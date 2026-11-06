@@ -2,10 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>TP Wish Tree 2026</title>
 <meta name="description" content="One TP. Many Wishes. One Christmas Together. The shared Christmas wish tree for TP Malaysia and Thailand.">
 <meta name="theme-color" content="#0E2A1F">
+<link rel="icon" type="image/png" href="assets/tp-logo-white.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Noto+Sans:wght@300;400;500;700&family=Noto+Sans+Thai:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -16,7 +17,7 @@
 @font-face{font-family:'TP Sans';font-weight:700;font-display:swap;src:local('TP Sans Bold'),local('TPSans-Bold'),url('fonts/TPSans-Bold.ttf') format('truetype')}
 
 :root{
-  --bg:#0E2A1F; --bg-2:#11302A;
+  --bg:#0E2A1F; --bg-2:#11302A; --bg-3:#0B231A;
   --cream:#F6EEDC; --cream-2:#DCD3BF; --cream-3:#B9B19E;
   --gold:#E3B45A; --gold-2:#F2C766; --carmine:#AB2C37;
   --ink:#183326; --slate:#4B4C6A; --focus:#00AF9B;
@@ -35,69 +36,106 @@ button{font-family:inherit}
 
 .skip{position:absolute;left:-999px;top:8px;z-index:20;padding:10px 16px;border-radius:8px;background:var(--cream);color:var(--bg)}
 .skip:focus{left:8px}
+.demo-bar{position:relative;z-index:2;padding:8px 16px;background:#FFF1E8;color:#7A2C00;font-size:13px;font-weight:500;text-align:center}
 
 .deco{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0}
 .arc{position:absolute;border-radius:50%}
 .arc.a1{right:-520px;top:-260px;width:1100px;height:1100px;background:var(--bg-2)}
 .arc.a2{right:-400px;top:-140px;width:860px;height:860px;border:1px solid rgba(227,180,90,.16)}
 
-.wrap{position:relative;z-index:1;max-width:1360px;margin:0 auto;padding:24px 40px 40px}
+.wrap{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:20px 40px 40px}
 
-.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px 24px;padding-bottom:24px;border-bottom:1px solid var(--line)}
-.brand{display:flex;align-items:center;gap:16px;min-height:40px}
-.logo{height:30px;width:auto;display:block}
-.brand-divider{width:1px;height:24px;background:rgba(246,238,220,.25)}
-.brand-name{font-size:18px;font-weight:500;letter-spacing:.01em}
-.top-actions{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
-.chips{display:flex;gap:6px;padding:4px;border-radius:999px;background:rgba(246,238,220,.07)}
-.chip{min-height:40px;padding:0 18px;border:0;border-radius:999px;background:transparent;color:var(--cream);font-size:15px;font-weight:500;cursor:pointer}
-.chip:hover{background:rgba(246,238,220,.1)}
-.chip[aria-pressed="true"]{background:var(--cream);color:var(--bg)}
-.btn-gold{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:48px;padding:0 24px;border-radius:999px;background:var(--gold);color:var(--bg);font-size:16px;font-weight:700;text-decoration:none;border:0;cursor:pointer}
+/* header */
+.top{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-bottom:20px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:14px;min-height:44px;color:var(--cream);text-decoration:none}
+.brand:hover{color:var(--cream)}
+.logo{height:38px;width:auto;display:block}
+.brand-divider{width:1px;height:26px;background:rgba(246,238,220,.25)}
+.brand-name{font-size:18px;font-weight:500;letter-spacing:.01em;white-space:nowrap}
+.btn-gold{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:48px;padding:0 24px;border-radius:999px;background:var(--gold);color:var(--bg);font-size:16px;font-weight:700;text-decoration:none;border:0;cursor:pointer;white-space:nowrap}
 .btn-gold:hover{background:var(--gold-2);color:var(--bg)}
 
-.grid{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:40px;padding-top:40px}
+/* layout */
+.grid{display:grid;grid-template-columns:minmax(260px,320px) minmax(0,1fr) minmax(290px,350px);grid-template-areas:"intro tree side" "sites tree side";grid-template-rows:auto 1fr;gap:28px 40px;align-items:start;padding-top:32px}
+.intro{grid-area:intro;display:flex;flex-direction:column;gap:26px;padding-top:12px}
+.tree-col{grid-area:tree;display:flex;flex-direction:column;gap:14px;min-width:0}
+.side{grid-area:side;display:flex;flex-direction:column;gap:18px;padding-top:12px}
 
-.intro{flex:1 1 300px;max-width:380px;display:flex;flex-direction:column;gap:28px;padding-top:24px}
+/* intro */
 .eyebrow{font-size:13px;font-weight:500;letter-spacing:.14em;color:var(--gold)}
-h1{margin:14px 0 0;font-size:60px;line-height:1;font-weight:300;letter-spacing:-.01em}
-.script{margin-top:10px;font-family:var(--script);font-size:54px;line-height:1.05;color:var(--gold)}
-.lede{margin:0;font-size:17px;line-height:1.55;font-weight:300;color:var(--cream-2)}
-.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;padding:20px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
-.num{display:block;font-size:36px;font-weight:300;line-height:1;font-variant-numeric:tabular-nums}
-.lbl{display:block;margin-top:6px;font-size:13px;color:#CFC6B2}
-.meta{display:flex;flex-direction:column;gap:10px;font-size:15px;color:var(--cream-2)}
+h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacing:-.01em}
+.script{margin-top:8px;font-family:var(--script);font-size:50px;line-height:1.05;color:var(--gold)}
+.lede{margin:0;font-size:16px;line-height:1.55;font-weight:300;color:var(--cream-2)}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;padding:18px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.num{display:block;font-size:34px;font-weight:300;line-height:1;font-variant-numeric:tabular-nums}
+.lbl{display:block;margin-top:6px;font-size:13px;line-height:1.3;color:#CFC6B2}
+.meta{display:flex;flex-direction:column;gap:10px;font-size:14px;color:var(--cream-2)}
 .meta-row{display:flex;align-items:center;gap:10px}
 .dot{flex:none;width:8px;height:8px;border-radius:50%;background:#00D769;animation:pulse 2s infinite}
 .dot.off{background:#FF5C00;animation:none}
 @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(0,215,105,.55)}70%{box-shadow:0 0 0 8px rgba(0,215,105,0)}100%{box-shadow:0 0 0 0 rgba(0,215,105,0)}}
 
-.tree-col{flex:2 1 460px;max-width:600px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+/* site picker: a list in the left column on desktop, a row of chips on smaller screens */
+.sites{grid-area:sites;display:flex;flex-direction:column;gap:10px;min-width:0}
+.sites-title{font-size:12px;font-weight:500;letter-spacing:.14em;color:var(--gold)}
+.site-rail{min-width:0;display:flex;flex-direction:column;gap:6px}
+.site-chip{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;min-height:44px;padding:0 14px;border:1px solid rgba(246,238,220,.18);border-radius:12px;background:rgba(246,238,220,.04);color:var(--cream);font-size:14px;font-weight:500;cursor:pointer;white-space:nowrap;text-align:left}
+.site-chip:hover{background:rgba(246,238,220,.1)}
+.site-chip .count{min-width:22px;padding:1px 7px;border-radius:999px;background:rgba(246,238,220,.12);font-size:12px;font-weight:700;text-align:center;font-variant-numeric:tabular-nums}
+.site-chip[aria-pressed="true"]{background:var(--cream);border-color:var(--cream);color:var(--bg)}
+.site-chip[aria-pressed="true"] .count{background:var(--bg);color:var(--cream)}
+.tour{flex:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border:1px solid rgba(227,180,90,.5);border-radius:999px;background:transparent;color:var(--gold);font-size:14px;font-weight:500;cursor:pointer;white-space:nowrap}
+.tour:hover{background:rgba(227,180,90,.1)}
+.tour[aria-pressed="true"]{background:var(--gold);color:var(--bg)}
+
+.tree-label{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:center;gap:4px 12px;text-align:center}
+.tree-label .site{font-size:22px;font-weight:300}
+.tree-label .count{font-size:14px;color:var(--cream-3)}
+
+/* tree + rotation */
+.spin-stage{position:relative;width:100%;max-width:600px;margin:0 auto;perspective:1400px}
+#treeMount{transform-style:preserve-3d;will-change:transform}
+.spin-out #treeMount{animation:spinOut .38s ease-in forwards}
+.spin-in #treeMount{animation:spinIn .55s cubic-bezier(.2,.8,.3,1) both}
+@keyframes spinOut{from{transform:rotateY(0);opacity:1}to{transform:rotateY(90deg);opacity:.15}}
+@keyframes spinIn{from{transform:rotateY(-90deg);opacity:.15}to{transform:rotateY(0);opacity:1}}
+.wt-tag::after{content:"";position:absolute;inset:-6px -4px}
+.wt-leader::after{content:"";position:absolute;inset:-6px}
+
+.legend{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 22px;font-size:13px;color:var(--cream-2)}
+.legend span{display:inline-flex;align-items:center;gap:8px}
+.lg-leader{width:14px;height:14px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 3px rgba(242,199,102,.25)}
+.lg-tag{width:10px;height:14px;border-radius:2px 2px 3px 3px;background:var(--cream)}
 .tree-foot{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:4px 16px;text-align:center;font-size:13px;color:var(--cream-3)}
 .link-btn{min-height:40px;padding:0 6px;border:0;background:transparent;color:var(--gold);font-size:14px;font-weight:500;text-decoration:underline;cursor:pointer}
 .link-btn:hover{color:var(--gold-2)}
 
-.side{flex:1 1 300px;max-width:360px;display:flex;flex-direction:column;gap:20px;padding-top:24px}
+/* wish / leader card */
 .card-wrap{display:flex;flex-direction:column;align-items:center}
-.card-string{width:1px;height:28px;background:#D9C59A}
+.card-string{width:1px;height:26px;background:#D9C59A}
+.card-wrap[data-kind="leader"] .card-string{background:var(--gold-2)}
 .wish-card{
   --card-bg:#F6EEDC; --card-ink:#183326; --card-kicker:#AB2C37; --card-sub:#4B4C6A;
-  --card-pill:#ECE3CC; --card-line:rgba(24,51,38,.25);
-  position:relative;width:100%;padding:40px 28px 24px;border-radius:6px 6px 10px 10px;
+  --card-pill:#ECE3CC; --card-line:rgba(24,51,38,.25); --card-avatar-bg:#0E2A1F; --card-avatar-fg:#E3B45A;
+  position:relative;width:100%;padding:40px 26px 22px;border-radius:6px 6px 10px 10px;border:1.5px solid transparent;
   background:var(--card-bg);color:var(--card-ink);box-shadow:0 18px 40px rgba(0,0,0,.35);
   transition:background-color .3s ease,color .3s ease
 }
 .wish-card[data-color="red"]{--card-bg:#AB2C37;--card-ink:#F6EEDC;--card-kicker:#F2C766;--card-sub:#F6EEDC;--card-pill:rgba(246,238,220,.18);--card-line:rgba(246,238,220,.35)}
 .wish-card[data-color="gold"]{--card-bg:#E3B45A;--card-ink:#0E2A1F;--card-kicker:#0E2A1F;--card-sub:#183326;--card-pill:rgba(14,42,31,.12);--card-line:rgba(14,42,31,.3)}
+.wish-card[data-kind="leader"]{--card-bg:#0B231A;--card-ink:#F6EEDC;--card-kicker:#F2C766;--card-sub:#DCD3BF;--card-pill:rgba(246,238,220,.12);--card-line:rgba(242,199,102,.35);--card-avatar-bg:#E3B45A;--card-avatar-fg:#0E2A1F;border-color:#E3B45A;border-radius:14px;box-shadow:0 0 0 6px rgba(227,180,90,.12),0 18px 40px rgba(0,0,0,.45)}
+.wish-card[data-kind="leader"] .hole{background:var(--gold);opacity:.8}
+.leader-badge{display:none;position:absolute;top:-16px;left:22px;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;background:var(--gold);color:var(--bg);font-size:11px;font-weight:700;letter-spacing:.1em}
+.wish-card[data-kind="leader"] .leader-badge{display:inline-flex}
 .hole{position:absolute;top:14px;left:50%;width:10px;height:10px;margin-left:-5px;border-radius:50%;background:#0E2A1F;opacity:.55}
-.card-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+.card-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
 .card-kicker{font-size:12px;font-weight:500;letter-spacing:.12em;color:var(--card-kicker)}
-.pill{padding:4px 10px;border-radius:999px;background:var(--card-pill);font-size:12px;font-weight:500;color:var(--card-sub)}
+.pill{flex:none;padding:4px 10px;border-radius:999px;background:var(--card-pill);font-size:12px;font-weight:500;color:var(--card-sub)}
 .pill:empty{display:none}
-.card-text{margin:0 0 22px;font-size:21px;line-height:1.5;white-space:pre-line;overflow-wrap:anywhere}
+.card-text{margin:0 0 20px;font-size:20px;line-height:1.5;white-space:pre-line;overflow-wrap:anywhere}
+.wish-card[data-kind="leader"] .card-text{font-size:19px;font-weight:300}
 .card-foot{display:flex;align-items:center;gap:12px;padding-top:16px;border-top:1px dashed var(--card-line)}
-.card-foot[hidden]{display:none}
-.avatar{flex:none;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;background:#0E2A1F;color:var(--gold);font-size:16px;font-weight:700}
+.avatar{flex:none;display:flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:50%;background:var(--card-avatar-bg);color:var(--card-avatar-fg);font-size:15px;font-weight:700}
 .who{font-size:16px;font-weight:700}
 .where{margin-top:2px;font-size:14px;color:var(--card-sub)}
 
@@ -108,31 +146,54 @@ h1{margin:14px 0 0;font-size:60px;line-height:1;font-weight:300;letter-spacing:-
 
 .qr-card{display:flex;align-items:center;gap:18px;padding:18px;border-radius:12px;border:1px solid rgba(227,180,90,.35);background:rgba(246,238,220,.04);color:var(--cream);text-decoration:none}
 .qr-card:hover{background:rgba(246,238,220,.08);color:var(--cream)}
-.qr{flex:none;width:96px;height:96px;padding:6px;border-radius:8px;background:var(--cream)}
-.qr img,.qr canvas{display:block;width:84px !important;height:84px !important}
+.qr{flex:none;width:100px;height:100px;padding:6px;border-radius:8px;background:var(--cream)}
+.qr img,.qr canvas{display:block;width:88px !important;height:88px !important}
 .qr-title{font-size:17px;font-weight:700}
 .qr-sub{margin-top:6px;font-size:14px;line-height:1.45;color:var(--cream-2)}
 
 .foot{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;margin-top:40px;padding-top:20px;border-top:1px solid var(--line);font-size:13px;color:var(--cream-3)}
 
-.demo-bar{position:relative;z-index:2;padding:8px 16px;background:#FFF1E8;color:#7A2C00;font-size:13px;font-weight:500;text-align:center}
-
-@media (max-width:900px){
-  .wrap{padding:16px 16px 32px}
-  .grid{gap:28px;padding-top:24px}
-  .intro,.side{max-width:none;padding-top:0}
-  h1{font-size:44px}
-  .script{font-size:42px}
-  .tree-col{flex-basis:100%}
+/* laptop / tablet: intro on top, tree + card side by side */
+@media (max-width:1180px){
+  .grid{grid-template-columns:minmax(0,1fr) minmax(280px,340px);grid-template-areas:"intro intro" "sites sites" "tree side";grid-template-rows:auto;gap:28px 32px}
+  .sites{flex-direction:row;flex-wrap:wrap;align-items:center;justify-content:center}
+  .sites-title{display:none}
+  .site-rail{flex-direction:row;flex-wrap:wrap;justify-content:center;gap:8px}
+  .site-chip{width:auto;min-height:40px;border-radius:999px;justify-content:center}
+  .intro{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:20px 40px;align-items:end;padding-top:0}
+  .intro-head{grid-row:span 3;align-self:center}
+  h1{font-size:48px}
+  .script{font-size:44px}
 }
-@media (max-width:480px){
-  .top-actions{width:100%}
-  .chips{flex:1}
-  .chip{flex:1;padding:0 10px}
-  .btn-gold{width:100%}
-  .num{font-size:30px}
+/* phone */
+@media (max-width:820px){
+  .wrap{padding:14px 16px 32px}
+  .top{padding-bottom:14px}
+  .logo{height:30px}
+  .brand{gap:10px}
+  .brand-divider{height:20px}
+  .brand-name{font-size:15px}
+  .btn-gold{min-height:44px;padding:0 16px;font-size:15px}
+  .grid{grid-template-columns:minmax(0,1fr);grid-template-areas:"intro" "sites" "tree" "side";gap:20px;padding-top:20px}
+  .intro{display:flex;align-items:stretch;gap:18px}
+  h1{font-size:38px}
+  .script{font-size:36px}
+  .lede{font-size:15px}
+  .num{font-size:28px}
+  .sites{flex-direction:column;align-items:stretch}
+  .sites-title{display:block}
+  .site-rail{flex-wrap:nowrap;justify-content:flex-start;overflow-x:auto;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;padding:2px 2px 8px;margin:0 -16px;padding-left:16px;padding-right:16px;scrollbar-width:none}
+  .site-rail::-webkit-scrollbar{display:none}
+  .site-chip{scroll-snap-align:center}
+  .tour{align-self:center}
+  .tree-label .site{font-size:19px}
+  .qr-card{display:none}
+  .card-text{font-size:18px}
 }
-@media (prefers-reduced-motion:reduce){.dot{animation:none}.wish-card{transition:none}}
+@media (max-width:380px){
+  .brand-name,.brand-divider{display:none}
+}
+@media (prefers-reduced-motion:reduce){.dot{animation:none}.wish-card{transition:none}.spin-out #treeMount,.spin-in #treeMount{animation:none}}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -146,36 +207,29 @@ h1{margin:14px 0 0;font-size:60px;line-height:1;font-weight:300;letter-spacing:-
 
 <div class="wrap">
   <header class="top">
-    <div class="brand">
+    <a class="brand" href="./">
       <img id="logo" class="logo" alt="TP" hidden>
-      <span id="logoDivider" class="brand-divider" hidden></span>
+      <span class="brand-divider" aria-hidden="true"></span>
       <span class="brand-name">Wish Tree 2026</span>
-    </div>
-    <div class="top-actions">
-      <div class="chips" role="group" aria-label="Show wishes from">
-        <button type="button" class="chip" data-region="all" aria-pressed="true">All</button>
-        <button type="button" class="chip" data-region="MY" aria-pressed="false">Malaysia</button>
-        <button type="button" class="chip" data-region="TH" aria-pressed="false">Thailand</button>
-      </div>
-      <a id="ctaTop" class="btn-gold" href="wish.html">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
-        Hang your wish
-      </a>
-    </div>
+    </a>
+    <a id="ctaTop" class="btn-gold" href="wish.html">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+      Hang your wish
+    </a>
   </header>
 
   <main class="grid">
     <section class="intro">
-      <div>
+      <div class="intro-head">
         <div class="eyebrow">TP MALAYSIA &amp; THAILAND · CHRISTMAS 2026</div>
-        <h1>One TP.<br>Many Wishes.</h1>
+        <h1>One TP. Many Wishes.</h1>
         <div class="script">One Christmas Together</div>
       </div>
-      <p class="lede">Every tag on this tree is a wish from a TP colleague in Malaysia or Thailand, on site or working from home. Tap a tag to read it.</p>
+      <p class="lede">Every tag on this tree is a wish from a TP colleague. Pick a site to see its own tree. Our leaders' messages hang at the top of every tree.</p>
       <div class="stats" aria-live="polite">
         <div><span class="num" id="statTotal">0</span><span class="lbl">wishes hung</span></div>
-        <div><span class="num" id="statMY">0</span><span class="lbl">from Malaysia</span></div>
-        <div><span class="num" id="statTH">0</span><span class="lbl">from Thailand</span></div>
+        <div><span class="num" id="statSites">0</span><span class="lbl">sites on the tree</span></div>
+        <div><span class="num" id="statLeaders">0</span><span class="lbl">leaders' messages</span></div>
       </div>
       <div class="meta">
         <div class="meta-row"><span id="liveDot" class="dot" aria-hidden="true"></span><span id="liveText">Live · new wishes appear once approved</span></div>
@@ -186,8 +240,25 @@ h1{margin:14px 0 0;font-size:60px;line-height:1;font-weight:300;letter-spacing:-
       </div>
     </section>
 
+    <nav class="sites" aria-label="Sites">
+      <div class="sites-title" id="sitesTitle">PICK A SITE</div>
+      <div id="siteRail" class="site-rail" role="group" aria-labelledby="sitesTitle"></div>
+      <button type="button" id="tourBtn" class="tour" aria-pressed="false">
+        <svg id="tourIcon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15l12-7.5z"/></svg>
+        <span id="tourLabel">Tour all sites</span>
+      </button>
+    </nav>
+
     <section class="tree-col" id="tree" aria-label="The wish tree" tabindex="-1">
-      <div id="treeMount"></div>
+      <div class="tree-label" aria-live="polite">
+        <span class="site" id="treeSite">All sites</span>
+        <span class="count" id="treeCount"></span>
+      </div>
+      <div id="spinStage" class="spin-stage"><div id="treeMount"></div></div>
+      <div class="legend" aria-hidden="true">
+        <span><i class="lg-leader"></i>Leaders' messages, on every site's tree</span>
+        <span><i class="lg-tag"></i>Wishes from colleagues</span>
+      </div>
       <div class="tree-foot">
         <span>Every wish is reviewed by the Talent Engagement team before it appears.</span>
         <button type="button" id="shuffleBtn" class="link-btn" hidden>Show other wishes</button>
@@ -195,9 +266,13 @@ h1{margin:14px 0 0;font-size:60px;line-height:1;font-weight:300;letter-spacing:-
     </section>
 
     <aside class="side">
-      <div class="card-wrap">
+      <div id="cardWrap" class="card-wrap" data-kind="wish">
         <div class="card-string" aria-hidden="true"></div>
-        <article id="wishCard" class="wish-card" data-color="cream" aria-live="polite">
+        <article id="wishCard" class="wish-card" data-kind="wish" data-color="cream" aria-live="polite">
+          <span class="leader-badge">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg>
+            FROM OUR LEADERS
+          </span>
           <div class="hole" aria-hidden="true"></div>
           <div class="card-top">
             <span id="cardKicker" class="card-kicker">LOADING WISHES</span>
@@ -215,11 +290,11 @@ h1{margin:14px 0 0;font-size:60px;line-height:1;font-weight:300;letter-spacing:-
       </div>
 
       <div class="nav">
-        <button type="button" id="prevBtn" class="btn-ghost" aria-label="Previous wish">
+        <button type="button" id="prevBtn" class="btn-ghost" aria-label="Previous message">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
           Previous
         </button>
-        <button type="button" id="nextBtn" class="btn-ghost" aria-label="Next wish">
+        <button type="button" id="nextBtn" class="btn-ghost" aria-label="Next message">
           Next
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
         </button>
@@ -229,7 +304,7 @@ h1{margin:14px 0 0;font-size:60px;line-height:1;font-weight:300;letter-spacing:-
         <div id="qr" class="qr" role="img" aria-label="QR code to hang your wish"></div>
         <div>
           <div class="qr-title">Scan to hang your wish</div>
-          <div class="qr-sub">Write it bright, hang it right. Takes about a minute on your phone.</div>
+          <div class="qr-sub" id="qrSub">Write it bright, hang it right. Takes about a minute on your phone.</div>
         </div>
       </a>
     </aside>
@@ -247,33 +322,32 @@ h1{margin:14px 0 0;font-size:60px;line-height:1;font-weight:300;letter-spacing:-
   var C = window.WishCore;
   var CFG = C.cfg;
 
+  var params = new URLSearchParams(window.location.search);
+  var startSite = params.get('site');
+
   var state = {
-    all: [],          // approved wishes, newest first
-    region: 'all',
-    selectedId: null,
+    wishes: [],        // approved wishes, newest first
+    leaders: [],       // leaders' messages
+    site: startSite && C.siteById(startSite) ? startSite : 'all',
+    selected: null,    // { kind: 'wish' | 'leader', id }
     offset: 0,
-    onTree: [],       // wishes currently on the tree, oldest first
-    loadedOnce: false
+    onTree: [],        // wishes on the tree right now, oldest first
+    loadedOnce: false,
+    spinning: false,
+    pendingSite: null
   };
   var CAP = Math.max(6, Math.min(CFG.MAX_TAGS_ON_TREE || 40, C.treeCapacity(0.58)));
+  var REDUCE = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var tourTimer = null;
 
   var el = function (id) { return document.getElementById(id); };
   var treeMount = el('treeMount');
+  var stage = el('spinStage');
 
   /* ---------- Static setup ---------- */
   C.initGA();
+  C.setLogo(el('logo'));
   if (C.demo) el('demoBar').hidden = false;
-
-  if (CFG.LOGO_URL) {
-    el('logo').src = CFG.LOGO_URL;
-    el('logo').hidden = false;
-    el('logoDivider').hidden = false;
-    el('logo').addEventListener('error', function () { el('logo').hidden = true; el('logoDivider').hidden = true; });
-  }
-
-  var wishUrl = C.wishPageUrl();
-  el('ctaTop').href = wishUrl;
-  el('qrCard').href = wishUrl;
 
   if (CFG.SUBMISSIONS_OPEN === false) {
     el('ctaTop').hidden = true;
@@ -283,120 +357,276 @@ h1{margin:14px 0 0;font-size:60px;line-height:1;font-weight:300;letter-spacing:-
     el('datesText').textContent = 'Wishes open ' + (CFG.OPEN_DATE || '') + ' to ' + (CFG.CLOSE_DATE || '');
   }
 
-  try {
-    if (window.QRCode) {
-      new window.QRCode(el('qr'), {
-        text: wishUrl, width: 168, height: 168,
-        colorDark: '#0E2A1F', colorLight: '#F6EEDC',
-        correctLevel: window.QRCode.CorrectLevel.M
-      });
-      el('qr').removeAttribute('title');
-    }
-  } catch (e) { /* QR is optional */ }
+  function wishUrlForSite() {
+    var base = C.wishPageUrl();
+    if (state.site === 'all') return base;
+    return base + (base.indexOf('?') === -1 ? '?' : '&') + 'site=' + encodeURIComponent(state.site);
+  }
 
-  /* ---------- Helpers ---------- */
-  function regionMatch(w) { return state.region === 'all' || w.country === state.region; }
+  var lastQr = '';
+  function renderQr() {
+    var link = wishUrlForSite();
+    el('ctaTop').href = link;
+    el('qrCard').href = link;
+    el('qrSub').textContent = state.site === 'all'
+      ? 'Write it bright, hang it right. Takes about a minute on your phone.'
+      : 'Your wish goes on the ' + C.siteById(state.site).label + ' tree. Takes about a minute.';
+    if (link === lastQr || !window.QRCode) return;
+    lastQr = link;
+    var box = el('qr');
+    box.innerHTML = '';
+    try {
+      new window.QRCode(box, { text: link, width: 176, height: 176, colorDark: '#0E2A1F', colorLight: '#F6EEDC', correctLevel: window.QRCode.CorrectLevel.M });
+      box.removeAttribute('title');
+    } catch (e) { /* QR is optional */ }
+  }
+
+  /* ---------- Data helpers ---------- */
+  function siteWishes() {
+    return state.site === 'all' ? state.wishes : state.wishes.filter(function (w) { return w.site === state.site; });
+  }
+  function countFor(id) {
+    if (id === 'all') return state.wishes.length;
+    var n = 0;
+    state.wishes.forEach(function (w) { if (w.site === id) n++; });
+    return n;
+  }
+  function crown() { return state.leaders.slice(0, C.LEADER_SLOTS); }
 
   function computeTreeSet() {
-    var source = state.all.length <= CAP ? state.all : state.all.filter(regionMatch);
-    if (source.length <= CAP) return C.pickForTree(source, CAP);
-    var start = state.offset % source.length;
-    var rotated = source.slice(start).concat(source.slice(0, start));
-    return C.pickForTree(rotated, CAP);
+    var src = siteWishes();
+    if (src.length <= CAP) return C.pickForTree(src, CAP);
+    var start = state.offset % src.length;
+    return C.pickForTree(src.slice(start).concat(src.slice(0, start)), CAP);
   }
 
-  // Wishes you can step through with Previous / Next: on the tree, matching the filter, newest first
+  // Order for Previous / Next: leaders first, then wishes on the tree, newest first
   function browsable() {
-    return state.onTree.filter(regionMatch).slice().reverse();
+    var list = crown().map(function (l) { return { kind: 'leader', id: String(l.id) }; });
+    state.onTree.slice().reverse().forEach(function (w) { list.push({ kind: 'wish', id: String(w.id) }); });
+    return list;
   }
-
-  function findWish(id) {
-    for (var i = 0; i < state.all.length; i++) if (String(state.all[i].id) === String(id)) return state.all[i];
+  function sameSel(a, b) { return a && b && a.kind === b.kind && String(a.id) === String(b.id); }
+  function findItem(sel) {
+    if (!sel) return null;
+    var src = sel.kind === 'leader' ? state.leaders : state.wishes;
+    for (var i = 0; i < src.length; i++) if (String(src[i].id) === String(sel.id)) return src[i];
     return null;
   }
 
-  function fmt(n) { return Number(n).toLocaleString('en-US'); }
+  function defaultSelection() {
+    var list = siteWishes();
+    if (state.site !== 'all' && list.length) return { kind: 'wish', id: String(list[0].id) };
+    if (crown().length) return { kind: 'leader', id: String(crown()[0].id) };
+    if (list.length) return { kind: 'wish', id: String(list[0].id) };
+    return null;
+  }
+  function ensureSelection() {
+    var list = browsable();
+    var ok = state.selected && list.some(function (x) { return sameSel(x, state.selected); });
+    if (!ok) state.selected = defaultSelection();
+  }
 
   /* ---------- Render ---------- */
+  function fmt(n) { return Number(n).toLocaleString('en-US'); }
+
   function renderStats() {
-    var my = 0, th = 0;
-    state.all.forEach(function (w) { if (w.country === 'MY') my++; else if (w.country === 'TH') th++; });
-    el('statTotal').textContent = fmt(state.all.length);
-    el('statMY').textContent = fmt(my);
-    el('statTH').textContent = fmt(th);
+    var withWishes = C.SITES.filter(function (s) { return countFor(s.id) > 0; }).length;
+    el('statTotal').textContent = fmt(state.wishes.length);
+    el('statSites').textContent = fmt(withWishes);
+    el('statLeaders').textContent = fmt(state.leaders.length);
+  }
+
+  function renderRail() {
+    var rail = el('siteRail');
+    var items = [{ id: 'all', label: 'All sites', title: 'All sites' }].concat(C.SITES.map(function (s) {
+      return { id: s.id, label: s.label, title: C.siteName(s.id) };
+    }));
+    rail.innerHTML = items.map(function (it) {
+      var pressed = it.id === state.site;
+      return '<button type="button" class="site-chip" data-site="' + C.esc(it.id) + '" aria-pressed="' + pressed + '" title="' + C.esc(it.title) + '">' +
+        C.esc(it.label) + '<span class="count">' + fmt(countFor(it.id)) + '</span></button>';
+    }).join('');
+  }
+
+  function scrollChipIntoView() {
+    var rail = el('siteRail');
+    var chip = rail.querySelector('[aria-pressed="true"]');
+    if (!chip || rail.scrollWidth <= rail.clientWidth) return;
+    var left = chip.offsetLeft - rail.clientWidth / 2 + chip.clientWidth / 2;
+    try { rail.scrollTo({ left: left, behavior: REDUCE ? 'auto' : 'smooth' }); } catch (e) { rail.scrollLeft = left; }
+  }
+
+  function renderLabel() {
+    var n = countFor(state.site);
+    el('treeSite').textContent = state.site === 'all' ? 'All sites' : C.siteName(state.site);
+    el('treeCount').textContent = fmt(n) + (n === 1 ? ' wish' : ' wishes');
   }
 
   function renderTree() {
     state.onTree = computeTreeSet();
-    var dimNeeded = state.all.length <= CAP && state.region !== 'all';
     C.renderTree(treeMount, {
       wishes: state.onTree,
-      selectedId: state.selectedId,
-      isDimmed: dimNeeded ? function (w) { return !regionMatch(w); } : null,
-      onSelect: function (id) { select(id, true); }
+      leaders: crown(),
+      selected: state.selected,
+      onSelect: function (kind, id) { select({ kind: kind, id: id }, true); }
     });
-    var source = state.all.length <= CAP ? state.all : state.all.filter(regionMatch);
-    el('shuffleBtn').hidden = source.length <= CAP;
+    el('shuffleBtn').hidden = siteWishes().length <= CAP;
   }
 
   function renderCard() {
     var card = el('wishCard');
-    var w = state.selectedId != null ? findWish(state.selectedId) : null;
+    var wrap = el('cardWrap');
+    var item = findItem(state.selected);
     var list = browsable();
     el('prevBtn').disabled = list.length < 2;
     el('nextBtn').disabled = list.length < 2;
 
-    if (!w) {
+    if (!item) {
+      card.setAttribute('data-kind', 'wish');
+      wrap.setAttribute('data-kind', 'wish');
       card.setAttribute('data-color', 'cream');
       card.removeAttribute('lang');
       el('cardLang').textContent = '';
       el('cardFoot').hidden = true;
       if (!state.loadedOnce) return;
-      if (state.all.length === 0) {
-        el('cardKicker').textContent = 'WAITING FOR THE FIRST WISH';
-        el('cardText').textContent = 'No wishes on the tree yet. Be the first to hang one.';
-      } else {
-        el('cardKicker').textContent = 'PICK A TAG';
-        el('cardText').textContent = 'Tap any tag on the tree to read the wish.';
-      }
+      el('cardKicker').textContent = 'WAITING FOR THE FIRST WISH';
+      el('cardText').textContent = state.site === 'all'
+        ? 'No wishes on the tree yet. Be the first to hang one.'
+        : 'No wishes from ' + C.siteById(state.site).label + ' yet. Be the first to hang one.';
       return;
     }
 
-    var pos = list.findIndex(function (x) { return String(x.id) === String(w.id); });
-    card.setAttribute('data-color', C.PALETTE[w.tag_color] ? w.tag_color : 'cream');
-    card.setAttribute('lang', w.lang || 'en');
-    el('cardKicker').textContent = pos >= 0 ? 'WISH ' + (pos + 1) + ' OF ' + list.length : 'WISH';
-    el('cardLang').textContent = C.LANG_LABEL[w.lang] || '';
-    el('cardText').textContent = w.message;
-    var name = C.displayName(w);
-    el('cardName').textContent = name;
-    el('cardWhere').textContent = C.displayWhere(w);
-    el('cardInitial').textContent = w.display_name ? name.charAt(0).toUpperCase() : '?';
+    var isLeader = state.selected.kind === 'leader';
+    card.setAttribute('data-kind', isLeader ? 'leader' : 'wish');
+    wrap.setAttribute('data-kind', isLeader ? 'leader' : 'wish');
+    card.setAttribute('data-color', isLeader ? 'cream' : (C.PALETTE[item.tag_color] ? item.tag_color : 'cream'));
+    card.setAttribute('lang', item.lang || 'en');
+    el('cardLang').textContent = C.LANG_LABEL[item.lang] || '';
+    el('cardText').textContent = item.message;
     el('cardFoot').hidden = false;
+
+    if (isLeader) {
+      el('cardKicker').textContent = 'ON EVERY SITE\'S TREE';
+      el('cardName').textContent = item.display_name || 'TP leadership';
+      el('cardWhere').textContent = item.title || '';
+      el('cardInitial').textContent = C.initials(item.display_name);
+    } else {
+      var wishesOnly = list.filter(function (x) { return x.kind === 'wish'; });
+      var pos = wishesOnly.findIndex(function (x) { return sameSel(x, state.selected); });
+      el('cardKicker').textContent = pos >= 0 ? 'WISH ' + (pos + 1) + ' OF ' + wishesOnly.length : 'WISH';
+      var name = C.displayName(item);
+      el('cardName').textContent = name;
+      el('cardWhere').textContent = C.displayWhere(item);
+      el('cardInitial').textContent = item.display_name ? name.charAt(0).toUpperCase() : '?';
+    }
   }
 
-  function select(id, fromUser) {
-    state.selectedId = id;
+  function renderAll() {
+    renderStats();
+    renderRail();
+    renderLabel();
+    renderTree();
+    renderCard();
+    renderQr();
+  }
+
+  function select(sel, fromUser) {
+    state.selected = sel;
     renderTree();
     renderCard();
     if (fromUser) {
-      var w = findWish(id);
-      C.track('wish_open', { country: w ? w.country : '' });
+      stopTour();
+      C.track(sel.kind === 'leader' ? 'leader_open' : 'wish_open', { site: state.site });
     }
   }
 
   function step(dir) {
     var list = browsable();
     if (!list.length) return;
-    var pos = list.findIndex(function (x) { return String(x.id) === String(state.selectedId); });
+    var pos = list.findIndex(function (x) { return sameSel(x, state.selected); });
     var next = list[((pos < 0 ? 0 : pos + dir) + list.length) % list.length];
-    select(next.id, true);
+    select(next, true);
   }
 
-  function ensureSelection() {
-    var list = browsable();
-    var stillThere = list.some(function (x) { return String(x.id) === String(state.selectedId); });
-    if (!stillThere) state.selectedId = list.length ? list[0].id : null;
+  /* ---------- Site switching with the tree rotation ---------- */
+  function updateUrl() {
+    try {
+      var p = new URLSearchParams(window.location.search);
+      if (state.site === 'all') p.delete('site'); else p.set('site', state.site);
+      var q = p.toString();
+      window.history.replaceState(null, '', window.location.pathname + (q ? '?' + q : '') + window.location.hash);
+    } catch (e) { /* ignore */ }
+  }
+
+  function changeSite(id, fromTour) {
+    if (!fromTour) stopTour();
+    if (state.spinning) { state.pendingSite = id; return; }
+    if (id === state.site) return;
+
+    var apply = function () {
+      state.site = id;
+      state.offset = 0;
+      state.selected = null;
+      C.resetTreeMemory(treeMount);
+      state.onTree = computeTreeSet();
+      ensureSelection();
+      renderAll();
+      scrollChipIntoView();
+      updateUrl();
+      C.track('wish_site', { site: id });
+    };
+
+    if (REDUCE) { apply(); return; }
+    state.spinning = true;
+    // show the chip as selected straight away
+    Array.prototype.forEach.call(el('siteRail').querySelectorAll('.site-chip'), function (c) {
+      c.setAttribute('aria-pressed', c.getAttribute('data-site') === id ? 'true' : 'false');
+    });
+    stage.classList.remove('spin-in');
+    stage.classList.add('spin-out');
+    setTimeout(function () {
+      apply();
+      stage.classList.remove('spin-out');
+      void stage.offsetWidth;
+      stage.classList.add('spin-in');
+      setTimeout(function () {
+        stage.classList.remove('spin-in');
+        state.spinning = false;
+        if (state.pendingSite && state.pendingSite !== state.site) {
+          var next = state.pendingSite;
+          state.pendingSite = null;
+          changeSite(next, true);
+        } else {
+          state.pendingSite = null;
+        }
+      }, 560);
+    }, 380);
+  }
+
+  /* ---------- Tour through the sites ---------- */
+  function tourList() {
+    return ['all'].concat(C.SITES.filter(function (s) { return countFor(s.id) > 0; }).map(function (s) { return s.id; }));
+  }
+  function setTourUi(on) {
+    el('tourBtn').setAttribute('aria-pressed', on ? 'true' : 'false');
+    el('tourLabel').textContent = on ? 'Pause tour' : 'Tour all sites';
+    el('tourIcon').innerHTML = on ? '<path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/>' : '<path d="M7 4.5v15l12-7.5z"/>';
+  }
+  function startTour() {
+    stopTour();
+    setTourUi(true);
+    var secs = Math.max(4, Number(CFG.TOUR_SECONDS) || 10);
+    tourTimer = setInterval(function () {
+      var list = tourList();
+      var i = list.indexOf(state.site);
+      changeSite(list[(i + 1) % list.length], true);
+    }, secs * 1000);
+  }
+  function stopTour() {
+    if (tourTimer) clearInterval(tourTimer);
+    tourTimer = null;
+    setTourUi(false);
   }
 
   function setLive(ok) {
@@ -406,14 +636,16 @@ h1{margin:14px 0 0;font-size:60px;line-height:1;font-weight:300;letter-spacing:-
 
   /* ---------- Data ---------- */
   function load() {
-    return C.fetchApproved().then(function (rows) {
-      state.all = rows;
+    return Promise.all([C.fetchApproved(), C.fetchLeaders()]).then(function (res) {
+      state.wishes = res[0] || [];
+      state.leaders = res[1] || [];
       state.loadedOnce = true;
       state.onTree = computeTreeSet();
       ensureSelection();
-      renderStats();
-      renderTree();
-      renderCard();
+      if (!state.spinning) {
+        renderAll();
+        scrollChipIntoView();
+      }
       setLive(true);
     }).catch(function (err) {
       console.error('Wish Tree: could not load wishes', err);
@@ -427,21 +659,13 @@ h1{margin:14px 0 0;font-size:60px;line-height:1;font-weight:300;letter-spacing:-
   }
 
   /* ---------- Events ---------- */
-  Array.prototype.forEach.call(document.querySelectorAll('.chip'), function (chip) {
-    chip.addEventListener('click', function () {
-      state.region = chip.getAttribute('data-region');
-      state.offset = 0;
-      Array.prototype.forEach.call(document.querySelectorAll('.chip'), function (c) {
-        c.setAttribute('aria-pressed', c === chip ? 'true' : 'false');
-      });
-      state.onTree = computeTreeSet();
-      ensureSelection();
-      renderTree();
-      renderCard();
-      C.track('wish_filter', { region: state.region });
-    });
+  el('siteRail').addEventListener('click', function (e) {
+    var chip = e.target.closest ? e.target.closest('.site-chip') : null;
+    if (chip) changeSite(chip.getAttribute('data-site'), false);
   });
-
+  el('tourBtn').addEventListener('click', function () {
+    if (tourTimer) stopTour(); else startTour();
+  });
   el('prevBtn').addEventListener('click', function () { step(-1); });
   el('nextBtn').addEventListener('click', function () { step(1); });
   el('shuffleBtn').addEventListener('click', function () {
@@ -451,12 +675,12 @@ h1{margin:14px 0 0;font-size:60px;line-height:1;font-weight:300;letter-spacing:-
     renderTree();
     renderCard();
   });
-  el('ctaTop').addEventListener('click', function () { C.track('wish_cta', { place: 'header' }); });
-  el('qrCard').addEventListener('click', function () { C.track('wish_cta', { place: 'qr_card' }); });
+  el('ctaTop').addEventListener('click', function () { C.track('wish_cta', { place: 'header', site: state.site }); });
+  el('qrCard').addEventListener('click', function () { C.track('wish_cta', { place: 'qr_card', site: state.site }); });
 
   /* ---------- Start ---------- */
-  renderTree();
-  load();
+  renderAll();
+  load().then(function () { if (params.get('tour') === '1') startTour(); });
   var every = Math.max(15, Number(CFG.TREE_REFRESH_SECONDS) || 60) * 1000;
   setInterval(function () { if (!document.hidden) load(); }, every);
   document.addEventListener('visibilitychange', function () { if (!document.hidden) load(); });

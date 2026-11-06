@@ -8,6 +8,20 @@
   var CFG = window.WISH_CFG || {};
   var DEMO = !CFG.SUPABASE_URL || !CFG.SUPABASE_ANON_KEY;
 
+  // Folder this script lives in = the site root, so pages in sub-folders (leaders/) resolve paths correctly
+  var BASE = (function () {
+    try {
+      var s = document.currentScript && document.currentScript.src;
+      if (s) return s.slice(0, s.lastIndexOf('/') + 1);
+    } catch (e) { /* ignore */ }
+    return new URL('./', window.location.href).href;
+  })();
+  function url(path) {
+    if (!path) return BASE;
+    if (/^(https?:)?\/\//i.test(path) || path.charAt(0) === '/') return path;
+    return BASE + String(path).replace(/^\.\//, '');
+  }
+
   var PALETTE = {
     cream: { bg: '#F6EEDC', fg: '#AB2C37', text: '#183326' },
     red: { bg: '#AB2C37', fg: '#F6EEDC', text: '#F6EEDC' },
@@ -62,37 +76,87 @@
     return a;
   }
 
-  /* ---------- Sample wishes for demo mode ---------- */
+  function initials(name) {
+    var parts = String(name || '').trim().split(/\s+/).filter(Boolean);
+    if (!parts.length) return '?';
+    var first = parts[0].charAt(0);
+    var last = parts.length > 1 ? parts[parts.length - 1].charAt(0) : '';
+    return (first + last).toUpperCase();
+  }
+
+  /* ---------- Sites ---------- */
+  var SITES = (CFG.SITES || []).slice();
+  function siteById(id) {
+    for (var i = 0; i < SITES.length; i++) if (SITES[i].id === id) return SITES[i];
+    return null;
+  }
+  // "One Precinct, Penang"
+  function siteName(id) {
+    var s = siteById(id);
+    if (!s) return String(id || '');
+    return s.city ? s.label + ', ' + s.city : s.label;
+  }
+
+  /* ---------- Sample data for demo mode ---------- */
   var SAMPLE = [
-    ['To my Penang night-shift family: thank you for always having each other\'s backs. Here\'s to a calmer, happier 2027!', 'Aisyah', 'Penang', 'MY', 'en', 'cream', 'snow'],
-    ['ขอบคุณทีมกรุงเทพฯ ที่ช่วยเหลือกันตลอดปีนี้ ขอให้ปี 2027 ทุกคนสุขภาพแข็งแรงและมีความสุขมาก ๆ', 'Nattaya', 'Bangkok', 'TH', 'th', 'red', 'star'],
-    ['Terima kasih team KL atas sokongan sepanjang tahun. Semoga 2027 lebih ceria untuk kita semua!', 'Hafiz', 'Kuala Lumpur', 'MY', 'ms', 'gold', 'tree'],
-    ['Working from home can feel far away, but this team never made me feel alone. Thank you, and Merry Christmas!', null, 'Remote · Malaysia', 'MY', 'en', 'cream', 'gift'],
-    ['Wishing every new joiner this year the same welcome I got on my first day. You belong here.', 'Priya', 'Kuala Lumpur', 'MY', 'en', 'red', 'snow'],
-    ['My wish for 2027: more coffee breaks together and fewer system outages.', 'Somchai', 'Bangkok', 'TH', 'en', 'cream', 'star'],
-    ['To our trainers: thank you for your patience with every new batch. You make the floor better.', 'Mei Ling', 'Penang', 'MY', 'en', 'gold', 'gift'],
-    ['ขอให้ทุกคนได้กลับบ้านไปหาครอบครัวช่วงปีใหม่นี้นะคะ', null, 'Bangkok', 'TH', 'th', 'cream', 'tree'],
-    ['Thank you to my team lead for believing in me before I did.', 'Daniel', 'Kuala Lumpur', 'MY', 'en', 'gold', 'snow'],
-    ['Here\'s to learning a new language in 2027. Next Christmas I\'ll write this wish in Thai!', 'Kenji', 'Kuala Lumpur', 'MY', 'en', 'red', 'star'],
-    ['Semoga semua rakan sekerja sihat dan dimurahkan rezeki.', 'Nurul', 'Penang', 'MY', 'ms', 'gold', 'gift'],
-    ['Thank you, Bangkok, for welcoming me when I moved here this year. Merry Christmas!', 'Lucas', 'Bangkok', 'TH', 'en', 'cream', 'snow'],
-    ['To the WFM team who juggle every schedule: you are the real Santa\'s helpers.', null, 'Kuala Lumpur', 'MY', 'en', 'red', 'tree'],
-    ['Wishing my teammates a peaceful holiday and a strong start to 2027.', 'Ploy', 'Bangkok', 'TH', 'en', 'cream', 'star'],
-    ['Thank you to IT for rescuing my headset more times than I can count.', 'Arjun', 'Penang', 'MY', 'en', 'red', 'gift'],
-    ['ขอให้ปีหน้าเป็นปีที่ดีของทุกคนในทีม TP', null, 'Remote · Thailand', 'TH', 'th', 'cream', 'tree'],
-    ['One TP, many languages, one big family. Grateful to be part of it.', 'Farah', 'Kuala Lumpur', 'MY', 'en', 'gold', 'snow'],
-    ['My wish: that everyone feels heard at work in 2027.', 'Tanawat', 'Bangkok', 'TH', 'en', 'cream', 'star']
+    ['gtower', 'Thank you to the G-Tower floor for making every Monday feel lighter. Merry Christmas!', 'Daniel', 'en', 'cream', 'star'],
+    ['gtower', 'Wishing every new joiner this year the same welcome I got on my first day. You belong here.', 'Priya', 'en', 'red', 'snow'],
+    ['gtower', 'To the WFM team who juggle every schedule: you are the real Santa\'s helpers.', null, 'en', 'gold', 'gift'],
+    ['gtower', 'Terima kasih team G-Tower atas sokongan sepanjang tahun. Semoga 2027 lebih ceria!', 'Hafiz', 'ms', 'cream', 'tree'],
+    ['kcp', 'KCP family, thank you for the laughs during every peak season. See you in 2027!', 'Siti', 'en', 'red', 'star'],
+    ['kcp', 'Thank you to my team lead for believing in me before I did.', 'Kumar', 'en', 'cream', 'snow'],
+    ['kcp', 'Semoga semua rakan sekerja sihat dan dimurahkan rezeki.', 'Nurul', 'ms', 'gold', 'gift'],
+    ['kcp', 'My wish for 2027: more team lunches and fewer system outages.', null, 'en', 'cream', 'tree'],
+    ['gbs', 'To my GBS night-shift family: thank you for always having each other\'s backs.', 'Aisyah', 'en', 'cream', 'snow'],
+    ['gbs', 'Thank you to IT for rescuing my headset more times than I can count.', 'Arjun', 'en', 'red', 'gift'],
+    ['gbs', 'Wishing everyone at GBS a peaceful holiday with your loved ones.', 'Mei Ling', 'en', 'gold', 'star'],
+    ['gbs', 'Terima kasih kerana sentiasa membantu saya belajar. Selamat Hari Krismas!', 'Faiz', 'ms', 'cream', 'tree'],
+    ['op', 'To our trainers: thank you for your patience with every new batch. You make the floor better.', 'Jia Hui', 'en', 'cream', 'star'],
+    ['op', 'One Precinct, thank you for the shuttle chats and the morning smiles.', null, 'en', 'red', 'snow'],
+    ['op', 'Here\'s to learning a new language in 2027. Next Christmas I\'ll write this wish in Thai!', 'Kenji', 'en', 'gold', 'gift'],
+    ['op', 'Grateful for a team that turns tough days into good stories. Merry Christmas!', 'Farah', 'en', 'cream', 'tree'],
+    ['lv', 'Livingston Tower crew, thank you for every coffee run and every covered shift.', 'Wei Jie', 'en', 'red', 'star'],
+    ['lv', 'Wishing my teammates a calm, happy and healthy 2027.', 'Anis', 'en', 'cream', 'snow'],
+    ['lv', 'To everyone who helped me settle in Penang this year: thank you, truly.', 'Yuki', 'en', 'gold', 'tree'],
+    ['lv', 'Selamat Hari Krismas dan Tahun Baru kepada semua di Livingston Tower!', 'Amir', 'ms', 'cream', 'gift'],
+    ['jb', 'JB team, small but mighty. Thank you for an amazing year!', 'Rachel', 'en', 'cream', 'star'],
+    ['jb', 'My wish: that everyone feels heard at work in 2027.', null, 'en', 'red', 'snow'],
+    ['jb', 'Terima kasih atas kerjasama semua. Jumpa lagi tahun depan!', 'Zul', 'ms', 'gold', 'tree'],
+    ['jb', 'Thank you to my supervisor for the patience and the jokes.', 'Priyanka', 'en', 'cream', 'gift'],
+    ['singha', 'ขอบคุณทีมกรุงเทพฯ ที่ช่วยเหลือกันตลอดปีนี้ ขอให้ปี 2027 ทุกคนสุขภาพแข็งแรง', 'Nattaya', 'th', 'red', 'star'],
+    ['singha', 'Thank you, Bangkok, for welcoming me when I moved here this year. Merry Christmas!', 'Lucas', 'en', 'cream', 'snow'],
+    ['singha', 'ขอให้ทุกคนได้กลับบ้านไปหาครอบครัวช่วงปีใหม่นี้นะคะ', null, 'th', 'gold', 'gift'],
+    ['singha', 'Wishing my teammates a peaceful holiday and a strong start to 2027.', 'Ploy', 'en', 'cream', 'tree'],
+    ['wfh', 'Working from home can feel far away, but this team never made me feel alone.', null, 'en', 'cream', 'snow'],
+    ['wfh', 'Thank you to everyone on the morning video calls. You made home feel like the office, in a good way.', 'Hana', 'en', 'red', 'star'],
+    ['wfh', 'ขอให้ปีหน้าเป็นปีที่ดีของทุกคนในทีม TP', 'Somchai', 'th', 'gold', 'tree'],
+    ['wfh', 'Grateful for flexible days and a team that always shows up. Happy holidays!', 'Ravi', 'en', 'cream', 'gift']
   ].map(function (r, i) {
     return {
       id: 'demo-' + (i + 1),
-      message: r[0],
-      display_name: r[1],
-      site: r[2],
-      country: r[3],
-      lang: r[4],
-      tag_color: r[5],
-      charm: r[6],
+      site: r[0],
+      message: r[1],
+      display_name: r[2],
+      lang: r[3],
+      tag_color: r[4],
+      charm: r[5],
       approved_at: new Date(Date.UTC(2026, 11, 1, 8, i * 7)).toISOString()
+    };
+  });
+
+  var SAMPLE_LEADERS = [
+    ['Leader A', '[Title]', 'Thank you for every call, every chat and every customer you helped this year. You are the reason TP Malaysia and Thailand shine. Merry Christmas and a happy 2027!'],
+    ['Leader B', '[Title]', 'This year we grew together across our sites in two countries. Rest well this holiday, and let us make 2027 our best year yet.'],
+    ['Leader C', '[Title]', 'To everyone working from home, on site, on nights and on weekends: we see you and we are grateful. Happy holidays to you and your families.'],
+    ['Leader D', '[Title]', 'My wish for 2027: that each of you feels proud of the work you do and supported by the people around you. Merry Christmas!']
+  ].map(function (r, i) {
+    return {
+      id: 'demo-leader-' + (i + 1),
+      display_name: r[0],
+      title: r[1],
+      message: r[2],
+      lang: 'en',
+      updated_at: new Date(Date.UTC(2026, 11, 1, 6, i)).toISOString()
     };
   });
 
@@ -111,22 +175,40 @@
     return client;
   }
 
-  // Approved wishes, newest first
-  function fetchApproved(limit) {
+  function storageGet(key) {
+    try { return window.localStorage.getItem(key); } catch (e) { return null; }
+  }
+  function storageSet(key, value) {
+    try { window.localStorage.setItem(key, value); } catch (e) { /* ignore */ }
+  }
+
+  // Approved employee wishes, newest first
+  function fetchApproved() {
     if (DEMO) {
       return Promise.resolve(SAMPLE.slice().sort(function (a, b) {
         return a.approved_at < b.approved_at ? 1 : -1;
       }));
     }
-    return getClient()
-      .from('approved_wishes')
-      .select('id,message,display_name,site,country,lang,tag_color,charm,approved_at')
-      .order('approved_at', { ascending: false })
-      .limit(limit || 5000)
-      .then(function (res) {
-        if (res.error) throw res.error;
-        return res.data || [];
-      });
+    return getClient().rpc('get_approved_wishes').then(function (res) {
+      if (res.error) throw res.error;
+      return res.data || [];
+    });
+  }
+
+  // Leaders' messages, oldest first (first leader gets the top spot)
+  function fetchLeaders() {
+    if (DEMO) {
+      var list = SAMPLE_LEADERS.slice();
+      try {
+        var mine = JSON.parse(storageGet('wt-demo-leader') || 'null');
+        if (mine && mine.message) list.unshift(Object.assign({ id: 'demo-leader-you' }, mine));
+      } catch (e) { /* ignore */ }
+      return Promise.resolve(list);
+    }
+    return getClient().rpc('get_leader_messages').then(function (res) {
+      if (res.error) throw res.error;
+      return res.data || [];
+    });
   }
 
   /* ---------- Small helpers ---------- */
@@ -145,15 +227,15 @@
   }
 
   function displayWhere(w) {
-    var country = COUNTRY_LABEL[w.country] || '';
-    var site = String(w.site || '');
-    if (/^remote/i.test(site)) return 'Working remotely' + (country ? ' · ' + country : '');
-    return site + (country && site.indexOf(country) === -1 ? ' · ' + country : '');
+    var s = siteById(w.site);
+    if (!s) return String(w.site || '');
+    if (s.id === 'wfh') return 'Working from home';
+    var country = COUNTRY_LABEL[s.country] || '';
+    return s.label + (s.city ? ', ' + s.city : '') + (country ? ' · ' + country : '');
   }
 
   function wishPageUrl() {
-    if (CFG.WISH_PAGE_URL) return CFG.WISH_PAGE_URL;
-    try { return new URL('wish.html', window.location.href).href; } catch (e) { return 'wish.html'; }
+    return CFG.WISH_PAGE_URL || url('wish.html');
   }
 
   function initGA() {
@@ -172,11 +254,12 @@
     try { if (window.gtag && CFG.GA4_ID) window.gtag('event', name, params || {}); } catch (e) { /* ignore */ }
   }
 
-  function storageGet(key) {
-    try { return window.localStorage.getItem(key); } catch (e) { return null; }
-  }
-  function storageSet(key, value) {
-    try { window.localStorage.setItem(key, value); } catch (e) { /* ignore */ }
+  function setLogo(img) {
+    if (!img) return;
+    if (!CFG.LOGO_URL) { img.hidden = true; return; }
+    img.addEventListener('error', function () { img.hidden = true; });
+    img.src = url(CFG.LOGO_URL);
+    img.hidden = false;
   }
 
   // Newest `cap` wishes, returned oldest first so tags keep their place as new ones arrive
@@ -185,7 +268,13 @@
   }
 
   /* ---------- The tree ---------- */
+  // Tree outline in tree units (620 x 760): [apex y, base y, half width at base]
   var TIERS = [[70, 230, 110], [150, 360, 165], [250, 500, 220], [370, 650, 280]];
+  // Crown of the tree is kept for leaders' messages
+  var LEADER_SLOTS = [[310, 92], [268, 148], [352, 148], [232, 210], [310, 214], [388, 210]];
+  // Which slots to use for 1-6 leaders, so the crown always looks balanced
+  var LEADER_LAYOUT = { 1: [0], 2: [1, 2], 3: [0, 1, 2], 4: [0, 1, 2, 4], 5: [0, 1, 2, 3, 5], 6: [0, 1, 2, 3, 4, 5] };
+  var TAGS_START_Y = 284;
 
   function halfWidthAt(y) {
     var hw = 0;
@@ -202,7 +291,7 @@
     var rowStep = th + 8 * scale;
     var colStep = tw + 12 * scale;
     var out = [];
-    for (var y = 150; y + th <= 642; y += rowStep) {
+    for (var y = TAGS_START_Y; y + th <= 642; y += rowStep) {
       var hw = Math.min(halfWidthAt(y + 14 * scale), halfWidthAt(y + th * 0.5), halfWidthAt(y + th));
       var usable = 2 * (hw - tw / 2 - 6);
       if (usable < 0) continue;
@@ -222,7 +311,7 @@
     [126, 602], [172, 612], [219, 618], [265, 621], [312, 621], [359, 618], [406, 612], [453, 603], [500, 590]
   ];
   var BALLS = [
-    [310, 121, 9, '#E3B45A'], [312, 287, 11, '#AB2C37'], [260, 361, 10, '#E3B45A'], [350, 359, 10, '#AB2C37'],
+    [312, 287, 11, '#AB2C37'], [260, 361, 10, '#E3B45A'], [350, 359, 10, '#AB2C37'],
     [257, 441, 10, '#AB2C37'], [343, 441, 10, '#E3B45A'], [140, 463, 9, '#E3B45A'], [480, 471, 9, '#AB2C37'],
     [217, 521, 10, '#E3B45A'], [387, 523, 10, '#AB2C37'], [215, 604, 11, '#AB2C37'], [415, 604, 11, '#E3B45A']
   ];
@@ -253,11 +342,14 @@
     return p.join('');
   })();
 
+  var STAR_PATH = 'M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z';
+
   var TREE_CSS = [
     '.wt-stage{position:relative;width:100%;aspect-ratio:620/760;container-type:inline-size}',
     '.wt-art{position:absolute;top:0;left:0;width:100%;height:100%;display:block}',
     '.wt-light{animation:wt-twinkle 2.6s ease-in-out infinite}',
     '@keyframes wt-twinkle{0%,100%{opacity:1}50%{opacity:.45}}',
+    /* employee tags */
     '.wt-tag{position:absolute;padding:0;margin:0;border:0;background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;width:var(--w);transform:translateX(-50%) rotate(var(--r,0deg));transform-origin:50% 0;transition:opacity .35s ease,transform .35s ease;-webkit-tap-highlight-color:transparent}',
     '.wt-tag:hover{transform:translateX(-50%) rotate(calc(var(--r,0deg) * -1))}',
     '.wt-string{display:block;width:1px;height:var(--str);background:#D9C59A}',
@@ -266,12 +358,23 @@
     '.wt-hole{position:absolute;top:var(--holet);left:50%;width:var(--hole);height:var(--hole);transform:translateX(-50%);border-radius:50%;background:rgba(14,42,31,.5)}',
     '.wt-tag[aria-pressed="true"]{transform:translateX(-50%) rotate(0deg);z-index:2}',
     '.wt-tag[aria-pressed="true"] .wt-body{box-shadow:0 0 0 2px #F6EEDC,0 0 0 6px rgba(227,180,90,.55),0 8px 18px rgba(0,0,0,.45)}',
-    '.wt-tag:focus{outline:none}',
-    '.wt-tag:focus-visible .wt-body{box-shadow:0 0 0 2px #0E2A1F,0 0 0 5px #00AF9B}',
+    '.wt-tag:focus,.wt-leader:focus{outline:none}',
+    '.wt-tag:focus-visible .wt-body,.wt-leader:focus-visible .wt-lball{box-shadow:0 0 0 2px #0E2A1F,0 0 0 5px #00AF9B}',
     '.wt-tag.wt-dim{opacity:.22}',
     '.wt-tag.wt-new{animation:wt-drop .8s cubic-bezier(.2,.9,.3,1.2) both}',
     '@keyframes wt-drop{from{opacity:0;transform:translateX(-50%) translateY(-40px) rotate(var(--r,0deg))}to{opacity:1;transform:translateX(-50%) rotate(var(--r,0deg))}}',
-    '@media (prefers-reduced-motion:reduce){.wt-tag,.wt-body{transition:none}.wt-tag.wt-new,.wt-light{animation:none}.wt-tag:hover{transform:translateX(-50%) rotate(var(--r,0deg))}}'
+    /* leaders' ornaments in the crown */
+    '.wt-leader{position:absolute;padding:0;margin:0;border:0;background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;width:var(--d);transform:translateX(-50%);transform-origin:50% 0;z-index:3;-webkit-tap-highlight-color:transparent;animation:wt-sway 5s ease-in-out infinite}',
+    '@keyframes wt-sway{0%,100%{transform:translateX(-50%) rotate(-2deg)}50%{transform:translateX(-50%) rotate(2deg)}}',
+    '.wt-lstring{display:block;width:1px;height:var(--lstr);background:#F2C766}',
+    '.wt-lcap{display:block;width:calc(var(--d) * .26);height:calc(var(--d) * .14);margin-bottom:-1px;border-radius:2px 2px 0 0;background:#AB2C37}',
+    '.wt-lball{position:relative;display:flex;align-items:center;justify-content:center;width:var(--d);height:var(--d);border-radius:50%;background:#E3B45A;color:#0E2A1F;font-weight:700;font-size:calc(var(--d) * .32);letter-spacing:.02em;line-height:1;box-shadow:inset 0 0 0 calc(var(--d) * .06) #F2C766,0 0 0 calc(var(--d) * .1) rgba(242,199,102,.22),0 4px 10px rgba(0,0,0,.4);transition:box-shadow .25s ease}',
+    '.wt-lball::after{content:"";position:absolute;left:18%;top:16%;width:22%;height:22%;border-radius:50%;background:rgba(255,255,255,.45)}',
+    '.wt-lstar{position:absolute;right:-6%;bottom:-6%;width:calc(var(--d) * .4);height:calc(var(--d) * .4);border-radius:50%;background:#AB2C37;color:#F6EEDC;display:flex;align-items:center;justify-content:center}',
+    '.wt-lstar svg{width:62%;height:62%}',
+    '.wt-leader[aria-pressed="true"]{animation:none}',
+    '.wt-leader[aria-pressed="true"] .wt-lball{box-shadow:inset 0 0 0 calc(var(--d) * .06) #F2C766,0 0 0 3px #F6EEDC,0 0 0 8px rgba(242,199,102,.45),0 8px 18px rgba(0,0,0,.45)}',
+    '@media (prefers-reduced-motion:reduce){.wt-tag,.wt-body{transition:none}.wt-tag.wt-new,.wt-light,.wt-leader{animation:none}.wt-tag:hover{transform:translateX(-50%) rotate(var(--r,0deg))}}'
   ].join('\n');
 
   function ensureCss() {
@@ -284,28 +387,33 @@
 
   /*
     renderTree(container, {
-      wishes:     array of wishes, oldest first (use pickForTree)
-      selectedId: id of the highlighted wish
-      isDimmed:   function(wish) -> true to fade a tag
-      onSelect:   function(id)
-      scale:      optional fixed tag size; otherwise picked to fit
+      wishes:   employee wishes, oldest first (use pickForTree)
+      leaders:  leaders' messages (first 6 hang in the crown)
+      selected: { kind: 'wish' | 'leader', id }
+      isDimmed: function(wish) -> true to fade a tag
+      onSelect: function(kind, id)
+      scale:    optional fixed tag size; otherwise picked to fit
     })
   */
   function renderTree(container, opts) {
     var o = opts || {};
     var wishes = o.wishes || [];
+    var leaders = (o.leaders || []).slice(0, LEADER_SLOTS.length);
+    var sel = o.selected || {};
     ensureCss();
 
     if (!container._wt) {
       container.innerHTML =
         '<div class="wt-stage">' +
         '<svg class="wt-art" viewBox="0 0 620 760" aria-hidden="true">' + TREE_SVG + '</svg>' +
+        '<div class="wt-crown" role="group" aria-label="Messages from our leaders"></div>' +
         '<div class="wt-tags" role="group" aria-label="Wishes on the tree"></div>' +
         '</div>';
       container._wt = { seen: {}, first: true, onSelect: null };
-      container.querySelector('.wt-tags').addEventListener('click', function (e) {
-        var btn = e.target.closest ? e.target.closest('.wt-tag') : null;
-        if (btn && typeof container._wt.onSelect === 'function') container._wt.onSelect(btn.getAttribute('data-id'));
+      container.querySelector('.wt-stage').addEventListener('click', function (e) {
+        var btn = e.target.closest ? e.target.closest('.wt-tag,.wt-leader') : null;
+        if (!btn || typeof container._wt.onSelect !== 'function') return;
+        container._wt.onSelect(btn.getAttribute('data-kind'), btn.getAttribute('data-id'));
       });
     }
 
@@ -325,17 +433,39 @@
       }
     }
 
-    var order = seededOrder(slots.length, 2026);
-    var shown = wishes.slice(0, slots.length);
-    var focused = document.activeElement && document.activeElement.closest ? document.activeElement.closest('.wt-tag') : null;
-    var focusedId = focused && container.contains(focused) ? focused.getAttribute('data-id') : null;
-
-    // Sizes in container units so tags shrink and grow with the tree (100cqw = tree width = 620 tree units)
+    // Sizes in container units so everything grows and shrinks with the tree (100cqw = 620 tree units)
     var u = function (treeUnits) { return (treeUnits / 6.2).toFixed(3) + 'cqw'; };
     var sizeVars =
       '--w:' + u(40 * scale) + ';--h:' + u(54 * scale) + ';--str:' + u(14 * scale) + ';' +
       '--ic:' + u(18 * scale) + ';--icm:' + u(6 * scale) + ';--hole:' + u(6 * scale) + ';--holet:' + u(5 * scale) + ';';
 
+    var focused = document.activeElement && document.activeElement.closest ? document.activeElement.closest('.wt-tag,.wt-leader') : null;
+    var focusedKey = focused && container.contains(focused) ? focused.getAttribute('data-kind') + ':' + focused.getAttribute('data-id') : null;
+
+    // Leaders' crown
+    var crown = '';
+    var layout = LEADER_LAYOUT[leaders.length] || [];
+    for (var li = 0; li < leaders.length; li++) {
+      var L = leaders[li];
+      var lid = String(L.id);
+      var pos = LEADER_SLOTS[layout[li]];
+      var lsel = sel.kind === 'leader' && String(sel.id) === lid;
+      crown +=
+        '<button type="button" class="wt-leader" data-kind="leader" data-id="' + esc(lid) + '"' +
+        ' aria-pressed="' + (lsel ? 'true' : 'false') + '"' +
+        ' aria-label="' + esc('Message from ' + (L.display_name || 'a TP leader')) + '"' +
+        ' style="left:' + (pos[0] / 6.2).toFixed(2) + '%;top:' + (pos[1] / 7.6).toFixed(2) + '%;' +
+        '--d:' + u(50) + ';--lstr:' + u(10) + ';animation-delay:' + (li * -0.8) + 's">' +
+        '<span class="wt-lstring"></span><span class="wt-lcap"></span>' +
+        '<span class="wt-lball">' + esc(initials(L.display_name)) +
+        '<span class="wt-lstar"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="' + STAR_PATH + '"/></svg></span>' +
+        '</span></button>';
+    }
+    container.querySelector('.wt-crown').innerHTML = crown;
+
+    // Employee tags
+    var order = seededOrder(slots.length, 2026);
+    var shown = wishes.slice(0, slots.length);
     var html = '';
     var newCount = 0;
     var seenNext = {};
@@ -347,11 +477,11 @@
       var rot = (hash(id) % 11) - 5;
       var isNew = !st.first && !st.seen[id];
       var dim = typeof o.isDimmed === 'function' ? !!o.isDimmed(w) : false;
-      var sel = o.selectedId != null && id === String(o.selectedId);
+      var wsel = sel.kind === 'wish' && String(sel.id) === id;
       seenNext[id] = true;
       html +=
         '<button type="button" class="wt-tag' + (isNew ? ' wt-new' : '') + (dim ? ' wt-dim' : '') + '"' +
-        ' data-id="' + esc(id) + '" aria-pressed="' + (sel ? 'true' : 'false') + '"' +
+        ' data-kind="wish" data-id="' + esc(id) + '" aria-pressed="' + (wsel ? 'true' : 'false') + '"' +
         ' aria-label="' + esc('Wish from ' + displayName(w)) + '"' +
         ' style="left:' + (s.x / 6.2).toFixed(2) + '%;top:' + (s.y / 7.6).toFixed(2) + '%;' +
         '--r:' + rot + 'deg;' + sizeVars + '--bg:' + pal.bg + ';--fg:' + pal.fg + ';' +
@@ -364,33 +494,49 @@
     st.seen = seenNext;
     st.first = false;
 
-    if (focusedId) {
-      var again = container.querySelector('.wt-tag[data-id="' + (window.CSS && CSS.escape ? CSS.escape(focusedId) : focusedId) + '"]');
+    if (focusedKey) {
+      var parts = focusedKey.split(':');
+      var sel2 = '[data-kind="' + parts[0] + '"][data-id="' + (window.CSS && CSS.escape ? CSS.escape(parts.slice(1).join(':')) : parts.slice(1).join(':')) + '"]';
+      var again = container.querySelector(sel2);
       if (again) again.focus({ preventScroll: true });
     }
-    return { shown: shown, scale: scale, capacity: slots.length };
+    return { shown: shown, leaders: leaders, scale: scale, capacity: slots.length };
+  }
+
+  // Forget which tags were already shown, so the next render doesn't animate them as "new"
+  function resetTreeMemory(container) {
+    if (container && container._wt) { container._wt.first = true; container._wt.seen = {}; }
   }
 
   window.WishCore = {
     cfg: CFG,
     demo: DEMO,
+    url: url,
     PALETTE: PALETTE,
     LANG_LABEL: LANG_LABEL,
     COUNTRY_LABEL: COUNTRY_LABEL,
+    SITES: SITES,
+    LEADER_SLOTS: LEADER_SLOTS.length,
+    siteById: siteById,
+    siteName: siteName,
     esc: esc,
     iconSvg: iconSvg,
+    initials: initials,
     client: getClient,
     fetchApproved: fetchApproved,
+    fetchLeaders: fetchLeaders,
     allowedEmail: allowedEmail,
     displayName: displayName,
     displayWhere: displayWhere,
     wishPageUrl: wishPageUrl,
+    setLogo: setLogo,
     initGA: initGA,
     track: track,
     storageGet: storageGet,
     storageSet: storageSet,
     pickForTree: pickForTree,
     treeCapacity: treeCapacity,
-    renderTree: renderTree
+    renderTree: renderTree,
+    resetTreeMemory: resetTreeMemory
   };
 })();

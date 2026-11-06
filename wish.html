@@ -6,6 +6,7 @@
 <title>Hang your wish · TP Wish Tree 2026</title>
 <meta name="description" content="Write a Christmas wish and hang it on the shared TP Malaysia and Thailand wish tree.">
 <meta name="theme-color" content="#0E2A1F">
+<link rel="icon" type="image/png" href="assets/tp-logo-white.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Noto+Sans:wght@300;400;500;700&family=Noto+Sans+Thai:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -35,7 +36,7 @@ button,input,select,textarea{font-family:inherit}
 /* top bar */
 .bar{position:relative;z-index:3;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 20px 0;padding-top:max(14px, env(safe-area-inset-top))}
 .bar-left{display:flex;align-items:center;gap:10px;min-height:36px}
-.logo{height:24px;width:auto;display:block}
+.logo{height:28px;width:auto;display:block}
 .bar-name{font-size:14px;font-weight:500;color:var(--cream-2)}
 .langs{display:flex;gap:4px;padding:3px;border-radius:999px;background:rgba(246,238,220,.1)}
 .langs button{min-width:48px;min-height:36px;padding:0 12px;border:0;border-radius:999px;background:transparent;color:var(--cream);font-size:14px;font-weight:500;cursor:pointer}
@@ -144,7 +145,7 @@ button,input,select,textarea{font-family:inherit}
 .tag[data-color="gold"]{--tag-bg:#E3B45A;--tag-fg:#0E2A1F;--tag-ink:#0E2A1F;--tag-line:rgba(14,42,31,.3)}
 .tag .hole{position:absolute;top:10px;left:50%;width:8px;height:8px;margin-left:-4px;border-radius:50%;background:rgba(14,42,31,.5)}
 .tag .charm-icon{position:absolute;top:11px;right:14px;color:var(--tag-fg)}
-.tag .tag-text{margin:0 0 12px;font-size:15px;line-height:1.45;white-space:pre-line;overflow-wrap:anywhere}
+.tag .tag-text{margin:0 0 12px;font-size:15px;line-height:1.45;font-weight:400;color:var(--tag-ink);white-space:pre-line;overflow-wrap:anywhere}
 .tag .tag-text.placeholder{opacity:.6}
 .tag .tag-sig{padding-top:10px;border-top:1px dashed var(--tag-line);font-size:13px;font-weight:700}
 .tag.big{width:310px;padding:40px 26px 22px;border-radius:6px 6px 10px 10px;transform:rotate(-1.5deg);box-shadow:0 20px 40px rgba(0,0,0,.45)}
@@ -179,7 +180,27 @@ button,input,select,textarea{font-family:inherit}
 
 .demo-bar{margin:0 20px 16px;padding:10px 14px;border-radius:12px;background:#FFF1E8;color:#7A2C00;font-size:12px;font-weight:500;text-align:center}
 
-@media (min-width:481px){ body{background:#0A2018} .app{box-shadow:0 0 60px rgba(0,0,0,.4)} }
+/* tablet: centred phone-width column */
+@media (min-width:481px) and (max-width:959px){ body{background:#0A2018} .app{box-shadow:0 0 60px rgba(0,0,0,.4)} }
+/* desktop: wider page, live tag beside the form while writing */
+@media (min-width:960px){
+  body{background:#0A2018}
+  .app{max-width:1120px;box-shadow:0 0 80px rgba(0,0,0,.4)}
+  .bar{padding:22px 40px 0}
+  .logo{height:34px}
+  .bar-name{font-size:16px}
+  .view{width:100%;max-width:580px;margin:0 auto;padding-bottom:40px}
+  .sheet{flex:0 0 auto;border-radius:24px;margin:0 20px}
+  .deco-tags{right:70px}
+  #view-write{max-width:none;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,560px);gap:0 56px;align-items:start;padding:8px 48px 48px}
+  #view-write .hero{position:sticky;top:24px;padding:48px 0 0}
+  #view-write .hero h1{font-size:34px !important}
+  #view-write .sheet{margin:24px 0 0}
+  #view-write .tag{width:340px;padding:36px 26px 20px}
+  #view-write .tag .tag-text{font-size:18px}
+  #view-write .tag .tag-sig{font-size:14px}
+  #view-preview .actions,#view-done .actions{padding-bottom:20px}
+}
 @media (max-width:360px){ .opt-grid.three{grid-template-columns:minmax(0,1fr)} .tag.big{width:100%} }
 @media (prefers-reduced-motion:reduce){ .spinner{animation:none} .tag{transition:none} }
 </style>
@@ -731,6 +752,7 @@ button,input,select,textarea{font-family:inherit}
 
   /* ---------- State ---------- */
   var stored = C.storageGet('wt-lang');
+  var siteParam = new URLSearchParams(window.location.search).get('site');
   var S = {
     view: 'loading',
     lang: T[stored] ? stored : 'en',
@@ -743,7 +765,7 @@ button,input,select,textarea{font-family:inherit}
     wishLangTouched: false,
     mode: 'name',
     first: '',
-    site: '',
+    site: siteParam && C.siteById(siteParam) ? siteParam : (C.siteById(C.storageGet('wt-site')) ? C.storageGet('wt-site') : ''),
     consent: false,
     triedPreview: false,
     busy: false
@@ -758,10 +780,10 @@ button,input,select,textarea{font-family:inherit}
     return s;
   }
 
-  function siteByLabel(label) {
-    var list = CFG.SITES || [];
-    for (var i = 0; i < list.length; i++) if (list[i].label === label) return list[i];
-    return null;
+  // "One Precinct" for display on the tag
+  function siteLabel(id) {
+    var s = C.siteById(id);
+    return s ? s.label : '';
   }
 
   /* ---------- Views ---------- */
@@ -798,9 +820,20 @@ button,input,select,textarea{font-family:inherit}
 
   function renderSites() {
     var sel = $('siteSel');
+    var groups = [
+      { label: 'Malaysia', items: C.SITES.filter(function (s) { return s.country === 'MY'; }) },
+      { label: 'Thailand', items: C.SITES.filter(function (s) { return s.country === 'TH'; }) },
+      { label: '', items: C.SITES.filter(function (s) { return s.country !== 'MY' && s.country !== 'TH'; }) }
+    ];
+    var opt = function (s) {
+      var text = s.city ? s.label + ' (' + s.city + ')' : s.label;
+      return '<option value="' + C.esc(s.id) + '">' + C.esc(text) + '</option>';
+    };
     var html = '<option value="">' + C.esc(t('sitePick')) + '</option>';
-    (CFG.SITES || []).forEach(function (s) {
-      html += '<option value="' + C.esc(s.label) + '">' + C.esc(s.label) + '</option>';
+    groups.forEach(function (g) {
+      if (!g.items.length) return;
+      if (g.label) html += '<optgroup label="' + C.esc(g.label) + '">' + g.items.map(opt).join('') + '</optgroup>';
+      else html += g.items.map(opt).join('');
     });
     sel.innerHTML = html;
     sel.value = S.site;
@@ -812,7 +845,7 @@ button,input,select,textarea{font-family:inherit}
 
   /* ---------- Write ---------- */
   function signature() {
-    var site = S.site || '';
+    var site = siteLabel(S.site);
     var name = S.mode === 'anon' ? t('anonName') : (S.first.trim() || t('yourName'));
     return site ? name + ' · ' + site : name;
   }
@@ -869,7 +902,7 @@ button,input,select,textarea{font-family:inherit}
     $('siteSel').value = S.site;
     $('consent').checked = S.consent;
 
-    var site = S.site ? ' · ' + S.site : '';
+    var site = S.site ? ' · ' + siteLabel(S.site) : '';
     $('exName').textContent = (S.first.trim() || t('yourName')) + site;
     $('exAnon').textContent = t('anonName') + site;
 
@@ -895,6 +928,7 @@ button,input,select,textarea{font-family:inherit}
 
   function renderDone() {
     $('doneText').textContent = t('doneText', { reveal: CFG.REVEAL_DATE || '' });
+    $('seeTreeBtn').href = C.url('index.html') + (S.site ? '?site=' + encodeURIComponent(S.site) : '');
     var pal = C.PALETTE[S.color] || C.PALETTE.cream;
     $('doneTagRect').setAttribute('fill', pal.bg);
     var icon = $('doneTagIcon');
@@ -1017,13 +1051,11 @@ button,input,select,textarea{font-family:inherit}
     if (key) { S.triedPreview = true; show('write'); return; }
     if (CFG.SUBMISSIONS_OPEN === false) { $('submitErr').textContent = t('errClosed'); return; }
 
-    var site = siteByLabel(S.site);
     var row = {
       message: S.text.trim().slice(0, MAX),
       display_mode: S.mode,
       first_name: S.mode === 'name' ? S.first.trim().slice(0, 40) : null,
       site: S.site,
-      country: site ? site.country : null,
       lang: effectiveWishLang(),
       tag_color: S.color,
       charm: S.charm,
@@ -1036,7 +1068,7 @@ button,input,select,textarea{font-family:inherit}
 
     var done = function () {
       S.busy = false;
-      C.track('wish_submit', { country: row.country, lang: row.lang, mode: row.display_mode });
+      C.track('wish_submit', { site: row.site, lang: row.lang, mode: row.display_mode });
       show('done');
     };
     var fail = function (err) {
@@ -1143,7 +1175,7 @@ button,input,select,textarea{font-family:inherit}
     r.addEventListener('change', function () { if (r.checked) { S.mode = r.value; renderWrite(); } });
   });
   $('firstName').addEventListener('input', function (e) { S.first = e.target.value; renderWrite(); });
-  $('siteSel').addEventListener('change', function (e) { S.site = e.target.value; renderWrite(); });
+  $('siteSel').addEventListener('change', function (e) { S.site = e.target.value; C.storageSet('wt-site', S.site); renderWrite(); });
   $('consent').addEventListener('change', function (e) { S.consent = e.target.checked; renderWrite(); });
 
   $('toPreviewBtn').addEventListener('click', function () {
@@ -1166,11 +1198,7 @@ button,input,select,textarea{font-family:inherit}
 
   /* ---------- Start ---------- */
   C.initGA();
-  if (CFG.LOGO_URL) {
-    $('logo').src = CFG.LOGO_URL;
-    $('logo').hidden = false;
-    $('logo').addEventListener('error', function () { $('logo').hidden = true; });
-  }
+  C.setLogo($('logo'));
   $('googleBlock').hidden = AUTH !== 'google';
   $('emailForm').hidden = AUTH !== 'email';
   if (C.demo) $('demoBar').hidden = false;

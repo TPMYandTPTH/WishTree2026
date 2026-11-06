@@ -9,7 +9,7 @@ window.WISH_CFG = {
   SUPABASE_URL: '',
   SUPABASE_ANON_KEY: '',
 
-  // How staff prove they are TP before posting:
+  // How people prove they are TP before posting (employee page and leaders page):
   //   'google' = "Continue with your TP Google account" (no email setup needed)
   //   'email'  = 6-digit code sent by email (needs custom SMTP in Supabase)
   AUTH_MODE: 'google',
@@ -22,24 +22,29 @@ window.WISH_CFG = {
   SUBMISSIONS_OPEN: true,
 
   // Full public link to wish.html, used for the QR codes.
-  // Leave blank to use wish.html in the same folder as the page.
+  // Leave blank to use wish.html next to the tree page.
   WISH_PAGE_URL: '',
 
-  // Official white TP logo, e.g. 'assets/tp-logo-white.svg'. Leave blank to hide.
-  LOGO_URL: '',
+  // Official TP logo (white, for the dark pages). Path is relative to the site root.
+  LOGO_URL: 'assets/tp-logo-white.png',
 
-  // Sites people can pick. country must be 'MY' or 'TH'.
+  // TP Malaysia & Thailand sites. id is stored with each wish - don't change an id once wishes exist.
   SITES: [
-    { label: 'Kuala Lumpur', country: 'MY' },
-    { label: 'Penang', country: 'MY' },
-    { label: 'Remote · Malaysia', country: 'MY' },
-    { label: 'Bangkok', country: 'TH' },
-    { label: 'Remote · Thailand', country: 'TH' }
+    { id: 'gtower', label: 'G-Tower', city: 'Kuala Lumpur', country: 'MY' },
+    { id: 'kcp', label: 'Kelana Centre Point', city: 'Petaling Jaya', country: 'MY' },
+    { id: 'gbs', label: 'GBS @ Mahsuri', city: 'Penang', country: 'MY' },
+    { id: 'op', label: 'One Precinct', city: 'Penang', country: 'MY' },
+    { id: 'lv', label: 'Livingston Tower', city: 'Penang', country: 'MY' },
+    { id: 'jb', label: 'Johor Bahru', city: 'Johor', country: 'MY' },
+    { id: 'singha', label: 'Singha Complex', city: 'Bangkok', country: 'TH' },
+    { id: 'wfh', label: 'Work from home', city: '', country: '' }
   ],
 
-  MAX_LENGTH: 200,
+  MAX_LENGTH: 200,          // employee wish length
+  LEADER_MAX_LENGTH: 400,   // leader message length
   TREE_REFRESH_SECONDS: 60,
   MAX_TAGS_ON_TREE: 40,
+  TOUR_SECONDS: 10,         // "Tour sites" switches site every N seconds
 
   // Optional GA4 measurement ID, e.g. 'G-XXXXXXXXXX'
   GA4_ID: ''

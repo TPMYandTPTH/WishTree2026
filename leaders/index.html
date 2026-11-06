@@ -1,0 +1,606 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Leaders' messages · TP Wish Tree 2026</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0B231A">
+<link rel="icon" type="image/png" href="../assets/tp-logo-white.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Noto+Sans:wght@300;400;500;700&family=Noto+Sans+Thai:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+@font-face{font-family:'TP Sans';font-weight:300;font-display:swap;src:local('TP Sans Light'),local('TPSans-Light'),url('../fonts/TPSans-Light.ttf') format('truetype')}
+@font-face{font-family:'TP Sans';font-weight:400;font-display:swap;src:local('TP Sans'),local('TPSans-Regular'),url('../fonts/TPSans-Regular.ttf') format('truetype')}
+@font-face{font-family:'TP Sans';font-weight:500;font-display:swap;src:local('TP Sans Medium'),local('TPSans-Medium'),url('../fonts/TPSans-Medium.ttf') format('truetype')}
+@font-face{font-family:'TP Sans';font-weight:700;font-display:swap;src:local('TP Sans Bold'),local('TPSans-Bold'),url('../fonts/TPSans-Bold.ttf') format('truetype')}
+
+:root{
+  --bg:#0B231A; --bg-2:#0E2A1F; --bg-3:#12352A;
+  --cream:#F6EEDC; --cream-2:#DCD3BF; --cream-3:#B9B19E;
+  --gold:#E3B45A; --gold-2:#F2C766; --carmine:#AB2C37;
+  --ink:#183326; --slate:#4B4C6A; --field:#C9BFA8; --focus:#00AF9B;
+  --line:rgba(242,199,102,.22);
+  --font:'TP Sans','Noto Sans','Noto Sans Thai',Calibri,system-ui,sans-serif;
+  --script:'Great Vibes',cursive;
+}
+*{box-sizing:border-box}
+[hidden]{display:none !important}
+html,body{margin:0;background:var(--bg);color:var(--cream);font-family:var(--font);-webkit-font-smoothing:antialiased}
+body{min-height:100vh;min-height:100dvh;overflow-x:hidden}
+a{color:var(--gold)}
+a:hover{color:var(--gold-2)}
+button,input,select,textarea{font-family:inherit}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+
+.demo-bar{position:relative;z-index:2;padding:8px 16px;background:#FFF1E8;color:#7A2C00;font-size:13px;font-weight:500;text-align:center}
+.deco{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0}
+.deco span{position:absolute;border-radius:50%}
+.deco .d1{right:-480px;top:-300px;width:1000px;height:1000px;background:var(--bg-2)}
+.deco .d2{right:-360px;top:-180px;width:780px;height:780px;border:1px solid rgba(227,180,90,.2)}
+
+.wrap{position:relative;z-index:1;max-width:1140px;margin:0 auto;padding:20px 40px 48px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-bottom:18px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:14px;min-height:44px}
+.logo{height:36px;width:auto;display:block}
+.brand-divider{width:1px;height:26px;background:rgba(246,238,220,.25)}
+.brand-name{font-size:17px;font-weight:500}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;border:1px solid rgba(227,180,90,.55);color:var(--gold);font-size:12px;font-weight:700;letter-spacing:.1em;white-space:nowrap}
+
+.view{padding-top:36px}
+.view h1{margin:0;font-weight:300;line-height:1.1}
+.view h1:focus{outline:none}
+.script{font-family:var(--script);color:var(--gold);line-height:1}
+
+/* centred card views */
+.center{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:22px}
+.center .script{font-size:44px}
+.center h1{font-size:36px}
+.center p{margin:0;font-size:16px;line-height:1.55;font-weight:300;color:var(--cream-2)}
+.panel{display:flex;flex-direction:column;gap:16px;padding:24px;border-radius:18px;background:#FBF6EA;color:var(--ink)}
+.panel label{font-size:15px;font-weight:700}
+.help{font-size:13px;line-height:1.45;color:var(--slate)}
+.err{margin:0;padding:10px 12px;border-radius:10px;background:#F8E5E7;color:#7E1F28;font-size:14px;line-height:1.45}
+.err:empty{display:none}
+.ok{margin:0;padding:10px 12px;border-radius:10px;background:#E3F6F3;color:#00584D;font-size:14px;line-height:1.45}
+.ok:empty{display:none}
+
+.input,.textarea{width:100%;min-width:0;border:1.5px solid var(--field);border-radius:12px;background:#fff;color:var(--ink);font-size:16px}
+.input{height:50px;padding:0 14px}
+.textarea{padding:14px 16px;line-height:1.5;resize:vertical;min-height:150px}
+.input:focus,.textarea:focus{border-color:var(--bg);outline:none;box-shadow:0 0 0 3px rgba(0,175,155,.35)}
+.code-input{height:62px;text-align:center;font-size:26px;font-weight:500;letter-spacing:.5em}
+
+.btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:54px;padding:0 20px;border:0;border-radius:999px;font-size:16px;font-weight:700;text-decoration:none;cursor:pointer}
+.btn-gold{background:var(--gold);color:var(--bg)}
+.btn-gold:hover{background:var(--gold-2);color:var(--bg)}
+.btn-dark{background:var(--bg);color:var(--cream)}
+.btn-dark:hover{background:#163D2E;color:var(--cream)}
+.btn-google{background:#fff;color:#1F1F1F;border:1.5px solid var(--field);font-weight:500}
+.btn-google:hover{background:#F7F7F7}
+.btn-line{border:1px solid rgba(246,238,220,.4);background:transparent;color:var(--cream);font-weight:500}
+.btn-line:hover{background:rgba(246,238,220,.08);color:var(--cream)}
+.btn[disabled]{opacity:.6;cursor:progress}
+.link{min-height:44px;padding:0;border:0;background:transparent;color:var(--carmine);font-size:14px;font-weight:500;text-decoration:underline;cursor:pointer}
+.link-cream{color:var(--cream-2)}
+
+/* editor */
+.editor{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,520px);gap:48px;align-items:start}
+.preview{position:sticky;top:24px;display:flex;flex-direction:column;gap:18px}
+.preview-title{font-size:13px;font-weight:500;letter-spacing:.14em;color:var(--gold)}
+.crown-window{position:relative;width:100%;max-width:440px;margin:0 auto;aspect-ratio:620/330;overflow:hidden;border-radius:18px;background:var(--bg-2);border:1px solid var(--line)}
+.crown-window #crownMount{position:absolute;left:0;right:0;top:-2%}
+.leader-card{position:relative;width:100%;max-width:440px;margin:6px auto 0;padding:34px 24px 20px;border-radius:14px;border:1.5px solid var(--gold);background:var(--bg);color:var(--cream);box-shadow:0 0 0 6px rgba(227,180,90,.12),0 18px 40px rgba(0,0,0,.45)}
+.leader-card .lc-badge{position:absolute;top:-14px;left:20px;display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;background:var(--gold);color:var(--bg);font-size:11px;font-weight:700;letter-spacing:.1em}
+.leader-card .lc-kicker{margin-bottom:12px;font-size:12px;font-weight:500;letter-spacing:.12em;color:var(--gold-2)}
+.leader-card .lc-text{margin:0 0 18px;font-size:18px;line-height:1.5;font-weight:300;white-space:pre-line;overflow-wrap:anywhere}
+.leader-card .lc-text.placeholder{opacity:.55}
+.leader-card .lc-foot{display:flex;align-items:center;gap:12px;padding-top:14px;border-top:1px dashed rgba(242,199,102,.35)}
+.leader-card .lc-avatar{flex:none;display:flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:50%;background:var(--gold);color:var(--bg);font-weight:700;font-size:15px}
+.leader-card .lc-name{font-size:16px;font-weight:700}
+.leader-card .lc-title{margin-top:2px;font-size:14px;color:var(--cream-2)}
+
+.form{display:flex;flex-direction:column;gap:20px;padding:26px;border-radius:20px;background:#FBF6EA;color:var(--ink)}
+.form h1{font-size:28px;color:var(--ink)}
+.form .sub{margin:-8px 0 0;font-size:14px;line-height:1.5;color:var(--slate)}
+.field{display:flex;flex-direction:column;gap:8px;min-width:0}
+.field label,.field .label{font-size:15px;font-weight:700}
+.field-foot{display:flex;justify-content:space-between;gap:12px;font-size:12px;color:var(--slate)}
+.counter{margin-left:auto;font-variant-numeric:tabular-nums}
+.seg{display:flex;gap:6px;padding:4px;border-radius:999px;background:#EFE6D2}
+.seg button{flex:1;min-height:40px;padding:0 8px;border:0;border-radius:999px;background:transparent;color:var(--ink);font-size:14px;font-weight:500;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--bg);color:var(--cream)}
+.status{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:12px;background:#E3F6F3;color:#00584D;font-size:14px;font-weight:500}
+.status .dot{width:8px;height:8px;border-radius:50%;background:#00AF9B}
+.row-actions{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px}
+.who{font-size:13px;color:var(--slate)}
+
+/* deco tags for sign-in */
+.hang{display:flex;gap:18px;justify-content:center;margin-bottom:-6px}
+.hang span{display:flex;flex-direction:column;align-items:center}
+.hang i{display:block;width:1px;background:var(--gold-2)}
+.hang b{display:flex;align-items:center;justify-content:center;width:46px;height:46px;border-radius:50%;background:var(--gold);color:var(--bg);font-size:14px;font-weight:700;box-shadow:inset 0 0 0 3px var(--gold-2),0 0 0 5px rgba(242,199,102,.2)}
+
+@media (max-width:900px){
+  .wrap{padding:14px 16px 40px}
+  .logo{height:30px}
+  .brand{gap:10px}
+  .brand-name{font-size:15px}
+  .view{padding-top:24px}
+  .editor{grid-template-columns:minmax(0,1fr);gap:24px}
+  .preview{position:static}
+  .center h1{font-size:30px}
+  .center .script{font-size:38px}
+  .form{padding:20px}
+}
+@media (max-width:420px){
+  .brand-divider,.brand-name{display:none}
+}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../config.js"></script>
+<script src="../wishtree.js"></script>
+</head>
+<body>
+<div id="demoBar" class="demo-bar" role="status" hidden>Demo mode: anyone can try this page and nothing is saved. In live mode only people on the leaders list can post.</div>
+<div class="deco" aria-hidden="true"><span class="d1"></span><span class="d2"></span></div>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <img id="logo" class="logo" alt="TP" hidden>
+      <span class="brand-divider" aria-hidden="true"></span>
+      <span class="brand-name">Wish Tree 2026</span>
+    </div>
+    <span class="badge">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg>
+      LEADERS ONLY
+    </span>
+  </header>
+
+  <!-- Loading -->
+  <section id="view-loading" class="view">
+    <div class="center"><p>Checking your access…</p></div>
+  </section>
+
+  <!-- Sign in -->
+  <section id="view-signin" class="view" hidden>
+    <div class="center">
+      <div class="hang" aria-hidden="true">
+        <span><i style="height:28px"></i><b>TP</b></span>
+        <span><i style="height:52px"></i><b>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg>
+        </b></span>
+        <span><i style="height:18px"></i><b>MY</b></span>
+        <span><i style="height:40px"></i><b>TH</b></span>
+      </div>
+      <div class="script">Lead with light,</div>
+      <h1 tabindex="-1">Hang a message for every TP site</h1>
+      <p>This page is only for TP Malaysia and Thailand leaders. Your message hangs in gold at the top of the tree, on every site's tree and on the site screens.</p>
+      <div class="panel">
+        <div id="googleBlock" hidden>
+          <button type="button" id="googleBtn" class="btn btn-google">
+            <svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>
+            Continue with your TP Google account
+          </button>
+        </div>
+        <form id="emailForm" novalidate hidden style="display:flex;flex-direction:column;gap:10px">
+          <label for="email">Your TP work email</label>
+          <input id="email" class="input" type="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" required>
+          <button type="submit" id="sendCodeBtn" class="btn btn-dark" style="margin-top:6px">Send my code</button>
+        </form>
+        <div class="help" id="signinHelp"></div>
+        <p id="signinErr" class="err" role="alert"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Email code -->
+  <section id="view-code" class="view" hidden>
+    <div class="center">
+      <h1 tabindex="-1">Check your inbox</h1>
+      <div class="panel">
+        <form id="codeForm" novalidate style="display:flex;flex-direction:column;gap:10px">
+          <label for="code" id="codeLabel">Enter the 6-digit code we sent you</label>
+          <input id="code" class="input code-input" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" required>
+          <button type="submit" id="verifyBtn" class="btn btn-dark" style="margin-top:6px">Continue</button>
+        </form>
+        <p id="codeErr" class="err" role="alert"></p>
+        <button type="button" id="backToEmail" class="link" style="align-self:flex-start">Use a different email</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Not a leader -->
+  <section id="view-denied" class="view" hidden>
+    <div class="center">
+      <h1 tabindex="-1">This page is for TP leaders</h1>
+      <p id="deniedText"></p>
+      <p>If you lead a team or site and should be here, ask the Wish Tree team to add your work email to the leaders list.</p>
+      <a class="btn btn-gold" id="toWishPage" href="../wish.html">Hang an employee wish instead</a>
+      <button type="button" class="btn btn-line" id="deniedSignOut">Sign out</button>
+    </div>
+  </section>
+
+  <!-- Editor -->
+  <section id="view-edit" class="view" hidden>
+    <div class="editor">
+      <div class="preview">
+        <div class="preview-title">HOW IT WILL LOOK ON EVERY SITE'S TREE</div>
+        <div class="crown-window" aria-hidden="true"><div id="crownMount"></div></div>
+        <article class="leader-card" aria-label="Preview of your message">
+          <span class="lc-badge">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg>
+            FROM OUR LEADERS
+          </span>
+          <div class="lc-kicker">ON EVERY SITE'S TREE</div>
+          <p class="lc-text" id="pvText"></p>
+          <div class="lc-foot">
+            <div class="lc-avatar" id="pvInitials"></div>
+            <div>
+              <div class="lc-name" id="pvName"></div>
+              <div class="lc-title" id="pvTitle"></div>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <form class="form" id="leaderForm" novalidate>
+        <div>
+          <h1 tabindex="-1" id="editTitle">Your message</h1>
+        </div>
+        <p class="sub">One message per leader. It goes live straight away at the top of every site's tree, and you can edit or remove it any time.</p>
+        <div id="statusLive" class="status" hidden><span class="dot" aria-hidden="true"></span><span id="statusText">Live on every site's tree</span></div>
+
+        <div class="field">
+          <label for="lName">Name as shown</label>
+          <input id="lName" class="input" type="text" maxlength="60" autocomplete="name" required>
+        </div>
+        <div class="field">
+          <label for="lTitle">Title</label>
+          <input id="lTitle" class="input" type="text" maxlength="80" placeholder="e.g. Site Director, One Precinct">
+          <div class="help">Shown under your name. Leave it blank if you prefer.</div>
+        </div>
+        <div class="field">
+          <label for="lMessage">Your message to everyone</label>
+          <textarea id="lMessage" class="textarea" rows="6"></textarea>
+          <div class="field-foot"><span>Shown to every site in Malaysia and Thailand.</span><span class="counter" id="lCounter"></span></div>
+        </div>
+        <div class="field">
+          <span class="label" id="langLabel">Written in</span>
+          <div class="seg" role="group" aria-labelledby="langLabel">
+            <button type="button" data-lang="en" aria-pressed="true">English</button>
+            <button type="button" data-lang="ms" aria-pressed="false">Bahasa Melayu</button>
+            <button type="button" data-lang="th" aria-pressed="false" lang="th">ภาษาไทย</button>
+          </div>
+        </div>
+
+        <p id="editErr" class="err" role="alert"></p>
+        <p id="editOk" class="ok" role="status"></p>
+        <button type="submit" id="publishBtn" class="btn btn-gold">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg>
+          <span id="publishLabel">Publish to every site</span>
+        </button>
+        <div class="row-actions">
+          <span class="who" id="whoText"></span>
+          <span style="display:flex;gap:16px">
+            <button type="button" class="link" id="removeBtn" hidden>Remove my message</button>
+            <button type="button" class="link" id="signOutBtn" style="color:var(--slate)">Sign out</button>
+          </span>
+        </div>
+        <a class="link" style="color:var(--slate);align-self:flex-start;display:inline-flex;align-items:center" id="seeTree" href="../index.html">See the tree</a>
+      </form>
+    </div>
+  </section>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var C = window.WishCore;
+  var CFG = C.cfg;
+  var MAX = Number(CFG.LEADER_MAX_LENGTH) || 400;
+  var DOMAIN = (CFG.ALLOWED_EMAIL_DOMAINS && CFG.ALLOWED_EMAIL_DOMAINS[0]) || 'tp.com';
+  var AUTH = CFG.AUTH_MODE === 'email' ? 'email' : 'google';
+
+  var S = { view: 'loading', user: null, email: '', existing: null, name: '', title: '', message: '', lang: 'en', busy: false };
+  var sb = null;
+  var $ = function (id) { return document.getElementById(id); };
+  var qsa = function (sel) { return Array.prototype.slice.call(document.querySelectorAll(sel)); };
+
+  function show(view) {
+    S.view = view;
+    qsa('.view').forEach(function (v) { v.hidden = v.id !== 'view-' + view; });
+    if (view === 'edit') renderEdit();
+    window.scrollTo(0, 0);
+    var h = document.querySelector('#view-' + view + ' h1');
+    if (h) setTimeout(function () { h.focus({ preventScroll: true }); }, 0);
+  }
+
+  /* ---------- Preview ---------- */
+  function renderPreview() {
+    var name = S.name.trim() || 'Your name';
+    var has = !!S.message.trim();
+    $('pvText').textContent = has ? S.message : 'Your message will appear here as you type.';
+    $('pvText').classList.toggle('placeholder', !has);
+    $('pvText').setAttribute('lang', S.lang);
+    $('pvName').textContent = name;
+    $('pvTitle').textContent = S.title.trim();
+    $('pvInitials').textContent = C.initials(name);
+    var me = { id: 'preview', display_name: name, title: S.title, message: S.message };
+    C.renderTree($('crownMount'), { wishes: [], leaders: [me], selected: { kind: 'leader', id: 'preview' } });
+  }
+
+  function renderEdit() {
+    var f = function (id, v) { if ($(id).value !== v) $(id).value = v; };
+    f('lName', S.name);
+    f('lTitle', S.title);
+    f('lMessage', S.message);
+    $('lMessage').setAttribute('maxlength', String(MAX));
+    $('lCounter').textContent = S.message.length + ' / ' + MAX;
+    qsa('.seg button').forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-lang') === S.lang ? 'true' : 'false'); });
+    $('statusLive').hidden = !S.existing;
+    if (S.existing && S.existing.updated_at) {
+      $('statusText').textContent = 'Live on every site\'s tree · last updated ' + new Date(S.existing.updated_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    }
+    $('publishLabel').textContent = S.busy ? 'Saving…' : (S.existing ? 'Update my message' : 'Publish to every site');
+    $('publishBtn').disabled = S.busy;
+    $('removeBtn').hidden = !S.existing;
+    $('whoText').textContent = S.user ? 'Signed in as ' + S.user.email : '';
+    renderPreview();
+  }
+
+  /* ---------- Access ---------- */
+  function loadLeader() {
+    if (C.demo) {
+      var mine = null;
+      try { mine = JSON.parse(C.storageGet('wt-demo-leader') || 'null'); } catch (e) { mine = null; }
+      S.existing = mine && mine.message ? mine : null;
+      S.name = S.existing ? S.existing.display_name : (S.name || '');
+      S.title = S.existing ? (S.existing.title || '') : S.title;
+      S.message = S.existing ? S.existing.message : S.message;
+      S.lang = S.existing ? (S.existing.lang || 'en') : S.lang;
+      show('edit');
+      return Promise.resolve();
+    }
+    return sb.rpc('leader_profile').then(function (res) {
+      if (res.error) throw res.error;
+      var p = Array.isArray(res.data) ? res.data[0] : res.data;
+      if (!p || !p.is_leader) {
+        $('deniedText').textContent = 'You are signed in as ' + S.user.email + ', which is not on the leaders list.';
+        show('denied');
+        return null;
+      }
+      if (!S.name && p.default_name) S.name = p.default_name;
+      if (!S.title && p.default_title) S.title = p.default_title;
+      return sb.from('leader_messages').select('id,display_name,title,message,lang,updated_at').eq('user_id', S.user.id).maybeSingle().then(function (r) {
+        if (r.error) throw r.error;
+        if (r.data) {
+          S.existing = r.data;
+          S.name = r.data.display_name || S.name;
+          S.title = r.data.title || '';
+          S.message = r.data.message || '';
+          S.lang = r.data.lang || 'en';
+        }
+        show('edit');
+      });
+    }).catch(function (err) {
+      console.error(err);
+      $('signinErr').textContent = 'We could not check your access. Please try again.';
+      show('signin');
+    });
+  }
+
+  function handleSession(session) {
+    if (!session || !session.user) {
+      S.user = null;
+      if (S.view !== 'code') show('signin');
+      return;
+    }
+    var email = session.user.email || '';
+    if (!C.allowedEmail(email)) {
+      setTimeout(function () { sb.auth.signOut(); }, 0);
+      $('signinErr').textContent = 'Please use your TP work account (@' + DOMAIN + ').';
+      show('signin');
+      return;
+    }
+    if (S.user && S.user.id === session.user.id && S.view !== 'loading' && S.view !== 'signin' && S.view !== 'code') return;
+    var meta = session.user.user_metadata || {};
+    S.user = { id: session.user.id, email: email };
+    if (!S.name) S.name = meta.full_name || meta.name || '';
+    loadLeader();
+  }
+
+  function startGoogle() {
+    $('signinErr').textContent = '';
+    if (C.demo) { demoSignIn('leader@' + DOMAIN); return; }
+    $('googleBtn').disabled = true;
+    sb.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: window.location.origin + window.location.pathname, queryParams: { hd: DOMAIN, prompt: 'select_account' } }
+    }).then(function (res) { if (res.error) throw res.error; }).catch(function (err) {
+      console.error(err);
+      $('googleBtn').disabled = false;
+      $('signinErr').textContent = 'Something went wrong. Please try again.';
+    });
+  }
+
+  function sendCode(e) {
+    if (e) e.preventDefault();
+    var email = $('email').value.trim().toLowerCase();
+    $('signinErr').textContent = '';
+    if (!C.allowedEmail(email)) { $('signinErr').textContent = 'Please use your TP work email (@' + DOMAIN + ').'; return; }
+    S.email = email;
+    $('codeLabel').textContent = 'Enter the 6-digit code we sent to ' + email;
+    if (C.demo) { show('code'); return; }
+    $('sendCodeBtn').disabled = true;
+    sb.auth.signInWithOtp({ email: email, options: { shouldCreateUser: true } }).then(function (res) {
+      $('sendCodeBtn').disabled = false;
+      if (res.error) throw res.error;
+      $('code').value = '';
+      show('code');
+    }).catch(function (err) {
+      console.error(err);
+      $('sendCodeBtn').disabled = false;
+      $('signinErr').textContent = 'We could not send the code. Please try again in a minute.';
+    });
+  }
+
+  function verifyCode(e) {
+    if (e) e.preventDefault();
+    var token = $('code').value.replace(/\D/g, '');
+    $('codeErr').textContent = '';
+    if (token.length !== 6) { $('codeErr').textContent = 'Enter all 6 digits.'; return; }
+    if (C.demo) { demoSignIn(S.email); return; }
+    $('verifyBtn').disabled = true;
+    sb.auth.verifyOtp({ email: S.email, token: token, type: 'email' }).then(function (res) {
+      $('verifyBtn').disabled = false;
+      if (res.error) throw res.error;
+      handleSession(res.data && res.data.session);
+    }).catch(function (err) {
+      console.error(err);
+      $('verifyBtn').disabled = false;
+      $('codeErr').textContent = "That code didn't work. Check it and try again.";
+    });
+  }
+
+  function demoSignIn(email) {
+    S.user = { id: 'demo', email: email };
+    C.storageSet('wt-demo-leader-user', email);
+    loadLeader();
+  }
+
+  function signOut() {
+    S.user = null;
+    S.existing = null;
+    S.name = ''; S.title = ''; S.message = ''; S.lang = 'en';
+    if (C.demo) { C.storageSet('wt-demo-leader-user', ''); show('signin'); return; }
+    sb.auth.signOut().finally(function () { show('signin'); });
+  }
+
+  /* ---------- Save / remove ---------- */
+  function publish(e) {
+    if (e) e.preventDefault();
+    $('editErr').textContent = '';
+    $('editOk').textContent = '';
+    if (!S.name.trim()) { $('editErr').textContent = 'Add your name as it should appear.'; $('lName').focus(); return; }
+    if (!S.message.trim()) { $('editErr').textContent = 'Write your message first.'; $('lMessage').focus(); return; }
+    var row = {
+      display_name: S.name.trim().slice(0, 60),
+      title: S.title.trim().slice(0, 80) || null,
+      message: S.message.trim().slice(0, MAX),
+      lang: S.lang
+    };
+    S.busy = true;
+    renderEdit();
+    var done = function (saved) {
+      S.busy = false;
+      var wasNew = !S.existing;
+      S.existing = saved;
+      renderEdit();
+      $('editOk').textContent = wasNew ? 'Published. Your message now hangs at the top of every site\'s tree.' : 'Updated on every site\'s tree.';
+      C.track('leader_publish', { is_new: wasNew });
+    };
+    var fail = function (err) {
+      console.error(err);
+      S.busy = false;
+      renderEdit();
+      $('editErr').textContent = err && err.code === '42501'
+        ? 'Your account is not on the leaders list, so the message was not saved.'
+        : 'We could not save your message. Please try again.';
+    };
+
+    if (C.demo) {
+      var saved = Object.assign({ updated_at: new Date().toISOString() }, row);
+      C.storageSet('wt-demo-leader', JSON.stringify(saved));
+      setTimeout(function () { done(saved); }, 500);
+      return;
+    }
+    sb.from('leader_messages')
+      .upsert(Object.assign({ user_id: S.user.id }, row), { onConflict: 'user_id' })
+      .select('id,display_name,title,message,lang,updated_at')
+      .single()
+      .then(function (res) { if (res.error) throw res.error; done(res.data); })
+      .catch(fail);
+  }
+
+  function removeMessage() {
+    if (!S.existing) return;
+    $('editErr').textContent = '';
+    $('editOk').textContent = '';
+    var after = function () {
+      S.existing = null;
+      renderEdit();
+      $('editOk').textContent = 'Removed from the tree. You can publish a new message any time.';
+    };
+    if (C.demo) { C.storageSet('wt-demo-leader', ''); after(); return; }
+    sb.from('leader_messages').delete().eq('user_id', S.user.id).then(function (res) {
+      if (res.error) throw res.error;
+      after();
+    }).catch(function (err) {
+      console.error(err);
+      $('editErr').textContent = 'We could not remove your message. Please try again.';
+    });
+  }
+
+  /* ---------- Events ---------- */
+  $('googleBtn').addEventListener('click', startGoogle);
+  $('emailForm').addEventListener('submit', sendCode);
+  $('codeForm').addEventListener('submit', verifyCode);
+  $('code').addEventListener('input', function () {
+    var v = $('code').value.replace(/\D/g, '').slice(0, 6);
+    if ($('code').value !== v) $('code').value = v;
+    if (v.length === 6) verifyCode();
+  });
+  $('backToEmail').addEventListener('click', function () { show('signin'); });
+  $('deniedSignOut').addEventListener('click', signOut);
+  $('signOutBtn').addEventListener('click', signOut);
+  $('lName').addEventListener('input', function (e) { S.name = e.target.value; renderPreview(); });
+  $('lTitle').addEventListener('input', function (e) { S.title = e.target.value; renderPreview(); });
+  $('lMessage').addEventListener('input', function (e) {
+    S.message = e.target.value.slice(0, MAX);
+    $('lCounter').textContent = S.message.length + ' / ' + MAX;
+    renderPreview();
+  });
+  qsa('.seg button').forEach(function (b) {
+    b.addEventListener('click', function () { S.lang = b.getAttribute('data-lang'); renderEdit(); });
+  });
+  $('leaderForm').addEventListener('submit', publish);
+  $('removeBtn').addEventListener('click', removeMessage);
+
+  /* ---------- Start ---------- */
+  C.initGA();
+  C.setLogo($('logo'));
+  $('toWishPage').href = C.url('wish.html');
+  $('seeTree').href = C.url('index.html');
+  $('googleBlock').hidden = AUTH !== 'google';
+  $('emailForm').hidden = AUTH !== 'email';
+  $('email').setAttribute('placeholder', 'name@' + DOMAIN);
+  $('signinHelp').textContent = 'Use your TP work account (@' + DOMAIN + '). Access is checked against the leaders list.';
+  if (C.demo) $('demoBar').hidden = false;
+
+  if (C.demo) {
+    var u = C.storageGet('wt-demo-leader-user');
+    if (u) demoSignIn(u); else show('signin');
+    return;
+  }
+
+  try { sb = C.client(); } catch (err) {
+    console.error(err);
+    $('signinErr').textContent = 'Something went wrong loading the page. Please refresh.';
+    show('signin');
+    return;
+  }
+  sb.auth.onAuthStateChange(function (event, session) {
+    if (event === 'SIGNED_OUT') return;
+    if (session) handleSession(session);
+  });
+  sb.auth.getSession().then(function (res) {
+    var session = res && res.data ? res.data.session : null;
+    if (session) handleSession(session); else show('signin');
+  }).catch(function () { show('signin'); });
+})();
+</script>
+</body>
+</html>
