@@ -1,0 +1,1215 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hang your wish · TP Wish Tree 2026</title>
+<meta name="description" content="Write a Christmas wish and hang it on the shared TP Malaysia and Thailand wish tree.">
+<meta name="theme-color" content="#0E2A1F">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Noto+Sans:wght@300;400;500;700&family=Noto+Sans+Thai:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+@font-face{font-family:'TP Sans';font-weight:300;font-display:swap;src:local('TP Sans Light'),local('TPSans-Light'),url('fonts/TPSans-Light.ttf') format('truetype')}
+@font-face{font-family:'TP Sans';font-weight:400;font-display:swap;src:local('TP Sans'),local('TPSans-Regular'),url('fonts/TPSans-Regular.ttf') format('truetype')}
+@font-face{font-family:'TP Sans';font-weight:500;font-display:swap;src:local('TP Sans Medium'),local('TPSans-Medium'),url('fonts/TPSans-Medium.ttf') format('truetype')}
+@font-face{font-family:'TP Sans';font-weight:700;font-display:swap;src:local('TP Sans Bold'),local('TPSans-Bold'),url('fonts/TPSans-Bold.ttf') format('truetype')}
+
+:root{
+  --bg:#0E2A1F; --bg-2:#11302A;
+  --cream:#F6EEDC; --cream-2:#DCD3BF; --paper:#FBF6EA; --paper-2:#EFE6D2;
+  --gold:#E3B45A; --gold-2:#F2C766; --carmine:#AB2C37;
+  --ink:#183326; --slate:#4B4C6A; --field:#C9BFA8; --field-off:#DDD3BE; --focus:#00AF9B;
+  --font:'TP Sans','Noto Sans','Noto Sans Thai',Calibri,system-ui,sans-serif;
+  --script:'Great Vibes',cursive;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--cream);font-family:var(--font);-webkit-font-smoothing:antialiased}
+body{min-height:100vh;min-height:100dvh}
+button,input,select,textarea{font-family:inherit}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+[hidden]{display:none !important}
+
+.app{position:relative;max-width:480px;min-height:100vh;min-height:100dvh;margin:0 auto;display:flex;flex-direction:column;background:var(--bg);overflow:hidden}
+
+/* top bar */
+.bar{position:relative;z-index:3;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 20px 0;padding-top:max(14px, env(safe-area-inset-top))}
+.bar-left{display:flex;align-items:center;gap:10px;min-height:36px}
+.logo{height:24px;width:auto;display:block}
+.bar-name{font-size:14px;font-weight:500;color:var(--cream-2)}
+.langs{display:flex;gap:4px;padding:3px;border-radius:999px;background:rgba(246,238,220,.1)}
+.langs button{min-width:48px;min-height:36px;padding:0 12px;border:0;border-radius:999px;background:transparent;color:var(--cream);font-size:14px;font-weight:500;cursor:pointer}
+.langs button[aria-pressed="true"]{background:var(--cream);color:var(--bg)}
+
+.view{position:relative;flex:1;display:flex;flex-direction:column}
+.view h1{margin:0;font-weight:300;line-height:1.15}
+.view h1:focus{outline:none}
+
+/* dark hero */
+.hero{position:relative;display:flex;flex-direction:column;gap:10px;padding:24px 24px 28px}
+.hero .script{font-family:var(--script);font-size:40px;line-height:1;color:var(--gold)}
+.hero h1{font-size:30px;color:var(--cream)}
+.hero p{margin:0;font-size:15px;line-height:1.5;font-weight:300;color:var(--cream-2)}
+.arc{position:absolute;border-radius:50%;pointer-events:none}
+.arc-1{right:-150px;top:-140px;width:360px;height:360px;border:1px solid rgba(227,180,90,.18)}
+.arc-2{right:-180px;top:160px;width:380px;height:380px;background:var(--bg-2)}
+.deco-tags{position:absolute;right:30px;top:0;display:flex;gap:14px;align-items:flex-start;pointer-events:none}
+.deco-tags span{display:flex;flex-direction:column;align-items:center;transform-origin:50% 0}
+.deco-tags i{display:block;width:1px;background:#D9C59A}
+.deco-tags b{display:block;width:30px;height:40px;border-radius:3px 3px 5px 5px}
+
+/* progress */
+.progress{display:flex;align-items:center;gap:12px}
+.back{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;margin-left:-10px;border:0;border-radius:50%;background:transparent;color:var(--cream);cursor:pointer}
+.back:hover{background:rgba(246,238,220,.08)}
+.progress-main{flex:1;display:flex;flex-direction:column;gap:6px}
+.step-label{font-size:12px;font-weight:500;letter-spacing:.12em;color:var(--gold)}
+.bars{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.bars span{height:4px;border-radius:2px;background:rgba(246,238,220,.2)}
+.bars span.on{background:var(--gold)}
+
+/* cream sheet */
+.sheet{position:relative;z-index:2;flex:1;display:flex;flex-direction:column;gap:22px;padding:24px 20px 32px;padding-bottom:max(32px, env(safe-area-inset-bottom));border-radius:24px 24px 0 0;background:var(--paper);color:var(--ink)}
+.sheet fieldset{margin:0;padding:0;border:0;min-width:0}
+.sheet legend,.sheet .label{padding:0;margin-bottom:10px;font-size:15px;font-weight:700;color:var(--ink)}
+.field{display:flex;flex-direction:column;gap:8px;min-width:0}
+.field label{font-size:15px;font-weight:700}
+.field.small label{font-size:13px;font-weight:500}
+.input,.select,.textarea{width:100%;min-width:0;border:1.5px solid var(--field);border-radius:12px;background:#fff;color:var(--ink);font-size:16px}
+.input,.select{height:52px;padding:0 16px}
+.select{padding:0 12px}
+.textarea{padding:14px 16px;line-height:1.45;resize:none}
+.input:focus,.select:focus,.textarea:focus{border-color:var(--bg);outline:none;box-shadow:0 0 0 3px rgba(0,175,155,.35)}
+.help{font-size:13px;line-height:1.45;color:var(--slate)}
+.err{margin:0;padding:10px 12px;border-radius:10px;background:#F8E5E7;color:#7E1F28;font-size:14px;line-height:1.45}
+.err:empty{display:none}
+
+.btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:56px;padding:0 20px;border:0;border-radius:999px;font-size:17px;font-weight:700;text-decoration:none;cursor:pointer}
+.btn-dark{background:var(--bg);color:var(--cream)}
+.btn-dark:hover{background:#163D2E}
+.btn-gold{background:var(--gold);color:var(--bg)}
+.btn-gold:hover{background:var(--gold-2)}
+.btn-line{min-height:52px;border:1px solid rgba(246,238,220,.4);background:transparent;color:var(--cream);font-weight:500;font-size:16px}
+.btn-line:hover{background:rgba(246,238,220,.08)}
+.btn-google{background:#fff;color:#1F1F1F;border:1.5px solid var(--field);font-weight:500;font-size:16px}
+.btn-google:hover{background:#F7F7F7}
+.btn[disabled]{opacity:.6;cursor:progress}
+.link{min-height:44px;padding:0;border:0;background:transparent;color:var(--carmine);font-size:14px;font-weight:500;text-decoration:underline;cursor:pointer;align-self:flex-start}
+.link-cream{color:var(--cream)}
+
+.privacy{display:flex;align-items:flex-start;gap:10px;margin-top:auto;font-size:12px;line-height:1.5;color:var(--slate)}
+.privacy svg{flex:none;margin-top:1px}
+
+.code-input{height:64px;padding:0 16px;text-align:center;font-size:28px;font-weight:500;letter-spacing:.5em}
+
+/* write view */
+.who{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:4px 12px;margin:-6px 0 -8px;font-size:13px;color:var(--slate)}
+.who .link{min-height:36px;font-size:13px;color:var(--slate)}
+.opt-grid{display:grid;gap:10px}
+.opt-grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.opt-grid.four{grid-template-columns:repeat(4,minmax(0,1fr))}
+.opt{display:flex;align-items:center;gap:10px;min-height:52px;padding:0 12px;border:1.5px solid var(--field-off);border-radius:12px;background:#fff;color:var(--ink);font-size:14px;font-weight:500;cursor:pointer;text-align:left}
+.opt[aria-pressed="true"]{border:2px solid var(--bg);box-shadow:0 0 0 2px rgba(14,42,31,.08)}
+.opt .sw{flex:none;width:22px;height:28px;border-radius:3px 3px 4px 4px;box-shadow:inset 0 0 0 1px rgba(14,42,31,.15)}
+.opt.charm{flex-direction:column;justify-content:center;gap:4px;min-height:66px;padding:6px 4px;color:var(--carmine);text-align:center}
+.opt.charm span{font-size:12px;font-weight:400;color:var(--slate)}
+.starters{display:flex;flex-wrap:wrap;gap:8px}
+.starters button{min-height:36px;padding:0 14px;border:1px solid var(--field);border-radius:999px;background:transparent;color:var(--ink);font-size:13px;cursor:pointer}
+.starters button:hover{background:var(--paper-2)}
+.field-foot{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;font-size:12px;color:var(--slate)}
+.counter{margin-left:auto;font-variant-numeric:tabular-nums;white-space:nowrap}
+.warn{color:#A33A00;font-weight:500;line-height:1.45}
+.seg{display:flex;gap:6px;padding:4px;border-radius:999px;background:var(--paper-2)}
+.seg button{flex:1;min-height:40px;padding:0 8px;border:0;border-radius:999px;background:transparent;color:var(--ink);font-size:14px;font-weight:500;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--bg);color:var(--cream)}
+.radio-card{display:flex;align-items:center;gap:12px;min-height:58px;padding:8px 14px;margin-bottom:10px;border:1.5px solid var(--field-off);border-radius:12px;background:#fff;cursor:pointer}
+.radio-card:last-child{margin-bottom:0}
+.radio-card:has(input:checked){border:2px solid var(--bg)}
+.radio-card input{flex:none;width:20px;height:20px;margin:0;accent-color:var(--bg)}
+.radio-card .rc-main{display:block;font-size:15px;font-weight:500}
+.radio-card .rc-ex{display:block;margin-top:2px;font-size:13px;color:var(--slate)}
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.two.one{grid-template-columns:minmax(0,1fr)}
+.rules{display:flex;gap:12px;padding:14px 16px;border-radius:12px;background:var(--paper-2);font-size:13px;line-height:1.5}
+.rules svg{flex:none;margin-top:1px}
+.check{display:flex;align-items:flex-start;gap:12px;font-size:14px;line-height:1.45;cursor:pointer}
+.check input{flex:none;width:22px;height:22px;margin:0;accent-color:var(--bg)}
+.blocker{margin:-10px 0 0;text-align:center;font-size:13px;color:var(--carmine);min-height:1em}
+
+/* tags */
+.tag-stage{display:flex;flex-direction:column;align-items:center;padding-top:4px}
+.tag-string{width:1px;height:22px;background:#D9C59A}
+.tag{--tag-bg:#F6EEDC;--tag-fg:#AB2C37;--tag-ink:#183326;--tag-line:rgba(24,51,38,.25);position:relative;width:250px;max-width:100%;padding:30px 20px 16px;border-radius:5px 5px 9px 9px;background:var(--tag-bg);color:var(--tag-ink);box-shadow:0 14px 30px rgba(0,0,0,.4);transform:rotate(-2deg);transition:background-color .25s ease,color .25s ease}
+.tag[data-color="red"]{--tag-bg:#AB2C37;--tag-fg:#F6EEDC;--tag-ink:#F6EEDC;--tag-line:rgba(246,238,220,.35)}
+.tag[data-color="gold"]{--tag-bg:#E3B45A;--tag-fg:#0E2A1F;--tag-ink:#0E2A1F;--tag-line:rgba(14,42,31,.3)}
+.tag .hole{position:absolute;top:10px;left:50%;width:8px;height:8px;margin-left:-4px;border-radius:50%;background:rgba(14,42,31,.5)}
+.tag .charm-icon{position:absolute;top:11px;right:14px;color:var(--tag-fg)}
+.tag .tag-text{margin:0 0 12px;font-size:15px;line-height:1.45;white-space:pre-line;overflow-wrap:anywhere}
+.tag .tag-text.placeholder{opacity:.6}
+.tag .tag-sig{padding-top:10px;border-top:1px dashed var(--tag-line);font-size:13px;font-weight:700}
+.tag.big{width:310px;padding:40px 26px 22px;border-radius:6px 6px 10px 10px;transform:rotate(-1.5deg);box-shadow:0 20px 40px rgba(0,0,0,.45)}
+.tag.big .hole{top:13px;width:10px;height:10px;margin-left:-5px}
+.tag.big .charm-icon{top:14px;right:16px}
+.tag.big .tag-text{font-size:19px;line-height:1.5;margin-bottom:18px}
+.tag.big .tag-sig{padding-top:14px;font-size:15px}
+
+/* preview + done */
+.chips{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;padding:22px 20px 0}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:rgba(246,238,220,.1);font-size:13px;color:var(--cream)}
+.next{display:flex;flex-direction:column;gap:12px;margin:22px 20px 0;padding:18px;border-radius:14px;border:1px solid rgba(246,238,220,.14)}
+.next-title{font-size:13px;font-weight:500;letter-spacing:.12em;color:var(--gold)}
+.next-row{display:flex;gap:12px;align-items:baseline;font-size:14px;line-height:1.45;color:var(--cream-2)}
+.next-row b{flex:none;color:var(--cream)}
+.actions{margin-top:auto;display:flex;flex-direction:column;gap:10px;padding:22px 20px 28px;padding-bottom:max(28px, env(safe-area-inset-bottom))}
+.done-copy{display:flex;flex-direction:column;align-items:center;gap:12px;padding:12px 28px 0;text-align:center}
+.done-copy .script{font-family:var(--script);font-size:42px;line-height:1;color:var(--gold)}
+.done-copy h1{font-size:28px}
+.done-copy p{margin:0;font-size:15px;line-height:1.55;font-weight:300;color:var(--cream-2)}
+.invite{display:flex;align-items:center;gap:14px;margin:26px 20px 0;padding:16px;border-radius:14px;border:1px solid rgba(227,180,90,.35);background:rgba(246,238,220,.04)}
+.invite-icon{flex:none;display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:50%;background:rgba(227,180,90,.16);color:var(--gold)}
+.invite-main{flex:1;min-width:0}
+.invite-title{font-size:15px;font-weight:700}
+.invite-sub{margin-top:2px;font-size:13px;line-height:1.4;color:var(--cream-2)}
+.invite button{flex:none;min-height:44px;padding:0 14px;border:1px solid rgba(246,238,220,.4);border-radius:999px;background:transparent;color:var(--cream);font-size:14px;font-weight:500;cursor:pointer}
+.center-msg{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:40px 28px;text-align:center}
+.center-msg h1{font-size:28px}
+.center-msg p{margin:0;font-size:15px;line-height:1.55;color:var(--cream-2)}
+.spinner{width:36px;height:36px;border-radius:50%;border:3px solid rgba(246,238,220,.2);border-top-color:var(--gold);animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.demo-bar{margin:0 20px 16px;padding:10px 14px;border-radius:12px;background:#FFF1E8;color:#7A2C00;font-size:12px;font-weight:500;text-align:center}
+
+@media (min-width:481px){ body{background:#0A2018} .app{box-shadow:0 0 60px rgba(0,0,0,.4)} }
+@media (max-width:360px){ .opt-grid.three{grid-template-columns:minmax(0,1fr)} .tag.big{width:100%} }
+@media (prefers-reduced-motion:reduce){ .spinner{animation:none} .tag{transition:none} }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="wishtree.js"></script>
+</head>
+<body>
+<div class="app">
+  <div class="arc arc-1" aria-hidden="true"></div>
+
+  <div class="bar">
+    <div class="bar-left">
+      <img id="logo" class="logo" alt="TP" hidden>
+      <span class="bar-name">Wish Tree 2026</span>
+    </div>
+    <div class="langs" role="group" aria-label="Language">
+      <button type="button" data-lang="en" aria-pressed="true">EN</button>
+      <button type="button" data-lang="ms" aria-pressed="false">BM</button>
+      <button type="button" data-lang="th" aria-pressed="false" lang="th">ไทย</button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <section id="view-loading" class="view">
+    <div class="center-msg"><div class="spinner" aria-hidden="true"></div><p data-i18n="loading"></p></div>
+  </section>
+
+  <!-- Closed -->
+  <section id="view-closed" class="view" hidden>
+    <div class="center-msg">
+      <h1 tabindex="-1" data-i18n="closedTitle"></h1>
+      <p data-i18n="closedText"></p>
+      <a class="btn btn-gold" href="index.html" data-i18n="seeTree"></a>
+    </div>
+  </section>
+
+  <!-- Sign in -->
+  <section id="view-signin" class="view" hidden>
+    <div class="deco-tags" aria-hidden="true">
+      <span style="transform:rotate(-6deg)"><i style="height:30px"></i><b style="background:#F6EEDC"></b></span>
+      <span style="transform:rotate(4deg)"><i style="height:52px"></i><b style="background:#AB2C37"></b></span>
+      <span style="transform:rotate(-3deg)"><i style="height:16px"></i><b style="background:#E3B45A"></b></span>
+    </div>
+    <div class="hero" style="padding-top:96px">
+      <div class="script">Write it bright,</div>
+      <h1 tabindex="-1" data-i18n="signinTitle"></h1>
+      <p data-i18n="signinSub"></p>
+    </div>
+    <div class="sheet">
+      <div id="googleBlock" class="field" hidden>
+        <button type="button" id="googleBtn" class="btn btn-google">
+          <svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>
+          <span data-i18n="googleBtn"></span>
+        </button>
+        <div class="help" id="googleHelp"></div>
+      </div>
+
+      <form id="emailForm" class="field" novalidate hidden>
+        <label for="email" data-i18n="emailLabel"></label>
+        <input id="email" class="input" type="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" required>
+        <div class="help" data-i18n="emailHelp"></div>
+        <button type="submit" id="sendCodeBtn" class="btn btn-dark" style="margin-top:12px">
+          <span data-i18n="sendCode"></span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
+      </form>
+
+      <p id="signinErr" class="err" role="alert"></p>
+
+      <div class="privacy">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4B4C6A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+        <span data-i18n="privacy"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Email code -->
+  <section id="view-code" class="view" hidden>
+    <div class="hero" style="padding-top:40px">
+      <div class="script">Write it bright,</div>
+      <h1 tabindex="-1" data-i18n="codeTitle"></h1>
+    </div>
+    <div class="sheet">
+      <form id="codeForm" class="field" novalidate>
+        <label for="code" id="codeLabel"></label>
+        <input id="code" class="input code-input" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]*" maxlength="6" required>
+        <button type="submit" id="verifyBtn" class="btn btn-dark" style="margin-top:12px">
+          <span data-i18n="verify"></span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
+      </form>
+      <p id="codeErr" class="err" role="alert"></p>
+      <div style="display:flex;flex-wrap:wrap;gap:4px 20px">
+        <button type="button" id="resendBtn" class="link" data-i18n="resend"></button>
+        <button type="button" id="changeEmailBtn" class="link" data-i18n="changeEmail"></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Write -->
+  <section id="view-write" class="view" hidden>
+    <div class="arc arc-2" aria-hidden="true" style="top:-60px"></div>
+    <div class="hero" style="gap:14px;padding-top:12px">
+      <div class="progress">
+        <div class="progress-main">
+          <span class="step-label" data-i18n="step1"></span>
+          <div class="bars"><span class="on"></span><span></span></div>
+        </div>
+      </div>
+      <h1 tabindex="-1" style="font-size:26px" data-i18n="writeTitle"></h1>
+      <div class="tag-stage">
+        <span class="tag-string" aria-hidden="true"></span>
+        <div id="liveTag" class="tag" data-color="cream" role="img">
+          <span class="hole" aria-hidden="true"></span>
+          <span class="charm-icon" aria-hidden="true"></span>
+          <p class="tag-text"></p>
+          <div class="tag-sig"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sheet">
+      <div class="who"><span id="whoText"></span><button type="button" class="link" id="signOutBtn" data-i18n="signOut"></button></div>
+
+      <fieldset>
+        <legend data-i18n="colourLegend"></legend>
+        <div class="opt-grid three">
+          <button type="button" class="opt" data-color="cream"><span class="sw" style="background:#F6EEDC"></span><span data-i18n="c_cream"></span></button>
+          <button type="button" class="opt" data-color="red"><span class="sw" style="background:#AB2C37"></span><span data-i18n="c_red"></span></button>
+          <button type="button" class="opt" data-color="gold"><span class="sw" style="background:#E3B45A"></span><span data-i18n="c_gold"></span></button>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend data-i18n="charmLegend"></legend>
+        <div class="opt-grid four">
+          <button type="button" class="opt charm" data-charm="snow"></button>
+          <button type="button" class="opt charm" data-charm="star"></button>
+          <button type="button" class="opt charm" data-charm="tree"></button>
+          <button type="button" class="opt charm" data-charm="gift"></button>
+        </div>
+      </fieldset>
+
+      <div class="field">
+        <label for="wishText" data-i18n="wishLabel"></label>
+        <div class="starters">
+          <button type="button" data-starter="thanks" data-i18n="st_thanks"></button>
+          <button type="button" data-starter="shout" data-i18n="st_shout"></button>
+          <button type="button" data-starter="hope" data-i18n="st_hope"></button>
+        </div>
+        <textarea id="wishText" class="textarea" rows="4" data-i18n-ph="placeholder"></textarea>
+        <div class="field-foot">
+          <span id="contactWarn" class="warn" data-i18n="contactWarn" hidden></span>
+          <span id="counter" class="counter" aria-live="polite"></span>
+        </div>
+      </div>
+
+      <fieldset>
+        <legend data-i18n="writtenIn"></legend>
+        <div class="seg">
+          <button type="button" data-wlang="en">English</button>
+          <button type="button" data-wlang="ms">Bahasa Melayu</button>
+          <button type="button" data-wlang="th" lang="th">ภาษาไทย</button>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend data-i18n="nameLegend"></legend>
+        <label class="radio-card">
+          <input type="radio" name="mode" value="name">
+          <span><span class="rc-main" data-i18n="modeName"></span><span class="rc-ex" id="exName"></span></span>
+        </label>
+        <label class="radio-card">
+          <input type="radio" name="mode" value="anon">
+          <span><span class="rc-main" data-i18n="modeAnon"></span><span class="rc-ex" id="exAnon"></span></span>
+        </label>
+      </fieldset>
+
+      <div id="nameRow" class="two">
+        <div class="field small" id="firstWrap">
+          <label for="firstName" data-i18n="firstName"></label>
+          <input id="firstName" class="input" type="text" autocomplete="given-name" maxlength="40">
+        </div>
+        <div class="field small">
+          <label for="siteSel" data-i18n="site"></label>
+          <select id="siteSel" class="select"></select>
+        </div>
+      </div>
+
+      <div class="rules">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0E2A1F" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v6c0 4.4-3 7.6-7 9-4-1.4-7-4.6-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg>
+        <span data-i18n="rules"></span>
+      </div>
+
+      <label class="check">
+        <input type="checkbox" id="consent">
+        <span data-i18n="consent"></span>
+      </label>
+
+      <button type="button" id="toPreviewBtn" class="btn btn-dark">
+        <span data-i18n="previewBtn"></span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </button>
+      <p id="blocker" class="blocker" role="status"></p>
+    </div>
+  </section>
+
+  <!-- Preview -->
+  <section id="view-preview" class="view" hidden>
+    <div class="arc arc-2" aria-hidden="true"></div>
+    <div class="hero" style="gap:14px;padding:12px 20px 0">
+      <div class="progress">
+        <button type="button" class="back" id="backToWrite" aria-label="Back">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+        </button>
+        <div class="progress-main">
+          <span class="step-label" data-i18n="step2"></span>
+          <div class="bars"><span class="on"></span><span class="on"></span></div>
+        </div>
+      </div>
+      <h1 tabindex="-1" style="font-size:26px" data-i18n="previewTitle"></h1>
+    </div>
+    <div class="tag-stage" style="position:relative;padding:6px 20px 0">
+      <span class="tag-string" style="height:34px" aria-hidden="true"></span>
+      <div id="bigTag" class="tag big" data-color="cream">
+        <span class="hole" aria-hidden="true"></span>
+        <span class="charm-icon" aria-hidden="true"></span>
+        <p class="tag-text"></p>
+        <div class="tag-sig"></div>
+      </div>
+    </div>
+    <div class="chips" style="position:relative">
+      <span class="chip">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 3 2.5 15 0 18M12 3c-2.5 3-2.5 15 0 18"/></svg>
+        <span id="previewLang"></span>
+      </span>
+      <span class="chip">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v6c0 4.4-3 7.6-7 9-4-1.4-7-4.6-7-9V6z"/></svg>
+        <span data-i18n="shownAfterReview"></span>
+      </span>
+    </div>
+    <div class="next" style="position:relative">
+      <div class="next-title" data-i18n="nextTitle"></div>
+      <div class="next-row"><b>1</b><span data-i18n="next1"></span></div>
+      <div class="next-row"><b>2</b><span data-i18n="next2"></span></div>
+      <div class="next-row"><b>3</b><span data-i18n="next3"></span></div>
+    </div>
+    <p id="submitErr" class="err" role="alert" style="margin:16px 20px 0"></p>
+    <div class="actions">
+      <button type="button" id="hangBtn" class="btn btn-gold">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.5v4.5M8 7h8a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1z"/><circle cx="12" cy="10.5" r="1.2"/></svg>
+        <span id="hangLabel" data-i18n="hangBtn"></span>
+      </button>
+      <button type="button" id="editBtn" class="btn btn-line" data-i18n="editBtn"></button>
+    </div>
+  </section>
+
+  <!-- Done -->
+  <section id="view-done" class="view" hidden>
+    <svg width="100%" viewBox="0 0 390 290" aria-hidden="true" style="display:block;max-width:480px">
+      <path d="M-10,80 Q140,40 290,78 Q340,90 400,70" fill="none" stroke="#4A2F1F" stroke-width="7" stroke-linecap="round"/>
+      <ellipse cx="20" cy="70" rx="26" ry="8" fill="#23664A" transform="rotate(-25 20 70)"/><ellipse cx="24" cy="80" rx="24" ry="7" fill="#318060" transform="rotate(20 24 80)"/>
+      <ellipse cx="65" cy="61" rx="26" ry="8" fill="#23664A" transform="rotate(-25 65 61)"/><ellipse cx="69" cy="72" rx="24" ry="7" fill="#318060" transform="rotate(22 69 72)"/>
+      <ellipse cx="110" cy="56" rx="26" ry="8" fill="#23664A" transform="rotate(-22 110 56)"/><ellipse cx="114" cy="67" rx="24" ry="7" fill="#318060" transform="rotate(20 114 67)"/>
+      <ellipse cx="155" cy="56" rx="26" ry="8" fill="#23664A" transform="rotate(-20 155 56)"/><ellipse cx="159" cy="67" rx="24" ry="7" fill="#318060" transform="rotate(22 159 67)"/>
+      <ellipse cx="245" cy="64" rx="26" ry="8" fill="#23664A" transform="rotate(-18 245 64)"/><ellipse cx="249" cy="75" rx="24" ry="7" fill="#318060" transform="rotate(24 249 75)"/>
+      <ellipse cx="290" cy="74" rx="26" ry="8" fill="#23664A" transform="rotate(-15 290 74)"/><ellipse cx="294" cy="85" rx="24" ry="7" fill="#318060" transform="rotate(25 294 85)"/>
+      <ellipse cx="342" cy="78" rx="26" ry="8" fill="#23664A" transform="rotate(-20 342 78)"/><ellipse cx="346" cy="89" rx="24" ry="7" fill="#318060" transform="rotate(18 346 89)"/>
+      <ellipse cx="388" cy="68" rx="26" ry="8" fill="#23664A" transform="rotate(-25 388 68)"/>
+      <g fill="#FFD98A" opacity="0.22"><circle cx="42" cy="70" r="7"/><circle cx="88" cy="62" r="7"/><circle cx="133" cy="58" r="7"/><circle cx="178" cy="60" r="7"/><circle cx="222" cy="66" r="7"/><circle cx="268" cy="74" r="7"/><circle cx="318" cy="82" r="7"/><circle cx="368" cy="78" r="7"/></g>
+      <g fill="#FFF1C9"><circle cx="42" cy="70" r="2.8"/><circle cx="88" cy="62" r="2.8"/><circle cx="133" cy="58" r="2.8"/><circle cx="178" cy="60" r="2.8"/><circle cx="222" cy="66" r="2.8"/><circle cx="268" cy="74" r="2.8"/><circle cx="318" cy="82" r="2.8"/><circle cx="368" cy="78" r="2.8"/></g>
+      <line x1="110" y1="62" x2="110" y2="96" stroke="#D9C59A"/><rect x="106" y="94" width="8" height="5" rx="1" fill="#C9A36B"/><circle cx="110" cy="111" r="12" fill="#AB2C37"/><circle cx="106" cy="107" r="3.2" fill="#fff" opacity="0.35"/>
+      <line x1="300" y1="80" x2="300" y2="118" stroke="#D9C59A"/><rect x="296" y="116" width="8" height="5" rx="1" fill="#C9A36B"/><circle cx="300" cy="132" r="11" fill="#E3B45A"/><circle cx="296" cy="128" r="3" fill="#fff" opacity="0.4"/>
+      <g transform="rotate(-4 200 62)">
+        <line x1="200" y1="62" x2="200" y2="130" stroke="#D9C59A"/>
+        <rect id="doneTagRect" x="160" y="128" width="80" height="104" rx="5" fill="#F6EEDC"/>
+        <circle cx="200" cy="141" r="4" fill="#0E2A1F" opacity="0.5"/>
+        <g id="doneTagIcon" transform="translate(182 164) scale(1.5)" fill="none" stroke="#AB2C37" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></g>
+      </g>
+      <path d="M310,160 L312.5,167.5 L320,170 L312.5,172.5 L310,180 L307.5,172.5 L300,170 L307.5,167.5 Z" fill="#E3B45A"/>
+      <path d="M86,182 L87.8,187.2 L93,189 L87.8,190.8 L86,196 L84.2,190.8 L79,189 L84.2,187.2 Z" fill="#F6EEDC" opacity="0.8"/>
+      <path d="M338,228 L339.5,232.5 L344,234 L339.5,235.5 L338,240 L336.5,235.5 L332,234 L336.5,232.5 Z" fill="#E3B45A" opacity="0.8"/>
+    </svg>
+    <div class="done-copy">
+      <div class="script">Let your wish take flight!</div>
+      <h1 tabindex="-1" data-i18n="doneTitle"></h1>
+      <p id="doneText"></p>
+    </div>
+    <div class="invite">
+      <div class="invite-icon" aria-hidden="true">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5M16 4.8a3.5 3.5 0 0 1 0 6.4M18.5 14.8c1.6.8 2.7 2.6 3 5.2"/></svg>
+      </div>
+      <div class="invite-main">
+        <div class="invite-title" data-i18n="inviteTitle"></div>
+        <div class="invite-sub" data-i18n="inviteSub"></div>
+      </div>
+      <button type="button" id="shareBtn" data-i18n="copyLink"></button>
+    </div>
+    <div class="actions">
+      <a class="btn btn-gold" href="index.html" id="seeTreeBtn">
+        <span data-i18n="seeTree"></span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>
+      <button type="button" id="anotherBtn" class="link link-cream" style="align-self:center" data-i18n="another"></button>
+    </div>
+  </section>
+
+  <div id="demoBar" class="demo-bar" role="status" hidden>Demo mode: nothing is saved. Add your Supabase keys in config.js to go live.</div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var C = window.WishCore;
+  var CFG = C.cfg;
+  var MAX = Number(CFG.MAX_LENGTH) || 200;
+  var DOMAIN = (CFG.ALLOWED_EMAIL_DOMAINS && CFG.ALLOWED_EMAIL_DOMAINS[0]) || 'tp.com';
+  var AUTH = CFG.AUTH_MODE === 'email' ? 'email' : 'google';
+
+  /* ---------- Copy (EN / BM / TH) ---------- */
+  var T = {
+    en: {
+      loading: 'Getting the tree ready…',
+      signinTitle: 'Hang your wish on the TP tree',
+      signinSub: 'For every TP Malaysia and Thailand colleague, on site or working from home.',
+      googleBtn: 'Continue with your TP Google account',
+      googleHelp: 'Use your work account (@{domain}). We only use it to check you are part of TP. Your email is never shown on the tree.',
+      emailLabel: 'Your TP work email',
+      emailHelp: 'We will email you a 6-digit code. Your email is never shown on the tree.',
+      sendCode: 'Send my code',
+      codeTitle: 'Check your inbox',
+      codeLabel: 'Enter the 6-digit code we sent to {email}',
+      verify: 'Continue',
+      resend: 'Resend code',
+      changeEmail: 'Use a different email',
+      privacy: 'Only your chosen display name and wish are shown. Your email stays private.',
+      errDomain: 'Please use your TP work email (@{domain}).',
+      errCode: "That code didn't work. Check it and try again.",
+      errSend: "We couldn't send the code. Please try again in a minute.",
+      errGeneric: 'Something went wrong. Please try again.',
+      errSubmit: "We couldn't hang your wish. Please try again.",
+      errNotAllowed: 'Only TP work accounts can hang wishes.',
+      errLimit: "You've hung the maximum number of wishes. Thank you!",
+      errClosed: 'Wishes are closed for this year.',
+      step1: 'STEP 1 OF 2',
+      step2: 'STEP 2 OF 2',
+      writeTitle: 'Write your wish',
+      signedInAs: 'Signed in as {email}',
+      signOut: 'Sign out',
+      colourLegend: 'Tag colour',
+      c_cream: 'Cream', c_red: 'Carmine', c_gold: 'Gold',
+      charmLegend: 'Charm',
+      ch_snow: 'Snowflake', ch_star: 'Star', ch_tree: 'Tree', ch_gift: 'Gift',
+      wishLabel: 'Your wish',
+      st_thanks: 'A thank you', st_shout: 'A shout-out', st_hope: 'A hope for 2027',
+      seed_thanks: 'Thank you to ', seed_shout: 'Big shout-out to ', seed_hope: 'My wish for 2027: ',
+      placeholder: 'A thank you, a shout-out or a hope for 2027',
+      contactWarn: "This looks like a phone number or email. Wishes with contact details can't be approved.",
+      writtenIn: 'Written in',
+      nameLegend: 'Show my name as',
+      modeName: 'First name and site',
+      modeAnon: 'Anonymous',
+      anonName: 'A TP colleague',
+      yourName: 'Your name',
+      firstName: 'First name',
+      site: 'Site',
+      sitePick: 'Choose your site',
+      rules: 'Keep it kind and personal. No client or account names, phone numbers or anything confidential. Every wish is reviewed before it goes up.',
+      consent: 'I agree that my wish and display name can be shown on the TP Wish Tree and site screens during the campaign.',
+      previewBtn: 'Preview my wish',
+      needText: 'Write your wish to continue.',
+      needName: 'Add your first name, or choose Anonymous.',
+      needSite: 'Choose your site.',
+      needConsent: 'Tick the consent box to continue.',
+      tagPlaceholder: 'Your wish will appear here as you type.',
+      previewTitle: 'Check your wish',
+      shownAfterReview: 'Shown after review',
+      nextTitle: 'WHAT HAPPENS NEXT',
+      next1: 'Talent Engagement checks your wish, usually within a day.',
+      next2: 'Your tag goes up on the shared tree and the site screens.',
+      next3: 'Look for it on the tree once it is approved.',
+      hangBtn: 'Hang it on the tree',
+      sending: 'Hanging your wish…',
+      editBtn: 'Edit my wish',
+      doneTitle: 'Your wish is on its way to the tree',
+      doneText: 'Once it is approved it will appear on the tree. The tree lights up for everyone on {reveal}.',
+      inviteTitle: 'Invite your team',
+      inviteSub: 'The more wishes, the fuller the tree.',
+      copyLink: 'Share link',
+      copied: 'Link copied',
+      seeTree: 'See the tree',
+      another: 'Write another wish',
+      closedTitle: 'Wishes are closed for this year',
+      closedText: 'Thank you for every wish. You can still visit the tree.',
+      shareText: 'Hang your Christmas wish on the TP Wish Tree'
+    },
+    ms: {
+      loading: 'Menyediakan pokok…',
+      signinTitle: 'Gantung hajat anda di pokok TP',
+      signinSub: 'Untuk semua rakan TP Malaysia dan Thailand, di pejabat atau bekerja dari rumah.',
+      googleBtn: 'Teruskan dengan akaun Google TP anda',
+      googleHelp: 'Gunakan akaun kerja anda (@{domain}). Kami hanya menggunakannya untuk mengesahkan anda warga TP. E-mel anda tidak akan dipaparkan di pokok.',
+      emailLabel: 'E-mel kerja TP anda',
+      emailHelp: 'Kami akan menghantar kod 6 digit. E-mel anda tidak akan dipaparkan di pokok.',
+      sendCode: 'Hantar kod saya',
+      codeTitle: 'Semak peti masuk anda',
+      codeLabel: 'Masukkan kod 6 digit yang kami hantar ke {email}',
+      verify: 'Teruskan',
+      resend: 'Hantar semula kod',
+      changeEmail: 'Guna e-mel lain',
+      privacy: 'Hanya nama paparan dan hajat anda dipaparkan. E-mel anda kekal peribadi.',
+      errDomain: 'Sila gunakan e-mel kerja TP anda (@{domain}).',
+      errCode: 'Kod itu tidak berjaya. Semak dan cuba lagi.',
+      errSend: 'Kami tidak dapat menghantar kod. Sila cuba lagi sebentar lagi.',
+      errGeneric: 'Ada masalah. Sila cuba lagi.',
+      errSubmit: 'Kami tidak dapat menggantung hajat anda. Sila cuba lagi.',
+      errNotAllowed: 'Hanya akaun kerja TP boleh menggantung hajat.',
+      errLimit: 'Anda telah mencapai had hajat. Terima kasih!',
+      errClosed: 'Hajat telah ditutup untuk tahun ini.',
+      step1: 'LANGKAH 1 DARIPADA 2',
+      step2: 'LANGKAH 2 DARIPADA 2',
+      writeTitle: 'Tulis hajat anda',
+      signedInAs: 'Log masuk sebagai {email}',
+      signOut: 'Log keluar',
+      colourLegend: 'Warna tag',
+      c_cream: 'Krim', c_red: 'Merah', c_gold: 'Emas',
+      charmLegend: 'Hiasan',
+      ch_snow: 'Salji', ch_star: 'Bintang', ch_tree: 'Pokok', ch_gift: 'Hadiah',
+      wishLabel: 'Hajat anda',
+      st_thanks: 'Ucapan terima kasih', st_shout: 'Penghargaan', st_hope: 'Harapan 2027',
+      seed_thanks: 'Terima kasih kepada ', seed_shout: 'Penghargaan buat ', seed_hope: 'Harapan saya untuk 2027: ',
+      placeholder: 'Ucapan terima kasih, penghargaan atau harapan untuk 2027',
+      contactWarn: 'Ini kelihatan seperti nombor telefon atau e-mel. Hajat yang mengandungi maklumat hubungan tidak akan diluluskan.',
+      writtenIn: 'Ditulis dalam',
+      nameLegend: 'Paparkan nama saya sebagai',
+      modeName: 'Nama pertama dan lokasi',
+      modeAnon: 'Tanpa nama',
+      anonName: 'Rakan TP',
+      yourName: 'Nama anda',
+      firstName: 'Nama pertama',
+      site: 'Lokasi',
+      sitePick: 'Pilih lokasi anda',
+      rules: 'Tulis dengan baik dan ikhlas. Jangan sertakan nama klien atau akaun, nombor telefon atau maklumat sulit. Setiap hajat disemak sebelum dipaparkan.',
+      consent: 'Saya bersetuju hajat dan nama paparan saya dipaparkan di Pokok Hajat TP dan skrin di lokasi sepanjang kempen.',
+      previewBtn: 'Pratonton hajat saya',
+      needText: 'Tulis hajat anda untuk teruskan.',
+      needName: 'Masukkan nama pertama anda, atau pilih Tanpa nama.',
+      needSite: 'Pilih lokasi anda.',
+      needConsent: 'Tandakan kotak persetujuan untuk teruskan.',
+      tagPlaceholder: 'Hajat anda akan muncul di sini semasa anda menaip.',
+      previewTitle: 'Semak hajat anda',
+      shownAfterReview: 'Dipaparkan selepas semakan',
+      nextTitle: 'APA SETERUSNYA',
+      next1: 'Pasukan Talent Engagement akan menyemak hajat anda, biasanya dalam masa sehari.',
+      next2: 'Tag anda akan digantung di pokok bersama dan skrin di lokasi.',
+      next3: 'Cari tag anda di pokok selepas ia diluluskan.',
+      hangBtn: 'Gantung di pokok',
+      sending: 'Sedang menggantung hajat anda…',
+      editBtn: 'Ubah hajat saya',
+      doneTitle: 'Hajat anda dalam perjalanan ke pokok',
+      doneText: 'Selepas diluluskan, hajat anda akan muncul di pokok. Pokok akan menyala untuk semua pada {reveal}.',
+      inviteTitle: 'Ajak pasukan anda',
+      inviteSub: 'Lebih banyak hajat, lebih meriah pokoknya.',
+      copyLink: 'Kongsi pautan',
+      copied: 'Pautan disalin',
+      seeTree: 'Lihat pokok',
+      another: 'Tulis hajat lain',
+      closedTitle: 'Hajat telah ditutup untuk tahun ini',
+      closedText: 'Terima kasih atas setiap hajat. Anda masih boleh melawat pokok.',
+      shareText: 'Gantung hajat Krismas anda di Pokok Hajat TP'
+    },
+    th: {
+      loading: 'กำลังเตรียมต้นไม้…',
+      signinTitle: 'แขวนคำอวยพรของคุณบนต้นไม้ TP',
+      signinSub: 'สำหรับเพื่อนร่วมงาน TP มาเลเซียและไทยทุกคน ทั้งที่ออฟฟิศและทำงานจากบ้าน',
+      googleBtn: 'ดำเนินการต่อด้วยบัญชี Google ของ TP',
+      googleHelp: 'ใช้บัญชีที่ทำงานของคุณ (@{domain}) เราใช้เพื่อยืนยันว่าคุณเป็นพนักงาน TP เท่านั้น และจะไม่แสดงอีเมลบนต้นไม้',
+      emailLabel: 'อีเมลที่ทำงาน TP ของคุณ',
+      emailHelp: 'เราจะส่งรหัส 6 หลักให้คุณทางอีเมล อีเมลของคุณจะไม่แสดงบนต้นไม้',
+      sendCode: 'ส่งรหัสให้ฉัน',
+      codeTitle: 'ตรวจสอบกล่องจดหมายของคุณ',
+      codeLabel: 'กรอกรหัส 6 หลักที่เราส่งไปที่ {email}',
+      verify: 'ดำเนินการต่อ',
+      resend: 'ส่งรหัสอีกครั้ง',
+      changeEmail: 'ใช้อีเมลอื่น',
+      privacy: 'จะแสดงเฉพาะชื่อที่คุณเลือกและคำอวยพรเท่านั้น อีเมลของคุณจะถูกเก็บเป็นความลับ',
+      errDomain: 'กรุณาใช้อีเมลที่ทำงาน TP ของคุณ (@{domain})',
+      errCode: 'รหัสไม่ถูกต้อง กรุณาตรวจสอบแล้วลองอีกครั้ง',
+      errSend: 'ไม่สามารถส่งรหัสได้ กรุณาลองใหม่อีกครั้งในอีกสักครู่',
+      errGeneric: 'เกิดข้อผิดพลาด กรุณาลองอีกครั้ง',
+      errSubmit: 'ไม่สามารถแขวนคำอวยพรได้ กรุณาลองอีกครั้ง',
+      errNotAllowed: 'เฉพาะบัญชีที่ทำงาน TP เท่านั้นที่สามารถแขวนคำอวยพรได้',
+      errLimit: 'คุณแขวนคำอวยพรครบจำนวนสูงสุดแล้ว ขอบคุณ',
+      errClosed: 'ปิดรับคำอวยพรสำหรับปีนี้แล้ว',
+      step1: 'ขั้นตอนที่ 1 จาก 2',
+      step2: 'ขั้นตอนที่ 2 จาก 2',
+      writeTitle: 'เขียนคำอวยพรของคุณ',
+      signedInAs: 'เข้าสู่ระบบในชื่อ {email}',
+      signOut: 'ออกจากระบบ',
+      colourLegend: 'สีป้าย',
+      c_cream: 'ครีม', c_red: 'แดง', c_gold: 'ทอง',
+      charmLegend: 'สัญลักษณ์',
+      ch_snow: 'เกล็ดหิมะ', ch_star: 'ดาว', ch_tree: 'ต้นไม้', ch_gift: 'ของขวัญ',
+      wishLabel: 'คำอวยพรของคุณ',
+      st_thanks: 'ขอบคุณ', st_shout: 'ชื่นชม', st_hope: 'ความหวังปี 2027',
+      seed_thanks: 'ขอบคุณ ', seed_shout: 'ขอชื่นชม ', seed_hope: 'ปี 2027 ขอให้ ',
+      placeholder: 'คำขอบคุณ คำชื่นชม หรือความหวังสำหรับปี 2027',
+      contactWarn: 'ดูเหมือนจะมีเบอร์โทรศัพท์หรืออีเมล คำอวยพรที่มีข้อมูลติดต่อจะไม่ได้รับการอนุมัติ',
+      writtenIn: 'ภาษาที่เขียน',
+      nameLegend: 'แสดงชื่อของฉันเป็น',
+      modeName: 'ชื่อจริงและสาขา',
+      modeAnon: 'ไม่ระบุชื่อ',
+      anonName: 'เพื่อนร่วมงาน TP',
+      yourName: 'ชื่อของคุณ',
+      firstName: 'ชื่อจริง',
+      site: 'สาขา',
+      sitePick: 'เลือกสาขาของคุณ',
+      rules: 'เขียนด้วยความสุภาพและจริงใจ ห้ามระบุชื่อลูกค้าหรือโปรเจกต์ เบอร์โทรศัพท์ หรือข้อมูลที่เป็นความลับ ทุกคำอวยพรจะได้รับการตรวจสอบก่อนแสดง',
+      consent: 'ฉันยินยอมให้แสดงคำอวยพรและชื่อที่เลือกบนต้นไม้แห่งคำอวยพร TP และหน้าจอในสาขาตลอดช่วงแคมเปญ',
+      previewBtn: 'ดูตัวอย่างคำอวยพร',
+      needText: 'กรุณาเขียนคำอวยพรเพื่อดำเนินการต่อ',
+      needName: 'กรุณาใส่ชื่อจริง หรือเลือกไม่ระบุชื่อ',
+      needSite: 'กรุณาเลือกสาขาของคุณ',
+      needConsent: 'กรุณาทำเครื่องหมายยินยอมเพื่อดำเนินการต่อ',
+      tagPlaceholder: 'คำอวยพรของคุณจะแสดงที่นี่ระหว่างที่พิมพ์',
+      previewTitle: 'ตรวจสอบคำอวยพรของคุณ',
+      shownAfterReview: 'แสดงหลังการตรวจสอบ',
+      nextTitle: 'ขั้นตอนถัดไป',
+      next1: 'ทีม Talent Engagement จะตรวจสอบคำอวยพรของคุณ โดยปกติภายในหนึ่งวัน',
+      next2: 'ป้ายของคุณจะถูกแขวนบนต้นไม้และหน้าจอในสาขา',
+      next3: 'มองหาป้ายของคุณบนต้นไม้เมื่อได้รับการอนุมัติ',
+      hangBtn: 'แขวนบนต้นไม้',
+      sending: 'กำลังแขวนคำอวยพรของคุณ…',
+      editBtn: 'แก้ไขคำอวยพร',
+      doneTitle: 'คำอวยพรของคุณกำลังเดินทางไปที่ต้นไม้',
+      doneText: 'เมื่อได้รับการอนุมัติ คำอวยพรจะปรากฏบนต้นไม้ ต้นไม้จะเปิดไฟให้ทุกคนชมในวันที่ {reveal}',
+      inviteTitle: 'ชวนทีมของคุณ',
+      inviteSub: 'ยิ่งมีคำอวยพรมาก ต้นไม้ก็ยิ่งสวย',
+      copyLink: 'แชร์ลิงก์',
+      copied: 'คัดลอกลิงก์แล้ว',
+      seeTree: 'ดูต้นไม้',
+      another: 'เขียนคำอวยพรอีก',
+      closedTitle: 'ปิดรับคำอวยพรสำหรับปีนี้แล้ว',
+      closedText: 'ขอบคุณสำหรับทุกคำอวยพร คุณยังสามารถเข้าชมต้นไม้ได้',
+      shareText: 'แขวนคำอวยพรคริสต์มาสของคุณบนต้นไม้แห่งคำอวยพร TP'
+    }
+  };
+
+  /* ---------- State ---------- */
+  var stored = C.storageGet('wt-lang');
+  var S = {
+    view: 'loading',
+    lang: T[stored] ? stored : 'en',
+    user: null,
+    email: '',
+    color: 'cream',
+    charm: 'snow',
+    text: '',
+    wishLang: null,
+    wishLangTouched: false,
+    mode: 'name',
+    first: '',
+    site: '',
+    consent: false,
+    triedPreview: false,
+    busy: false
+  };
+
+  var $ = function (id) { return document.getElementById(id); };
+  var qsa = function (sel) { return Array.prototype.slice.call(document.querySelectorAll(sel)); };
+
+  function t(key, vars) {
+    var s = (T[S.lang] && T[S.lang][key]) || T.en[key] || key;
+    if (vars) Object.keys(vars).forEach(function (k) { s = s.split('{' + k + '}').join(vars[k]); });
+    return s;
+  }
+
+  function siteByLabel(label) {
+    var list = CFG.SITES || [];
+    for (var i = 0; i < list.length; i++) if (list[i].label === label) return list[i];
+    return null;
+  }
+
+  /* ---------- Views ---------- */
+  function show(view) {
+    S.view = view;
+    qsa('.view').forEach(function (v) { v.hidden = v.id !== 'view-' + view; });
+    if (view === 'write') renderWrite();
+    if (view === 'preview') renderPreview();
+    if (view === 'done') renderDone();
+    var h = document.querySelector('#view-' + view + ' h1');
+    window.scrollTo(0, 0);
+    if (h) setTimeout(function () { h.focus({ preventScroll: true }); }, 0);
+  }
+
+  function applyLang() {
+    document.documentElement.lang = S.lang;
+    qsa('[data-i18n]').forEach(function (n) { n.textContent = t(n.getAttribute('data-i18n')); });
+    qsa('[data-i18n-ph]').forEach(function (n) { n.setAttribute('placeholder', t(n.getAttribute('data-i18n-ph'))); });
+    qsa('.langs button').forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-lang') === S.lang ? 'true' : 'false'); });
+    $('googleHelp').textContent = t('googleHelp', { domain: DOMAIN });
+    $('email').setAttribute('placeholder', 'name@' + DOMAIN);
+    $('codeLabel').textContent = t('codeLabel', { email: S.email || '' });
+    qsa('.opt.charm').forEach(function (b) {
+      var c = b.getAttribute('data-charm');
+      b.innerHTML = C.iconSvg(c, 22) + '<span>' + C.esc(t('ch_' + c)) + '</span>';
+      b.setAttribute('aria-label', t('ch_' + c));
+    });
+    renderSites();
+    if (S.view === 'write') renderWrite();
+    if (S.view === 'preview') renderPreview();
+    if (S.view === 'done') renderDone();
+    renderWho();
+  }
+
+  function renderSites() {
+    var sel = $('siteSel');
+    var html = '<option value="">' + C.esc(t('sitePick')) + '</option>';
+    (CFG.SITES || []).forEach(function (s) {
+      html += '<option value="' + C.esc(s.label) + '">' + C.esc(s.label) + '</option>';
+    });
+    sel.innerHTML = html;
+    sel.value = S.site;
+  }
+
+  function renderWho() {
+    $('whoText').textContent = S.user ? t('signedInAs', { email: S.user.email }) : '';
+  }
+
+  /* ---------- Write ---------- */
+  function signature() {
+    var site = S.site || '';
+    var name = S.mode === 'anon' ? t('anonName') : (S.first.trim() || t('yourName'));
+    return site ? name + ' · ' + site : name;
+  }
+
+  function effectiveWishLang() {
+    if (S.wishLangTouched && S.wishLang) return S.wishLang;
+    if (/[฀-๿]/.test(S.text)) return 'th';
+    return S.wishLang || S.lang;
+  }
+
+  function hasContactDetails(text) {
+    if (/[^\s@]+@[^\s@]+\.[^\s@]{2,}/.test(text)) return true;
+    var runs = text.match(/\+?\d[\d\s\-().]{6,}\d/g) || [];
+    return runs.some(function (r) { return r.replace(/\D/g, '').length >= 9; });
+  }
+
+  function blockerKey() {
+    if (!S.text.trim()) return 'needText';
+    if (S.mode === 'name' && !S.first.trim()) return 'needName';
+    if (!S.site) return 'needSite';
+    if (!S.consent) return 'needConsent';
+    return '';
+  }
+
+  function paintTag(node, big) {
+    node.setAttribute('data-color', C.PALETTE[S.color] ? S.color : 'cream');
+    node.querySelector('.charm-icon').innerHTML = C.iconSvg(S.charm, big ? 22 : 18);
+    var p = node.querySelector('.tag-text');
+    var has = !!S.text.trim();
+    p.textContent = has ? S.text : t('tagPlaceholder');
+    p.classList.toggle('placeholder', !has);
+    p.setAttribute('lang', effectiveWishLang());
+    node.querySelector('.tag-sig').textContent = signature();
+    node.setAttribute('aria-label', (has ? S.text : t('tagPlaceholder')) + '. ' + signature());
+  }
+
+  function renderWrite() {
+    qsa('.opt[data-color]').forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-color') === S.color ? 'true' : 'false'); });
+    qsa('.opt[data-charm]').forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-charm') === S.charm ? 'true' : 'false'); });
+    var wl = effectiveWishLang();
+    qsa('.seg button').forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-wlang') === wl ? 'true' : 'false'); });
+    qsa('input[name="mode"]').forEach(function (r) { r.checked = r.value === S.mode; });
+
+    var ta = $('wishText');
+    if (ta.value !== S.text) ta.value = S.text;
+    ta.setAttribute('maxlength', String(MAX));
+    $('counter').textContent = S.text.length + ' / ' + MAX;
+    $('contactWarn').hidden = !hasContactDetails(S.text);
+
+    var fn = $('firstName');
+    if (fn.value !== S.first) fn.value = S.first;
+    $('firstWrap').hidden = S.mode !== 'name';
+    $('nameRow').classList.toggle('one', S.mode !== 'name');
+    $('siteSel').value = S.site;
+    $('consent').checked = S.consent;
+
+    var site = S.site ? ' · ' + S.site : '';
+    $('exName').textContent = (S.first.trim() || t('yourName')) + site;
+    $('exAnon').textContent = t('anonName') + site;
+
+    paintTag($('liveTag'), false);
+    var key = blockerKey();
+    $('blocker').textContent = S.triedPreview && key ? t(key) : '';
+  }
+
+  /* ---------- Preview / done ---------- */
+  function renderPreview() {
+    paintTag($('bigTag'), true);
+    $('previewLang').textContent = C.LANG_LABEL[effectiveWishLang()] || '';
+    $('hangLabel').textContent = S.busy ? t('sending') : t('hangBtn');
+    $('hangBtn').disabled = S.busy;
+  }
+
+  var ICON_INNER = {
+    snow: '<path d="M12 3v18M4.2 7.5l15.6 9M4.2 16.5l15.6-9M9.5 4.5 12 7l2.5-2.5M9.5 19.5 12 17l2.5 2.5"/>',
+    star: '<path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/>',
+    tree: '<path d="M12 3 6.5 10h3L5 16h14l-4.5-6h3zM12 16v4.5"/>',
+    gift: '<path d="M4 10h16v10H4zM3 7h18v3H3zM12 7v13M12 7c-1.5-3-5-3.5-5-1.5S10 7 12 7zm0 0c1.5-3 5-3.5 5-1.5S14 7 12 7z"/>'
+  };
+
+  function renderDone() {
+    $('doneText').textContent = t('doneText', { reveal: CFG.REVEAL_DATE || '' });
+    var pal = C.PALETTE[S.color] || C.PALETTE.cream;
+    $('doneTagRect').setAttribute('fill', pal.bg);
+    var icon = $('doneTagIcon');
+    icon.setAttribute('stroke', pal.fg);
+    icon.innerHTML = ICON_INNER[S.charm] || ICON_INNER.snow;
+  }
+
+  /* ---------- Auth ---------- */
+  var sb = null;
+
+  function handleSession(session) {
+    if (!session || !session.user) {
+      S.user = null;
+      if (S.view === 'loading' || S.view === 'write' || S.view === 'preview') show('signin');
+      return;
+    }
+    var email = session.user.email || '';
+    if (!C.allowedEmail(email)) {
+      S.user = null;
+      setTimeout(function () { sb.auth.signOut(); }, 0);
+      $('signinErr').textContent = t('errDomain', { domain: DOMAIN });
+      show('signin');
+      return;
+    }
+    var meta = session.user.user_metadata || {};
+    var first = meta.given_name || String(meta.full_name || meta.name || '').split(' ')[0] || '';
+    S.user = { email: email };
+    if (!S.first && first) S.first = first;
+    renderWho();
+    if (S.view === 'loading' || S.view === 'signin' || S.view === 'code') show('write');
+  }
+
+  function startGoogle() {
+    $('signinErr').textContent = '';
+    if (C.demo) {
+      handleDemoSignIn('you@' + DOMAIN, 'Aisyah');
+      return;
+    }
+    var btn = $('googleBtn');
+    btn.disabled = true;
+    sb.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: window.location.origin + window.location.pathname,
+        queryParams: { hd: DOMAIN, prompt: 'select_account' }
+      }
+    }).then(function (res) {
+      if (res.error) throw res.error;
+    }).catch(function (err) {
+      console.error(err);
+      btn.disabled = false;
+      $('signinErr').textContent = t('errGeneric');
+    });
+  }
+
+  function sendCode(e) {
+    if (e) e.preventDefault();
+    var email = $('email').value.trim().toLowerCase();
+    $('signinErr').textContent = '';
+    if (!C.allowedEmail(email)) {
+      $('signinErr').textContent = t('errDomain', { domain: DOMAIN });
+      $('email').focus();
+      return;
+    }
+    S.email = email;
+    $('codeLabel').textContent = t('codeLabel', { email: email });
+    if (C.demo) { $('code').value = ''; show('code'); return; }
+    var btn = $('sendCodeBtn');
+    btn.disabled = true;
+    sb.auth.signInWithOtp({ email: email, options: { shouldCreateUser: true } }).then(function (res) {
+      btn.disabled = false;
+      if (res.error) throw res.error;
+      $('code').value = '';
+      $('codeErr').textContent = '';
+      show('code');
+    }).catch(function (err) {
+      console.error(err);
+      btn.disabled = false;
+      $('signinErr').textContent = t('errSend');
+    });
+  }
+
+  function verifyCode(e) {
+    if (e) e.preventDefault();
+    var token = $('code').value.replace(/\D/g, '');
+    $('codeErr').textContent = '';
+    if (token.length !== 6) { $('codeErr').textContent = t('errCode'); $('code').focus(); return; }
+    if (C.demo) { handleDemoSignIn(S.email, ''); return; }
+    var btn = $('verifyBtn');
+    btn.disabled = true;
+    sb.auth.verifyOtp({ email: S.email, token: token, type: 'email' }).then(function (res) {
+      btn.disabled = false;
+      if (res.error) throw res.error;
+      handleSession(res.data && res.data.session);
+    }).catch(function (err) {
+      console.error(err);
+      btn.disabled = false;
+      $('codeErr').textContent = t('errCode');
+    });
+  }
+
+  function handleDemoSignIn(email, first) {
+    S.user = { email: email };
+    if (!S.first && first) S.first = first;
+    C.storageSet('wt-demo-user', email);
+    renderWho();
+    show('write');
+  }
+
+  function signOut() {
+    S.user = null;
+    if (C.demo) { C.storageSet('wt-demo-user', ''); show('signin'); return; }
+    sb.auth.signOut().finally(function () { show('signin'); });
+  }
+
+  /* ---------- Submit ---------- */
+  function submit() {
+    if (S.busy) return;
+    var key = blockerKey();
+    if (key) { S.triedPreview = true; show('write'); return; }
+    if (CFG.SUBMISSIONS_OPEN === false) { $('submitErr').textContent = t('errClosed'); return; }
+
+    var site = siteByLabel(S.site);
+    var row = {
+      message: S.text.trim().slice(0, MAX),
+      display_mode: S.mode,
+      first_name: S.mode === 'name' ? S.first.trim().slice(0, 40) : null,
+      site: S.site,
+      country: site ? site.country : null,
+      lang: effectiveWishLang(),
+      tag_color: S.color,
+      charm: S.charm,
+      consent: true
+    };
+
+    $('submitErr').textContent = '';
+    S.busy = true;
+    renderPreview();
+
+    var done = function () {
+      S.busy = false;
+      C.track('wish_submit', { country: row.country, lang: row.lang, mode: row.display_mode });
+      show('done');
+    };
+    var fail = function (err) {
+      console.error(err);
+      S.busy = false;
+      renderPreview();
+      var msg = String((err && (err.message || err.details)) || '').toLowerCase();
+      if (err && err.code === '42501') $('submitErr').textContent = t('errNotAllowed');
+      else if (msg.indexOf('wish_limit') !== -1) $('submitErr').textContent = t('errLimit');
+      else if (msg.indexOf('wishes_closed') !== -1) $('submitErr').textContent = t('errClosed');
+      else $('submitErr').textContent = t('errSubmit');
+    };
+
+    if (C.demo) {
+      try {
+        var list = JSON.parse(C.storageGet('wt-demo-wishes') || '[]');
+        list.push(Object.assign({ created_at: new Date().toISOString(), status: 'pending' }, row));
+        C.storageSet('wt-demo-wishes', JSON.stringify(list));
+      } catch (e) { /* ignore */ }
+      setTimeout(done, 600);
+      return;
+    }
+
+    sb.from('wishes').insert(row).then(function (res) {
+      if (res.error) throw res.error;
+      done();
+    }).catch(fail);
+  }
+
+  function resetForAnother() {
+    S.text = '';
+    S.wishLangTouched = false;
+    S.wishLang = null;
+    S.triedPreview = false;
+    show('write');
+  }
+
+  function share() {
+    var url = new URL('wish.html', window.location.href).href;
+    if (CFG.WISH_PAGE_URL) url = CFG.WISH_PAGE_URL;
+    var btn = $('shareBtn');
+    var mark = function () { btn.textContent = t('copied'); setTimeout(function () { btn.textContent = t('copyLink'); }, 2500); };
+    if (navigator.share) {
+      navigator.share({ title: 'TP Wish Tree', text: t('shareText'), url: url }).catch(function () { /* cancelled */ });
+      C.track('wish_share', { method: 'native' });
+      return;
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(mark, function () { window.prompt(t('copyLink'), url); });
+    } else {
+      window.prompt(t('copyLink'), url);
+    }
+    C.track('wish_share', { method: 'copy' });
+  }
+
+  /* ---------- Events ---------- */
+  qsa('.langs button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      S.lang = b.getAttribute('data-lang');
+      C.storageSet('wt-lang', S.lang);
+      applyLang();
+    });
+  });
+
+  $('googleBtn').addEventListener('click', startGoogle);
+  $('emailForm').addEventListener('submit', sendCode);
+  $('codeForm').addEventListener('submit', verifyCode);
+  $('code').addEventListener('input', function () {
+    var v = $('code').value.replace(/\D/g, '').slice(0, 6);
+    if ($('code').value !== v) $('code').value = v;
+    if (v.length === 6) verifyCode();
+  });
+  $('resendBtn').addEventListener('click', function () { $('email').value = S.email; sendCode(); });
+  $('changeEmailBtn').addEventListener('click', function () { show('signin'); $('email').focus(); });
+  $('signOutBtn').addEventListener('click', signOut);
+
+  qsa('.opt[data-color]').forEach(function (b) {
+    b.addEventListener('click', function () { S.color = b.getAttribute('data-color'); renderWrite(); });
+  });
+  qsa('.opt[data-charm]').forEach(function (b) {
+    b.addEventListener('click', function () { S.charm = b.getAttribute('data-charm'); renderWrite(); });
+  });
+  qsa('[data-starter]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      S.text = t('seed_' + b.getAttribute('data-starter'));
+      renderWrite();
+      var ta = $('wishText');
+      ta.focus();
+      ta.setSelectionRange(ta.value.length, ta.value.length);
+    });
+  });
+  $('wishText').addEventListener('input', function (e) {
+    S.text = e.target.value.slice(0, MAX);
+    renderWrite();
+  });
+  qsa('.seg button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      S.wishLang = b.getAttribute('data-wlang');
+      S.wishLangTouched = true;
+      renderWrite();
+    });
+  });
+  qsa('input[name="mode"]').forEach(function (r) {
+    r.addEventListener('change', function () { if (r.checked) { S.mode = r.value; renderWrite(); } });
+  });
+  $('firstName').addEventListener('input', function (e) { S.first = e.target.value; renderWrite(); });
+  $('siteSel').addEventListener('change', function (e) { S.site = e.target.value; renderWrite(); });
+  $('consent').addEventListener('change', function (e) { S.consent = e.target.checked; renderWrite(); });
+
+  $('toPreviewBtn').addEventListener('click', function () {
+    var key = blockerKey();
+    if (key) {
+      S.triedPreview = true;
+      renderWrite();
+      var focusMap = { needText: 'wishText', needName: 'firstName', needSite: 'siteSel', needConsent: 'consent' };
+      var f = $(focusMap[key]);
+      if (f) f.focus();
+      return;
+    }
+    show('preview');
+  });
+  $('backToWrite').addEventListener('click', function () { show('write'); });
+  $('editBtn').addEventListener('click', function () { show('write'); });
+  $('hangBtn').addEventListener('click', submit);
+  $('shareBtn').addEventListener('click', share);
+  $('anotherBtn').addEventListener('click', resetForAnother);
+
+  /* ---------- Start ---------- */
+  C.initGA();
+  if (CFG.LOGO_URL) {
+    $('logo').src = CFG.LOGO_URL;
+    $('logo').hidden = false;
+    $('logo').addEventListener('error', function () { $('logo').hidden = true; });
+  }
+  $('googleBlock').hidden = AUTH !== 'google';
+  $('emailForm').hidden = AUTH !== 'email';
+  if (C.demo) $('demoBar').hidden = false;
+  applyLang();
+
+  if (CFG.SUBMISSIONS_OPEN === false) {
+    show('closed');
+    return;
+  }
+
+  if (C.demo) {
+    var demoUser = C.storageGet('wt-demo-user');
+    if (demoUser) { S.user = { email: demoUser }; renderWho(); show('write'); }
+    else show('signin');
+    return;
+  }
+
+  try {
+    sb = C.client();
+  } catch (err) {
+    console.error(err);
+    show('signin');
+    $('signinErr').textContent = t('errGeneric');
+    return;
+  }
+
+  sb.auth.onAuthStateChange(function (event, session) {
+    if (event === 'SIGNED_OUT') { S.user = null; renderWho(); return; }
+    if (session) handleSession(session);
+  });
+  sb.auth.getSession().then(function (res) {
+    var session = res && res.data ? res.data.session : null;
+    if (session) handleSession(session);
+    else if (S.view === 'loading') show('signin');
+  }).catch(function (err) {
+    console.error(err);
+    show('signin');
+  });
+})();
+</script>
+</body>
+</html>

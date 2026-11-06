@@ -1,0 +1,466 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TP Wish Tree 2026</title>
+<meta name="description" content="One TP. Many Wishes. One Christmas Together. The shared Christmas wish tree for TP Malaysia and Thailand.">
+<meta name="theme-color" content="#0E2A1F">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Noto+Sans:wght@300;400;500;700&family=Noto+Sans+Thai:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+@font-face{font-family:'TP Sans';font-weight:300;font-display:swap;src:local('TP Sans Light'),local('TPSans-Light'),url('fonts/TPSans-Light.ttf') format('truetype')}
+@font-face{font-family:'TP Sans';font-weight:400;font-display:swap;src:local('TP Sans'),local('TPSans-Regular'),url('fonts/TPSans-Regular.ttf') format('truetype')}
+@font-face{font-family:'TP Sans';font-weight:500;font-display:swap;src:local('TP Sans Medium'),local('TPSans-Medium'),url('fonts/TPSans-Medium.ttf') format('truetype')}
+@font-face{font-family:'TP Sans';font-weight:700;font-display:swap;src:local('TP Sans Bold'),local('TPSans-Bold'),url('fonts/TPSans-Bold.ttf') format('truetype')}
+
+:root{
+  --bg:#0E2A1F; --bg-2:#11302A;
+  --cream:#F6EEDC; --cream-2:#DCD3BF; --cream-3:#B9B19E;
+  --gold:#E3B45A; --gold-2:#F2C766; --carmine:#AB2C37;
+  --ink:#183326; --slate:#4B4C6A; --focus:#00AF9B;
+  --line:rgba(246,238,220,.12);
+  --font:'TP Sans','Noto Sans','Noto Sans Thai',Calibri,system-ui,sans-serif;
+  --script:'Great Vibes',cursive;
+}
+*{box-sizing:border-box}
+[hidden]{display:none !important}
+html,body{margin:0;background:var(--bg);color:var(--cream);font-family:var(--font);-webkit-font-smoothing:antialiased}
+body{min-height:100vh;overflow-x:hidden}
+a{color:var(--gold)}
+a:hover{color:var(--gold-2)}
+button{font-family:inherit}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+
+.skip{position:absolute;left:-999px;top:8px;z-index:20;padding:10px 16px;border-radius:8px;background:var(--cream);color:var(--bg)}
+.skip:focus{left:8px}
+
+.deco{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0}
+.arc{position:absolute;border-radius:50%}
+.arc.a1{right:-520px;top:-260px;width:1100px;height:1100px;background:var(--bg-2)}
+.arc.a2{right:-400px;top:-140px;width:860px;height:860px;border:1px solid rgba(227,180,90,.16)}
+
+.wrap{position:relative;z-index:1;max-width:1360px;margin:0 auto;padding:24px 40px 40px}
+
+.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px 24px;padding-bottom:24px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:16px;min-height:40px}
+.logo{height:30px;width:auto;display:block}
+.brand-divider{width:1px;height:24px;background:rgba(246,238,220,.25)}
+.brand-name{font-size:18px;font-weight:500;letter-spacing:.01em}
+.top-actions{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+.chips{display:flex;gap:6px;padding:4px;border-radius:999px;background:rgba(246,238,220,.07)}
+.chip{min-height:40px;padding:0 18px;border:0;border-radius:999px;background:transparent;color:var(--cream);font-size:15px;font-weight:500;cursor:pointer}
+.chip:hover{background:rgba(246,238,220,.1)}
+.chip[aria-pressed="true"]{background:var(--cream);color:var(--bg)}
+.btn-gold{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:48px;padding:0 24px;border-radius:999px;background:var(--gold);color:var(--bg);font-size:16px;font-weight:700;text-decoration:none;border:0;cursor:pointer}
+.btn-gold:hover{background:var(--gold-2);color:var(--bg)}
+
+.grid{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:40px;padding-top:40px}
+
+.intro{flex:1 1 300px;max-width:380px;display:flex;flex-direction:column;gap:28px;padding-top:24px}
+.eyebrow{font-size:13px;font-weight:500;letter-spacing:.14em;color:var(--gold)}
+h1{margin:14px 0 0;font-size:60px;line-height:1;font-weight:300;letter-spacing:-.01em}
+.script{margin-top:10px;font-family:var(--script);font-size:54px;line-height:1.05;color:var(--gold)}
+.lede{margin:0;font-size:17px;line-height:1.55;font-weight:300;color:var(--cream-2)}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;padding:20px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.num{display:block;font-size:36px;font-weight:300;line-height:1;font-variant-numeric:tabular-nums}
+.lbl{display:block;margin-top:6px;font-size:13px;color:#CFC6B2}
+.meta{display:flex;flex-direction:column;gap:10px;font-size:15px;color:var(--cream-2)}
+.meta-row{display:flex;align-items:center;gap:10px}
+.dot{flex:none;width:8px;height:8px;border-radius:50%;background:#00D769;animation:pulse 2s infinite}
+.dot.off{background:#FF5C00;animation:none}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(0,215,105,.55)}70%{box-shadow:0 0 0 8px rgba(0,215,105,0)}100%{box-shadow:0 0 0 0 rgba(0,215,105,0)}}
+
+.tree-col{flex:2 1 460px;max-width:600px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+.tree-foot{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:4px 16px;text-align:center;font-size:13px;color:var(--cream-3)}
+.link-btn{min-height:40px;padding:0 6px;border:0;background:transparent;color:var(--gold);font-size:14px;font-weight:500;text-decoration:underline;cursor:pointer}
+.link-btn:hover{color:var(--gold-2)}
+
+.side{flex:1 1 300px;max-width:360px;display:flex;flex-direction:column;gap:20px;padding-top:24px}
+.card-wrap{display:flex;flex-direction:column;align-items:center}
+.card-string{width:1px;height:28px;background:#D9C59A}
+.wish-card{
+  --card-bg:#F6EEDC; --card-ink:#183326; --card-kicker:#AB2C37; --card-sub:#4B4C6A;
+  --card-pill:#ECE3CC; --card-line:rgba(24,51,38,.25);
+  position:relative;width:100%;padding:40px 28px 24px;border-radius:6px 6px 10px 10px;
+  background:var(--card-bg);color:var(--card-ink);box-shadow:0 18px 40px rgba(0,0,0,.35);
+  transition:background-color .3s ease,color .3s ease
+}
+.wish-card[data-color="red"]{--card-bg:#AB2C37;--card-ink:#F6EEDC;--card-kicker:#F2C766;--card-sub:#F6EEDC;--card-pill:rgba(246,238,220,.18);--card-line:rgba(246,238,220,.35)}
+.wish-card[data-color="gold"]{--card-bg:#E3B45A;--card-ink:#0E2A1F;--card-kicker:#0E2A1F;--card-sub:#183326;--card-pill:rgba(14,42,31,.12);--card-line:rgba(14,42,31,.3)}
+.hole{position:absolute;top:14px;left:50%;width:10px;height:10px;margin-left:-5px;border-radius:50%;background:#0E2A1F;opacity:.55}
+.card-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+.card-kicker{font-size:12px;font-weight:500;letter-spacing:.12em;color:var(--card-kicker)}
+.pill{padding:4px 10px;border-radius:999px;background:var(--card-pill);font-size:12px;font-weight:500;color:var(--card-sub)}
+.pill:empty{display:none}
+.card-text{margin:0 0 22px;font-size:21px;line-height:1.5;white-space:pre-line;overflow-wrap:anywhere}
+.card-foot{display:flex;align-items:center;gap:12px;padding-top:16px;border-top:1px dashed var(--card-line)}
+.card-foot[hidden]{display:none}
+.avatar{flex:none;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;background:#0E2A1F;color:var(--gold);font-size:16px;font-weight:700}
+.who{font-size:16px;font-weight:700}
+.where{margin-top:2px;font-size:14px;color:var(--card-sub)}
+
+.nav{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.btn-ghost{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;border:1px solid rgba(246,238,220,.35);border-radius:999px;background:transparent;color:var(--cream);font-size:15px;cursor:pointer}
+.btn-ghost:hover{background:rgba(246,238,220,.08)}
+.btn-ghost:disabled{opacity:.4;cursor:default}
+
+.qr-card{display:flex;align-items:center;gap:18px;padding:18px;border-radius:12px;border:1px solid rgba(227,180,90,.35);background:rgba(246,238,220,.04);color:var(--cream);text-decoration:none}
+.qr-card:hover{background:rgba(246,238,220,.08);color:var(--cream)}
+.qr{flex:none;width:96px;height:96px;padding:6px;border-radius:8px;background:var(--cream)}
+.qr img,.qr canvas{display:block;width:84px !important;height:84px !important}
+.qr-title{font-size:17px;font-weight:700}
+.qr-sub{margin-top:6px;font-size:14px;line-height:1.45;color:var(--cream-2)}
+
+.foot{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;margin-top:40px;padding-top:20px;border-top:1px solid var(--line);font-size:13px;color:var(--cream-3)}
+
+.demo-bar{position:relative;z-index:2;padding:8px 16px;background:#FFF1E8;color:#7A2C00;font-size:13px;font-weight:500;text-align:center}
+
+@media (max-width:900px){
+  .wrap{padding:16px 16px 32px}
+  .grid{gap:28px;padding-top:24px}
+  .intro,.side{max-width:none;padding-top:0}
+  h1{font-size:44px}
+  .script{font-size:42px}
+  .tree-col{flex-basis:100%}
+}
+@media (max-width:480px){
+  .top-actions{width:100%}
+  .chips{flex:1}
+  .chip{flex:1;padding:0 10px}
+  .btn-gold{width:100%}
+  .num{font-size:30px}
+}
+@media (prefers-reduced-motion:reduce){.dot{animation:none}.wish-card{transition:none}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="config.js"></script>
+<script src="wishtree.js"></script>
+</head>
+<body>
+<a class="skip" href="#tree">Skip to the tree</a>
+<div id="demoBar" class="demo-bar" role="status" hidden>Demo mode: sample wishes only. Add your Supabase keys in config.js to go live.</div>
+<div class="deco" aria-hidden="true"><span class="arc a1"></span><span class="arc a2"></span></div>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <img id="logo" class="logo" alt="TP" hidden>
+      <span id="logoDivider" class="brand-divider" hidden></span>
+      <span class="brand-name">Wish Tree 2026</span>
+    </div>
+    <div class="top-actions">
+      <div class="chips" role="group" aria-label="Show wishes from">
+        <button type="button" class="chip" data-region="all" aria-pressed="true">All</button>
+        <button type="button" class="chip" data-region="MY" aria-pressed="false">Malaysia</button>
+        <button type="button" class="chip" data-region="TH" aria-pressed="false">Thailand</button>
+      </div>
+      <a id="ctaTop" class="btn-gold" href="wish.html">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+        Hang your wish
+      </a>
+    </div>
+  </header>
+
+  <main class="grid">
+    <section class="intro">
+      <div>
+        <div class="eyebrow">TP MALAYSIA &amp; THAILAND · CHRISTMAS 2026</div>
+        <h1>One TP.<br>Many Wishes.</h1>
+        <div class="script">One Christmas Together</div>
+      </div>
+      <p class="lede">Every tag on this tree is a wish from a TP colleague in Malaysia or Thailand, on site or working from home. Tap a tag to read it.</p>
+      <div class="stats" aria-live="polite">
+        <div><span class="num" id="statTotal">0</span><span class="lbl">wishes hung</span></div>
+        <div><span class="num" id="statMY">0</span><span class="lbl">from Malaysia</span></div>
+        <div><span class="num" id="statTH">0</span><span class="lbl">from Thailand</span></div>
+      </div>
+      <div class="meta">
+        <div class="meta-row"><span id="liveDot" class="dot" aria-hidden="true"></span><span id="liveText">Live · new wishes appear once approved</span></div>
+        <div class="meta-row">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E3B45A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
+          <span id="datesText"></span>
+        </div>
+      </div>
+    </section>
+
+    <section class="tree-col" id="tree" aria-label="The wish tree" tabindex="-1">
+      <div id="treeMount"></div>
+      <div class="tree-foot">
+        <span>Every wish is reviewed by the Talent Engagement team before it appears.</span>
+        <button type="button" id="shuffleBtn" class="link-btn" hidden>Show other wishes</button>
+      </div>
+    </section>
+
+    <aside class="side">
+      <div class="card-wrap">
+        <div class="card-string" aria-hidden="true"></div>
+        <article id="wishCard" class="wish-card" data-color="cream" aria-live="polite">
+          <div class="hole" aria-hidden="true"></div>
+          <div class="card-top">
+            <span id="cardKicker" class="card-kicker">LOADING WISHES</span>
+            <span id="cardLang" class="pill"></span>
+          </div>
+          <p id="cardText" class="card-text">Lighting up the tree…</p>
+          <div id="cardFoot" class="card-foot" hidden>
+            <div id="cardInitial" class="avatar" aria-hidden="true"></div>
+            <div>
+              <div id="cardName" class="who"></div>
+              <div id="cardWhere" class="where"></div>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <div class="nav">
+        <button type="button" id="prevBtn" class="btn-ghost" aria-label="Previous wish">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+          Previous
+        </button>
+        <button type="button" id="nextBtn" class="btn-ghost" aria-label="Next wish">
+          Next
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
+      </div>
+
+      <a id="qrCard" class="qr-card" href="wish.html">
+        <div id="qr" class="qr" role="img" aria-label="QR code to hang your wish"></div>
+        <div>
+          <div class="qr-title">Scan to hang your wish</div>
+          <div class="qr-sub">Write it bright, hang it right. Takes about a minute on your phone.</div>
+        </div>
+      </a>
+    </aside>
+  </main>
+
+  <footer class="foot">
+    <span>One TP. Many Wishes. One Christmas Together.</span>
+    <span>Run by Talent Engagement &amp; MarComm · Built by DST</span>
+  </footer>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var C = window.WishCore;
+  var CFG = C.cfg;
+
+  var state = {
+    all: [],          // approved wishes, newest first
+    region: 'all',
+    selectedId: null,
+    offset: 0,
+    onTree: [],       // wishes currently on the tree, oldest first
+    loadedOnce: false
+  };
+  var CAP = Math.max(6, Math.min(CFG.MAX_TAGS_ON_TREE || 40, C.treeCapacity(0.58)));
+
+  var el = function (id) { return document.getElementById(id); };
+  var treeMount = el('treeMount');
+
+  /* ---------- Static setup ---------- */
+  C.initGA();
+  if (C.demo) el('demoBar').hidden = false;
+
+  if (CFG.LOGO_URL) {
+    el('logo').src = CFG.LOGO_URL;
+    el('logo').hidden = false;
+    el('logoDivider').hidden = false;
+    el('logo').addEventListener('error', function () { el('logo').hidden = true; el('logoDivider').hidden = true; });
+  }
+
+  var wishUrl = C.wishPageUrl();
+  el('ctaTop').href = wishUrl;
+  el('qrCard').href = wishUrl;
+
+  if (CFG.SUBMISSIONS_OPEN === false) {
+    el('ctaTop').hidden = true;
+    el('qrCard').hidden = true;
+    el('datesText').textContent = 'Wishes are closed for this year. Thank you for every one of them.';
+  } else {
+    el('datesText').textContent = 'Wishes open ' + (CFG.OPEN_DATE || '') + ' to ' + (CFG.CLOSE_DATE || '');
+  }
+
+  try {
+    if (window.QRCode) {
+      new window.QRCode(el('qr'), {
+        text: wishUrl, width: 168, height: 168,
+        colorDark: '#0E2A1F', colorLight: '#F6EEDC',
+        correctLevel: window.QRCode.CorrectLevel.M
+      });
+      el('qr').removeAttribute('title');
+    }
+  } catch (e) { /* QR is optional */ }
+
+  /* ---------- Helpers ---------- */
+  function regionMatch(w) { return state.region === 'all' || w.country === state.region; }
+
+  function computeTreeSet() {
+    var source = state.all.length <= CAP ? state.all : state.all.filter(regionMatch);
+    if (source.length <= CAP) return C.pickForTree(source, CAP);
+    var start = state.offset % source.length;
+    var rotated = source.slice(start).concat(source.slice(0, start));
+    return C.pickForTree(rotated, CAP);
+  }
+
+  // Wishes you can step through with Previous / Next: on the tree, matching the filter, newest first
+  function browsable() {
+    return state.onTree.filter(regionMatch).slice().reverse();
+  }
+
+  function findWish(id) {
+    for (var i = 0; i < state.all.length; i++) if (String(state.all[i].id) === String(id)) return state.all[i];
+    return null;
+  }
+
+  function fmt(n) { return Number(n).toLocaleString('en-US'); }
+
+  /* ---------- Render ---------- */
+  function renderStats() {
+    var my = 0, th = 0;
+    state.all.forEach(function (w) { if (w.country === 'MY') my++; else if (w.country === 'TH') th++; });
+    el('statTotal').textContent = fmt(state.all.length);
+    el('statMY').textContent = fmt(my);
+    el('statTH').textContent = fmt(th);
+  }
+
+  function renderTree() {
+    state.onTree = computeTreeSet();
+    var dimNeeded = state.all.length <= CAP && state.region !== 'all';
+    C.renderTree(treeMount, {
+      wishes: state.onTree,
+      selectedId: state.selectedId,
+      isDimmed: dimNeeded ? function (w) { return !regionMatch(w); } : null,
+      onSelect: function (id) { select(id, true); }
+    });
+    var source = state.all.length <= CAP ? state.all : state.all.filter(regionMatch);
+    el('shuffleBtn').hidden = source.length <= CAP;
+  }
+
+  function renderCard() {
+    var card = el('wishCard');
+    var w = state.selectedId != null ? findWish(state.selectedId) : null;
+    var list = browsable();
+    el('prevBtn').disabled = list.length < 2;
+    el('nextBtn').disabled = list.length < 2;
+
+    if (!w) {
+      card.setAttribute('data-color', 'cream');
+      card.removeAttribute('lang');
+      el('cardLang').textContent = '';
+      el('cardFoot').hidden = true;
+      if (!state.loadedOnce) return;
+      if (state.all.length === 0) {
+        el('cardKicker').textContent = 'WAITING FOR THE FIRST WISH';
+        el('cardText').textContent = 'No wishes on the tree yet. Be the first to hang one.';
+      } else {
+        el('cardKicker').textContent = 'PICK A TAG';
+        el('cardText').textContent = 'Tap any tag on the tree to read the wish.';
+      }
+      return;
+    }
+
+    var pos = list.findIndex(function (x) { return String(x.id) === String(w.id); });
+    card.setAttribute('data-color', C.PALETTE[w.tag_color] ? w.tag_color : 'cream');
+    card.setAttribute('lang', w.lang || 'en');
+    el('cardKicker').textContent = pos >= 0 ? 'WISH ' + (pos + 1) + ' OF ' + list.length : 'WISH';
+    el('cardLang').textContent = C.LANG_LABEL[w.lang] || '';
+    el('cardText').textContent = w.message;
+    var name = C.displayName(w);
+    el('cardName').textContent = name;
+    el('cardWhere').textContent = C.displayWhere(w);
+    el('cardInitial').textContent = w.display_name ? name.charAt(0).toUpperCase() : '?';
+    el('cardFoot').hidden = false;
+  }
+
+  function select(id, fromUser) {
+    state.selectedId = id;
+    renderTree();
+    renderCard();
+    if (fromUser) {
+      var w = findWish(id);
+      C.track('wish_open', { country: w ? w.country : '' });
+    }
+  }
+
+  function step(dir) {
+    var list = browsable();
+    if (!list.length) return;
+    var pos = list.findIndex(function (x) { return String(x.id) === String(state.selectedId); });
+    var next = list[((pos < 0 ? 0 : pos + dir) + list.length) % list.length];
+    select(next.id, true);
+  }
+
+  function ensureSelection() {
+    var list = browsable();
+    var stillThere = list.some(function (x) { return String(x.id) === String(state.selectedId); });
+    if (!stillThere) state.selectedId = list.length ? list[0].id : null;
+  }
+
+  function setLive(ok) {
+    el('liveDot').classList.toggle('off', !ok);
+    el('liveText').textContent = ok ? 'Live · new wishes appear once approved' : 'Reconnecting… the tree will refresh shortly';
+  }
+
+  /* ---------- Data ---------- */
+  function load() {
+    return C.fetchApproved().then(function (rows) {
+      state.all = rows;
+      state.loadedOnce = true;
+      state.onTree = computeTreeSet();
+      ensureSelection();
+      renderStats();
+      renderTree();
+      renderCard();
+      setLive(true);
+    }).catch(function (err) {
+      console.error('Wish Tree: could not load wishes', err);
+      setLive(false);
+      if (!state.loadedOnce) {
+        el('cardKicker').textContent = 'ONE MOMENT';
+        el('cardText').textContent = "We couldn't load the wishes. We'll try again in a minute.";
+        renderTree();
+      }
+    });
+  }
+
+  /* ---------- Events ---------- */
+  Array.prototype.forEach.call(document.querySelectorAll('.chip'), function (chip) {
+    chip.addEventListener('click', function () {
+      state.region = chip.getAttribute('data-region');
+      state.offset = 0;
+      Array.prototype.forEach.call(document.querySelectorAll('.chip'), function (c) {
+        c.setAttribute('aria-pressed', c === chip ? 'true' : 'false');
+      });
+      state.onTree = computeTreeSet();
+      ensureSelection();
+      renderTree();
+      renderCard();
+      C.track('wish_filter', { region: state.region });
+    });
+  });
+
+  el('prevBtn').addEventListener('click', function () { step(-1); });
+  el('nextBtn').addEventListener('click', function () { step(1); });
+  el('shuffleBtn').addEventListener('click', function () {
+    state.offset += CAP;
+    state.onTree = computeTreeSet();
+    ensureSelection();
+    renderTree();
+    renderCard();
+  });
+  el('ctaTop').addEventListener('click', function () { C.track('wish_cta', { place: 'header' }); });
+  el('qrCard').addEventListener('click', function () { C.track('wish_cta', { place: 'qr_card' }); });
+
+  /* ---------- Start ---------- */
+  renderTree();
+  load();
+  var every = Math.max(15, Number(CFG.TREE_REFRESH_SECONDS) || 60) * 1000;
+  setInterval(function () { if (!document.hidden) load(); }, every);
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) load(); });
+})();
+</script>
+</body>
+</html>
