@@ -49,6 +49,7 @@ The **Accept new wishes** switch on the Approvals page closes or reopens the cam
 - Character limits live in two places: `MAX_LENGTH` / `LEADER_MAX_LENGTH` in `config.js` and the two `char_length` checks in `schema.sql`. Keep them the same.
 - Likes need no sign-in: one like per message per browser, stored with a random device id. Counts show on the tree, the TVs and the Approvals page.
 - The tree is 3D (`tree3d.js`, built with three.js, kept in `vendor/` so it doesn't depend on an outside CDN). People can drag it to turn it; it turns a full circle when a site is picked.
+- Tree look: `TREE_STYLE` in `config.js`. `light` (a tree made of light, the current choice), `cone` (one smooth cone) or `tiers` (smooth layers). Add `?style=cone` to any tree or TV link to preview another look.
 - Each person can post up to 3 wishes (change `max_wishes_per_person` in `app_settings`).
 - To add a site: add it to `SITES` in `config.js` and add its id to `wishes_site_check` in `schema.sql`, then run that part again.
 - Logo: `assets/tp-logo-white.png` (from the ELP repo). TP Sans is used when installed on the device; otherwise the pages fall back to Noto Sans. Only add the TP Sans font files to `fonts/` if TP allows them in a public repo.

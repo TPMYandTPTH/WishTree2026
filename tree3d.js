@@ -10,26 +10,36 @@ const C = window.WishCore;
 const TAU = Math.PI * 2;
 
 /* ---------- Tree shape (world units, the tree is about 8.6 tall) ---------- */
+// Three clean looks. Pick one with TREE_STYLE in config.js (or ?style= in the link to preview):
+//   'tiers' = smooth layered branches, 'cone' = one smooth modern cone, 'light' = a tree made of light
+const STYLES = ['tiers', 'cone', 'light'];
+let STYLE = 'tiers';
 const TIERS = [
-  { y0: 1.0, h: 3.2, r: 3.0, ridges: 13, seed: 0.3 },
-  { y0: 2.5, h: 2.8, r: 2.35, ridges: 12, seed: 1.7 },
-  { y0: 3.8, h: 2.5, r: 1.8, ridges: 11, seed: 2.9 },
-  { y0: 5.0, h: 2.2, r: 1.3, ridges: 10, seed: 4.1 },
-  { y0: 6.1, h: 1.9, r: 0.85, ridges: 9, seed: 5.3 }
+  { y0: 1.0, h: 3.2, r: 3.0 },
+  { y0: 2.5, h: 2.8, r: 2.35 },
+  { y0: 3.8, h: 2.5, r: 1.8 },
+  { y0: 5.0, h: 2.2, r: 1.3 },
+  { y0: 6.1, h: 1.9, r: 0.85 }
 ];
-const TOP_Y = 8.0;
+const CONE = { y0: 1.0, top: 8.15, r: 2.85 };
 const TAG = { w: 0.42, h: 0.56, d: 0.02, string: 0.12, tilt: 0.5 };
 const TAG_Y = [1.75, 5.7];          // where employee tags can hang
 const MAX_LEADERS = 6;
 const BG = { cream: '#F6EEDC', red: '#AB2C37', gold: '#E3B45A' };
 const FG = { cream: '#AB2C37', red: '#F6EEDC', gold: '#0E2A1F' };
 
+function topY() { return STYLE === 'tiers' ? 8.0 : CONE.top; }
+
 function surfaceR(y) {
+  if (STYLE !== 'tiers') {
+    if (y < CONE.y0 - 0.1 || y > CONE.top) return 0;
+    return CONE.r * Math.min(1, (CONE.top - y) / (CONE.top - CONE.y0));
+  }
   let r = 0;
   for (const t of TIERS) {
-    if (y >= t.y0 - 0.2 && y <= t.y0 + t.h) {
-      const f = Math.min(1, Math.max(0, 1 - (y - t.y0) / t.h));
-      r = Math.max(r, t.r * f);
+    if (y >= t.y0 - 0.12 && y <= t.y0 + t.h) {
+      const s = Math.min(1, Math.max(0, 1 - (y - t.y0) / t.h));
+      r = Math.max(r, t.r * Math.pow(s, 1.12));
     }
   }
   return r;
@@ -159,34 +169,32 @@ function drawSoftDisc(inner, outer) {
 }
 
 /* ---------- Geometry helpers ---------- */
-function makeTierGeometry(t) {
-  const g = new THREE.ConeGeometry(t.r, t.h, 80, 8, true);
+// A smooth tier: a gently flared cone with a soft rounded rim, shaded darker at the bottom
+function makeSmoothTier(r, h, flare) {
+  const pts = [];
+  pts.push(new THREE.Vector2(r * 0.5, -0.05));
+  pts.push(new THREE.Vector2(r * 0.84, -0.12));
+  pts.push(new THREE.Vector2(r * 0.96, -0.1));
+  pts.push(new THREE.Vector2(r * 1.0, -0.035));
+  const N = 18;
+  for (let i = 0; i <= N; i++) {
+    const s = 1 - i / N;                       // 1 at the rim, 0 at the tip
+    pts.push(new THREE.Vector2(Math.max(0.0005, r * Math.pow(s, flare)), h * (1 - s)));
+  }
+  const g = new THREE.LatheGeometry(pts, 96);
   const pos = g.attributes.position;
   const cols = new Float32Array(pos.count * 3);
-  const dark = new THREE.Color('#123D2A');
-  const mid = new THREE.Color('#25694A');
-  const light = new THREE.Color('#4A9A6C');
+  const under = new THREE.Color('#0D3324');
+  const low = new THREE.Color('#1A5539');
+  const high = new THREE.Color('#2C7650');
   const tmp = new THREE.Color();
   for (let i = 0; i < pos.count; i++) {
-    const x = pos.getX(i), y = pos.getY(i), z = pos.getZ(i);
-    const f = (y + t.h / 2) / t.h; // 0 at the rim, 1 at the tip
-    const rr = Math.hypot(x, z);
-    const th = Math.atan2(z, x);
-    const ridge = Math.sin(th * t.ridges + t.seed);
-    const fine = Math.sin(th * t.ridges * 3 + t.seed * 2.1);
-    if (rr > 1e-5) {
-      const k = 1 + (0.13 * ridge + 0.035 * fine) * (1 - f * 0.7);
-      let ny = y;
-      if (f < 0.02) ny -= 0.2 * (0.5 + 0.5 * ridge); // droopy branch tips around the rim
-      pos.setXYZ(i, (x / rr) * rr * k, ny, (z / rr) * rr * k);
-    }
-    const shade = Math.min(1, Math.max(0, 0.3 + 0.32 * (0.5 + 0.5 * ridge) + 0.38 * f));
-    if (shade < 0.5) tmp.copy(dark).lerp(mid, shade / 0.5);
-    else tmp.copy(mid).lerp(light, (shade - 0.5) / 0.5);
+    const y = pos.getY(i);
+    if (y < -0.02) tmp.copy(under);
+    else tmp.copy(low).lerp(high, Math.min(1, Math.pow(y / h, 0.8)));
     cols[i * 3] = tmp.r; cols[i * 3 + 1] = tmp.g; cols[i * 3 + 2] = tmp.b;
   }
   g.setAttribute('color', new THREE.BufferAttribute(cols, 3));
-  g.computeVertexNormals();
   return g;
 }
 
@@ -208,6 +216,10 @@ function makeStarGeometry() {
    createTree3D(container, { onSelect(kind, id) })
    ========================================================= */
 export function createTree3D(container, opts = {}) {
+  let want = opts.style || '';
+  try { want = new URLSearchParams(window.location.search).get('style') || want; } catch (e) { /* ignore */ }
+  want = want || (C.cfg && C.cfg.TREE_STYLE) || 'tiers';
+  STYLE = STYLES.indexOf(want) === -1 ? 'tiers' : want;
   const reduce = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
 
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
@@ -254,38 +266,74 @@ export function createTree3D(container, opts = {}) {
   const shadowTex = toTex(drawSoftDisc('rgba(0,0,0,0.55)', 'rgba(0,0,0,0)'));
   const snowTex = toTex(drawSoftDisc('rgba(255,255,255,1)', 'rgba(255,255,255,0)'));
 
-  // ground shadow and tree skirt
-  const shadow = new THREE.Mesh(new THREE.CircleGeometry(3.8, 48), new THREE.MeshBasicMaterial({ map: shadowTex, transparent: true, depthWrite: false }));
+  // ground shadow, a simple planter and the trunk
+  const shadow = new THREE.Mesh(new THREE.CircleGeometry(3.4, 48), new THREE.MeshBasicMaterial({ map: shadowTex, transparent: true, depthWrite: false }));
   shadow.rotation.x = -Math.PI / 2;
   shadow.position.y = 0.005;
   world.add(shadow);
-  const skirt = new THREE.Mesh(new THREE.RingGeometry(0.4, 2.3, 48), new THREE.MeshStandardMaterial({ color: 0x8e2430, roughness: 0.9, side: THREE.DoubleSide }));
-  skirt.rotation.x = -Math.PI / 2;
-  skirt.position.y = 0.02;
-  world.add(skirt);
-
-  // trunk and inner fill (so you never see through the branches)
-  const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.42, 1.4, 16), new THREE.MeshStandardMaterial({ color: 0x5a3a26, roughness: 0.95 }));
-  trunk.position.y = 0.7;
+  const planter = new THREE.Mesh(new THREE.CylinderGeometry(0.62, 0.5, 0.62, 48), new THREE.MeshStandardMaterial({ color: 0xefe5cf, roughness: 0.55 }));
+  planter.position.y = 0.31;
+  world.add(planter);
+  const band = new THREE.Mesh(new THREE.TorusGeometry(0.62, 0.025, 10, 64), new THREE.MeshStandardMaterial({ color: 0xe3b45a, metalness: 0.8, roughness: 0.3 }));
+  band.rotation.x = Math.PI / 2;
+  band.position.y = 0.6;
+  world.add(band);
+  const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.22, 0.7, 16), new THREE.MeshStandardMaterial({ color: 0x5a3a26, roughness: 0.95 }));
+  trunk.position.y = 0.95;
   world.add(trunk);
-  const fill = new THREE.Mesh(new THREE.ConeGeometry(2.35, 7.0, 28), new THREE.MeshStandardMaterial({ color: 0x0f3324, roughness: 1 }));
-  fill.position.y = 1.0 + 3.5;
-  world.add(fill);
 
-  // foliage tiers
-  const foliageMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.82, metalness: 0, flatShading: true, side: THREE.DoubleSide });
+  // the tree itself
   const foliage = [];
-  for (const t of TIERS) {
-    const m = new THREE.Mesh(makeTierGeometry(t), foliageMat);
-    m.position.y = t.y0 + t.h / 2;
+  const foliageMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.72, metalness: 0.02, side: THREE.DoubleSide });
+  if (STYLE === 'tiers') {
+    const fill = new THREE.Mesh(new THREE.ConeGeometry(2.2, 6.9, 32), new THREE.MeshStandardMaterial({ color: 0x0d3324, roughness: 1 }));
+    fill.position.y = 1.05 + 3.45;
+    world.add(fill);
+    foliage.push(fill);
+    TIERS.forEach((t) => {
+      const m = new THREE.Mesh(makeSmoothTier(t.r, t.h, 1.12), foliageMat);
+      m.position.y = t.y0;
+      world.add(m);
+      foliage.push(m);
+    });
+  } else if (STYLE === 'cone') {
+    const m = new THREE.Mesh(makeSmoothTier(CONE.r, CONE.top - CONE.y0, 1.0), foliageMat);
+    m.position.y = CONE.y0;
     world.add(m);
     foliage.push(m);
+  } else {
+    // a tree made of light: a dark core with strands of tiny lights spiralling round it
+    const core = new THREE.Mesh(new THREE.ConeGeometry(CONE.r * 0.8, (CONE.top - CONE.y0) * 0.97, 64, 1, true), new THREE.MeshStandardMaterial({ color: 0x0c2c1f, roughness: 1, side: THREE.DoubleSide }));
+    core.position.y = CONE.y0 + ((CONE.top - CONE.y0) * 0.97) / 2;
+    world.add(core);
+    foliage.push(core);
+    const STRANDS = 9, PER = 150;
+    const pts = new Float32Array(STRANDS * PER * 3);
+    const cols = new Float32Array(STRANDS * PER * 3);
+    const warm = [new THREE.Color('#FFF1C9'), new THREE.Color('#FFD98A'), new THREE.Color('#F2C766'), new THREE.Color('#7FD8A8')];
+    const pr = C.random(9);
+    let n = 0;
+    for (let k = 0; k < STRANDS; k++) {
+      for (let i = 0; i < PER; i++) {
+        const sAlong = (i + pr() * 0.6) / PER;
+        const y = CONE.y0 + 0.05 + sAlong * (CONE.top - CONE.y0 - 0.2);
+        const th = sAlong * TAU * 1.6 + (k * TAU) / STRANDS;
+        const R = surfaceR(y) * (0.9 + pr() * 0.12);
+        pts[n * 3] = Math.cos(th) * R; pts[n * 3 + 1] = y; pts[n * 3 + 2] = Math.sin(th) * R;
+        const c = warm[k % 3 === 2 && pr() < 0.25 ? 3 : Math.floor(pr() * 3)];
+        cols[n * 3] = c.r; cols[n * 3 + 1] = c.g; cols[n * 3 + 2] = c.b;
+        n++;
+      }
+    }
+    const lg = new THREE.BufferGeometry();
+    lg.setAttribute('position', new THREE.BufferAttribute(pts, 3));
+    lg.setAttribute('color', new THREE.BufferAttribute(cols, 3));
+    world.add(new THREE.Points(lg, new THREE.PointsMaterial({ size: 0.17, map: glowTex, vertexColors: true, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true })));
   }
-  foliage.push(fill);
 
   // star on top: it stays facing you while the tree turns, with a gentle sway
   const starGroup = new THREE.Group();
-  starGroup.position.y = TOP_Y + 0.38;
+  starGroup.position.y = topY() + 0.38;
   scene.add(starGroup);
   const star = new THREE.Mesh(makeStarGeometry(), new THREE.MeshStandardMaterial({ color: 0xf2c766, emissive: 0xf2b640, emissiveIntensity: 0.9, metalness: 0.55, roughness: 0.3 }));
   starGroup.add(star);
@@ -294,18 +342,20 @@ export function createTree3D(container, opts = {}) {
   starGlow.scale.set(2.6, 2.6, 1);
   starGroup.add(starGlow);
 
-  // garland: a gold rope spiralling up the tree
+  // the path the string of lights follows as it spirals up the tree
   const garlandPts = [];
   for (let i = 0; i <= 220; i++) {
     const s = i / 220;
     const y = 1.25 + s * (6.6 - 1.25);
     const th = s * 4.6 * TAU;
     const R = surfaceR(y) * 1.02 + 0.03;
-    garlandPts.push(new THREE.Vector3(Math.cos(th) * R, y - 0.08 * Math.sin(s * 40), Math.sin(th) * R));
+    garlandPts.push(new THREE.Vector3(Math.cos(th) * R, y - 0.06 * Math.sin(s * 40), Math.sin(th) * R));
   }
   const garlandCurve = new THREE.CatmullRomCurve3(garlandPts);
-  const garland = new THREE.Mesh(new THREE.TubeGeometry(garlandCurve, 600, 0.024, 6, false), new THREE.MeshStandardMaterial({ color: 0xe3b45a, metalness: 0.8, roughness: 0.3, emissive: 0x3a2808 }));
-  world.add(garland);
+  if (STYLE !== 'light') {
+    // a fine gold wire for the lights
+    world.add(new THREE.Mesh(new THREE.TubeGeometry(garlandCurve, 600, 0.008, 4, false), new THREE.MeshBasicMaterial({ color: 0xc9a36b })));
+  }
 
   /* fairy lights: along the garland and scattered over the branches */
   const bulbs = [];
@@ -338,64 +388,8 @@ export function createTree3D(container, opts = {}) {
     addLight(new THREE.Vector3(Math.cos(th) * R, y, Math.sin(th) * R), Math.floor(lr() * bulbColors.length), lr() * 14);
   }
 
-  /* baubles */
-  const baubleGeo = new THREE.SphereGeometry(1, 22, 16);
-  const capGeo = new THREE.CylinderGeometry(0.035, 0.035, 0.05, 10);
-  const baubleMats = [
-    new THREE.MeshStandardMaterial({ color: 0xab2c37, metalness: 0.55, roughness: 0.22 }),
-    new THREE.MeshStandardMaterial({ color: 0xe3b45a, metalness: 0.85, roughness: 0.2 }),
-    new THREE.MeshStandardMaterial({ color: 0xede3cf, metalness: 0.6, roughness: 0.25 })
-  ];
-  const capMat = new THREE.MeshStandardMaterial({ color: 0xc9a36b, metalness: 0.8, roughness: 0.35 });
+  // spots tags must keep clear of (none for now: the tags are the decorations)
   const obstacles = [];
-  const br = C.random(77);
-  for (let i = 0; i < 26; i++) {
-    const y = 1.35 + br() * 4.9;
-    const th = br() * TAU;
-    const R = surfaceR(y) + 0.1;
-    const size = 0.12 + br() * 0.06;
-    const m = new THREE.Mesh(baubleGeo, baubleMats[i % 3]);
-    m.scale.setScalar(size);
-    m.position.set(Math.cos(th) * R, y, Math.sin(th) * R);
-    world.add(m);
-    const cap = new THREE.Mesh(capGeo, capMat);
-    cap.position.set(m.position.x, y + size + 0.015, m.position.z);
-    world.add(cap);
-    obstacles.push({ x: m.position.x, y: y + 0.25, z: m.position.z, r: 0.2 });
-  }
-
-  /* gifts under the tree */
-  function gift(x, z, w, h, d, color, ribbon, rotY) {
-    const g = new THREE.Group();
-    const boxMat = new THREE.MeshStandardMaterial({ color, roughness: 0.6 });
-    const ribMat = new THREE.MeshStandardMaterial({ color: ribbon, roughness: 0.4, metalness: 0.3 });
-    const box = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), boxMat);
-    box.position.y = h / 2;
-    g.add(box);
-    const r1 = new THREE.Mesh(new THREE.BoxGeometry(w + 0.01, h + 0.01, d * 0.18), ribMat);
-    r1.position.y = h / 2;
-    g.add(r1);
-    const r2 = new THREE.Mesh(new THREE.BoxGeometry(w * 0.18, h + 0.012, d + 0.01), ribMat);
-    r2.position.y = h / 2;
-    g.add(r2);
-    const bowGeo = new THREE.TorusGeometry(0.09, 0.025, 8, 18);
-    const b1 = new THREE.Mesh(bowGeo, ribMat);
-    b1.position.set(-0.07, h + 0.05, 0);
-    b1.rotation.set(0, Math.PI / 2, Math.PI / 4);
-    g.add(b1);
-    const b2 = b1.clone();
-    b2.position.x = 0.07;
-    b2.rotation.z = -Math.PI / 4;
-    g.add(b2);
-    g.position.set(x, 0, z);
-    g.rotation.y = rotY;
-    world.add(g);
-  }
-  gift(1.55, 1.35, 0.7, 0.55, 0.6, 0xab2c37, 0xe3b45a, 0.4);
-  gift(-1.7, 1.1, 0.6, 0.7, 0.6, 0xe3b45a, 0xab2c37, -0.3);
-  gift(0.25, 2.05, 0.5, 0.42, 0.5, 0xf6eedc, 0xab2c37, 0.9);
-  gift(-0.9, -1.6, 0.65, 0.5, 0.55, 0x1e573d, 0xe3b45a, 0.2);
-  gift(2.0, -0.6, 0.5, 0.62, 0.5, 0xf6eedc, 0x1e573d, -0.6);
 
   /* snow drifting in front of the tree */
   const SNOW = reduce ? 0 : 160;

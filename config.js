@@ -45,6 +45,7 @@ window.WISH_CFG = {
   TREE_REFRESH_SECONDS: 60,
   MAX_TAGS_ON_TREE: 40,     // flat tree (fallback and leaders' preview)
   MAX_TAGS_3D: 60,          // 3D tree
+  TREE_STYLE: 'light',      // 3D tree look: 'tiers' (smooth layers), 'cone' (one smooth cone) or 'light' (a tree made of light)
   TOUR_SECONDS: 10,         // "Tour sites" switches site every N seconds
 
   // TV screens (tv/ page)
