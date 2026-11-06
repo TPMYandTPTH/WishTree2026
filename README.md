@@ -10,6 +10,7 @@ A shared Christmas wish tree for TP Malaysia and Thailand, hosted on GitHub Page
 | The tree | https://tpmyandtpth.github.io/WishTree2026/ | Everyone |
 | One site's tree | `…/WishTree2026/?site=op` (ids: gtower, kcp, gbs, op, lv, jb, singha, wfh) | Site posters, intranet |
 | Lobby screen tour | `…/WishTree2026/?tour=1` | TVs at the sites |
+| Flat tree | `…/WishTree2026/?view=flat` | Older devices; the 3D tree switches to this by itself when WebGL isn't available |
 | Hang a wish | `…/WishTree2026/wish.html` (add `?site=op` to pre-pick the site) | Employees |
 | Leaders' messages | `…/WishTree2026/leaders/` | Leaders on the leaders list only |
 
@@ -25,6 +26,8 @@ Until the Supabase keys are in `config.js`, every page runs in demo mode with sa
 6. **Approving wishes:** until the moderation page is built, open **Table Editor > wishes** and change `status` from `pending` to `approved`.
 
 ## Notes
+
+- The tree is 3D (`tree3d.js`, built with three.js, kept in `vendor/` so it doesn't depend on an outside CDN). People can drag it to turn it; it turns a full circle when a site is picked.
 
 - Each person can post up to 3 wishes (change `max_wishes_per_person` in `app_settings`). Set `submissions_open` to false to close the campaign.
 - Wishes with a phone number or email address are flagged automatically for the moderators.

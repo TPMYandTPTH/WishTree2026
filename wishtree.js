@@ -30,12 +30,17 @@
   var LANG_LABEL = { en: 'English', ms: 'Bahasa Melayu', th: 'ภาษาไทย' };
   var COUNTRY_LABEL = { MY: 'Malaysia', TH: 'Thailand' };
 
-  var ICON_PATHS = {
-    snow: '<path d="M12 3v18M4.2 7.5l15.6 9M4.2 16.5l15.6-9M9.5 4.5 12 7l2.5-2.5M9.5 19.5 12 17l2.5 2.5"/>',
-    star: '<path stroke-linejoin="round" d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/>',
-    tree: '<path stroke-linejoin="round" d="M12 3 6.5 10h3L5 16h14l-4.5-6h3zM12 16v4.5"/>',
-    gift: '<path stroke-linejoin="round" d="M4 10h16v10H4zM3 7h18v3H3zM12 7v13M12 7c-1.5-3-5-3.5-5-1.5S10 7 12 7zm0 0c1.5-3 5-3.5 5-1.5S14 7 12 7z"/>'
+  // Charm icons as SVG path data (24 x 24), shared by the 2D and 3D trees
+  var ICON_D = {
+    snow: 'M12 3v18M4.2 7.5l15.6 9M4.2 16.5l15.6-9M9.5 4.5 12 7l2.5-2.5M9.5 19.5 12 17l2.5 2.5',
+    star: 'M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z',
+    tree: 'M12 3 6.5 10h3L5 16h14l-4.5-6h3zM12 16v4.5',
+    gift: 'M4 10h16v10H4zM3 7h18v3H3zM12 7v13M12 7c-1.5-3-5-3.5-5-1.5S10 7 12 7zm0 0c1.5-3 5-3.5 5-1.5S14 7 12 7z'
   };
+  var ICON_PATHS = {};
+  Object.keys(ICON_D).forEach(function (k) {
+    ICON_PATHS[k] = '<path stroke-linejoin="round" d="' + ICON_D[k] + '"/>';
+  });
 
   function iconSvg(name, size) {
     var s = size || 18;
@@ -57,6 +62,17 @@
       h = Math.imul(h, 16777619);
     }
     return h >>> 0;
+  }
+
+  // Small seeded random generator, so each wish always gets the same spot on the tree
+  function mulberry32(seed) {
+    var t = seed >>> 0;
+    return function () {
+      t += 0x6D2B79F5;
+      var r = Math.imul(t ^ (t >>> 15), 1 | t);
+      r ^= r + Math.imul(r ^ (r >>> 7), 61 | r);
+      return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
+    };
   }
 
   function seededOrder(n, seed) {
@@ -304,6 +320,29 @@
 
   function treeCapacity(scale) { return buildSlots(scale || 0.8).length; }
 
+  // Random but repeatable spots inside the tree outline (seeded by each wish's id),
+  // weighted towards the wider lower branches, never overlapping another tag
+  function scatterTags(wishes, scale) {
+    var tw = 40 * scale;
+    var th = (54 + 14) * scale;
+    var placed = [];
+    for (var i = 0; i < wishes.length; i++) {
+      var rnd = mulberry32(hash('tag:' + wishes[i].id));
+      for (var k = 0; k < 90; k++) {
+        var y = TAGS_START_Y + rnd() * (638 - th - TAGS_START_Y);
+        var hw = Math.min(halfWidthAt(y + 14 * scale), halfWidthAt(y + th * 0.5), halfWidthAt(y + th)) - tw / 2 - 6;
+        if (hw <= 0 || rnd() > (hw + 40) / 300) continue;
+        var x = 310 + (rnd() * 2 - 1) * hw;
+        var ok = true;
+        for (var j = 0; j < placed.length; j++) {
+          if (Math.abs(placed[j].x - x) < tw + 5 * scale && Math.abs(placed[j].y - y) < th + 3 * scale) { ok = false; break; }
+        }
+        if (ok) { placed.push({ w: wishes[i], x: x, y: y }); break; }
+      }
+    }
+    return placed;
+  }
+
   var LIGHTS = [
     [248, 196], [279, 203], [311, 204], [343, 200], [376, 189],
     [204, 309], [231, 316], [258, 320], [285, 322], [312, 323], [339, 320], [366, 316], [393, 310], [420, 301],
@@ -328,8 +367,12 @@
       p.push('<path d="' + d + '" fill="none" stroke="#E3B45A" stroke-width="1.5" opacity="0.55"/>');
     });
     LIGHTS.forEach(function (l, i) {
-      p.push('<circle cx="' + l[0] + '" cy="' + l[1] + '" r="7" fill="#FFD98A" opacity="0.22"/>');
-      p.push('<circle class="wt-light" style="animation-delay:' + ((i * 370) % 2600) + 'ms" cx="' + l[0] + '" cy="' + l[1] + '" r="2.8" fill="#FFF1C9"/>');
+      // each light glows high and low at its own pace
+      var dur = (1.6 + ((i * 7) % 11) * 0.22).toFixed(2) + 's';
+      var del = (-((i * 0.37) % 3)).toFixed(2) + 's';
+      var anim = 'animation-duration:' + dur + ';animation-delay:' + del;
+      p.push('<circle class="wt-halo" style="' + anim + '" cx="' + l[0] + '" cy="' + l[1] + '" r="9" fill="#FFD98A"/>');
+      p.push('<circle class="wt-light" style="' + anim + '" cx="' + l[0] + '" cy="' + l[1] + '" r="2.9" fill="#FFF4D6"/>');
     });
     BALLS.forEach(function (b) {
       p.push('<rect x="' + (b[0] - 4) + '" y="' + (b[1] - b[2] - 5) + '" width="8" height="5" rx="1" fill="#C9A36B"/>');
@@ -347,11 +390,17 @@
   var TREE_CSS = [
     '.wt-stage{position:relative;width:100%;aspect-ratio:620/760;container-type:inline-size}',
     '.wt-art{position:absolute;top:0;left:0;width:100%;height:100%;display:block}',
-    '.wt-light{animation:wt-twinkle 2.6s ease-in-out infinite}',
-    '@keyframes wt-twinkle{0%,100%{opacity:1}50%{opacity:.45}}',
-    /* employee tags */
-    '.wt-tag{position:absolute;padding:0;margin:0;border:0;background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;width:var(--w);transform:translateX(-50%) rotate(var(--r,0deg));transform-origin:50% 0;transition:opacity .35s ease,transform .35s ease;-webkit-tap-highlight-color:transparent}',
-    '.wt-tag:hover{transform:translateX(-50%) rotate(calc(var(--r,0deg) * -1))}',
+    /* lights glow high and low */
+    '.wt-light{animation:wt-glow 2.4s ease-in-out infinite}',
+    '.wt-halo{transform-box:fill-box;transform-origin:center;animation:wt-halo 2.4s ease-in-out infinite}',
+    '@keyframes wt-glow{0%,100%{opacity:1}50%{opacity:.3}}',
+    '@keyframes wt-halo{0%,100%{opacity:.5;transform:scale(1.5)}50%{opacity:.05;transform:scale(.6)}}',
+    /* employee tags: the button places the tag, .wt-swing makes it wiggle */
+    '.wt-tag{position:absolute;padding:0;margin:0;border:0;background:transparent;cursor:pointer;width:var(--w);transform:translateX(-50%) rotate(var(--r,0deg));transform-origin:50% 0;transition:opacity .35s ease,transform .35s ease;-webkit-tap-highlight-color:transparent}',
+    '.wt-swing{display:flex;flex-direction:column;align-items:center;transform-origin:50% 0;animation:wt-wiggle var(--wd,3s) ease-in-out var(--wdel,0s) infinite}',
+    '@keyframes wt-wiggle{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(4deg)}}',
+    '.wt-tag:hover .wt-swing{animation:wt-jiggle .7s ease-in-out}',
+    '@keyframes wt-jiggle{0%{transform:rotate(0)}20%{transform:rotate(-14deg)}45%{transform:rotate(10deg)}70%{transform:rotate(-5deg)}100%{transform:rotate(0)}}',
     '.wt-string{display:block;width:1px;height:var(--str);background:#D9C59A}',
     '.wt-body{position:relative;display:flex;align-items:center;justify-content:center;width:var(--w);height:var(--h);background:var(--bg);color:var(--fg);border-radius:3px 3px 5px 5px;box-shadow:0 3px 6px rgba(0,0,0,.35);transition:box-shadow .25s ease}',
     '.wt-body svg{width:var(--ic);height:var(--ic);margin-top:var(--icm)}',
@@ -374,7 +423,7 @@
     '.wt-lstar svg{width:62%;height:62%}',
     '.wt-leader[aria-pressed="true"]{animation:none}',
     '.wt-leader[aria-pressed="true"] .wt-lball{box-shadow:inset 0 0 0 calc(var(--d) * .06) #F2C766,0 0 0 3px #F6EEDC,0 0 0 8px rgba(242,199,102,.45),0 8px 18px rgba(0,0,0,.45)}',
-    '@media (prefers-reduced-motion:reduce){.wt-tag,.wt-body{transition:none}.wt-tag.wt-new,.wt-light,.wt-leader{animation:none}.wt-tag:hover{transform:translateX(-50%) rotate(var(--r,0deg))}}'
+    '@media (prefers-reduced-motion:reduce){.wt-tag,.wt-body{transition:none}.wt-tag.wt-new,.wt-light,.wt-halo,.wt-leader,.wt-swing,.wt-tag:hover .wt-swing{animation:none}}'
   ].join('\n');
 
   function ensureCss() {
@@ -420,17 +469,14 @@
     var st = container._wt;
     st.onSelect = o.onSelect || null;
 
+    // Scatter the tags at random (repeatable) spots, shrinking them if the tree gets crowded
     var scale = o.scale;
-    var slots;
-    if (scale) {
-      slots = buildSlots(scale);
-    } else {
-      var tries = [1, 0.8, 0.68, 0.58];
-      for (var t = 0; t < tries.length; t++) {
-        scale = tries[t];
-        slots = buildSlots(scale);
-        if (wishes.length <= slots.length) break;
-      }
+    var spots;
+    var tries = scale ? [scale] : [1, 0.8, 0.68, 0.58];
+    for (var t = 0; t < tries.length; t++) {
+      scale = tries[t];
+      spots = scatterTags(wishes, scale);
+      if (spots.length >= wishes.length) break;
     }
 
     // Sizes in container units so everything grows and shrinks with the tree (100cqw = 620 tree units)
@@ -464,17 +510,18 @@
     container.querySelector('.wt-crown').innerHTML = crown;
 
     // Employee tags
-    var order = seededOrder(slots.length, 2026);
-    var shown = wishes.slice(0, slots.length);
+    var shown = spots.map(function (sp) { return sp.w; });
     var html = '';
     var newCount = 0;
     var seenNext = {};
-    for (var i = 0; i < shown.length; i++) {
-      var w = shown[i];
+    for (var i = 0; i < spots.length; i++) {
+      var w = spots[i].w;
       var id = String(w.id);
-      var s = slots[order[i]];
+      var s = spots[i];
       var pal = PALETTE[w.tag_color] || PALETTE.cream;
-      var rot = (hash(id) % 11) - 5;
+      var hv = hash(id);
+      var rot = (hv % 11) - 5;
+      var wiggle = '--wd:' + (2.4 + (hv % 17) / 10).toFixed(1) + 's;--wdel:-' + ((hv >>> 5) % 30 / 10).toFixed(1) + 's;';
       var isNew = !st.first && !st.seen[id];
       var dim = typeof o.isDimmed === 'function' ? !!o.isDimmed(w) : false;
       var wsel = sel.kind === 'wish' && String(sel.id) === id;
@@ -484,11 +531,11 @@
         ' data-kind="wish" data-id="' + esc(id) + '" aria-pressed="' + (wsel ? 'true' : 'false') + '"' +
         ' aria-label="' + esc('Wish from ' + displayName(w)) + '"' +
         ' style="left:' + (s.x / 6.2).toFixed(2) + '%;top:' + (s.y / 7.6).toFixed(2) + '%;' +
-        '--r:' + rot + 'deg;' + sizeVars + '--bg:' + pal.bg + ';--fg:' + pal.fg + ';' +
+        '--r:' + rot + 'deg;' + sizeVars + wiggle + '--bg:' + pal.bg + ';--fg:' + pal.fg + ';' +
         (isNew ? 'animation-delay:' + ((newCount++ % 8) * 90) + 'ms;' : '') + '">' +
-        '<span class="wt-string"></span>' +
+        '<span class="wt-swing"><span class="wt-string"></span>' +
         '<span class="wt-body"><span class="wt-hole"></span>' + iconSvg(w.charm, Math.round(18 * scale)) + '</span>' +
-        '</button>';
+        '</span></button>';
     }
     container.querySelector('.wt-tags').innerHTML = html;
     st.seen = seenNext;
@@ -500,7 +547,7 @@
       var again = container.querySelector(sel2);
       if (again) again.focus({ preventScroll: true });
     }
-    return { shown: shown, leaders: leaders, scale: scale, capacity: slots.length };
+    return { shown: shown, leaders: leaders, scale: scale };
   }
 
   // Forget which tags were already shown, so the next render doesn't animate them as "new"
@@ -521,6 +568,10 @@
     siteName: siteName,
     esc: esc,
     iconSvg: iconSvg,
+    ICON_D: ICON_D,
+    STAR_D: 'M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z',
+    hash: hash,
+    random: mulberry32,
     initials: initials,
     client: getClient,
     fetchApproved: fetchApproved,
