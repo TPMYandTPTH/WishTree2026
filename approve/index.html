@@ -1,0 +1,758 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Approvals · TP Wish Tree 2026</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#4B4C6A">
+<link rel="icon" type="image/png" href="../assets/tp-logo-white.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;700&family=Noto+Sans+Thai:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+@font-face{font-family:'TP Sans';font-weight:300;font-display:swap;src:local('TP Sans Light'),local('TPSans-Light'),url('../fonts/TPSans-Light.ttf') format('truetype')}
+@font-face{font-family:'TP Sans';font-weight:400;font-display:swap;src:local('TP Sans'),local('TPSans-Regular'),url('../fonts/TPSans-Regular.ttf') format('truetype')}
+@font-face{font-family:'TP Sans';font-weight:500;font-display:swap;src:local('TP Sans Medium'),local('TPSans-Medium'),url('../fonts/TPSans-Medium.ttf') format('truetype')}
+@font-face{font-family:'TP Sans';font-weight:700;font-display:swap;src:local('TP Sans Bold'),local('TPSans-Bold'),url('../fonts/TPSans-Bold.ttf') format('truetype')}
+
+:root{
+  --slate:#4B4C6A; --slate-2:#848DAD; --ink:#414141; --muted:#676767; --line:#E6E6E5; --line-2:#CCCCCC;
+  --page:#F7F5F2; --card:#FFFFFF; --violet-soft:#E2DFE8;
+  --teal:#00AF9B; --teal-ink:#04261F; --teal-soft:#E3F6F3; --teal-dark:#00695C;
+  --carmine:#AB2C37; --carmine-soft:#F8E5E7;
+  --orange-ink:#A33A00; --orange-soft:#FFF1E8; --orange-line:#FFC7A6;
+  --focus:#00AF9B;
+  --font:'TP Sans','Noto Sans','Noto Sans Thai',Calibri,system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+[hidden]{display:none !important}
+html,body{margin:0;background:var(--page);color:var(--ink);font-family:var(--font);-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font-family:inherit}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+h1[tabindex="-1"]:focus{outline:none}
+a{color:var(--slate)}
+
+.demo-bar{padding:8px 16px;background:#FFF1E8;color:#7A2C00;font-size:13px;font-weight:500;text-align:center}
+.top{background:var(--slate);color:#fff}
+.top-in{max-width:1320px;margin:0 auto;padding:14px 32px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 24px}
+.brand{display:flex;align-items:center;gap:14px}
+.logo{height:30px;width:auto;display:block}
+.brand-divider{width:1px;height:22px;background:rgba(255,255,255,.35)}
+.brand-name{font-size:17px;font-weight:500}
+.me{display:flex;align-items:center;gap:12px;font-size:14px}
+.me button{min-height:36px;padding:0 14px;border:1px solid rgba(255,255,255,.5);border-radius:999px;background:transparent;color:#fff;font-size:14px;cursor:pointer}
+.me button:hover{background:rgba(255,255,255,.12)}
+
+.wrap{max-width:1320px;margin:0 auto;padding:28px 32px 56px}
+
+/* sign-in style views */
+.center{max-width:480px;margin:40px auto 0;display:flex;flex-direction:column;gap:18px}
+.center h1{margin:0;font-size:32px;font-weight:300;color:var(--slate)}
+.center p{margin:0;font-size:15px;line-height:1.55;color:var(--muted)}
+.panel{display:flex;flex-direction:column;gap:14px;padding:22px;border-radius:16px;background:var(--card);border:1px solid var(--line)}
+.panel label{font-size:14px;font-weight:700}
+.input{width:100%;height:48px;padding:0 14px;border:1.5px solid var(--line-2);border-radius:10px;background:#fff;color:var(--ink);font-size:16px}
+.code-input{height:58px;text-align:center;font-size:24px;letter-spacing:.5em}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;border-radius:999px;border:0;font-size:15px;font-weight:700;cursor:pointer;text-decoration:none}
+.btn-block{width:100%;min-height:50px}
+.btn-slate{background:var(--slate);color:#fff}
+.btn-slate:hover{background:#3d3e58}
+.btn-google{background:#fff;color:#1F1F1F;border:1.5px solid var(--line-2);font-weight:500}
+.btn-approve{background:var(--teal);color:var(--teal-ink)}
+.btn-approve:hover{background:#00c2ac}
+.btn-ghost{background:#fff;color:var(--slate);border:1px solid var(--slate-2);font-weight:500}
+.btn-ghost:hover{background:#f2f1f6}
+.btn-reject{background:#fff;color:var(--carmine);border:1px solid var(--carmine);font-weight:500}
+.btn-reject:hover{background:var(--carmine-soft)}
+.btn[disabled]{opacity:.55;cursor:progress}
+.err{margin:0;padding:10px 12px;border-radius:10px;background:var(--carmine-soft);color:#7E1F28;font-size:14px}
+.err:empty{display:none}
+.link{min-height:40px;padding:0;border:0;background:transparent;color:var(--slate);font-size:14px;text-decoration:underline;cursor:pointer}
+
+/* main */
+.head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:22px}
+.head h1{margin:0;font-size:34px;font-weight:300;line-height:1.1;color:var(--slate)}
+.head p{margin:6px 0 0;font-size:15px;color:var(--muted)}
+.pill{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;font-size:13px;font-weight:700}
+.pill .d{width:8px;height:8px;border-radius:50%}
+.pill.on{background:var(--teal-soft);color:var(--teal-dark)}
+.pill.on .d{background:var(--teal)}
+.pill.off{background:var(--orange-soft);color:var(--orange-ink)}
+.pill.off .d{background:#FF5C00}
+
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:24px}
+.stat{display:flex;flex-direction:column;gap:6px;padding:16px 18px;border-radius:12px;background:var(--card);border:1px solid var(--line)}
+.stat span:first-child{font-size:13px;color:var(--muted)}
+.stat span:last-child{font-size:32px;font-weight:300;line-height:1;color:var(--slate);font-variant-numeric:tabular-nums}
+
+.layout{display:flex;flex-wrap:wrap;align-items:flex-start;gap:24px}
+.main{flex:999 1 560px;min-width:0;display:flex;flex-direction:column;gap:14px}
+.side{flex:1 1 300px;display:flex;flex-direction:column;gap:16px}
+
+.kinds{display:flex;gap:8px;flex-wrap:wrap}
+.kind{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 16px;border:1px solid var(--line-2);border-radius:999px;background:#fff;color:var(--ink);font-size:15px;font-weight:500;cursor:pointer}
+.kind[aria-pressed="true"]{background:var(--slate);border-color:var(--slate);color:#fff}
+.badge{min-width:22px;padding:2px 7px;border-radius:999px;background:var(--line);color:var(--ink);font-size:12px;font-weight:700;text-align:center}
+.kind[aria-pressed="true"] .badge{background:#fff;color:var(--slate)}
+.badge.hot{background:#FF5C00;color:#fff}
+
+.bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px;border-bottom:1px solid var(--line)}
+.tabs{display:flex;gap:2px;max-width:100%;overflow-x:auto;scrollbar-width:none}
+.tab{flex:none;white-space:nowrap;display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 12px;margin-bottom:-1px;border:0;border-bottom:3px solid transparent;background:transparent;color:var(--muted);font-size:15px;font-weight:500;cursor:pointer}
+.tab[aria-selected="true"]{border-bottom-color:var(--slate);color:var(--slate)}
+.filters{display:flex;flex-wrap:wrap;gap:8px;padding-bottom:8px}
+.filters select,.filters input{height:38px;padding:0 10px;border:1px solid var(--line-2);border-radius:8px;background:#fff;color:var(--ink);font-size:14px}
+.filters input{width:180px}
+.bulk{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border-radius:12px;background:var(--teal-soft);color:var(--teal-dark);font-size:14px}
+
+.item{display:flex;flex-direction:column;gap:12px;padding:18px 20px;border-radius:12px;background:var(--card);border:1px solid var(--line)}
+.item.flagged{border-color:var(--orange-line)}
+.item-top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 14px}
+.who{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
+.who b{font-size:15px}
+.who .where{font-size:14px;color:var(--muted)}
+.chip{padding:3px 9px;border-radius:999px;background:var(--violet-soft);color:var(--slate);font-size:12px;font-weight:500}
+.chip.tag{display:inline-flex;align-items:center;gap:6px}
+.chip.tag i{width:9px;height:12px;border-radius:2px}
+.time{font-size:13px;color:var(--muted)}
+.flags{display:flex;flex-wrap:wrap;gap:6px}
+.flag{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;background:var(--orange-soft);border:1px solid var(--orange-line);color:var(--orange-ink);font-size:12px;font-weight:700}
+.msg{margin:0;font-size:17px;line-height:1.5;color:var(--ink);white-space:pre-line;overflow-wrap:anywhere}
+.meta{font-size:12px;color:var(--muted)}
+.actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.likes{display:inline-flex;align-items:center;gap:6px;margin-right:auto;font-size:14px;color:var(--muted)}
+.likes svg{fill:#E04C5C}
+.edit-box{display:flex;flex-direction:column;gap:6px}
+.edit-box textarea{width:100%;min-height:90px;padding:12px 14px;border:1.5px solid var(--slate);border-radius:10px;color:var(--ink);font-size:16px;line-height:1.45;resize:vertical}
+.edit-foot{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
+.empty{padding:44px 20px;border:1px dashed var(--line-2);border-radius:12px;text-align:center;color:var(--muted);font-size:15px}
+.more{align-self:center}
+
+.box{display:flex;flex-direction:column;gap:12px;padding:18px 20px;border-radius:12px;background:var(--card);border:1px solid var(--line)}
+.box h2{margin:0;font-size:16px;font-weight:700;color:var(--slate)}
+.rule{display:flex;gap:10px;font-size:14px;line-height:1.45}
+.rule svg{flex:none;margin-top:2px}
+.switch{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:14px;line-height:1.4;cursor:pointer}
+.switch input{appearance:none;-webkit-appearance:none;flex:none;width:44px;height:26px;border-radius:999px;background:var(--line-2);position:relative;cursor:pointer;transition:background .2s}
+.switch input::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .2s}
+.switch input:checked{background:var(--teal)}
+.switch input:checked::after{transform:translateX(18px)}
+.small{font-size:12px;line-height:1.45;color:var(--muted)}
+.links a{display:block;padding:6px 0;font-size:14px}
+
+@media (max-width:760px){
+  .top-in,.wrap{padding-left:16px;padding-right:16px}
+  .wrap{padding-top:18px}
+  .head h1{font-size:28px}
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .stat span:last-child{font-size:26px}
+  .filters input{width:100%}
+  .filters{width:100%}
+  .filters select{flex:1}
+  .item{padding:16px}
+  .tab{padding:0 8px;font-size:14px}
+  .actions .btn{flex:1}
+  .likes{width:100%}
+}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../config.js"></script>
+<script src="../wishtree.js"></script>
+</head>
+<body>
+<div id="demoBar" class="demo-bar" role="status" hidden>Demo mode: sample messages only, decisions stay in this browser. In live mode only people on the approvers list can open this page.</div>
+<header class="top">
+  <div class="top-in">
+    <div class="brand">
+      <img id="logo" class="logo" alt="TP" hidden>
+      <span class="brand-divider" aria-hidden="true"></span>
+      <span class="brand-name">Wish Tree · Approvals</span>
+    </div>
+    <div class="me" id="meBox" hidden>
+      <span id="meEmail"></span>
+      <button type="button" id="signOutBtn">Sign out</button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <section id="view-loading" class="view"><div class="center"><p>Checking your access…</p></div></section>
+
+  <section id="view-signin" class="view" hidden>
+    <div class="center">
+      <h1 tabindex="-1">Approvals</h1>
+      <p>For the Wish Tree team. Sign in with your TP work account to approve wishes and leaders' messages before they go on the tree and the site TVs.</p>
+      <div class="panel">
+        <button type="button" id="googleBtn" class="btn btn-google btn-block" hidden>
+          <svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>
+          Continue with your TP Google account
+        </button>
+        <form id="emailForm" novalidate hidden style="display:flex;flex-direction:column;gap:10px">
+          <label for="email">Your TP work email</label>
+          <input id="email" class="input" type="email" autocomplete="email" autocapitalize="off" spellcheck="false">
+          <button type="submit" id="sendCodeBtn" class="btn btn-slate btn-block">Send my code</button>
+        </form>
+        <p id="signinErr" class="err" role="alert"></p>
+      </div>
+    </div>
+  </section>
+
+  <section id="view-code" class="view" hidden>
+    <div class="center">
+      <h1 tabindex="-1">Check your inbox</h1>
+      <div class="panel">
+        <form id="codeForm" novalidate style="display:flex;flex-direction:column;gap:10px">
+          <label for="code" id="codeLabel">Enter the 6-digit code we sent you</label>
+          <input id="code" class="input code-input" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6">
+          <button type="submit" id="verifyBtn" class="btn btn-slate btn-block">Continue</button>
+        </form>
+        <p id="codeErr" class="err" role="alert"></p>
+        <button type="button" id="backToEmail" class="link" style="align-self:flex-start">Use a different email</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="view-denied" class="view" hidden>
+    <div class="center">
+      <h1 tabindex="-1">This page is for the Wish Tree team</h1>
+      <p id="deniedText"></p>
+      <p>If you should approve messages, ask the Wish Tree owner to add your work email to the approvers list.</p>
+      <button type="button" class="btn btn-ghost btn-block" id="deniedSignOut">Sign out</button>
+    </div>
+  </section>
+
+  <section id="view-main" class="view" hidden>
+    <div class="head">
+      <div>
+        <h1 tabindex="-1">Approvals</h1>
+        <p>Nothing shows on the tree or the TVs until it's approved here.</p>
+      </div>
+      <span id="openPill" class="pill on"><span class="d" aria-hidden="true"></span><span id="openText">Accepting new wishes</span></span>
+    </div>
+
+    <div class="stats" aria-live="polite">
+      <div class="stat"><span>Waiting</span><span id="sWaiting">0</span></div>
+      <div class="stat"><span>Approved</span><span id="sApproved">0</span></div>
+      <div class="stat"><span>Not approved</span><span id="sRejected">0</span></div>
+      <div class="stat"><span>Likes</span><span id="sLikes">0</span></div>
+    </div>
+
+    <div class="layout">
+      <section class="main" aria-label="Messages">
+        <div class="kinds" role="group" aria-label="Type of message">
+          <button type="button" class="kind" data-kind="wish" aria-pressed="true">Employee wishes <span class="badge" id="kWish">0</span></button>
+          <button type="button" class="kind" data-kind="leader" aria-pressed="false">Leaders' messages <span class="badge" id="kLeader">0</span></button>
+        </div>
+
+        <div class="bar">
+          <div class="tabs" role="tablist" aria-label="Status">
+            <button type="button" class="tab" role="tab" data-status="pending" aria-selected="true">Waiting <span class="badge" id="tPending">0</span></button>
+            <button type="button" class="tab" role="tab" data-status="approved" aria-selected="false">Approved <span class="badge" id="tApproved">0</span></button>
+            <button type="button" class="tab" role="tab" data-status="rejected" aria-selected="false">Not approved <span class="badge" id="tRejected">0</span></button>
+          </div>
+          <div class="filters">
+            <select id="siteFilter" aria-label="Site"></select>
+            <input id="search" type="search" placeholder="Search words or names" aria-label="Search">
+          </div>
+        </div>
+
+        <div id="bulk" class="bulk" hidden>
+          <span id="bulkText"></span>
+          <button type="button" id="bulkBtn" class="btn btn-approve"></button>
+        </div>
+
+        <div id="list" style="display:flex;flex-direction:column;gap:12px"></div>
+        <button type="button" id="moreBtn" class="btn btn-ghost more" hidden>Show more</button>
+        <p id="mainErr" class="err" role="alert"></p>
+      </section>
+
+      <aside class="side">
+        <div class="box">
+          <h2>Approve if it is</h2>
+          <div class="rule"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00AF9B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Kind and respectful</div>
+          <div class="rule"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00AF9B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Free of client or account names</div>
+          <div class="rule"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00AF9B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Free of phone numbers, emails or other personal details</div>
+          <div class="rule"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00AF9B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Nothing confidential about work</div>
+          <div class="small">Orange flags are automatic checks for phone numbers and emails. A person always decides. Use Edit to fix a small thing and approve in one step.</div>
+        </div>
+
+        <div class="box">
+          <h2>Campaign switches</h2>
+          <label class="switch"><span>Accept new wishes</span><input type="checkbox" id="swOpen"></label>
+          <label class="switch"><span>Leaders' messages need approval</span><input type="checkbox" id="swLeaders"></label>
+          <p id="settingsMsg" class="small" role="status"></p>
+        </div>
+
+        <div class="box links">
+          <h2>Pages</h2>
+          <a id="lnTree" href="../index.html" target="_blank" rel="noopener">The tree</a>
+          <a id="lnTv" href="../tv/" target="_blank" rel="noopener">TV screen</a>
+          <a id="lnWish" href="../wish.html" target="_blank" rel="noopener">Hang a wish</a>
+          <a id="lnLeaders" href="../leaders/" target="_blank" rel="noopener">Leaders' messages</a>
+        </div>
+      </aside>
+    </div>
+  </section>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var C = window.WishCore;
+  var CFG = C.cfg;
+  var DOMAIN = (CFG.ALLOWED_EMAIL_DOMAINS && CFG.ALLOWED_EMAIL_DOMAINS[0]) || 'tp.com';
+  var AUTH = CFG.AUTH_MODE === 'email' ? 'email' : 'google';
+  var MAX = { wish: Number(CFG.MAX_LENGTH) || 150, leader: Number(CFG.LEADER_MAX_LENGTH) || 250 };
+  var PAGE = 40;
+
+  var S = {
+    view: 'loading', user: null, email: '',
+    kind: 'wish', status: 'pending', site: 'all', q: '',
+    wishes: [], leaders: [], likes: {},
+    settings: { submissions_open: true, leaders_need_approval: true },
+    editing: null, draft: '', busy: {}, shown: PAGE, bulkArmed: false
+  };
+  var sb = null;
+  var $ = function (id) { return document.getElementById(id); };
+  var qsa = function (sel) { return Array.prototype.slice.call(document.querySelectorAll(sel)); };
+  var esc = C.esc;
+
+  function show(view) {
+    S.view = view;
+    qsa('.view').forEach(function (v) { v.hidden = v.id !== 'view-' + view; });
+    $('meBox').hidden = !(S.user && view === 'main');
+    var h = document.querySelector('#view-' + view + ' h1');
+    if (h) setTimeout(function () { h.focus({ preventScroll: true }); }, 0);
+  }
+
+  function ago(iso) {
+    if (!iso) return '';
+    var m = Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 60000));
+    if (m < 1) return 'just now';
+    if (m < 60) return m + ' min ago';
+    var h = Math.round(m / 60);
+    if (h < 24) return h + (h === 1 ? ' hour ago' : ' hours ago');
+    var d = Math.round(h / 24);
+    return d + (d === 1 ? ' day ago' : ' days ago');
+  }
+  function fmt(n) { return Number(n || 0).toLocaleString('en-US'); }
+
+  /* ---------- Data ---------- */
+  function load() {
+    $('mainErr').textContent = '';
+    if (C.demo) {
+      var q = C.demoQueue();
+      S.wishes = q.wishes;
+      S.leaders = q.leaders;
+      S.settings = C.demoLoad('wt-demo-settings', { submissions_open: true, leaders_need_approval: true });
+      return Promise.all([C.fetchApproved(), C.fetchLeaders()]).then(function (r) {
+        S.likes = {};
+        r[0].forEach(function (w) { S.likes['wish:' + w.id] = w.like_count || 0; });
+        r[1].forEach(function (l) { S.likes['leader:' + l.id] = l.like_count || 0; });
+        render();
+      });
+    }
+    return Promise.all([
+      sb.from('wishes').select('id,created_at,email,message,display_mode,first_name,site,lang,tag_color,charm,status,flags,reviewed_at,reviewed_by,approved_at').order('created_at', { ascending: false }).limit(5000),
+      sb.from('leader_messages').select('id,created_at,updated_at,email,display_name,title,message,lang,status,hidden,reviewed_at,reviewed_by').order('updated_at', { ascending: false }),
+      sb.rpc('get_approved_wishes'),
+      sb.rpc('get_leader_messages'),
+      sb.rpc('get_settings')
+    ]).then(function (r) {
+      for (var i = 0; i < r.length; i++) if (r[i].error) throw r[i].error;
+      S.wishes = r[0].data || [];
+      S.leaders = r[1].data || [];
+      S.likes = {};
+      (r[2].data || []).forEach(function (w) { S.likes['wish:' + w.id] = w.like_count || 0; });
+      (r[3].data || []).forEach(function (l) { S.likes['leader:' + l.id] = l.like_count || 0; });
+      var st = Array.isArray(r[4].data) ? r[4].data[0] : r[4].data;
+      if (st) S.settings = st;
+      render();
+    }).catch(function (err) {
+      console.error(err);
+      $('mainErr').textContent = 'Could not load the messages. Check your connection and refresh.';
+    });
+  }
+
+  function items() { return S.kind === 'leader' ? S.leaders : S.wishes; }
+  function countBy(list, status) { return list.filter(function (x) { return (x.status || 'pending') === status; }).length; }
+
+  function filtered() {
+    var q = S.q.trim().toLowerCase();
+    return items().filter(function (x) {
+      if ((x.status || 'pending') !== S.status) return false;
+      if (S.kind === 'wish' && S.site !== 'all' && x.site !== S.site) return false;
+      if (q) {
+        var hay = [x.message, x.first_name, x.display_name, x.title, x.email].join(' ').toLowerCase();
+        if (hay.indexOf(q) === -1) return false;
+      }
+      return true;
+    });
+  }
+
+  /* ---------- Render ---------- */
+  function render() {
+    var waiting = countBy(S.wishes, 'pending') + countBy(S.leaders, 'pending');
+    $('sWaiting').textContent = fmt(waiting);
+    $('sApproved').textContent = fmt(countBy(S.wishes, 'approved') + countBy(S.leaders, 'approved'));
+    $('sRejected').textContent = fmt(countBy(S.wishes, 'rejected') + countBy(S.leaders, 'rejected'));
+    var likes = 0;
+    Object.keys(S.likes).forEach(function (k) { likes += S.likes[k] || 0; });
+    $('sLikes').textContent = fmt(likes);
+
+    var kw = countBy(S.wishes, 'pending'), kl = countBy(S.leaders, 'pending');
+    $('kWish').textContent = fmt(kw);
+    $('kLeader').textContent = fmt(kl);
+    $('kWish').classList.toggle('hot', kw > 0 && S.kind !== 'wish');
+    $('kLeader').classList.toggle('hot', kl > 0 && S.kind !== 'leader');
+    qsa('.kind').forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-kind') === S.kind ? 'true' : 'false'); });
+
+    var list = items();
+    $('tPending').textContent = fmt(countBy(list, 'pending'));
+    $('tApproved').textContent = fmt(countBy(list, 'approved'));
+    $('tRejected').textContent = fmt(countBy(list, 'rejected'));
+    qsa('.tab').forEach(function (b) { b.setAttribute('aria-selected', b.getAttribute('data-status') === S.status ? 'true' : 'false'); });
+    $('siteFilter').hidden = S.kind !== 'wish';
+
+    $('openPill').className = 'pill ' + (S.settings.submissions_open ? 'on' : 'off');
+    $('openText').textContent = S.settings.submissions_open ? 'Accepting new wishes' : 'New wishes closed';
+    $('swOpen').checked = !!S.settings.submissions_open;
+    $('swLeaders').checked = !!S.settings.leaders_need_approval;
+
+    renderBulk();
+    renderList();
+  }
+
+  function renderBulk() {
+    var clean = S.kind === 'wish' && S.status === 'pending'
+      ? filtered().filter(function (w) { return !(w.flags && w.flags.length); }) : [];
+    $('bulk').hidden = clean.length < 2;
+    if (clean.length < 2) { S.bulkArmed = false; return; }
+    $('bulkText').textContent = clean.length + ' waiting wishes have no flags.';
+    $('bulkBtn').textContent = S.bulkArmed ? 'Click again to approve ' + clean.length : 'Approve all ' + clean.length + ' without flags';
+  }
+
+  var SWATCH = { cream: '#F6EEDC', red: '#AB2C37', gold: '#E3B45A' };
+
+  function itemHtml(x) {
+    var isW = S.kind === 'wish';
+    var key = S.kind + ':' + x.id;
+    var status = x.status || 'pending';
+    var editing = S.editing === key;
+    var busy = !!S.busy[key];
+    var flags = isW && x.flags && x.flags.length ? x.flags : [];
+    var name = isW ? (x.display_mode === 'name' && x.first_name ? x.first_name : 'Anonymous') : (x.display_name || 'Leader');
+    var where = isW ? C.displayWhere(x) : (x.title || '');
+    var when = isW ? x.created_at : (x.updated_at || x.created_at);
+    var h = '<article class="item' + (flags.length ? ' flagged' : '') + '" data-key="' + esc(key) + '" lang="' + esc(x.lang || 'en') + '">';
+    h += '<div class="item-top"><div class="who"><b>' + esc(name) + '</b>';
+    if (where) h += '<span class="where">' + esc(where) + '</span>';
+    h += '<span class="chip">' + esc(C.LANG_LABEL[x.lang] || 'English') + '</span>';
+    if (isW) h += '<span class="chip tag"><i style="background:' + (SWATCH[x.tag_color] || SWATCH.cream) + ';box-shadow:inset 0 0 0 1px rgba(0,0,0,.15)"></i>' + esc((x.charm || 'snow').replace(/^./, function (c) { return c.toUpperCase(); })) + '</span>';
+    if (!isW && x.hidden) h += '<span class="chip">Hidden</span>';
+    h += '</div><span class="time">' + esc(ago(when)) + '</span></div>';
+    if (flags.length) {
+      h += '<div class="flags">' + flags.map(function (f) {
+        return '<span class="flag"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4 2.5 20h19zM12 10v4M12 17h.01"/></svg>' + esc(f) + '</span>';
+      }).join('') + '</div>';
+    }
+    if (editing) {
+      h += '<div class="edit-box"><label for="draft" class="meta">Edit before approving</label>' +
+        '<textarea id="draft" maxlength="' + MAX[S.kind] + '">' + esc(S.draft) + '</textarea>' +
+        '<div class="edit-foot"><span>Keep the meaning; fix only what breaks the rules.</span><span id="draftCount">' + S.draft.length + ' / ' + MAX[S.kind] + '</span></div></div>';
+    } else {
+      h += '<p class="msg">' + esc(x.message) + '</p>';
+    }
+    var metaBits = [];
+    if (x.email) metaBits.push('From ' + x.email);
+    if (status !== 'pending' && x.reviewed_by) metaBits.push((status === 'approved' ? 'Approved by ' : 'Not approved by ') + x.reviewed_by);
+    if (metaBits.length) h += '<div class="meta">' + esc(metaBits.join(' · ')) + '</div>';
+
+    h += '<div class="actions">';
+    if (status === 'approved') {
+      h += '<span class="likes"><svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.3s-7.4-4.3-9.2-9C1.5 7.9 3.7 4.6 7 4.6c2 0 3.6 1.1 5 3 1.4-1.9 3-3 5-3 3.3 0 5.5 3.3 4.2 6.7-1.8 4.7-9.2 9-9.2 9z"/></svg>' + fmt(S.likes[key] || 0) + ' likes</span>';
+    }
+    var dis = busy ? ' disabled' : '';
+    if (editing) {
+      h += '<button type="button" class="btn btn-approve" data-act="save"' + dis + '>Save and approve</button>';
+      h += '<button type="button" class="btn btn-ghost" data-act="cancel"' + dis + '>Cancel</button>';
+    } else if (status === 'pending') {
+      h += '<button type="button" class="btn btn-approve" data-act="approve"' + dis + '>' + checkIcon() + 'Approve</button>';
+      h += '<button type="button" class="btn btn-ghost" data-act="edit"' + dis + '>Edit</button>';
+      h += '<button type="button" class="btn btn-reject" data-act="reject"' + dis + '>Don\'t approve</button>';
+    } else if (status === 'approved') {
+      h += '<button type="button" class="btn btn-ghost" data-act="edit"' + dis + '>Edit</button>';
+      h += '<button type="button" class="btn btn-reject" data-act="reject"' + dis + '>Take down</button>';
+    } else {
+      h += '<button type="button" class="btn btn-approve" data-act="approve"' + dis + '>' + checkIcon() + 'Approve</button>';
+      h += '<button type="button" class="btn btn-ghost" data-act="pending"' + dis + '>Move back to waiting</button>';
+    }
+    h += '</div></article>';
+    return h;
+  }
+  function checkIcon() {
+    return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+  }
+
+  function renderList() {
+    var list = filtered();
+    if (S.status === 'pending') list = list.slice().reverse(); // oldest first, like a queue
+    var shown = list.slice(0, S.shown);
+    $('list').innerHTML = shown.length
+      ? shown.map(itemHtml).join('')
+      : '<div class="empty">' + (S.status === 'pending' ? 'All caught up. Nothing is waiting.' : 'Nothing here.') + '</div>';
+    $('moreBtn').hidden = list.length <= S.shown;
+    var ta = $('draft');
+    if (ta && document.activeElement !== ta) { ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); }
+  }
+
+  function renderSites() {
+    var html = '<option value="all">All sites</option>';
+    C.SITES.forEach(function (s) { html += '<option value="' + esc(s.id) + '">' + esc(C.siteName(s.id)) + '</option>'; });
+    $('siteFilter').innerHTML = html;
+    $('siteFilter').value = S.site;
+  }
+
+  /* ---------- Actions ---------- */
+  function findByKey(key) {
+    var kind = key.split(':')[0];
+    var id = key.slice(kind.length + 1);
+    var list = kind === 'leader' ? S.leaders : S.wishes;
+    for (var i = 0; i < list.length; i++) if (String(list[i].id) === id) return { kind: kind, id: id, item: list[i] };
+    return null;
+  }
+
+  function update(kind, ids, changes) {
+    if (C.demo) {
+      ids.forEach(function (id) { C.demoReview(kind, id, changes); });
+      return Promise.resolve();
+    }
+    var table = kind === 'leader' ? 'leader_messages' : 'wishes';
+    var chunks = [];
+    for (var i = 0; i < ids.length; i += 100) chunks.push(ids.slice(i, i + 100));
+    return chunks.reduce(function (p, chunk) {
+      return p.then(function () {
+        return sb.from(table).update(changes).in('id', chunk).select('id').then(function (res) {
+          if (res.error) throw res.error;
+          if ((res.data || []).length !== chunk.length) throw new Error('Not all rows were updated. You may not be on the approvers list.');
+        });
+      });
+    }, Promise.resolve());
+  }
+
+  function act(key, action) {
+    var f = findByKey(key);
+    if (!f) return;
+    if (action === 'edit') { S.editing = key; S.draft = f.item.message; renderList(); return; }
+    if (action === 'cancel') { S.editing = null; renderList(); return; }
+    var changes;
+    if (action === 'approve') changes = { status: 'approved' };
+    else if (action === 'reject') changes = { status: 'rejected' };
+    else if (action === 'pending') changes = { status: 'pending' };
+    else if (action === 'save') {
+      var text = S.draft.trim();
+      if (!text) { $('mainErr').textContent = 'The message can\'t be empty.'; return; }
+      changes = { message: text.slice(0, MAX[f.kind]), status: 'approved' };
+    } else return;
+    S.busy[key] = true;
+    $('mainErr').textContent = '';
+    renderList();
+    update(f.kind, [f.id], changes).then(function () {
+      S.busy[key] = false;
+      if (S.editing === key) S.editing = null;
+      Object.assign(f.item, changes, { reviewed_by: S.user ? S.user.email : '', reviewed_at: new Date().toISOString() });
+      C.track('approval_' + action, { kind: f.kind });
+      render();
+      load();
+    }).catch(function (err) {
+      console.error(err);
+      S.busy[key] = false;
+      renderList();
+      $('mainErr').textContent = 'That didn\'t save. ' + (err && err.message ? err.message : 'Please try again.');
+    });
+  }
+
+  function bulkApprove() {
+    var clean = filtered().filter(function (w) { return !(w.flags && w.flags.length); });
+    if (!S.bulkArmed) {
+      S.bulkArmed = true;
+      renderBulk();
+      setTimeout(function () { S.bulkArmed = false; renderBulk(); }, 5000);
+      return;
+    }
+    S.bulkArmed = false;
+    $('bulkBtn').disabled = true;
+    update('wish', clean.map(function (w) { return String(w.id); }), { status: 'approved' }).then(function () {
+      $('bulkBtn').disabled = false;
+      C.track('approval_bulk', { count: clean.length });
+      load();
+    }).catch(function (err) {
+      console.error(err);
+      $('bulkBtn').disabled = false;
+      $('mainErr').textContent = 'Bulk approval stopped part way. Refresh to see what was saved.';
+      load();
+    });
+  }
+
+  function saveSettings() {
+    var next = { submissions_open: $('swOpen').checked, leaders_need_approval: $('swLeaders').checked };
+    $('settingsMsg').textContent = 'Saving…';
+    var done = function () {
+      S.settings = next;
+      $('settingsMsg').textContent = 'Saved.';
+      render();
+    };
+    if (C.demo) { C.demoSave('wt-demo-settings', next); done(); return; }
+    sb.rpc('update_settings', { p_submissions_open: next.submissions_open, p_leaders_need_approval: next.leaders_need_approval }).then(function (res) {
+      if (res.error) throw res.error;
+      done();
+    }).catch(function (err) {
+      console.error(err);
+      $('settingsMsg').textContent = 'Could not save the switch. Please try again.';
+      render();
+    });
+  }
+
+  /* ---------- Sign-in ---------- */
+  function checkAccess() {
+    if (C.demo) { show('main'); renderSites(); load(); return; }
+    sb.rpc('am_i_moderator').then(function (res) {
+      if (res.error) throw res.error;
+      if (!res.data) {
+        $('deniedText').textContent = 'You are signed in as ' + S.user.email + ', which is not on the approvers list.';
+        show('denied');
+        return;
+      }
+      $('meEmail').textContent = S.user.email;
+      show('main');
+      renderSites();
+      load();
+    }).catch(function (err) {
+      console.error(err);
+      $('signinErr').textContent = 'We could not check your access. Please try again.';
+      show('signin');
+    });
+  }
+
+  function handleSession(session) {
+    if (!session || !session.user) { S.user = null; if (S.view !== 'code') show('signin'); return; }
+    var email = session.user.email || '';
+    if (!C.allowedEmail(email)) {
+      setTimeout(function () { sb.auth.signOut(); }, 0);
+      $('signinErr').textContent = 'Please use your TP work account (@' + DOMAIN + ').';
+      show('signin');
+      return;
+    }
+    if (S.user && S.user.id === session.user.id && S.view === 'main') return;
+    S.user = { id: session.user.id, email: email };
+    checkAccess();
+  }
+
+  $('googleBtn').addEventListener('click', function () {
+    $('signinErr').textContent = '';
+    if (C.demo) { S.user = { id: 'demo', email: 'approver@' + DOMAIN }; $('meEmail').textContent = S.user.email; C.storageSet('wt-demo-approver', '1'); checkAccess(); return; }
+    $('googleBtn').disabled = true;
+    sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin + window.location.pathname, queryParams: { hd: DOMAIN, prompt: 'select_account' } } })
+      .then(function (res) { if (res.error) throw res.error; })
+      .catch(function (err) { console.error(err); $('googleBtn').disabled = false; $('signinErr').textContent = 'Something went wrong. Please try again.'; });
+  });
+  $('emailForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var email = $('email').value.trim().toLowerCase();
+    $('signinErr').textContent = '';
+    if (!C.allowedEmail(email)) { $('signinErr').textContent = 'Please use your TP work email (@' + DOMAIN + ').'; return; }
+    S.email = email;
+    $('codeLabel').textContent = 'Enter the 6-digit code we sent to ' + email;
+    if (C.demo) { show('code'); return; }
+    $('sendCodeBtn').disabled = true;
+    sb.auth.signInWithOtp({ email: email, options: { shouldCreateUser: true } }).then(function (res) {
+      $('sendCodeBtn').disabled = false;
+      if (res.error) throw res.error;
+      show('code');
+    }).catch(function (err) { console.error(err); $('sendCodeBtn').disabled = false; $('signinErr').textContent = 'We could not send the code. Please try again in a minute.'; });
+  });
+  $('codeForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var token = $('code').value.replace(/\D/g, '');
+    if (token.length !== 6) { $('codeErr').textContent = 'Enter all 6 digits.'; return; }
+    if (C.demo) { S.user = { id: 'demo', email: S.email }; $('meEmail').textContent = S.email; checkAccess(); return; }
+    $('verifyBtn').disabled = true;
+    sb.auth.verifyOtp({ email: S.email, token: token, type: 'email' }).then(function (res) {
+      $('verifyBtn').disabled = false;
+      if (res.error) throw res.error;
+      handleSession(res.data && res.data.session);
+    }).catch(function (err) { console.error(err); $('verifyBtn').disabled = false; $('codeErr').textContent = "That code didn't work. Check it and try again."; });
+  });
+  $('backToEmail').addEventListener('click', function () { show('signin'); });
+  function signOut() {
+    S.user = null;
+    if (C.demo) { C.storageSet('wt-demo-approver', ''); show('signin'); return; }
+    sb.auth.signOut().finally(function () { show('signin'); });
+  }
+  $('signOutBtn').addEventListener('click', signOut);
+  $('deniedSignOut').addEventListener('click', signOut);
+
+  /* ---------- Page events ---------- */
+  qsa('.kind').forEach(function (b) {
+    b.addEventListener('click', function () { S.kind = b.getAttribute('data-kind'); S.editing = null; S.shown = PAGE; render(); });
+  });
+  qsa('.tab').forEach(function (b) {
+    b.addEventListener('click', function () { S.status = b.getAttribute('data-status'); S.editing = null; S.shown = PAGE; render(); });
+  });
+  $('siteFilter').addEventListener('change', function (e) { S.site = e.target.value; S.shown = PAGE; render(); });
+  $('search').addEventListener('input', function (e) { S.q = e.target.value; S.shown = PAGE; render(); });
+  $('moreBtn').addEventListener('click', function () { S.shown += PAGE; renderList(); });
+  $('bulkBtn').addEventListener('click', bulkApprove);
+  $('swOpen').addEventListener('change', saveSettings);
+  $('swLeaders').addEventListener('change', saveSettings);
+  $('list').addEventListener('click', function (e) {
+    var btn = e.target.closest ? e.target.closest('button[data-act]') : null;
+    if (!btn) return;
+    var card = btn.closest('.item');
+    act(card.getAttribute('data-key'), btn.getAttribute('data-act'));
+  });
+  $('list').addEventListener('input', function (e) {
+    if (e.target.id !== 'draft') return;
+    S.draft = e.target.value.slice(0, MAX[S.kind]);
+    var c = $('draftCount');
+    if (c) c.textContent = S.draft.length + ' / ' + MAX[S.kind];
+  });
+
+  /* ---------- Start ---------- */
+  C.setLogo($('logo'));
+  ['lnTree', 'lnWish', 'lnLeaders', 'lnTv'].forEach(function (id) {
+    var map = { lnTree: 'index.html', lnWish: 'wish.html', lnLeaders: 'leaders/', lnTv: 'tv/' };
+    $(id).href = C.url(map[id]);
+  });
+  $('googleBtn').hidden = AUTH !== 'google';
+  $('emailForm').hidden = AUTH !== 'email';
+  $('email').setAttribute('placeholder', 'name@' + DOMAIN);
+  if (C.demo) $('demoBar').hidden = false;
+
+  // keep the queue fresh while the page is open
+  setInterval(function () { if (S.view === 'main' && !S.editing && !document.hidden) load(); }, 30000);
+
+  if (C.demo) {
+    if (C.storageGet('wt-demo-approver')) { S.user = { id: 'demo', email: 'approver@' + DOMAIN }; $('meEmail').textContent = S.user.email; checkAccess(); }
+    else show('signin');
+    return;
+  }
+  try { sb = C.client(); } catch (err) {
+    console.error(err);
+    $('signinErr').textContent = 'Something went wrong loading the page. Please refresh.';
+    show('signin');
+    return;
+  }
+  sb.auth.onAuthStateChange(function (event, session) {
+    if (event === 'SIGNED_OUT') return;
+    if (session) handleSession(session);
+  });
+  sb.auth.getSession().then(function (res) {
+    var session = res && res.data ? res.data.session : null;
+    if (session) handleSession(session); else show('signin');
+  }).catch(function () { show('signin'); });
+})();
+</script>
+</body>
+</html>

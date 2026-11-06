@@ -441,6 +441,8 @@ export function createTree3D(container, opts = {}) {
   let oldSeq = 0;
   let selectedKey = null;
   let onSelect = opts.onSelect || null;
+  // seconds of no interaction before the tree starts turning on its own
+  const idleDelay = Number(opts.idleDelay) > 0 ? Number(opts.idleDelay) : 6;
 
   function spaced(a, b) {
     const dx = a.x - b.x, dz = a.z - b.z, dy = (a.y - b.y) * 0.8;
@@ -821,8 +823,8 @@ export function createTree3D(container, opts = {}) {
     } else if (!down) {
       rot += rotVel * dt;
       rotVel *= Math.exp(-3.2 * dt);
-      if (!reduce && t - lastInteract > 6) {
-        const ramp = Math.min(1, (t - lastInteract - 6) / 2);
+      if (!reduce && t - lastInteract > idleDelay) {
+        const ramp = Math.min(1, (t - lastInteract - idleDelay) / 2);
         rot += 0.16 * ramp * dt;
       }
     }

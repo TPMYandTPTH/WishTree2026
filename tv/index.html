@@ -1,0 +1,729 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>TV · TP Wish Tree 2026</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0E2A1F">
+<link rel="icon" type="image/png" href="../assets/tp-logo-white.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Noto+Sans:wght@300;400;500;700&family=Noto+Sans+Thai:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+@font-face{font-family:'TP Sans';font-weight:300;font-display:swap;src:local('TP Sans Light'),local('TPSans-Light'),url('../fonts/TPSans-Light.ttf') format('truetype')}
+@font-face{font-family:'TP Sans';font-weight:400;font-display:swap;src:local('TP Sans'),local('TPSans-Regular'),url('../fonts/TPSans-Regular.ttf') format('truetype')}
+@font-face{font-family:'TP Sans';font-weight:500;font-display:swap;src:local('TP Sans Medium'),local('TPSans-Medium'),url('../fonts/TPSans-Medium.ttf') format('truetype')}
+@font-face{font-family:'TP Sans';font-weight:700;font-display:swap;src:local('TP Sans Bold'),local('TPSans-Bold'),url('../fonts/TPSans-Bold.ttf') format('truetype')}
+
+/* The whole screen is drawn on a 120 x 67.5 rem canvas (16:9) that scales to any TV.
+   1rem = 16px on a 1920 x 1080 screen. */
+:root{
+  --bg:#0E2A1F; --bg-2:#11302A; --bg-3:#0B231A;
+  --cream:#F6EEDC; --cream-2:#DCD3BF; --cream-3:#B9B19E;
+  --gold:#E3B45A; --gold-2:#F2C766; --carmine:#AB2C37; --ink:#183326;
+  --line:rgba(246,238,220,.14);
+  --font:'TP Sans','Noto Sans','Noto Sans Thai',Calibri,system-ui,sans-serif;
+  --script:'Great Vibes',cursive;
+}
+html{font-size:calc(min(100vw / 120, 100vh / 67.5))}
+html.portrait{font-size:calc(min(100vw / 67.5, 100vh / 120))}
+*{box-sizing:border-box}
+[hidden]{display:none !important}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--bg-3);color:var(--cream);font-family:var(--font);-webkit-font-smoothing:antialiased}
+body{cursor:default}
+body.idle,body.idle *{cursor:none !important}
+
+.backdrop{position:fixed;inset:0;background:
+  radial-gradient(60% 75% at 26% 58%,rgba(227,180,90,.16),rgba(227,180,90,0) 60%),
+  radial-gradient(90% 80% at 70% 0%,#163B2E 0%,rgba(22,59,46,0) 60%),
+  linear-gradient(180deg,#0F2D22 0%,#0B231A 100%)}
+#snow{position:fixed;inset:0;width:100%;height:100%;pointer-events:none}
+
+.stage{position:fixed;left:50%;top:50%;width:120rem;height:67.5rem;transform:translate(-50%,-50%);display:grid;grid-template-rows:8rem minmax(0,1fr);overflow:hidden}
+html.portrait .stage{width:67.5rem;height:120rem}
+
+/* top bar */
+.top{display:flex;align-items:center;justify-content:space-between;gap:3rem;padding:0 4rem;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:1.5rem;min-width:0}
+.logo{height:3.6rem;width:auto;display:block}
+.divider{width:1px;height:2.6rem;background:rgba(246,238,220,.3)}
+.brand-name{font-size:2rem;font-weight:500;white-space:nowrap}
+.site{flex:1;min-width:0;text-align:center}
+.site-eyebrow{font-size:1.1rem;font-weight:500;letter-spacing:.16em;color:var(--gold)}
+.site-name{margin-top:.3rem;font-size:2.3rem;font-weight:300;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.status{display:flex;align-items:center;gap:2rem;font-size:1.4rem;color:var(--cream-2);white-space:nowrap}
+.live{display:inline-flex;align-items:center;gap:.7rem}
+.live .dot{width:1rem;height:1rem;border-radius:50%;background:#00D769;box-shadow:0 0 0 0 rgba(0,215,105,.6);animation:pulse 2s infinite}
+.live.off .dot{background:#FF9F5A;animation:none}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(0,215,105,.55)}70%{box-shadow:0 0 0 .9rem rgba(0,215,105,0)}100%{box-shadow:0 0 0 0 rgba(0,215,105,0)}}
+.demo{padding:.3rem .9rem;border-radius:999px;background:#FFF1E8;color:#7A2C00;font-size:1.1rem;font-weight:700}
+
+/* main */
+.main{display:grid;grid-template-columns:40rem minmax(0,1fr);gap:3.5rem;padding:2.5rem 4rem 3rem;min-height:0}
+html.portrait .main{grid-template-columns:minmax(0,1fr);grid-template-rows:56rem minmax(0,1fr);gap:2rem;padding:2rem 4rem 3.5rem}
+html.portrait .brand-name,html.portrait .divider{display:none}
+html.portrait .top{gap:2rem;padding:0 3rem}
+html.portrait .status{gap:1.4rem}
+.tree-col{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:1.6rem;min-height:0;min-width:0}
+.tree-box{position:relative;height:47.5rem;aspect-ratio:620/760;max-width:100%}
+html.portrait .tree-box{height:49rem}
+.tree3d{position:absolute;inset:0}
+.tree3d canvas{position:absolute;inset:0;width:100% !important;height:100% !important}
+.tree-flat{position:absolute;inset:0}
+.counts{display:flex;justify-content:center;gap:2.6rem;font-size:1.35rem;color:var(--cream-2);white-space:nowrap}
+.counts b{display:block;font-size:2.6rem;font-weight:300;line-height:1.1;color:var(--cream);font-variant-numeric:tabular-nums}
+.counts span{text-align:center}
+
+.msg-col{display:flex;flex-direction:column;min-height:0;min-width:0}
+.card-stage{position:relative;flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;padding-top:0}
+.string{flex:none;width:2px;height:2.6rem;background:#D9C59A;opacity:.8}
+.card-stage[data-kind="leader"] .string{background:var(--gold-2)}
+
+.card{
+  --card-bg:#F6EEDC; --card-ink:#183326; --card-kicker:#AB2C37; --card-sub:#4B4C6A; --card-line:rgba(24,51,38,.25);
+  --card-avatar-bg:#0E2A1F; --card-avatar-fg:#E3B45A; --card-pill-bg:#AB2C37; --card-pill-fg:#F6EEDC;
+  position:relative;flex:1;min-height:0;width:100%;display:flex;flex-direction:column;
+  padding:4rem 4.4rem 2.6rem;border-radius:.8rem .8rem 1.4rem 1.4rem;border:.2rem solid transparent;
+  background:var(--card-bg);color:var(--card-ink);box-shadow:0 2.4rem 5rem rgba(0,0,0,.4);
+  transform-origin:50% -2.6rem;transition:background-color .4s ease,color .4s ease
+}
+.card[data-color="red"]{--card-bg:#AB2C37;--card-ink:#F6EEDC;--card-kicker:#F2C766;--card-sub:#F6EEDC;--card-line:rgba(246,238,220,.35);--card-pill-bg:#F6EEDC;--card-pill-fg:#AB2C37}
+.card[data-color="gold"]{--card-bg:#E3B45A;--card-ink:#0E2A1F;--card-kicker:#0E2A1F;--card-sub:#183326;--card-line:rgba(14,42,31,.3);--card-pill-bg:#0E2A1F;--card-pill-fg:#F2C766}
+.card[data-kind="leader"]{--card-bg:#0B231A;--card-ink:#F6EEDC;--card-kicker:#F2C766;--card-sub:#DCD3BF;--card-line:rgba(242,199,102,.35);--card-avatar-bg:#E3B45A;--card-avatar-fg:#0E2A1F;--card-pill-bg:#E3B45A;--card-pill-fg:#0E2A1F;border-color:#E3B45A;border-radius:1.8rem;box-shadow:0 0 0 .8rem rgba(227,180,90,.12),0 2.4rem 5rem rgba(0,0,0,.5)}
+.hole{position:absolute;top:1.6rem;left:50%;width:1.2rem;height:1.2rem;margin-left:-.6rem;border-radius:50%;background:#0E2A1F;opacity:.55}
+.card[data-kind="leader"] .hole{background:var(--gold);opacity:.85}
+.badge{display:none;position:absolute;top:-1.8rem;left:3rem;align-items:center;gap:.7rem;padding:.6rem 1.4rem;border-radius:999px;background:var(--gold);color:var(--bg);font-size:1.2rem;font-weight:700;letter-spacing:.12em}
+.card[data-kind="leader"] .badge{display:inline-flex}
+.card-top{flex:none;display:flex;align-items:center;justify-content:space-between;gap:1.5rem}
+.kicker{font-size:1.4rem;font-weight:500;letter-spacing:.14em;color:var(--card-kicker)}
+.fresh{flex:none;display:inline-flex;align-items:center;gap:.6rem;padding:.5rem 1.2rem;border-radius:999px;background:var(--card-pill-bg);color:var(--card-pill-fg);font-size:1.2rem;font-weight:700;letter-spacing:.06em}
+.text-box{flex:1;min-height:0;display:flex;align-items:center;overflow:hidden;padding:1.6rem 0}
+.text{margin:0;width:100%;font-size:3.6rem;line-height:1.38;font-weight:400;white-space:pre-line;overflow-wrap:anywhere}
+.card[data-kind="leader"] .text{font-weight:300}
+.text:lang(th){line-height:1.55}
+.foot{flex:none;display:flex;align-items:center;gap:1.6rem;padding-top:1.8rem;border-top:.15rem dashed var(--card-line)}
+.avatar{flex:none;display:flex;align-items:center;justify-content:center;width:4.8rem;height:4.8rem;border-radius:50%;background:var(--card-avatar-bg);color:var(--card-avatar-fg);font-size:1.9rem;font-weight:700}
+.avatar svg{width:2.8rem;height:2.8rem}
+.who-box{min-width:0}
+.who{font-size:2.1rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.where{margin-top:.3rem;font-size:1.6rem;color:var(--card-sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.likes{margin-left:auto;flex:none;display:inline-flex;align-items:center;gap:.8rem;padding:.8rem 1.6rem;border:.15rem solid var(--card-line);border-radius:999px;font-size:2rem;font-weight:700;font-variant-numeric:tabular-nums}
+.likes svg{width:2.2rem;height:2.2rem;fill:#E04C5C}
+.card[data-color="red"] .likes svg{fill:#F6EEDC}
+
+/* change of message */
+.card.leaving{opacity:0;transform:translateY(1.6rem) scale(.985);transition:opacity .45s ease,transform .45s ease}
+.card.arriving{animation:swingIn 1.3s cubic-bezier(.2,.7,.3,1) both}
+@keyframes swingIn{
+  0%{opacity:0;transform:translateY(-2.4rem) rotate(-3.5deg)}
+  35%{opacity:1;transform:translateY(0) rotate(2deg)}
+  60%{transform:rotate(-1deg)}
+  80%{transform:rotate(.4deg)}
+  100%{transform:rotate(0)}
+}
+
+.progress{flex:none;height:.4rem;margin:1.8rem 0 0;border-radius:999px;background:rgba(246,238,220,.12);overflow:hidden}
+.progress span{display:block;height:100%;background:var(--gold);transform-origin:0 50%;transform:scaleX(0)}
+.progress span.run{animation:grow linear forwards}
+@keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+body.paused .progress span{animation-play-state:paused}
+
+.bottom{flex:none;display:flex;align-items:center;justify-content:space-between;gap:3rem;margin-top:2.2rem}
+.qr-block{display:flex;align-items:center;gap:2rem;min-width:0}
+.qr{flex:none;width:10rem;height:10rem;padding:.7rem;border-radius:1rem;background:var(--cream)}
+.qr img,.qr canvas{display:block;width:100% !important;height:100% !important}
+.qr-title{font-size:2.2rem;font-weight:700}
+.qr-sub{margin-top:.5rem;font-size:1.5rem;line-height:1.4;color:var(--cream-2)}
+.qr-url{margin-top:.6rem;font-size:1.3rem;color:var(--gold);word-break:break-all}
+.tagline{flex:none;max-width:30rem;font-family:var(--script);font-size:3.3rem;line-height:1.1;color:var(--gold);text-align:right}
+html.portrait .tagline{display:none}
+
+.paused-note{position:fixed;left:50%;bottom:2rem;transform:translateX(-50%);padding:.8rem 1.6rem;border-radius:999px;background:rgba(0,0,0,.55);font-size:1.3rem}
+.fs{position:fixed;top:1.4rem;right:1.4rem;z-index:5;min-height:44px;padding:0 18px;border:1px solid rgba(246,238,220,.5);border-radius:999px;background:rgba(11,35,26,.85);color:var(--cream);font-family:inherit;font-size:15px;cursor:pointer;opacity:0;pointer-events:none;transition:opacity .3s}
+body.pointer .fs{opacity:1;pointer-events:auto}
+.fs:focus-visible{outline:3px solid #00AF9B;outline-offset:2px;opacity:1}
+
+@media (prefers-reduced-motion: reduce){
+  .card.arriving{animation:fadeIn .5s ease both}
+  .card.leaving{transform:none}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  .live .dot{animation:none}
+}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="../config.js"></script>
+<script src="../wishtree.js"></script>
+</head>
+<body>
+<div class="backdrop" aria-hidden="true"></div>
+<canvas id="snow" aria-hidden="true"></canvas>
+
+<div class="stage" id="stage">
+  <header class="top">
+    <div class="brand">
+      <img id="logo" class="logo" alt="TP" hidden>
+      <span class="divider" aria-hidden="true"></span>
+      <span class="brand-name">Wish Tree 2026</span>
+    </div>
+    <div class="site">
+      <div class="site-eyebrow" id="siteEyebrow">OUR WISH TREE</div>
+      <div class="site-name" id="siteName">All sites</div>
+    </div>
+    <div class="status">
+      <span id="demoTag" class="demo" hidden>DEMO</span>
+      <span id="countdown"></span>
+      <span class="live" id="live"><span class="dot" aria-hidden="true"></span><span id="liveText">Live</span></span>
+    </div>
+  </header>
+
+  <main class="main">
+    <section class="tree-col" aria-label="The tree">
+      <div class="tree-box">
+        <div id="tree3d" class="tree3d" hidden></div>
+        <div id="treeFlat" class="tree-flat" hidden></div>
+      </div>
+      <div class="counts">
+        <span><b id="cWishes">0</b>wishes</span>
+        <span><b id="cLeaders">0</b>leaders' messages</span>
+        <span><b id="cLikes">0</b>likes</span>
+      </div>
+    </section>
+
+    <section class="msg-col" aria-live="polite">
+      <div class="card-stage" id="cardStage" data-kind="wish">
+        <span class="string" aria-hidden="true"></span>
+        <article id="card" class="card" data-kind="wish" data-color="cream">
+          <span class="hole" aria-hidden="true"></span>
+          <span class="badge"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg>FROM OUR LEADERS</span>
+          <div class="card-top">
+            <span class="kicker" id="kicker">LIGHTING UP THE TREE</span>
+            <span class="fresh" id="fresh" hidden>JUST HUNG</span>
+          </div>
+          <div class="text-box" id="textBox"><p class="text" id="text"></p></div>
+          <div class="foot" id="foot" hidden>
+            <span class="avatar" id="avatar" aria-hidden="true"></span>
+            <div class="who-box"><div class="who" id="who"></div><div class="where" id="where"></div></div>
+            <span class="likes" id="likes" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.3s-7.4-4.3-9.2-9C1.5 7.9 3.7 4.6 7 4.6c2 0 3.6 1.1 5 3 1.4-1.9 3-3 5-3 3.3 0 5.5 3.3 4.2 6.7-1.8 4.7-9.2 9-9.2 9z"/></svg><span id="likeCount">0</span></span>
+          </div>
+        </article>
+      </div>
+      <div class="progress" aria-hidden="true"><span id="progress"></span></div>
+      <div class="bottom">
+        <div class="qr-block">
+          <div id="qr" class="qr" aria-hidden="true"></div>
+          <div>
+            <div class="qr-title">Scan to hang your wish</div>
+            <div class="qr-sub">Sign in with your TP account. Your wish shows here once it's approved.</div>
+            <div class="qr-url" id="qrUrl"></div>
+          </div>
+        </div>
+        <div class="tagline">One TP. Many Wishes. One Christmas Together.</div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div id="pausedNote" class="paused-note" hidden>Paused. Press Space to continue.</div>
+<button type="button" id="fsBtn" class="fs">Full screen</button>
+
+<script>
+(function () {
+  'use strict';
+  var C = window.WishCore;
+  var CFG = C.cfg;
+  var params = new URLSearchParams(window.location.search);
+  var $ = function (id) { return document.getElementById(id); };
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var SECONDS = Math.max(5, Number(params.get('seconds')) || Number(CFG.TV_SECONDS) || 12);
+  var LEADER_EVERY = Math.max(1, Number(params.get('leaders')) || Number(CFG.TV_LEADER_EVERY) || 4);
+  var REFRESH = Math.max(15, Number(CFG.TREE_REFRESH_SECONDS) || 60) * 1000;
+  var FRESH_HOURS = 3;
+
+  var siteParam = (params.get('site') || 'all').toLowerCase();
+  var SITE = siteParam !== 'all' && C.siteById(siteParam) ? siteParam : 'all';
+
+  var S = {
+    wishes: [], leaders: [], loaded: false,
+    known: null,            // ids seen at the last refresh (null until the first load)
+    fresh: [],              // newly approved wishes, shown next
+    cycle: [], pos: 0, cycleNo: 0,
+    leaderPos: 0, sinceLeader: LEADER_EVERY, // start with a leader's message
+    current: null, history: [], onTree: [],
+    paused: false, timer: 0, startedAt: 0, remaining: 0
+  };
+  var view3d = null;
+  var CAP2D = Math.max(6, Math.min(Number(CFG.MAX_TAGS_ON_TREE) || 40, C.treeCapacity(0.58)));
+  function cap() { return view3d ? (Number(CFG.MAX_TAGS_3D) || 60) : CAP2D; }
+
+  /* ---------- Screen size (16:9 canvas, or 9:16 on a portrait TV) ---------- */
+  function fit() {
+    var w = window.innerWidth, h = window.innerHeight;
+    var portrait = h > w * 1.05;
+    document.documentElement.classList.toggle('portrait', portrait);
+    var rem = portrait ? Math.min(w / 67.5, h / 120) : Math.min(w / 120, h / 67.5);
+    document.documentElement.style.fontSize = rem + 'px';
+    sizeSnow();
+    fitText();
+  }
+  window.addEventListener('resize', fit);
+
+  /* ---------- Header ---------- */
+  C.setLogo($('logo'));
+  if (C.demo) $('demoTag').hidden = false;
+  (function header() {
+    var s = C.siteById(SITE);
+    if (!s) {
+      $('siteEyebrow').textContent = 'ALL OUR SITES';
+      $('siteName').textContent = 'TP Malaysia & Thailand';
+    } else if (s.id === 'wfh') {
+      $('siteEyebrow').textContent = 'OUR WISH TREE';
+      $('siteName').textContent = 'Working from home';
+    } else {
+      $('siteEyebrow').textContent = 'OUR WISH TREE';
+      $('siteName').textContent = C.siteName(s.id);
+    }
+    document.title = (s ? s.label : 'All sites') + ' · TV · TP Wish Tree 2026';
+  })();
+
+  function countdown() {
+    var now = new Date();
+    var y = now.getFullYear();
+    var xmas = new Date(y, 11, 25);
+    var today = new Date(y, now.getMonth(), now.getDate());
+    var days = Math.round((xmas - today) / 86400000);
+    var txt = '';
+    if (days > 1 && days <= 60) txt = days + ' days to Christmas';
+    else if (days === 1) txt = 'Christmas is tomorrow';
+    else if (days === 0) txt = 'Merry Christmas!';
+    else if (days < 0 && now.getMonth() === 11) txt = 'Happy holidays';
+    else if (now.getMonth() === 0 && now.getDate() <= 7) txt = 'Happy New Year!';
+    $('countdown').textContent = txt;
+    $('countdown').hidden = !txt;
+  }
+
+  /* ---------- QR code ---------- */
+  (function qr() {
+    var link = C.wishPageUrl();
+    if (SITE !== 'all') link += (link.indexOf('?') === -1 ? '?' : '&') + 'site=' + encodeURIComponent(SITE);
+    $('qrUrl').textContent = link.replace(/^https?:\/\//, '').replace(/\?.*$/, '');
+    if (!window.QRCode) return;
+    try {
+      new window.QRCode($('qr'), { text: link, width: 256, height: 256, colorDark: '#0E2A1F', colorLight: '#F6EEDC', correctLevel: window.QRCode.CorrectLevel.M });
+      $('qr').removeAttribute('title');
+    } catch (e) { /* the QR is optional */ }
+  })();
+
+  /* ---------- Data ---------- */
+  function siteWishes() {
+    return SITE === 'all' ? S.wishes : S.wishes.filter(function (w) { return w.site === SITE; });
+  }
+  function findItem(sel) {
+    if (!sel) return null;
+    var list = sel.kind === 'leader' ? S.leaders : S.wishes;
+    for (var i = 0; i < list.length; i++) if (String(list[i].id) === String(sel.id)) return list[i];
+    return null;
+  }
+  function fmt(n) { return Number(n || 0).toLocaleString('en-US'); }
+
+  function setLive(ok) {
+    $('live').classList.toggle('off', !ok);
+    $('liveText').textContent = ok ? 'Live' : 'Reconnecting';
+  }
+
+  function load() {
+    return Promise.all([C.fetchApproved(), C.fetchLeaders()]).then(function (r) {
+      S.wishes = r[0] || [];
+      S.leaders = r[1] || [];
+      setLive(true);
+      var ids = {};
+      siteWishes().forEach(function (w) { ids[String(w.id)] = 1; });
+      if (S.known) {
+        // newly approved since the last refresh go to the front of the line
+        siteWishes().slice().reverse().forEach(function (w) {
+          var id = String(w.id);
+          if (!S.known[id] && S.fresh.indexOf(id) === -1) S.fresh.push(id);
+        });
+      }
+      S.known = ids;
+      renderCounts();
+      refreshTree();
+      if (!S.loaded) { S.loaded = true; advance(); }
+      else if (!S.current || !findItem(S.current)) advance();
+    }).catch(function (err) {
+      console.error(err);
+      setLive(false);
+      if (!S.loaded) { renderEmpty('We\'re reconnecting to the tree. Wishes will appear in a moment.'); }
+    });
+  }
+
+  function renderCounts() {
+    var likes = 0;
+    siteWishes().forEach(function (w) { likes += w.like_count || 0; });
+    S.leaders.forEach(function (l) { likes += l.like_count || 0; });
+    $('cWishes').textContent = fmt(siteWishes().length);
+    $('cLeaders').textContent = fmt(S.leaders.length);
+    $('cLikes').textContent = fmt(likes);
+  }
+
+  /* ---------- What to show next ---------- */
+  function shuffled(list, seed) {
+    var a = list.slice();
+    var rnd = C.random(C.hash(seed));
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(rnd() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+  function newCycle() {
+    S.cycleNo++;
+    S.cycle = shuffled(siteWishes().map(function (w) { return String(w.id); }), 'tv:' + SITE + ':' + S.cycleNo + ':' + Date.now());
+    S.pos = 0;
+    // don't show the same wish twice in a row across cycles
+    if (S.cycle.length > 1 && S.current && S.current.kind === 'wish' && S.cycle[0] === String(S.current.id)) {
+      S.cycle.push(S.cycle.shift());
+    }
+  }
+  function nextWishId() {
+    while (S.fresh.length) {
+      var f = S.fresh.shift();
+      if (findItem({ kind: 'wish', id: f })) return f;
+    }
+    for (var round = 0; round < 2; round++) {
+      while (S.pos < S.cycle.length) {
+        var id = S.cycle[S.pos++];
+        if (findItem({ kind: 'wish', id: id })) return id;
+      }
+      newCycle();
+    }
+    return null;
+  }
+  function pickNext() {
+    var hasW = siteWishes().length > 0, hasL = S.leaders.length > 0;
+    if (!hasW && !hasL) return null;
+    if (hasL && (!hasW || S.sinceLeader >= LEADER_EVERY)) {
+      S.sinceLeader = 0;
+      var L = S.leaders[S.leaderPos % S.leaders.length];
+      S.leaderPos++;
+      return { kind: 'leader', id: String(L.id) };
+    }
+    var id = nextWishId();
+    if (!id) return null;
+    S.sinceLeader++;
+    return { kind: 'wish', id: id };
+  }
+
+  /* ---------- Tree ---------- */
+  function upcomingIds(curId) {
+    var out = [], seen = {};
+    function add(id) { if (id && !seen[id] && findItem({ kind: 'wish', id: id })) { seen[id] = 1; out.push(id); } }
+    add(curId);
+    S.fresh.forEach(add);
+    for (var i = S.pos; i < S.cycle.length; i++) add(S.cycle[i]);
+    siteWishes().forEach(function (w) { add(String(w.id)); });
+    return out.slice(0, cap());
+  }
+  function treeData() {
+    return { wishes: S.onTree, leaders: S.leaders.slice(0, C.LEADER_SLOTS), selected: S.current };
+  }
+  function drawTree() {
+    if (view3d) view3d.setData(treeData());
+    else if (!$('treeFlat').hidden) {
+      var d = treeData();
+      C.renderTree($('treeFlat'), { wishes: d.wishes, leaders: d.leaders, selected: d.selected || {}, onSelect: function () {} });
+    }
+  }
+  function onTree(id) {
+    return S.onTree.some(function (w) { return String(w.id) === String(id); });
+  }
+  // keep what's on the tree in step with the data (removed wishes drop off, new ones join if there's room)
+  function refreshTree() {
+    var all = siteWishes();
+    if (all.length <= cap()) S.onTree = all.slice();
+    else {
+      var keep = S.onTree.map(function (w) { return findItem({ kind: 'wish', id: w.id }); }).filter(Boolean);
+      S.fresh.forEach(function (id) {
+        if (keep.length < cap() && !keep.some(function (w) { return String(w.id) === id; })) keep.push(findItem({ kind: 'wish', id: id }));
+      });
+      if (!keep.length) keep = upcomingIds(null).map(function (id) { return findItem({ kind: 'wish', id: id }); });
+      S.onTree = keep;
+    }
+    drawTree();
+  }
+  // returns a promise that resolves once the tree faces the current message
+  function showOnTree(sel) {
+    if (sel.kind === 'wish' && !onTree(sel.id)) {
+      var next = upcomingIds(sel.id).map(function (id) { return findItem({ kind: 'wish', id: id }); });
+      if (view3d && !reduce) {
+        return view3d.spin(function () { S.onTree = next; drawTree(); });
+      }
+      S.onTree = next;
+    }
+    drawTree();
+    if (view3d) {
+      view3d.focus(sel);
+      setTimeout(function () { if (view3d) view3d.poke(sel.kind, sel.id, 6); }, 700);
+    }
+    return Promise.resolve();
+  }
+
+  /* ---------- The message card ---------- */
+  function isFresh(item, sel) {
+    if (sel.kind !== 'wish') return false;
+    var t = item.approved_at ? new Date(item.approved_at).getTime() : 0;
+    return t && Date.now() - t < FRESH_HOURS * 3600000;
+  }
+  function kickerFor(item, sel) {
+    if (sel.kind === 'leader') return 'A MESSAGE TO EVERY TP SITE';
+    var s = C.siteById(item.site);
+    if (!s) return 'A WISH FROM OUR TEAM';
+    if (s.id === 'wfh') return 'A WISH FROM HOME';
+    return 'A WISH FROM ' + s.label.toUpperCase();
+  }
+  function fillCard(sel) {
+    var item = findItem(sel);
+    var card = $('card');
+    if (!item) return false;
+    var isLeader = sel.kind === 'leader';
+    card.setAttribute('data-kind', sel.kind);
+    $('cardStage').setAttribute('data-kind', sel.kind);
+    card.setAttribute('data-color', isLeader ? 'leader' : (item.tag_color || 'cream'));
+    card.setAttribute('lang', item.lang || 'en');
+    $('kicker').textContent = kickerFor(item, sel);
+    $('fresh').hidden = !isFresh(item, sel);
+    $('text').textContent = item.message || '';
+    $('foot').hidden = false;
+    $('who').textContent = isLeader ? (item.display_name || 'Our leaders') : C.displayName(item);
+    $('where').textContent = isLeader ? (item.title || 'TP Malaysia & Thailand') : C.displayWhere(item);
+    $('avatar').innerHTML = isLeader ? C.esc(C.initials(item.display_name)) : C.iconSvg(item.charm || 'snow', 28);
+    var likes = item.like_count || 0;
+    $('likes').hidden = likes < 1;
+    $('likeCount').textContent = fmt(likes);
+    fitText();
+    return true;
+  }
+  function renderEmpty(text) {
+    var card = $('card');
+    card.setAttribute('data-kind', 'wish');
+    $('cardStage').setAttribute('data-kind', 'wish');
+    card.setAttribute('data-color', 'cream');
+    card.removeAttribute('lang');
+    $('kicker').textContent = 'THE TREE IS WAITING';
+    $('fresh').hidden = true;
+    var s = C.siteById(SITE);
+    $('text').textContent = text || (s && s.id !== 'wfh'
+      ? 'No wishes from ' + s.label + ' yet. Scan the code and be the first to hang one.'
+      : 'No wishes on the tree yet. Scan the code and be the first to hang one.');
+    $('foot').hidden = true;
+    fitText();
+  }
+
+  // Biggest text size that still fits the card
+  function fitText() {
+    var el = $('text'), box = $('textBox');
+    if (!el || !box.clientHeight) return;
+    var len = (el.textContent || '').length;
+    var root = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+    var size = len <= 50 ? 4.8 : len <= 90 ? 4.2 : len <= 150 ? 3.6 : len <= 200 ? 3.1 : 2.8;
+    el.style.fontSize = size + 'rem';
+    var guard = 0;
+    while (el.scrollHeight > box.clientHeight - root * 1.2 && size > 1.8 && guard++ < 40) {
+      size -= 0.1;
+      el.style.fontSize = size.toFixed(2) + 'rem';
+    }
+  }
+
+  /* ---------- Timing ---------- */
+  function runProgress(ms) {
+    var bar = $('progress');
+    bar.classList.remove('run');
+    void bar.offsetWidth;
+    bar.style.animationDuration = ms + 'ms';
+    bar.classList.add('run');
+  }
+  function schedule(ms) {
+    clearTimeout(S.timer);
+    S.remaining = ms;
+    S.startedAt = Date.now();
+    S.timer = setTimeout(advance, ms);
+  }
+
+  var changing = false;
+  function show(sel, fromHistory) {
+    if (!sel) { S.current = null; renderEmpty(); drawTree(); schedule(SECONDS * 1000); $('progress').classList.remove('run'); return; }
+    changing = true;
+    if (!fromHistory && S.current) { S.history.push(S.current); if (S.history.length > 50) S.history.shift(); }
+    var card = $('card');
+    var swap = function () {
+      S.current = sel;
+      if (!fillCard(sel)) { changing = false; advance(); return; }
+      card.classList.remove('leaving');
+      card.classList.remove('arriving');
+      void card.offsetWidth;
+      card.classList.add('arriving');
+      showOnTree(sel).then(function () {
+        if (view3d) { view3d.focus(sel); }
+      });
+      changing = false;
+      if (!S.paused) { schedule(SECONDS * 1000); runProgress(SECONDS * 1000); }
+    };
+    if (!S.current) { swap(); return; }
+    card.classList.remove('arriving');
+    card.classList.add('leaving');
+    setTimeout(swap, reduce ? 150 : 480);
+  }
+  function advance() {
+    if (changing) return;
+    show(pickNext());
+  }
+  function back() {
+    if (changing || !S.history.length) return;
+    var prev = S.history.pop();
+    if (findItem(prev)) show(prev, true);
+  }
+  function setPaused(p) {
+    S.paused = p;
+    document.body.classList.toggle('paused', p);
+    $('pausedNote').hidden = !p;
+    if (p) {
+      clearTimeout(S.timer);
+      S.remaining = Math.max(500, S.remaining - (Date.now() - S.startedAt));
+    } else {
+      schedule(S.remaining || SECONDS * 1000);
+    }
+  }
+
+  /* ---------- Keyboard and mouse (for setting up; the TV itself needs none) ---------- */
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowRight' || e.key === 'PageDown') { e.preventDefault(); if (S.paused) setPaused(false); advance(); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); back(); }
+    else if (e.key === ' ' || e.key === 'MediaPlayPause') { e.preventDefault(); setPaused(!S.paused); }
+    else if (e.key === 'f' || e.key === 'F') { toggleFullscreen(); }
+  });
+  function toggleFullscreen() {
+    var d = document;
+    try {
+      if (!d.fullscreenElement && !d.webkitFullscreenElement) {
+        var el = d.documentElement;
+        (el.requestFullscreen || el.webkitRequestFullscreen).call(el);
+      } else {
+        (d.exitFullscreen || d.webkitExitFullscreen).call(d);
+      }
+    } catch (e) { /* not supported */ }
+  }
+  $('fsBtn').addEventListener('click', function () { toggleFullscreen(); wake(); });
+  var idleTimer = 0;
+  function pointerSeen() {
+    document.body.classList.remove('idle');
+    document.body.classList.add('pointer');
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(function () {
+      document.body.classList.add('idle');
+      document.body.classList.remove('pointer');
+    }, 3000);
+  }
+  document.addEventListener('mousemove', pointerSeen);
+  document.addEventListener('fullscreenchange', function () {
+    var on = !!document.fullscreenElement;
+    $('fsBtn').textContent = on ? 'Exit full screen' : 'Full screen';
+  });
+  document.body.classList.add('idle');
+
+  /* ---------- Keep the screen awake ---------- */
+  var lock = null;
+  function wake() {
+    if (!('wakeLock' in navigator) || document.hidden) return;
+    navigator.wakeLock.request('screen').then(function (l) {
+      lock = l;
+      l.addEventListener('release', function () { lock = null; });
+    }).catch(function () { /* not allowed here */ });
+  }
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden) { if (!lock) wake(); load(); }
+  });
+
+  /* ---------- Light snowfall ---------- */
+  var snowCanvas = $('snow'), snowCtx = snowCanvas.getContext && snowCanvas.getContext('2d');
+  var flakes = [];
+  function sizeSnow() {
+    if (!snowCtx) return;
+    var dpr = Math.min(1.5, window.devicePixelRatio || 1);
+    snowCanvas.width = Math.round(window.innerWidth * dpr);
+    snowCanvas.height = Math.round(window.innerHeight * dpr);
+  }
+  function startSnow() {
+    if (!snowCtx || reduce || params.get('snow') === '0') { snowCanvas.hidden = true; return; }
+    for (var i = 0; i < 70; i++) {
+      flakes.push({ x: Math.random(), y: Math.random(), r: 0.6 + Math.random() * 1.8, s: 0.015 + Math.random() * 0.03, d: Math.random() * 6.28 });
+    }
+    var last = performance.now();
+    (function tick(now) {
+      requestAnimationFrame(tick);
+      if (document.hidden || now - last < 33) return; // ~30 fps is plenty
+      var dt = Math.min(0.1, (now - last) / 1000);
+      last = now;
+      var w = snowCanvas.width, h = snowCanvas.height, k = w / 1920;
+      snowCtx.clearRect(0, 0, w, h);
+      snowCtx.fillStyle = 'rgba(246,238,220,0.55)';
+      snowCtx.beginPath();
+      for (var i = 0; i < flakes.length; i++) {
+        var f = flakes[i];
+        f.y += f.s * dt;
+        f.d += dt * 0.6;
+        if (f.y > 1.02) { f.y = -0.02; f.x = Math.random(); }
+        var x = (f.x + Math.sin(f.d) * 0.006) * w, y = f.y * h, r = f.r * Math.max(1, k * 1.6);
+        snowCtx.moveTo(x + r, y);
+        snowCtx.arc(x, y, r, 0, 6.2832);
+      }
+      snowCtx.fill();
+    })(last);
+  }
+
+  /* ---------- 3D tree, or the flat tree on screens without WebGL ---------- */
+  function hasWebGL() {
+    try {
+      var c = document.createElement('canvas');
+      return !!(window.WebGLRenderingContext && (c.getContext('webgl2') || c.getContext('webgl')));
+    } catch (e) { return false; }
+  }
+  function useFlat() {
+    view3d = null;
+    $('tree3d').hidden = true;
+    $('treeFlat').hidden = false;
+    refreshTree();
+  }
+  function startTree() {
+    if (params.get('view') === 'flat' || !hasWebGL()) { useFlat(); return; }
+    $('tree3d').hidden = false;
+    import(C.url('tree3d.js')).then(function (mod) {
+      view3d = mod.createTree3D($('tree3d'), { idleDelay: SECONDS + 4 });
+      refreshTree();
+      if (S.current) view3d.focus(S.current);
+    }).catch(function (err) {
+      console.warn('Wish Tree TV: 3D tree not available, using the flat tree', err);
+      useFlat();
+    });
+  }
+
+  /* ---------- Start ---------- */
+  C.initGA();
+  C.track('tv_open', { site: SITE });
+  fit();
+  countdown();
+  setInterval(countdown, 10 * 60 * 1000);
+  startSnow();
+  startTree();
+  wake();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitText);
+  load();
+  setInterval(function () { if (!document.hidden) load(); }, REFRESH);
+  // reload a few times a day so screens pick up any updates to the page
+  setTimeout(function () { if (navigator.onLine !== false) window.location.reload(); }, 6 * 3600 * 1000);
+  window.addEventListener('online', load);
+})();
+</script>
+</body>
+</html>

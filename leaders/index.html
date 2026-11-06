@@ -113,6 +113,10 @@ button,input,select,textarea{font-family:inherit}
 .seg button[aria-pressed="true"]{background:var(--bg);color:var(--cream)}
 .status{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:12px;background:#E3F6F3;color:#00584D;font-size:14px;font-weight:500}
 .status .dot{width:8px;height:8px;border-radius:50%;background:#00AF9B}
+.status.pending{background:#FFF4DC;color:#7A4B00}
+.status.pending .dot{background:#E3A008}
+.status.rejected{background:#F8E5E7;color:#7E1F28}
+.status.rejected .dot{background:#AB2C37}
 .row-actions{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px}
 .who{font-size:13px;color:var(--slate)}
 
@@ -250,7 +254,7 @@ button,input,select,textarea{font-family:inherit}
         <div>
           <h1 tabindex="-1" id="editTitle">Your message</h1>
         </div>
-        <p class="sub">One message per leader. It goes live straight away at the top of every site's tree, and you can edit or remove it any time.</p>
+        <p class="sub">One message per leader, up to <span id="maxNote">250</span> characters. The Wish Tree team approves it, then it hangs at the top of every site's tree and shows on the site TVs. You can edit or remove it any time; edits are approved again.</p>
         <div id="statusLive" class="status" hidden><span class="dot" aria-hidden="true"></span><span id="statusText">Live on every site's tree</span></div>
 
         <div class="field">
@@ -280,7 +284,7 @@ button,input,select,textarea{font-family:inherit}
         <p id="editOk" class="ok" role="status"></p>
         <button type="submit" id="publishBtn" class="btn btn-gold">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg>
-          <span id="publishLabel">Publish to every site</span>
+          <span id="publishLabel">Send for approval</span>
         </button>
         <div class="row-actions">
           <span class="who" id="whoText"></span>
@@ -341,10 +345,16 @@ button,input,select,textarea{font-family:inherit}
     $('lCounter').textContent = S.message.length + ' / ' + MAX;
     qsa('.seg button').forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-lang') === S.lang ? 'true' : 'false'); });
     $('statusLive').hidden = !S.existing;
-    if (S.existing && S.existing.updated_at) {
-      $('statusText').textContent = 'Live on every site\'s tree · last updated ' + new Date(S.existing.updated_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    if (S.existing) {
+      var st = S.existing.status || 'pending';
+      var when = S.existing.updated_at ? ' · updated ' + new Date(S.existing.updated_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+      $('statusLive').className = 'status' + (st === 'approved' ? '' : ' ' + st);
+      $('statusText').textContent = (st === 'approved' ? 'Live on every site\'s tree'
+        : st === 'rejected' ? 'Not approved. Edit it and send it again'
+        : 'Waiting for approval by the Wish Tree team') + when;
     }
-    $('publishLabel').textContent = S.busy ? 'Saving…' : (S.existing ? 'Update my message' : 'Publish to every site');
+    $('maxNote').textContent = String(MAX);
+    $('publishLabel').textContent = S.busy ? 'Sending…' : (S.existing ? 'Send my update for approval' : 'Send for approval');
     $('publishBtn').disabled = S.busy;
     $('removeBtn').hidden = !S.existing;
     $('whoText').textContent = S.user ? 'Signed in as ' + S.user.email : '';
@@ -374,7 +384,7 @@ button,input,select,textarea{font-family:inherit}
       }
       if (!S.name && p.default_name) S.name = p.default_name;
       if (!S.title && p.default_title) S.title = p.default_title;
-      return sb.from('leader_messages').select('id,display_name,title,message,lang,updated_at').eq('user_id', S.user.id).maybeSingle().then(function (r) {
+      return sb.from('leader_messages').select('id,display_name,title,message,lang,updated_at,status').eq('user_id', S.user.id).maybeSingle().then(function (r) {
         if (r.error) throw r.error;
         if (r.data) {
           S.existing = r.data;
@@ -499,7 +509,9 @@ button,input,select,textarea{font-family:inherit}
       var wasNew = !S.existing;
       S.existing = saved;
       renderEdit();
-      $('editOk').textContent = wasNew ? 'Published. Your message now hangs at the top of every site\'s tree.' : 'Updated on every site\'s tree.';
+      $('editOk').textContent = saved && saved.status === 'approved'
+        ? 'Saved. Your message is live at the top of every site\'s tree.'
+        : 'Sent. The Wish Tree team will approve it, then it hangs at the top of every site\'s tree.';
       C.track('leader_publish', { is_new: wasNew });
     };
     var fail = function (err) {
@@ -512,14 +524,14 @@ button,input,select,textarea{font-family:inherit}
     };
 
     if (C.demo) {
-      var saved = Object.assign({ updated_at: new Date().toISOString() }, row);
+      var saved = Object.assign({ updated_at: new Date().toISOString(), status: 'pending' }, row);
       C.storageSet('wt-demo-leader', JSON.stringify(saved));
       setTimeout(function () { done(saved); }, 500);
       return;
     }
     sb.from('leader_messages')
       .upsert(Object.assign({ user_id: S.user.id }, row), { onConflict: 'user_id' })
-      .select('id,display_name,title,message,lang,updated_at')
+      .select('id,display_name,title,message,lang,updated_at,status')
       .single()
       .then(function (res) { if (res.error) throw res.error; done(res.data); })
       .catch(fail);

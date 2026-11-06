@@ -40,12 +40,16 @@ window.WISH_CFG = {
     { id: 'wfh', label: 'Work from home', city: '', country: '' }
   ],
 
-  MAX_LENGTH: 200,          // employee wish length
-  LEADER_MAX_LENGTH: 400,   // leader message length
+  MAX_LENGTH: 150,          // employee wish length (keep in step with schema.sql)
+  LEADER_MAX_LENGTH: 250,   // leader message length (keep in step with schema.sql)
   TREE_REFRESH_SECONDS: 60,
   MAX_TAGS_ON_TREE: 40,     // flat tree (fallback and leaders' preview)
   MAX_TAGS_3D: 60,          // 3D tree
   TOUR_SECONDS: 10,         // "Tour sites" switches site every N seconds
+
+  // TV screens (tv/ page)
+  TV_SECONDS: 12,           // how long each message stays on screen
+  TV_LEADER_EVERY: 4,       // show a leader's message after every N wishes
 
   // Optional GA4 measurement ID, e.g. 'G-XXXXXXXXXX'
   GA4_ID: ''

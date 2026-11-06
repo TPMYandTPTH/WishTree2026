@@ -156,7 +156,25 @@
       lang: r[3],
       tag_color: r[4],
       charm: r[5],
-      approved_at: new Date(Date.UTC(2026, 11, 1, 8, i * 7)).toISOString()
+      approved_at: new Date(Date.UTC(2026, 11, 1, 8, i * 7)).toISOString(),
+      like_count: (hash('likes:' + i) % 38) + 1
+    };
+  });
+
+  // Demo-only wishes waiting for approval (to try the approvals page)
+  var SAMPLE_PENDING = [
+    ['gtower', 'Merry Christmas all! If anyone wants to join our futsal team, WhatsApp me at 012-345 6789.', 'Arif', 'en', 'cream', 'gift', ['Phone number']],
+    ['singha', 'ขอบคุณพี่ ๆ ทีมเทรนนิ่งที่ใจดีและอดทนกับน้องใหม่ทุกคนค่ะ', 'Ploy', 'th', 'red', 'star', []],
+    ['gbs', 'Semoga 2027 membawa lebih banyak kejayaan untuk team GBS!', 'Nurul', 'ms', 'gold', 'tree', []],
+    ['wfh', 'Thank you to my remote buddies for the daily morning check-ins. You kept me going this year.', null, 'en', 'cream', 'snow', []],
+    ['kcp', 'Email me at siti.kcp@gmail.com if you want the cookie recipe from the party!', 'Siti', 'en', 'red', 'gift', ['Email address']],
+    ['op', 'To my team: I know this year was tough. Proud of every one of you.', 'Jia Hui', 'en', 'gold', 'star', []]
+  ].map(function (r, i) {
+    return {
+      id: 'demo-p-' + (i + 1), site: r[0], message: r[1], first_name: r[2], display_name: r[2],
+      display_mode: r[2] ? 'name' : 'anon', lang: r[3], tag_color: r[4], charm: r[5], flags: r[6],
+      email: (r[2] ? r[2].toLowerCase().replace(/\s+/g, '.') : 'colleague') + '@tp.com',
+      status: 'pending', created_at: new Date(Date.now() - (i * 11 + 4) * 60000).toISOString()
     };
   });
 
@@ -172,9 +190,14 @@
       title: r[1],
       message: r[2],
       lang: 'en',
-      updated_at: new Date(Date.UTC(2026, 11, 1, 6, i)).toISOString()
+      updated_at: new Date(Date.UTC(2026, 11, 1, 6, i)).toISOString(),
+      like_count: (hash('leader-likes:' + i) % 60) + 12
     };
   });
+
+  var SAMPLE_PENDING_LEADERS = [
+    { id: 'demo-leader-p1', display_name: 'Leader E', title: '[Title]', message: 'Wishing every one of you rest, joy and time with the people you love. Thank you for 2026.', lang: 'en', status: 'pending', email: 'leader.e@tp.com', updated_at: new Date(Date.now() - 25 * 60000).toISOString() }
+  ];
 
   /* ---------- Supabase ---------- */
   var client = null;
@@ -198,12 +221,91 @@
     try { window.localStorage.setItem(key, value); } catch (e) { /* ignore */ }
   }
 
+  /* ---------- Demo store (only used when there are no Supabase keys) ---------- */
+  function demoLoad(key, fallback) {
+    try { var v = JSON.parse(storageGet(key) || 'null'); return v == null ? fallback : v; } catch (e) { return fallback; }
+  }
+  function demoSave(key, value) { storageSet(key, JSON.stringify(value)); }
+
+  // Everything that has gone through (or is waiting for) approval in demo mode
+  function demoQueue() {
+    var review = demoLoad('wt-demo-review', {});
+    var applyReview = function (item, key) {
+      var r = review[key];
+      return r ? Object.assign({}, item, r) : Object.assign({}, item);
+    };
+    var sampleApproved = SAMPLE.map(function (w) {
+      return applyReview(Object.assign({ status: 'approved', display_mode: w.display_name ? 'name' : 'anon', first_name: w.display_name, flags: [], email: (w.display_name || 'colleague').toLowerCase().replace(/\s+/g, '.') + '@tp.com', created_at: w.approved_at }, w), 'wish:' + w.id);
+    });
+    var wishes = SAMPLE_PENDING.map(function (w) { return applyReview(w, 'wish:' + w.id); }).concat(sampleApproved);
+    demoLoad('wt-demo-wishes', []).forEach(function (w, i) {
+      var phone = /\+?\d[\d\s\-().]{6,}\d/.exec(w.message || '');
+      var flags = [];
+      if (/[^\s@]+@[^\s@]+\.[^\s@]{2,}/.test(w.message || '')) flags.push('Email address');
+      if (phone && phone[0].replace(/\D/g, '').length >= 9) flags.push('Phone number');
+      wishes.unshift(Object.assign({ id: 'local-' + i, status: 'pending', flags: flags, email: 'you@tp.com' }, w, {
+        display_name: w.display_mode === 'name' ? w.first_name : null
+      }));
+    });
+    var leaders = SAMPLE_PENDING_LEADERS.map(function (l) { return applyReview(l, 'leader:' + l.id); })
+      .concat(SAMPLE_LEADERS.map(function (l) { return applyReview(Object.assign({ status: 'approved', email: 'leader@tp.com' }, l), 'leader:' + l.id); }));
+    var mine = demoLoad('wt-demo-leader', null);
+    if (mine && mine.message) leaders.unshift(Object.assign({ status: 'pending', email: 'you@tp.com' }, mine, { id: 'demo-leader-you' }));
+    return { wishes: wishes, leaders: leaders };
+  }
+
+  function demoReview(kind, id, changes) {
+    var stamp = { reviewed_at: new Date().toISOString() };
+    if (changes.status === 'approved') stamp.approved_at = stamp.reviewed_at;
+    var upd = Object.assign({}, changes, stamp);
+    if (kind === 'wish' && String(id).indexOf('local-') === 0) {
+      var list = demoLoad('wt-demo-wishes', []);
+      var i = Number(String(id).slice(6));
+      if (list[i]) { list[i] = Object.assign({}, list[i], upd); demoSave('wt-demo-wishes', list); }
+      return;
+    }
+    if (kind === 'leader' && id === 'demo-leader-you') {
+      var mine = demoLoad('wt-demo-leader', null);
+      if (mine) demoSave('wt-demo-leader', Object.assign({}, mine, upd));
+      return;
+    }
+    var review = demoLoad('wt-demo-review', {});
+    review[kind + ':' + id] = Object.assign({}, review[kind + ':' + id] || {}, upd);
+    demoSave('wt-demo-review', review);
+  }
+
+  /* ---------- Likes (one per device, no sign-in needed) ---------- */
+  function deviceId() {
+    var id = storageGet('wt-device');
+    if (!id || id.length < 16) {
+      id = window.crypto && crypto.randomUUID ? crypto.randomUUID()
+        : 'd' + Date.now().toString(36) + Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+      storageSet('wt-device', id);
+    }
+    return id;
+  }
+  function likedMap() { return demoLoad('wt-liked', {}) || {}; }
+  function hasLiked(kind, id) { return !!likedMap()[kind + ':' + id]; }
+  // Resolves to the new count from the server (or null in demo mode, where the page adds or removes one itself)
+  function setLike(kind, id, on) {
+    var all = likedMap();
+    if (on) all[kind + ':' + id] = 1; else delete all[kind + ':' + id];
+    demoSave('wt-liked', all);
+    if (DEMO) return Promise.resolve(null);
+    return getClient().rpc('set_like', { p_kind: kind, p_id: id, p_device: deviceId(), p_on: !!on }).then(function (res) {
+      if (res.error) throw res.error;
+      return typeof res.data === 'number' ? res.data : null;
+    });
+  }
+  function demoLikeBonus(kind, id) { return DEMO && hasLiked(kind, id) ? 1 : 0; }
+
   // Approved employee wishes, newest first
   function fetchApproved() {
     if (DEMO) {
-      return Promise.resolve(SAMPLE.slice().sort(function (a, b) {
-        return a.approved_at < b.approved_at ? 1 : -1;
-      }));
+      var list = demoQueue().wishes.filter(function (w) { return w.status === 'approved'; }).map(function (w) {
+        return Object.assign({}, w, { like_count: (w.like_count || 0) + demoLikeBonus('wish', w.id) });
+      });
+      return Promise.resolve(list.sort(function (a, b) { return a.approved_at < b.approved_at ? 1 : -1; }));
     }
     return getClient().rpc('get_approved_wishes').then(function (res) {
       if (res.error) throw res.error;
@@ -211,14 +313,12 @@
     });
   }
 
-  // Leaders' messages, oldest first (first leader gets the top spot)
+  // Approved leaders' messages, oldest first (first leader gets the top spot)
   function fetchLeaders() {
     if (DEMO) {
-      var list = SAMPLE_LEADERS.slice();
-      try {
-        var mine = JSON.parse(storageGet('wt-demo-leader') || 'null');
-        if (mine && mine.message) list.unshift(Object.assign({ id: 'demo-leader-you' }, mine));
-      } catch (e) { /* ignore */ }
+      var list = demoQueue().leaders.filter(function (l) { return l.status === 'approved'; }).map(function (l) {
+        return Object.assign({}, l, { like_count: (l.like_count || 0) + demoLikeBonus('leader', l.id) });
+      });
       return Promise.resolve(list);
     }
     return getClient().rpc('get_leader_messages').then(function (res) {
@@ -576,6 +676,12 @@
     client: getClient,
     fetchApproved: fetchApproved,
     fetchLeaders: fetchLeaders,
+    hasLiked: hasLiked,
+    setLike: setLike,
+    demoQueue: demoQueue,
+    demoReview: demoReview,
+    demoLoad: demoLoad,
+    demoSave: demoSave,
     allowedEmail: allowedEmail,
     displayName: displayName,
     displayWhere: displayWhere,

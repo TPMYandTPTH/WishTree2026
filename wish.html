@@ -1210,6 +1210,7 @@ button,input,select,textarea{font-family:inherit}
   }
 
   if (C.demo) {
+    if (C.demoLoad('wt-demo-settings', {}).submissions_open === false) { show('closed'); return; }
     var demoUser = C.storageGet('wt-demo-user');
     if (demoUser) { S.user = { email: demoUser }; renderWho(); show('write'); }
     else show('signin');
@@ -1225,17 +1226,24 @@ button,input,select,textarea{font-family:inherit}
     return;
   }
 
-  sb.auth.onAuthStateChange(function (event, session) {
-    if (event === 'SIGNED_OUT') { S.user = null; renderWho(); return; }
-    if (session) handleSession(session);
-  });
-  sb.auth.getSession().then(function (res) {
-    var session = res && res.data ? res.data.session : null;
-    if (session) handleSession(session);
-    else if (S.view === 'loading') show('signin');
-  }).catch(function (err) {
-    console.error(err);
-    show('signin');
+  // The Wish Tree team can close new wishes from the approvals page
+  sb.rpc('get_settings').then(function (res) {
+    var st = res && Array.isArray(res.data) ? res.data[0] : res && res.data;
+    return !(st && st.submissions_open === false);
+  }, function () { return true; }).then(function (open) {
+    if (!open) { show('closed'); return; }
+    sb.auth.onAuthStateChange(function (event, session) {
+      if (event === 'SIGNED_OUT') { S.user = null; renderWho(); return; }
+      if (session) handleSession(session);
+    });
+    sb.auth.getSession().then(function (res) {
+      var session = res && res.data ? res.data.session : null;
+      if (session) handleSession(session);
+      else if (S.view === 'loading') show('signin');
+    }).catch(function (err) {
+      console.error(err);
+      show('signin');
+    });
   });
 })();
 </script>
