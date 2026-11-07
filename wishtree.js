@@ -27,7 +27,51 @@
     red: { bg: '#AB2C37', fg: '#F6EEDC', text: '#F6EEDC' },
     gold: { bg: '#E3B45A', fg: '#0E2A1F', text: '#0E2A1F' }
   };
-  var LANG_LABEL = { en: 'English', ms: 'Bahasa Melayu', th: 'ภาษาไทย' };
+  /* ---------- Languages ---------- */
+  var DEFAULT_LANGS = [
+    { code: 'en', label: 'English', english: 'English' },
+    { code: 'ms', label: 'Bahasa Melayu', english: 'Malay' },
+    { code: 'th', label: 'ภาษาไทย', english: 'Thai' }
+  ];
+  var LANGUAGES = ((CFG.LANGUAGES && CFG.LANGUAGES.length) ? CFG.LANGUAGES : DEFAULT_LANGS).filter(function (l) {
+    return l && /^[a-z]{2,3}$/.test(l.code);
+  });
+  var LANG_LABEL = {};
+  LANGUAGES.forEach(function (l) { LANG_LABEL[l.code] = l.label; });
+  function langLabel(code) { return LANG_LABEL[code] || String(code || '').toUpperCase(); }
+
+  // Guess the language from the script it's written in (Latin-script languages can't be told apart reliably)
+  function detectLang(text) {
+    var s = String(text || '');
+    var code = '';
+    if (/[\u0E00-\u0E7F]/.test(s)) code = 'th';
+    else if (/[\u3040-\u30FF]/.test(s)) code = 'ja';
+    else if (/[\uAC00-\uD7AF\u1100-\u11FF\u3130-\u318F]/.test(s)) code = 'ko';
+    else if (/[\u3400-\u4DBF\u4E00-\u9FFF]/.test(s)) code = 'zh';
+    else if (/[\u0B80-\u0BFF]/.test(s)) code = 'ta';
+    else if (/[ăđơưĂĐƠƯạảấầẩẫậắằẳẵặẹẻẽếềểễệỉịọỏốồổỗộớờởỡợụủứừửữựỳỵỷỹ]/.test(s)) code = 'vi';
+    return LANG_LABEL[code] ? code : '';
+  }
+
+  // Which languages this reader wants to read (null = all of them), remembered on this device
+  function readLangs() {
+    var v = null;
+    try { v = JSON.parse(storageGet('wt-read-langs') || 'null'); } catch (e) { v = null; }
+    if (!Array.isArray(v)) return null;
+    v = v.filter(function (c) { return !!LANG_LABEL[c]; });
+    return v.length && v.length < LANGUAGES.length ? v : null;
+  }
+  function saveReadLangs(list) {
+    storageSet('wt-read-langs', list && list.length && list.length < LANGUAGES.length ? JSON.stringify(list) : '');
+  }
+
+  // Only https links (Supabase Storage) or images made in the browser (demo mode) are used as photos
+  function safePhoto(u) {
+    var v = String(u || '');
+    if (/^https:\/\/[^\s"'<>()\\]+$/.test(v) && v.length < 600) return v;
+    if (/^data:image\/(png|jpeg|webp|svg\+xml)[;,][^\s"<>\\]+$/.test(v) && v.length < 400000) return v;
+    return '';
+  }
   var COUNTRY_LABEL = { MY: 'Malaysia', TH: 'Thailand' };
 
   // Charm icons as SVG path data (24 x 24), shared by the 2D and 3D trees
@@ -156,10 +200,67 @@
       lang: r[3],
       tag_color: r[4],
       charm: r[5],
-      approved_at: new Date(Date.UTC(2026, 11, 1, 8, i * 7)).toISOString(),
+      approved_at: new Date(Date.now() - (i * 97 + 300) * 60000).toISOString(),
       like_count: (hash('likes:' + i) % 38) + 1
     };
   });
+
+  // More demo wishes in other languages, so the tree is fuller than its 60 spots
+  var SAMPLE_MORE = [
+    ['gtower', 'Thank you for every shift swap and every kind word this year.', 'Melissa', 'en', 'cream', 'star'],
+    ['kcp', 'To my QA buddy: your feedback made me better. Merry Christmas!', 'Hakim', 'en', 'red', 'snow'],
+    ['gbs', 'Wishing everyone a restful break and a fresh start in January.', null, 'en', 'gold', 'tree'],
+    ['op', 'Thank you to the facilities team for keeping our floor bright and comfy.', 'Grace', 'en', 'cream', 'gift'],
+    ['lv', 'To the night shift: the coffee is on me in 2027.', 'Darren', 'en', 'red', 'star'],
+    ['jb', 'Grateful for teammates who turned into friends this year.', 'Amira', 'en', 'cream', 'snow'],
+    ['singha', 'Thank you, HR, for answering every question with a smile.', 'Tom', 'en', 'gold', 'gift'],
+    ['wfh', 'May 2027 bring us fewer escalations and more celebrations!', null, 'en', 'cream', 'tree'],
+    ['gtower', 'To my trainer batch: we made it! Proud of all of you.', 'Shalini', 'en', 'red', 'star'],
+    ['kcp', 'Merry Christmas to everyone who makes TP feel like home.', 'Jason', 'en', 'cream', 'gift'],
+    ['gbs', 'Thank you to my manager for the trust and the second chances.', null, 'en', 'gold', 'snow'],
+    ['op', 'Wishing peace, health and good food to every TP family.', 'Hui Min', 'en', 'cream', 'tree'],
+    ['gtower', 'Selamat Hari Krismas kepada semua rakan di TP!', 'Syafiq', 'ms', 'red', 'tree'],
+    ['lv', 'Terima kasih kerana sentiasa bersabar dengan saya tahun ini.', 'Izzati', 'ms', 'cream', 'star'],
+    ['jb', 'Semoga tahun depan lebih banyak rezeki untuk kita semua.', null, 'ms', 'gold', 'gift'],
+    ['kcp', 'Terima kasih team, kita memang terbaik!', 'Aiman', 'ms', 'cream', 'snow'],
+    ['singha', 'สุขสันต์วันคริสต์มาสนะทุกคน ขอบคุณที่อยู่ด้วยกันมาทั้งปี', 'Kanokwan', 'th', 'cream', 'star'],
+    ['singha', 'ขอให้ปีใหม่นี้มีแต่ความสุข สุขภาพแข็งแรงนะคะ', null, 'th', 'red', 'gift'],
+    ['wfh', 'ขอบคุณหัวหน้าทีมที่คอยสนับสนุนเสมอครับ', 'Thanawat', 'th', 'cream', 'tree'],
+    ['gtower', '祝大家圣诞快乐，新年身体健康，工作顺利！', 'Wei Ling', 'zh', 'red', 'star'],
+    ['op', '感谢团队这一年的支持和陪伴。', null, 'zh', 'cream', 'snow'],
+    ['lv', '愿2027年我们一起成长，一起加油！', 'Jun Hao', 'zh', 'gold', 'tree'],
+    ['kcp', '谢谢每一位同事的帮助，圣诞快乐！', 'Xin Yi', 'zh', 'cream', 'gift'],
+    ['op', 'チームの皆さん、一年間本当にありがとうございました。メリークリスマス！', 'Haruka', 'ja', 'cream', 'star'],
+    ['gtower', '来年もよろしくお願いします。良いお年を！', 'Sota', 'ja', 'gold', 'snow'],
+    ['gbs', 'いつも助けてくれる先輩たちに感謝しています。', null, 'ja', 'red', 'tree'],
+    ['gtower', '올 한 해 함께해 주셔서 감사합니다. 메리 크리스마스!', 'Jiwoo', 'ko', 'cream', 'gift'],
+    ['lv', '2027년에도 모두 건강하고 행복하세요.', null, 'ko', 'red', 'star'],
+    ['kcp', '늘 도와주는 우리 팀 최고예요!', 'Minseo', 'ko', 'gold', 'snow'],
+    ['gbs', 'Cảm ơn cả đội đã luôn hỗ trợ mình trong năm qua. Giáng sinh vui vẻ!', 'Linh', 'vi', 'cream', 'tree'],
+    ['op', 'Chúc mọi người một năm mới an khang và hạnh phúc.', null, 'vi', 'gold', 'star'],
+    ['jb', 'Terima kasih untuk tim yang selalu kompak. Selamat Natal dan Tahun Baru!', 'Putri', 'id', 'red', 'gift'],
+    ['wfh', 'Semoga tahun 2027 membawa banyak kebahagiaan untuk kita semua.', 'Dimas', 'id', 'cream', 'snow'],
+    ['kcp', 'அனைவருக்கும் இனிய கிறிஸ்துமஸ் நல்வாழ்த்துக்கள்!', 'Kavitha', 'ta', 'gold', 'star'],
+    ['gtower', 'இந்த ஆண்டு முழுவதும் உதவிய என் அணிக்கு நன்றி.', null, 'ta', 'cream', 'tree'],
+    ['jb', 'Thank you for making every busy Monday a little easier. Happy holidays!', 'Kelvin', 'en', 'cream', 'gift'],
+    ['lv', 'To my seatmate: thanks for the snacks and the pep talks.', 'Nadia', 'en', 'gold', 'snow'],
+    ['gbs', 'Wishing all the new joiners a wonderful first Christmas with TP.', 'Ramesh', 'en', 'red', 'tree'],
+    ['wfh', 'Thank you to IT for every remote fix this year.', null, 'en', 'cream', 'star'],
+    ['singha', 'Merry Christmas from Bangkok to every TP site!', 'Mint', 'en', 'red', 'gift']
+  ].map(function (r, i) {
+    return {
+      id: 'demo-m-' + (i + 1),
+      site: r[0],
+      message: r[1],
+      display_name: r[2],
+      lang: r[3],
+      tag_color: r[4],
+      charm: r[5],
+      approved_at: new Date(Date.now() - (i * 61 + 90) * 60000).toISOString(),
+      like_count: hash('likes-m:' + i) % 24
+    };
+  });
+  SAMPLE = SAMPLE.concat(SAMPLE_MORE);
 
   // Demo-only wishes waiting for approval (to try the approvals page)
   var SAMPLE_PENDING = [
@@ -178,6 +279,16 @@
     };
   });
 
+  // Placeholder "photos" for the demo leaders (a plain silhouette, not a real person)
+  function placeholderPhoto(bg1, bg2) {
+    var svg = "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><defs><linearGradient id='g' x1='0' y1='0' x2='0' y2='1'>" +
+      "<stop offset='0' stop-color='" + bg1 + "'/><stop offset='1' stop-color='" + bg2 + "'/></linearGradient></defs>" +
+      "<rect width='200' height='200' fill='url(#g)'/><circle cx='100' cy='84' r='38' fill='#F3EEE6'/>" +
+      "<path d='M28 200c4-50 34-76 72-76s68 26 72 76z' fill='#F3EEE6'/></svg>";
+    return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+  }
+  var PLACEHOLDER_BG = [['#9FB4CF', '#5F7396'], ['#C9A98B', '#8A6B52'], ['#9CC5B4', '#4E8270'], ['#C7B3D6', '#7D6596']];
+
   var SAMPLE_LEADERS = [
     ['Leader A', '[Title]', 'Thank you for every call, every chat and every customer you helped this year. You are the reason TP Malaysia and Thailand shine. Merry Christmas and a happy 2027!'],
     ['Leader B', '[Title]', 'This year we grew together across our sites in two countries. Rest well this holiday, and let us make 2027 our best year yet.'],
@@ -190,6 +301,7 @@
       title: r[1],
       message: r[2],
       lang: 'en',
+      photo_url: placeholderPhoto(PLACEHOLDER_BG[i][0], PLACEHOLDER_BG[i][1]),
       updated_at: new Date(Date.UTC(2026, 11, 1, 6, i)).toISOString(),
       like_count: (hash('leader-likes:' + i) % 60) + 12
     };
@@ -382,6 +494,18 @@
   function pickForTree(wishesNewestFirst, cap) {
     return wishesNewestFirst.slice(0, cap).reverse();
   }
+  function newestFirst(a, b) {
+    var x = String(a.approved_at || ''), y = String(b.approved_at || '');
+    return x < y ? 1 : x > y ? -1 : 0;
+  }
+  // More wishes than spots: the most-liked go on the tree (ties go to the newest). Returns oldest first, like pickForTree.
+  function rankForTree(list, cap) {
+    if (list.length <= cap) return list.slice().sort(newestFirst).reverse();
+    var top = list.slice().sort(function (a, b) {
+      return ((b.like_count || 0) - (a.like_count || 0)) || newestFirst(a, b);
+    }).slice(0, cap);
+    return top.sort(newestFirst).reverse();
+  }
 
   /* ---------- The tree ---------- */
   // Tree outline in tree units (620 x 760): [apex y, base y, half width at base]
@@ -519,6 +643,8 @@
     '.wt-lcap{display:block;width:calc(var(--d) * .26);height:calc(var(--d) * .14);margin-bottom:-1px;border-radius:2px 2px 0 0;background:#AB2C37}',
     '.wt-lball{position:relative;display:flex;align-items:center;justify-content:center;width:var(--d);height:var(--d);border-radius:50%;background:#E3B45A;color:#0E2A1F;font-weight:700;font-size:calc(var(--d) * .32);letter-spacing:.02em;line-height:1;box-shadow:inset 0 0 0 calc(var(--d) * .06) #F2C766,0 0 0 calc(var(--d) * .1) rgba(242,199,102,.22),0 4px 10px rgba(0,0,0,.4);transition:box-shadow .25s ease}',
     '.wt-lball::after{content:"";position:absolute;left:18%;top:16%;width:22%;height:22%;border-radius:50%;background:rgba(255,255,255,.45)}',
+    '.wt-lball.wt-photo{background-color:#E3B45A;background-size:cover;background-position:center}',
+    '.wt-lball.wt-photo::after{display:none}',
     '.wt-lstar{position:absolute;right:-6%;bottom:-6%;width:calc(var(--d) * .4);height:calc(var(--d) * .4);border-radius:50%;background:#AB2C37;color:#F6EEDC;display:flex;align-items:center;justify-content:center}',
     '.wt-lstar svg{width:62%;height:62%}',
     '.wt-leader[aria-pressed="true"]{animation:none}',
@@ -603,7 +729,9 @@
         ' style="left:' + (pos[0] / 6.2).toFixed(2) + '%;top:' + (pos[1] / 7.6).toFixed(2) + '%;' +
         '--d:' + u(50) + ';--lstr:' + u(10) + ';animation-delay:' + (li * -0.8) + 's">' +
         '<span class="wt-lstring"></span><span class="wt-lcap"></span>' +
-        '<span class="wt-lball">' + esc(initials(L.display_name)) +
+        (safePhoto(L.photo_url)
+          ? '<span class="wt-lball wt-photo" style="background-image:url(&quot;' + esc(safePhoto(L.photo_url)) + '&quot;)">'
+          : '<span class="wt-lball">' + esc(initials(L.display_name))) +
         '<span class="wt-lstar"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="' + STAR_PATH + '"/></svg></span>' +
         '</span></button>';
     }
@@ -661,6 +789,13 @@
     url: url,
     PALETTE: PALETTE,
     LANG_LABEL: LANG_LABEL,
+    LANGUAGES: LANGUAGES,
+    langLabel: langLabel,
+    detectLang: detectLang,
+    readLangs: readLangs,
+    saveReadLangs: saveReadLangs,
+    safePhoto: safePhoto,
+    rankForTree: rankForTree,
     COUNTRY_LABEL: COUNTRY_LABEL,
     SITES: SITES,
     LEADER_SLOTS: LEADER_SLOTS.length,

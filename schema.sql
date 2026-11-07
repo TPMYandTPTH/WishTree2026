@@ -69,7 +69,7 @@ create table if not exists public.wishes (
   display_mode text not null check (display_mode in ('name', 'anon')),
   first_name text check (first_name is null or char_length(first_name) <= 40),
   site text not null,
-  lang text not null default 'en' check (lang in ('en', 'ms', 'th')),
+  lang text not null default 'en',
   tag_color text not null default 'cream' check (tag_color in ('cream', 'red', 'gold')),
   charm text not null default 'snow' check (charm in ('snow', 'star', 'tree', 'gift')),
   consent boolean not null default false check (consent),
@@ -84,6 +84,10 @@ create table if not exists public.wishes (
 alter table public.wishes drop constraint if exists wishes_message_check;
 alter table public.wishes add constraint wishes_message_check
   check (char_length(btrim(message)) between 1 and 150) not valid;
+
+-- Language: any 2-3 letter code, so languages can be added in config.js without touching the database
+alter table public.wishes drop constraint if exists wishes_lang_check;
+alter table public.wishes add constraint wishes_lang_check check (lang ~ '^[a-z]{2,3}$');
 
 alter table public.wishes drop constraint if exists wishes_site_check;
 alter table public.wishes add constraint wishes_site_check
@@ -175,13 +179,22 @@ create table if not exists public.leader_messages (
   display_name text not null check (char_length(btrim(display_name)) between 1 and 60),
   title text check (title is null or char_length(title) <= 80),
   message text not null,
-  lang text not null default 'en' check (lang in ('en', 'ms', 'th')),
+  lang text not null default 'en',
   sort_order int not null default 100,   -- lower = shown first; set by moderators
   hidden boolean not null default false
 );
 alter table public.leader_messages add column if not exists status text not null default 'pending';
 alter table public.leader_messages add column if not exists reviewed_at timestamptz;
 alter table public.leader_messages add column if not exists reviewed_by text;
+alter table public.leader_messages add column if not exists photo_url text;
+
+alter table public.leader_messages drop constraint if exists leader_messages_lang_check;
+alter table public.leader_messages add constraint leader_messages_lang_check check (lang ~ '^[a-z]{2,3}$');
+
+-- Photo: a link to the leader's picture in Supabase Storage (bucket leader-photos, see section 9)
+alter table public.leader_messages drop constraint if exists leader_messages_photo_check;
+alter table public.leader_messages add constraint leader_messages_photo_check
+  check (photo_url is null or (char_length(photo_url) <= 600 and photo_url ~ '^https://[^[:space:]"''<>()\\]+$'));
 
 alter table public.leader_messages drop constraint if exists leader_messages_status_check;
 alter table public.leader_messages add constraint leader_messages_status_check
@@ -232,7 +245,8 @@ begin
       if new.message is distinct from old.message
          or new.display_name is distinct from old.display_name
          or new.title is distinct from old.title
-         or new.lang is distinct from old.lang then
+         or new.lang is distinct from old.lang
+         or new.photo_url is distinct from old.photo_url then
         new.status      := case when needs_ok then 'pending' else 'approved' end;
         new.reviewed_at := null;
         new.reviewed_by := null;
@@ -333,9 +347,9 @@ $$;
 
 drop function if exists public.get_leader_messages();
 create function public.get_leader_messages()
-returns table (id uuid, display_name text, title text, message text, lang text, updated_at timestamptz, like_count int)
+returns table (id uuid, display_name text, title text, message text, lang text, photo_url text, updated_at timestamptz, like_count int)
 language sql stable security definer set search_path = '' as $$
-  select m.id, m.display_name, m.title, m.message, m.lang, m.updated_at,
+  select m.id, m.display_name, m.title, m.message, m.lang, m.photo_url, m.updated_at,
          (select count(*) from public.likes l where l.kind = 'leader' and l.target_id = m.id)::int
   from public.leader_messages m
   where m.status = 'approved' and not m.hidden
@@ -411,7 +425,36 @@ grant execute on function public.am_i_moderator() to authenticated;
 grant execute on function public.update_settings(boolean, boolean) to authenticated;
 
 
--- 9. Add your leaders and moderators -------------------------
+-- 9. Leader photos (Supabase Storage) ------------------------
+-- A public bucket: anyone can see the photos, only leaders can upload, each into their own folder.
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('leader-photos', 'leader-photos', true, 2097152, array['image/jpeg', 'image/png', 'image/webp'])
+on conflict (id) do update
+  set public = true, file_size_limit = excluded.file_size_limit, allowed_mime_types = excluded.allowed_mime_types;
+
+drop policy if exists "leaders upload own photo" on storage.objects;
+create policy "leaders upload own photo" on storage.objects
+  for insert to authenticated
+  with check (bucket_id = 'leader-photos' and (storage.foldername(name))[1] = (select auth.uid()::text) and public.is_leader());
+
+drop policy if exists "leaders see own photos" on storage.objects;
+create policy "leaders see own photos" on storage.objects
+  for select to authenticated
+  using (bucket_id = 'leader-photos' and (storage.foldername(name))[1] = (select auth.uid()::text));
+
+drop policy if exists "leaders replace own photo" on storage.objects;
+create policy "leaders replace own photo" on storage.objects
+  for update to authenticated
+  using (bucket_id = 'leader-photos' and (storage.foldername(name))[1] = (select auth.uid()::text) and public.is_leader())
+  with check (bucket_id = 'leader-photos' and (storage.foldername(name))[1] = (select auth.uid()::text) and public.is_leader());
+
+drop policy if exists "leaders delete own photo" on storage.objects;
+create policy "leaders delete own photo" on storage.objects
+  for delete to authenticated
+  using (bucket_id = 'leader-photos' and (storage.foldername(name))[1] = (select auth.uid()::text));
+
+
+-- 10. Add your leaders and moderators ------------------------
 -- Replace the examples, remove the leading "--", and run just these lines.
 -- (Or add rows in Table Editor > leaders / moderators.)
 --

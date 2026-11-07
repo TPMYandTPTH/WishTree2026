@@ -40,11 +40,25 @@ window.WISH_CFG = {
     { id: 'wfh', label: 'Work from home', city: '', country: '' }
   ],
 
+  // Languages people can write in, and readers can pick from on the tree and the TVs.
+  // code is stored with each wish (2-3 lowercase letters) - add or remove lines freely.
+  LANGUAGES: [
+    { code: 'en', label: 'English', english: 'English' },
+    { code: 'ms', label: 'Bahasa Melayu', english: 'Malay' },
+    { code: 'th', label: 'ภาษาไทย', english: 'Thai' },
+    { code: 'zh', label: '中文', english: 'Chinese' },
+    { code: 'ja', label: '日本語', english: 'Japanese' },
+    { code: 'ko', label: '한국어', english: 'Korean' },
+    { code: 'vi', label: 'Tiếng Việt', english: 'Vietnamese' },
+    { code: 'id', label: 'Bahasa Indonesia', english: 'Indonesian' },
+    { code: 'ta', label: 'தமிழ்', english: 'Tamil' }
+  ],
+
   MAX_LENGTH: 150,          // employee wish length (keep in step with schema.sql)
   LEADER_MAX_LENGTH: 250,   // leader message length (keep in step with schema.sql)
   TREE_REFRESH_SECONDS: 60,
   MAX_TAGS_ON_TREE: 40,     // flat tree (fallback and leaders' preview)
-  MAX_TAGS_3D: 60,          // 3D tree
+  MAX_TAGS_3D: 60,          // 3D tree: the most it holds without tags overlapping. With more wishes, the most-liked go on the tree and every wish stays in the list below it
   TREE_STYLE: 'light',      // 3D tree look: 'tiers' (smooth layers), 'cone' (one smooth cone) or 'light' (a tree made of light)
   TOUR_SECONDS: 10,         // "Tour sites" switches site every N seconds
 

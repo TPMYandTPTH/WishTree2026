@@ -9,7 +9,7 @@
 <link rel="icon" type="image/png" href="assets/tp-logo-white.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Noto+Sans:wght@300;400;500;700&family=Noto+Sans+Thai:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Noto+Sans:wght@300;400;500;700&family=Noto+Sans+Thai:wght@300;400;500;700&family=Noto+Sans+SC:wght@300;400;700&family=Noto+Sans+JP:wght@300;400;700&family=Noto+Sans+KR:wght@300;400;700&family=Noto+Sans+Tamil:wght@300;400;700&display=swap" rel="stylesheet">
 <style>
 @font-face{font-family:'TP Sans';font-weight:300;font-display:swap;src:local('TP Sans Light'),local('TPSans-Light'),url('fonts/TPSans-Light.ttf') format('truetype')}
 @font-face{font-family:'TP Sans';font-weight:400;font-display:swap;src:local('TP Sans'),local('TPSans-Regular'),url('fonts/TPSans-Regular.ttf') format('truetype')}
@@ -25,6 +25,10 @@
   --font:'TP Sans','Noto Sans','Noto Sans Thai',Calibri,system-ui,sans-serif;
   --script:'Great Vibes',cursive;
 }
+:lang(zh){font-family:'Noto Sans SC','Noto Sans',system-ui,sans-serif}
+:lang(ja){font-family:'Noto Sans JP','Noto Sans',system-ui,sans-serif}
+:lang(ko){font-family:'Noto Sans KR','Noto Sans',system-ui,sans-serif}
+:lang(ta){font-family:'Noto Sans Tamil','Noto Sans',system-ui,sans-serif}
 *{box-sizing:border-box}
 [hidden]{display:none !important}
 html,body{margin:0;background:var(--bg);color:var(--cream);font-family:var(--font);-webkit-font-smoothing:antialiased}
@@ -165,6 +169,59 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
 
 .foot{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;margin-top:40px;padding-top:20px;border-top:1px solid var(--line);font-size:13px;color:var(--cream-3)}
 
+/* language picker */
+.langs{position:relative}
+.lang-btn{display:flex;align-items:center;gap:10px;min-height:44px;padding:0 14px;border:1px solid rgba(246,238,220,.18);border-radius:12px;background:rgba(246,238,220,.04);color:var(--cream);font-size:14px;font-weight:500;cursor:pointer;list-style:none;white-space:nowrap}
+.lang-btn::-webkit-details-marker{display:none}
+.lang-btn:hover{background:rgba(246,238,220,.1)}
+.lang-btn .lb-text{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.lang-btn .chev{transition:transform .2s ease}
+.langs[open] .lang-btn .chev{transform:rotate(180deg)}
+.lang-panel{position:absolute;left:0;top:calc(100% + 6px);z-index:6;width:290px;max-width:calc(100vw - 32px);padding:14px;border-radius:14px;background:#123326;border:1px solid rgba(246,238,220,.18);box-shadow:0 18px 40px rgba(0,0,0,.45)}
+.lang-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px;font-size:13px;color:var(--cream-2)}
+.lang-head .link-btn{min-height:32px;font-size:13px}
+.lang-opt{display:flex;align-items:center;gap:12px;min-height:42px;padding:0 6px;border-radius:8px;font-size:15px;cursor:pointer}
+.lang-opt:hover{background:rgba(246,238,220,.06)}
+.lang-opt input{width:18px;height:18px;margin:0;accent-color:#E3B45A;cursor:pointer}
+.lang-opt .ln{flex:1}
+.lang-opt .count{min-width:24px;padding:1px 7px;border-radius:999px;background:rgba(246,238,220,.12);font-size:12px;font-weight:700;text-align:center;font-variant-numeric:tabular-nums}
+.lang-opt.zero{color:var(--cream-3)}
+.lang-note{margin:8px 6px 0;font-size:12px;line-height:1.45;color:var(--cream-3)}
+
+/* every wish, in a list under the tree */
+.all{position:relative;z-index:1;margin-top:56px;padding-top:32px;border-top:1px solid var(--line)}
+.all-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px 24px;margin-bottom:22px}
+.all-head h2{margin:0;font-size:32px;font-weight:300}
+.all-sub{margin:6px 0 0;font-size:15px;color:var(--cream-2)}
+.all-tools{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.search{width:240px;height:44px;padding:0 16px;border:1px solid rgba(246,238,220,.25);border-radius:999px;background:rgba(246,238,220,.06);color:var(--cream);font-family:inherit;font-size:15px}
+.search::placeholder{color:var(--cream-3)}
+.sort{display:flex;gap:4px;padding:4px;border-radius:999px;background:rgba(246,238,220,.08)}
+.sort button{min-height:36px;padding:0 14px;border:0;border-radius:999px;background:transparent;color:var(--cream);font-size:14px;font-weight:500;cursor:pointer}
+.sort button[aria-pressed="true"]{background:var(--cream);color:var(--bg)}
+.leader-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;margin-bottom:14px}
+.all-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.li{display:flex;flex-direction:column;gap:12px;padding:18px 18px 14px;border-radius:12px;background:rgba(246,238,220,.05);border:1px solid rgba(246,238,220,.12)}
+.li.leader{background:#0B231A;border-color:rgba(227,180,90,.55)}
+.li-top{display:flex;align-items:center;gap:8px;min-height:32px}
+.li-tag{flex:none;display:flex;align-items:center;justify-content:center;width:22px;height:28px;border-radius:3px 3px 5px 5px;background:var(--bg-tag);color:var(--fg-tag)}
+.li-kicker{font-size:11px;font-weight:700;letter-spacing:.12em;color:var(--gold)}
+.li-lang{padding:2px 9px;border-radius:999px;background:rgba(246,238,220,.1);font-size:12px;color:var(--cream-2)}
+.li-find{margin-left:auto;min-height:32px;padding:0 4px;border:0;background:transparent;color:var(--gold);font-size:13px;font-weight:500;text-decoration:underline;cursor:pointer}
+.li-text{margin:0;flex:1;font-size:16px;line-height:1.5;white-space:pre-line;overflow-wrap:anywhere}
+.li.leader .li-text{font-weight:300}
+.li-foot{display:flex;align-items:center;gap:12px;padding-top:12px;border-top:1px dashed rgba(246,238,220,.18)}
+.li-who{min-width:0;flex:1}
+.li-who b{display:block;font-size:14px}
+.li-who span{display:block;margin-top:2px;font-size:13px;color:var(--cream-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.li-photo{flex:none;width:40px;height:40px;border-radius:50%;object-fit:cover;background:var(--gold);box-shadow:0 0 0 2px var(--gold)}
+.li-init{flex:none;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;background:var(--gold);color:var(--bg);font-size:14px;font-weight:700}
+.li .like{min-height:38px;min-width:58px;padding:0 10px;font-size:14px;border-color:rgba(246,238,220,.25);color:var(--cream)}
+.all-empty{grid-column:1/-1;padding:40px 20px;border:1px dashed rgba(246,238,220,.2);border-radius:12px;text-align:center;color:var(--cream-3)}
+.more-row{display:flex;justify-content:center;margin-top:20px}
+.avatar img{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block}
+.wish-card[data-kind="leader"] .avatar.has-photo{box-shadow:0 0 0 2px #E3B45A}
+
 /* laptop / tablet: intro on top, tree + card side by side */
 @media (max-width:1180px){
   .grid{grid-template-columns:minmax(0,1fr) minmax(280px,340px);grid-template-areas:"intro intro" "sites sites" "tree side";grid-template-rows:auto;gap:28px 32px}
@@ -172,6 +229,7 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
   .sites-title{display:none}
   .site-rail{flex-direction:row;flex-wrap:wrap;justify-content:center;gap:8px}
   .site-chip{width:auto;min-height:40px;border-radius:999px;justify-content:center}
+  .lang-btn{min-height:44px;border-radius:999px}
   .intro{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:20px 40px;align-items:end;padding-top:0}
   .intro-head{grid-row:span 3;align-self:center}
   h1{font-size:48px}
@@ -198,6 +256,13 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
   .site-rail::-webkit-scrollbar{display:none}
   .site-chip{scroll-snap-align:center}
   .tour{align-self:center}
+  .langs{align-self:stretch}
+  .lang-btn{justify-content:center}
+  .lang-panel{left:0;right:0;width:auto;max-width:none}
+  .all{margin-top:36px;padding-top:24px}
+  .all-head h2{font-size:26px}
+  .all-tools{width:100%}
+  .search{flex:1;width:auto;min-width:0}
   .tree-label .site{font-size:19px}
   .qr-card{display:none}
   .card-text{font-size:18px}
@@ -259,6 +324,18 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
         <svg id="tourIcon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15l12-7.5z"/></svg>
         <span id="tourLabel">Tour all sites</span>
       </button>
+      <details class="langs" id="langPick">
+        <summary class="lang-btn" aria-label="Languages to read">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E3B45A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.4 2.4 3.6 5.2 3.6 8.5s-1.2 6.1-3.6 8.5c-2.4-2.4-3.6-5.2-3.6-8.5s1.2-6.1 3.6-8.5z"/></svg>
+          <span class="lb-text" id="langSummary">All languages</span>
+          <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        </summary>
+        <div class="lang-panel" role="group" aria-labelledby="langHead">
+          <div class="lang-head"><span id="langHead">Show wishes written in</span><button type="button" id="langAll" class="link-btn">Select all</button></div>
+          <div id="langList"></div>
+          <p class="lang-note">Leaders' messages always show.</p>
+        </div>
+      </details>
     </nav>
 
     <section class="tree-col" id="tree" aria-label="The wish tree" tabindex="-1">
@@ -279,8 +356,9 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
         <span><i class="lg-tag"></i>Wishes from colleagues</span>
       </div>
       <div class="tree-foot">
+        <span id="treeFull" hidden></span>
+        <a href="#allWishes" id="allLink" class="link-btn" hidden>See every wish</a>
         <span>Every wish is reviewed by the Talent Engagement team before it appears.</span>
-        <button type="button" id="shuffleBtn" class="link-btn" hidden>Show other wishes</button>
       </div>
     </section>
 
@@ -333,6 +411,25 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
     </aside>
   </main>
 
+  <section class="all" id="allWishes" aria-labelledby="allTitle" tabindex="-1">
+    <div class="all-head">
+      <div>
+        <h2 id="allTitle">Every wish</h2>
+        <p class="all-sub" id="allSub"></p>
+      </div>
+      <div class="all-tools">
+        <input type="search" id="allSearch" class="search" placeholder="Search words or names" aria-label="Search wishes">
+        <div class="sort" role="group" aria-label="Sort wishes">
+          <button type="button" data-sort="likes" aria-pressed="true">Most liked</button>
+          <button type="button" data-sort="new" aria-pressed="false">Newest</button>
+        </div>
+      </div>
+    </div>
+    <div id="leaderList" class="leader-list" aria-label="Leaders' messages"></div>
+    <div id="allList" class="all-list"></div>
+    <div class="more-row"><button type="button" id="moreBtn" class="btn-ghost" hidden>Show more</button></div>
+  </section>
+
   <footer class="foot">
     <span>One TP. Many Wishes. One Christmas Together.</span>
     <span>Run by Talent Engagement &amp; MarComm · Built by DST</span>
@@ -348,16 +445,27 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
   var params = new URLSearchParams(window.location.search);
   var startSite = params.get('site');
 
+  // Languages to read: ?lang=en,th in the link, otherwise what this reader picked last time (null = all)
+  function langsFromParam() {
+    var v = (params.get('lang') || '').split(',').map(function (x) { return x.trim().toLowerCase(); })
+      .filter(function (c) { return !!C.LANG_LABEL[c]; });
+    return v.length && v.length < C.LANGUAGES.length ? v : null;
+  }
+  var LIST_PAGE = 24;
+
   var state = {
     wishes: [],        // approved wishes, newest first
     leaders: [],       // leaders' messages
     site: startSite && C.siteById(startSite) ? startSite : 'all',
+    langs: params.get('lang') ? langsFromParam() : C.readLangs(),
     selected: null,    // { kind: 'wish' | 'leader', id }
-    offset: 0,
     onTree: [],        // wishes on the tree right now, oldest first
     loadedOnce: false,
     spinning: false,
-    pendingSite: null
+    pendingSite: null,
+    sort: 'likes',     // list order: 'likes' or 'new'
+    q: '',
+    shown: LIST_PAGE
   };
   var CAP2D = Math.max(6, Math.min(CFG.MAX_TAGS_ON_TREE || 40, C.treeCapacity(0.58)));
   var REDUCE = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -409,23 +517,24 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
   }
 
   /* ---------- Data helpers ---------- */
+  function langOk(w) { return !state.langs || state.langs.indexOf(w.lang) !== -1; }
+  // Wishes for the chosen site, in the chosen languages
   function siteWishes() {
-    return state.site === 'all' ? state.wishes : state.wishes.filter(function (w) { return w.site === state.site; });
+    return state.wishes.filter(function (w) { return (state.site === 'all' || w.site === state.site) && langOk(w); });
   }
   function countFor(id) {
-    if (id === 'all') return state.wishes.length;
     var n = 0;
-    state.wishes.forEach(function (w) { if (w.site === id) n++; });
+    state.wishes.forEach(function (w) { if ((id === 'all' || w.site === id) && langOk(w)) n++; });
     return n;
   }
   function crown() { return state.leaders.slice(0, C.LEADER_SLOTS); }
 
+  // The tree holds cap() wishes. With more than that, the most-liked go on it; the rest are in the list below.
   function computeTreeSet() {
-    var src = siteWishes();
-    var n = cap();
-    if (src.length <= n) return C.pickForTree(src, n);
-    var start = state.offset % src.length;
-    return C.pickForTree(src.slice(start).concat(src.slice(0, start)), n);
+    return C.rankForTree(siteWishes(), cap());
+  }
+  function isOnTree(id) {
+    return state.onTree.some(function (w) { return String(w.id) === String(id); });
   }
 
   // Order for Previous / Next: leaders first, then wishes on the tree, newest first
@@ -450,8 +559,10 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
     return null;
   }
   function ensureSelection() {
-    var list = browsable();
-    var ok = state.selected && list.some(function (x) { return sameSel(x, state.selected); });
+    var sel = state.selected;
+    var ok = false;
+    if (sel && sel.kind === 'leader') ok = !!findItem(sel);
+    else if (sel) ok = siteWishes().some(function (w) { return String(w.id) === String(sel.id); });
     if (!ok) state.selected = defaultSelection();
   }
 
@@ -459,7 +570,9 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
   function fmt(n) { return Number(n).toLocaleString('en-US'); }
 
   function renderStats() {
-    var withWishes = C.SITES.filter(function (s) { return countFor(s.id) > 0; }).length;
+    var withWishes = C.SITES.filter(function (s) {
+      return state.wishes.some(function (w) { return w.site === s.id; });
+    }).length;
     el('statTotal').textContent = fmt(state.wishes.length);
     el('statSites').textContent = fmt(withWishes);
     el('statLeaders').textContent = fmt(state.leaders.length);
@@ -491,10 +604,106 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
     el('treeCount').textContent = fmt(n) + (n === 1 ? ' wish' : ' wishes');
   }
 
+  /* ---------- Languages to read ---------- */
+  function langSummary() {
+    if (!state.langs) return 'All languages';
+    if (state.langs.length <= 2) return state.langs.map(function (c) { return C.langLabel(c); }).join(', ');
+    return state.langs.length + ' languages';
+  }
+  function renderLangs() {
+    el('langSummary').textContent = langSummary();
+    var counts = {};
+    state.wishes.forEach(function (w) {
+      if (state.site === 'all' || w.site === state.site) counts[w.lang] = (counts[w.lang] || 0) + 1;
+    });
+    el('langList').innerHTML = C.LANGUAGES.map(function (l) {
+      var on = !state.langs || state.langs.indexOf(l.code) !== -1;
+      var n = counts[l.code] || 0;
+      return '<label class="lang-opt' + (n ? '' : ' zero') + '"><input type="checkbox" value="' + C.esc(l.code) + '"' + (on ? ' checked' : '') + '>' +
+        '<span class="ln" lang="' + C.esc(l.code) + '">' + C.esc(l.label) + '</span>' +
+        (l.english && l.english !== l.label ? '<span class="sr-en" style="font-size:12px;color:#B9B19E">' + C.esc(l.english) + '</span>' : '') +
+        '<span class="count">' + fmt(n) + '</span></label>';
+    }).join('');
+    el('langAll').hidden = !state.langs;
+  }
+  function setLangs(list) {
+    state.langs = list && list.length && list.length < C.LANGUAGES.length ? list : null;
+    C.saveReadLangs(state.langs);
+    state.shown = LIST_PAGE;
+    state.onTree = computeTreeSet();
+    ensureSelection();
+    renderAll();
+    C.track('wish_langs', { langs: state.langs ? state.langs.join(',') : 'all' });
+  }
+
+  /* ---------- Every wish, in a list under the tree ---------- */
+  var HEART = '<svg class="heart" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.3s-7.4-4.3-9.2-9C1.5 7.9 3.7 4.6 7 4.6c2 0 3.6 1.1 5 3 1.4-1.9 3-3 5-3 3.3 0 5.5 3.3 4.2 6.7-1.8 4.7-9.2 9-9.2 9z"/></svg>';
+  function likeBtnHtml(kind, item) {
+    var liked = C.hasLiked(kind, item.id);
+    var showCount = kind !== 'leader';
+    return '<button type="button" class="like" data-like-kind="' + kind + '" data-like-id="' + C.esc(item.id) + '" aria-pressed="' + (liked ? 'true' : 'false') + '"' +
+      ' aria-label="' + (liked ? 'Unlike' : 'Like') + ' this message' + (showCount ? ', ' + (item.like_count || 0) + ' likes' : '') + '">' +
+      HEART + (showCount ? '<span>' + fmt(item.like_count || 0) + '</span>' : '') + '</button>';
+  }
+  function listWishes() {
+    var q = state.q.trim().toLowerCase();
+    var list = siteWishes().filter(function (w) {
+      if (!q) return true;
+      return [w.message, w.display_name, C.siteName(w.site)].join(' ').toLowerCase().indexOf(q) !== -1;
+    });
+    return list.sort(state.sort === 'likes'
+      ? function (a, b) { return ((b.like_count || 0) - (a.like_count || 0)) || (String(a.approved_at) < String(b.approved_at) ? 1 : -1); }
+      : function (a, b) { return String(a.approved_at) < String(b.approved_at) ? 1 : -1; });
+  }
+  function renderList() {
+    var all = siteWishes();
+    var where = state.site === 'all' ? 'All sites' : C.siteName(state.site);
+    el('allSub').textContent = fmt(all.length) + (all.length === 1 ? ' wish' : ' wishes') + ' · ' + where + ' · ' + langSummary() +
+      (all.length > cap() ? ' · the ' + cap() + ' most-liked are on the tree' : '');
+    Array.prototype.forEach.call(document.querySelectorAll('.sort button'), function (b) {
+      b.setAttribute('aria-pressed', b.getAttribute('data-sort') === state.sort ? 'true' : 'false');
+    });
+
+    el('leaderList').innerHTML = state.leaders.map(function (L) {
+      var photo = C.safePhoto(L.photo_url);
+      return '<article class="li leader" lang="' + C.esc(L.lang || 'en') + '">' +
+        '<div class="li-top"><span class="li-kicker">FROM OUR LEADERS</span>' +
+        '<button type="button" class="li-find" data-find-kind="leader" data-find-id="' + C.esc(L.id) + '">Read on the tree</button></div>' +
+        '<p class="li-text">' + C.esc(L.message) + '</p>' +
+        '<div class="li-foot">' +
+        (photo ? '<img class="li-photo" src="' + C.esc(photo) + '" alt="" loading="lazy">' : '<span class="li-init" aria-hidden="true">' + C.esc(C.initials(L.display_name)) + '</span>') +
+        '<div class="li-who"><b>' + C.esc(L.display_name || 'TP leadership') + '</b><span>' + C.esc(L.title || '') + '</span></div>' +
+        likeBtnHtml('leader', L) + '</div></article>';
+    }).join('');
+    el('leaderList').hidden = !state.leaders.length;
+
+    var list = listWishes();
+    var shown = list.slice(0, state.shown);
+    el('allList').innerHTML = shown.length ? shown.map(function (w) {
+      var pal = C.PALETTE[w.tag_color] || C.PALETTE.cream;
+      var on = isOnTree(w.id);
+      return '<article class="li" lang="' + C.esc(w.lang || 'en') + '">' +
+        '<div class="li-top"><span class="li-tag" style="--bg-tag:' + pal.bg + ';--fg-tag:' + pal.fg + '">' + C.iconSvg(w.charm, 14) + '</span>' +
+        '<span class="li-lang" lang="' + C.esc(w.lang || 'en') + '">' + C.esc(C.langLabel(w.lang)) + '</span>' +
+        (on ? '<button type="button" class="li-find" data-find-kind="wish" data-find-id="' + C.esc(w.id) + '">On the tree</button>' : '') + '</div>' +
+        '<p class="li-text">' + C.esc(w.message) + '</p>' +
+        '<div class="li-foot"><div class="li-who" lang="en"><b>' + C.esc(C.displayName(w)) + '</b><span>' + C.esc(C.displayWhere(w)) + '</span></div>' +
+        likeBtnHtml('wish', w) + '</div></article>';
+    }).join('') : '<div class="all-empty">' + (state.q ? 'No wishes match your search.' : 'No wishes here yet in the languages you picked.') + '</div>';
+    el('moreBtn').hidden = list.length <= state.shown;
+    el('moreBtn').textContent = 'Show more (' + fmt(list.length - Math.min(list.length, state.shown)) + ' left)';
+  }
+
   function onTreeSelect(kind, id) { select({ kind: kind, id: id }, true); }
 
   function renderTree() {
     state.onTree = computeTreeSet();
+    var total = siteWishes().length;
+    var full = total > state.onTree.length;
+    el('treeFull').hidden = !full;
+    el('allLink').hidden = !total;
+    el('treeFull').textContent = full ? 'The tree holds ' + cap() + ' wishes, so the most-liked hang here.' : '';
+    el('allLink').textContent = full ? 'See all ' + fmt(total) + ' in the list' : 'See them as a list';
     if (view3d) {
       view3d.setData({ wishes: state.onTree, leaders: crown(), selected: state.selected });
     } else {
@@ -505,7 +714,6 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
         onSelect: onTreeSelect
       });
     }
-    el('shuffleBtn').hidden = siteWishes().length <= cap();
   }
 
   function renderCard() {
@@ -534,13 +742,15 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
     var isLeader = state.selected.kind === 'leader';
     var liked = C.hasLiked(state.selected.kind, item.id);
     el('likeBtn').setAttribute('aria-pressed', liked ? 'true' : 'false');
-    el('likeBtn').setAttribute('aria-label', (liked ? 'Unlike' : 'Like') + ' this message, ' + (item.like_count || 0) + ' likes');
+    // leaders' messages can be liked, but their like count isn't shown
+    el('likeBtn').setAttribute('aria-label', (liked ? 'Unlike' : 'Like') + ' this message' + (isLeader ? '' : ', ' + (item.like_count || 0) + ' likes'));
     el('likeCount').textContent = fmt(item.like_count || 0);
+    el('likeCount').hidden = isLeader;
     card.setAttribute('data-kind', isLeader ? 'leader' : 'wish');
     wrap.setAttribute('data-kind', isLeader ? 'leader' : 'wish');
     card.setAttribute('data-color', isLeader ? 'cream' : (C.PALETTE[item.tag_color] ? item.tag_color : 'cream'));
     card.setAttribute('lang', item.lang || 'en');
-    el('cardLang').textContent = C.LANG_LABEL[item.lang] || '';
+    el('cardLang').textContent = C.langLabel(item.lang || 'en');
     el('cardText').textContent = item.message;
     el('cardFoot').hidden = false;
 
@@ -548,14 +758,18 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
       el('cardKicker').textContent = 'ON EVERY SITE\'S TREE';
       el('cardName').textContent = item.display_name || 'TP leadership';
       el('cardWhere').textContent = item.title || '';
-      el('cardInitial').textContent = C.initials(item.display_name);
+      var photo = C.safePhoto(item.photo_url);
+      el('cardInitial').classList.toggle('has-photo', !!photo);
+      if (photo) el('cardInitial').innerHTML = '<img src="' + C.esc(photo) + '" alt="">';
+      else el('cardInitial').textContent = C.initials(item.display_name);
     } else {
       var wishesOnly = list.filter(function (x) { return x.kind === 'wish'; });
       var pos = wishesOnly.findIndex(function (x) { return sameSel(x, state.selected); });
-      el('cardKicker').textContent = pos >= 0 ? 'WISH ' + (pos + 1) + ' OF ' + wishesOnly.length : 'WISH';
+      el('cardKicker').textContent = pos >= 0 ? 'WISH ' + (pos + 1) + ' OF ' + wishesOnly.length : 'FROM THE LIST';
       var name = C.displayName(item);
       el('cardName').textContent = name;
       el('cardWhere').textContent = C.displayWhere(item);
+      el('cardInitial').classList.remove('has-photo');
       el('cardInitial').textContent = item.display_name ? name.charAt(0).toUpperCase() : '?';
     }
   }
@@ -564,8 +778,10 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
     renderStats();
     renderRail();
     renderLabel();
+    renderLangs();
     renderTree();
     renderCard();
+    renderList();
     renderQr();
   }
 
@@ -605,7 +821,7 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
 
     var apply = function () {
       state.site = id;
-      state.offset = 0;
+      state.shown = LIST_PAGE;
       state.selected = null;
       C.resetTreeMemory(treeMount);
       state.onTree = computeTreeSet();
@@ -716,38 +932,80 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
   el('tourBtn').addEventListener('click', function () {
     if (tourTimer) stopTour(); else startTour();
   });
-  el('likeBtn').addEventListener('click', function () {
-    var sel = state.selected;
-    var item = findItem(sel);
-    if (!item) return;
-    var on = !C.hasLiked(sel.kind, item.id);
+  // Like or unlike, from the card or the list (one like per device)
+  function toggleLike(kind, item, btn) {
+    var on = !C.hasLiked(kind, item.id);
     var before = item.like_count || 0;
     item.like_count = Math.max(0, before + (on ? 1 : -1));
-    var btn = el('likeBtn');
-    btn.classList.remove('pop');
-    void btn.offsetWidth;
-    if (on) btn.classList.add('pop');
-    var p = C.setLike(sel.kind, item.id, on);
+    if (btn) {
+      btn.classList.remove('pop');
+      void btn.offsetWidth;
+      if (on) btn.classList.add('pop');
+    }
+    var p = C.setLike(kind, item.id, on);
     renderCard();
+    renderList();
     p.then(function (count) {
-      if (typeof count === 'number') { item.like_count = count; renderCard(); }
+      if (typeof count === 'number') { item.like_count = count; renderCard(); renderList(); }
     }).catch(function (err) {
       console.error('Wish Tree: like failed', err);
-      C.setLike(sel.kind, item.id, !on).catch(function () {});
+      C.setLike(kind, item.id, !on).catch(function () {});
       item.like_count = before;
       renderCard();
+      renderList();
     });
-    C.track(on ? 'wish_like' : 'wish_unlike', { kind: sel.kind, site: state.site });
+    C.track(on ? 'wish_like' : 'wish_unlike', { kind: kind, site: state.site });
+  }
+  el('likeBtn').addEventListener('click', function () {
+    var item = findItem(state.selected);
+    if (item) toggleLike(state.selected.kind, item, el('likeBtn'));
+  });
+  function onListClick(e) {
+    var likeB = e.target.closest ? e.target.closest('[data-like-kind]') : null;
+    if (likeB) {
+      var sel = { kind: likeB.getAttribute('data-like-kind'), id: likeB.getAttribute('data-like-id') };
+      var item = findItem(sel);
+      if (item) {
+        toggleLike(sel.kind, item, null);
+        var again = document.querySelector('[data-like-kind="' + sel.kind + '"][data-like-id="' + (window.CSS && CSS.escape ? CSS.escape(sel.id) : sel.id) + '"]');
+        if (again && C.hasLiked(sel.kind, sel.id)) { again.classList.add('pop'); again.focus({ preventScroll: true }); }
+        else if (again) again.focus({ preventScroll: true });
+      }
+      return;
+    }
+    var find = e.target.closest ? e.target.closest('[data-find-kind]') : null;
+    if (find) {
+      select({ kind: find.getAttribute('data-find-kind'), id: find.getAttribute('data-find-id') }, true);
+      var target = window.innerWidth <= 820 ? el('cardWrap') : el('tree');
+      try { target.scrollIntoView({ behavior: REDUCE ? 'auto' : 'smooth', block: 'start' }); } catch (err) { target.scrollIntoView(); }
+    }
+  }
+  el('allList').addEventListener('click', onListClick);
+  el('leaderList').addEventListener('click', onListClick);
+  el('allSearch').addEventListener('input', function (e) { state.q = e.target.value; state.shown = LIST_PAGE; renderList(); });
+  Array.prototype.forEach.call(document.querySelectorAll('.sort button'), function (b) {
+    b.addEventListener('click', function () { state.sort = b.getAttribute('data-sort'); state.shown = LIST_PAGE; renderList(); });
+  });
+  el('moreBtn').addEventListener('click', function () { state.shown += LIST_PAGE; renderList(); });
+  el('langList').addEventListener('change', function () {
+    var picked = Array.prototype.map.call(el('langList').querySelectorAll('input:checked'), function (i) { return i.value; });
+    if (!picked.length) {
+      // keep at least one language
+      renderLangs();
+      return;
+    }
+    setLangs(picked);
+  });
+  el('langAll').addEventListener('click', function () { setLangs(null); });
+  document.addEventListener('click', function (e) {
+    var d = el('langPick');
+    if (d.open && !d.contains(e.target)) d.open = false;
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && el('langPick').open) { el('langPick').open = false; el('langPick').querySelector('summary').focus(); }
   });
   el('prevBtn').addEventListener('click', function () { step(-1); });
   el('nextBtn').addEventListener('click', function () { step(1); });
-  el('shuffleBtn').addEventListener('click', function () {
-    state.offset += cap();
-    state.onTree = computeTreeSet();
-    ensureSelection();
-    renderTree();
-    renderCard();
-  });
   el('ctaTop').addEventListener('click', function () { C.track('wish_cta', { place: 'header', site: state.site }); });
   el('qrCard').addEventListener('click', function () { C.track('wish_cta', { place: 'qr_card', site: state.site }); });
 
@@ -763,6 +1021,7 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
     el('treeHint').hidden = true;
     treeMount.hidden = false;
     renderTree();
+    renderList();
   }
   var want3d = params.get('view') !== 'flat' && hasWebGL();
   if (want3d) {
@@ -775,6 +1034,7 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
       ensureSelection();
       renderTree();
       renderCard();
+      renderList();
     }).catch(function (err) {
       console.warn('Wish Tree: 3D tree not available, using the flat tree', err);
       view3d = null;

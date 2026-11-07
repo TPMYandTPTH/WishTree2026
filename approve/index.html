@@ -9,7 +9,7 @@
 <link rel="icon" type="image/png" href="../assets/tp-logo-white.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;700&family=Noto+Sans+Thai:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;700&family=Noto+Sans+Thai:wght@300;400;500;700&family=Noto+Sans+SC:wght@400;700&family=Noto+Sans+JP:wght@400;700&family=Noto+Sans+KR:wght@400;700&family=Noto+Sans+Tamil:wght@400;700&display=swap" rel="stylesheet">
 <style>
 @font-face{font-family:'TP Sans';font-weight:300;font-display:swap;src:local('TP Sans Light'),local('TPSans-Light'),url('../fonts/TPSans-Light.ttf') format('truetype')}
 @font-face{font-family:'TP Sans';font-weight:400;font-display:swap;src:local('TP Sans'),local('TPSans-Regular'),url('../fonts/TPSans-Regular.ttf') format('truetype')}
@@ -111,6 +111,13 @@ a{color:var(--slate)}
 .item-top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 14px}
 .who{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
 .who b{font-size:15px}
+.who .ph{width:44px;height:44px;border-radius:50%;object-fit:cover;box-shadow:0 0 0 2px #E3B45A}
+.who .ph-none{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:50%;background:#E3B45A;color:#0B231A;font-size:14px;font-weight:700}
+.item[lang] .who b,.item[lang] .where,.item[lang] .meta,.item[lang] .chip,.item[lang] .actions{font-family:var(--font)}
+:lang(zh){font-family:'Noto Sans SC','Noto Sans',system-ui,sans-serif}
+:lang(ja){font-family:'Noto Sans JP','Noto Sans',system-ui,sans-serif}
+:lang(ko){font-family:'Noto Sans KR','Noto Sans',system-ui,sans-serif}
+:lang(ta){font-family:'Noto Sans Tamil','Noto Sans',system-ui,sans-serif}
 .who .where{font-size:14px;color:var(--muted)}
 .chip{padding:3px 9px;border-radius:999px;background:var(--violet-soft);color:var(--slate);font-size:12px;font-weight:500}
 .chip.tag{display:inline-flex;align-items:center;gap:6px}
@@ -355,7 +362,7 @@ a{color:var(--slate)}
     }
     return Promise.all([
       sb.from('wishes').select('id,created_at,email,message,display_mode,first_name,site,lang,tag_color,charm,status,flags,reviewed_at,reviewed_by,approved_at').order('created_at', { ascending: false }).limit(5000),
-      sb.from('leader_messages').select('id,created_at,updated_at,email,display_name,title,message,lang,status,hidden,reviewed_at,reviewed_by').order('updated_at', { ascending: false }),
+      sb.from('leader_messages').select('id,created_at,updated_at,email,display_name,title,message,lang,photo_url,status,hidden,reviewed_at,reviewed_by').order('updated_at', { ascending: false }),
       sb.rpc('get_approved_wishes'),
       sb.rpc('get_leader_messages'),
       sb.rpc('get_settings')
@@ -446,9 +453,14 @@ a{color:var(--slate)}
     var where = isW ? C.displayWhere(x) : (x.title || '');
     var when = isW ? x.created_at : (x.updated_at || x.created_at);
     var h = '<article class="item' + (flags.length ? ' flagged' : '') + '" data-key="' + esc(key) + '" lang="' + esc(x.lang || 'en') + '">';
-    h += '<div class="item-top"><div class="who"><b>' + esc(name) + '</b>';
+    h += '<div class="item-top"><div class="who">';
+    if (!isW) {
+      var ph = C.safePhoto(x.photo_url);
+      h += ph ? '<img class="ph" src="' + esc(ph) + '" alt="Photo of ' + esc(name) + '">' : '<span class="ph-none" title="No photo">' + esc(C.initials(name)) + '</span>';
+    }
+    h += '<b>' + esc(name) + '</b>';
     if (where) h += '<span class="where">' + esc(where) + '</span>';
-    h += '<span class="chip">' + esc(C.LANG_LABEL[x.lang] || 'English') + '</span>';
+    h += '<span class="chip">' + esc(C.langLabel(x.lang || 'en')) + '</span>';
     if (isW) h += '<span class="chip tag"><i style="background:' + (SWATCH[x.tag_color] || SWATCH.cream) + ';box-shadow:inset 0 0 0 1px rgba(0,0,0,.15)"></i>' + esc((x.charm || 'snow').replace(/^./, function (c) { return c.toUpperCase(); })) + '</span>';
     if (!isW && x.hidden) h += '<span class="chip">Hidden</span>';
     h += '</div><span class="time">' + esc(ago(when)) + '</span></div>';

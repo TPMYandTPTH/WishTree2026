@@ -9,7 +9,7 @@
 <link rel="icon" type="image/png" href="../assets/tp-logo-white.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Noto+Sans:wght@300;400;500;700&family=Noto+Sans+Thai:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Noto+Sans:wght@300;400;500;700&family=Noto+Sans+Thai:wght@300;400;500;700&family=Noto+Sans+SC:wght@300;400;700&family=Noto+Sans+JP:wght@300;400;700&family=Noto+Sans+KR:wght@300;400;700&family=Noto+Sans+Tamil:wght@300;400;700&display=swap" rel="stylesheet">
 <style>
 @font-face{font-family:'TP Sans';font-weight:300;font-display:swap;src:local('TP Sans Light'),local('TPSans-Light'),url('../fonts/TPSans-Light.ttf') format('truetype')}
 @font-face{font-family:'TP Sans';font-weight:400;font-display:swap;src:local('TP Sans'),local('TPSans-Regular'),url('../fonts/TPSans-Regular.ttf') format('truetype')}
@@ -108,9 +108,22 @@ button,input,select,textarea{font-family:inherit}
 .field label,.field .label{font-size:15px;font-weight:700}
 .field-foot{display:flex;justify-content:space-between;gap:12px;font-size:12px;color:var(--slate)}
 .counter{margin-left:auto;font-variant-numeric:tabular-nums}
-.seg{display:flex;gap:6px;padding:4px;border-radius:999px;background:#EFE6D2}
-.seg button{flex:1;min-height:40px;padding:0 8px;border:0;border-radius:999px;background:transparent;color:var(--ink);font-size:14px;font-weight:500;cursor:pointer}
-.seg button[aria-pressed="true"]{background:var(--bg);color:var(--cream)}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{min-height:40px;padding:0 14px;border:1px solid rgba(24,51,38,.2);border-radius:999px;background:#EFE6D2;color:var(--ink);font-size:14px;font-weight:500;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--bg);border-color:var(--bg);color:var(--cream)}
+:lang(zh){font-family:'Noto Sans SC','Noto Sans',system-ui,sans-serif}
+:lang(ja){font-family:'Noto Sans JP','Noto Sans',system-ui,sans-serif}
+:lang(ko){font-family:'Noto Sans KR','Noto Sans',system-ui,sans-serif}
+:lang(ta){font-family:'Noto Sans Tamil','Noto Sans',system-ui,sans-serif}
+.photo-row{display:flex;align-items:center;gap:16px}
+.photo-pv{flex:none;display:flex;align-items:center;justify-content:center;width:84px;height:84px;border-radius:50%;background:var(--gold);color:var(--bg);font-size:26px;font-weight:700;box-shadow:0 0 0 3px #F2C766,0 0 0 7px rgba(242,199,102,.25);overflow:hidden}
+.photo-pv img{width:100%;height:100%;object-fit:cover;display:block}
+.photo-actions{display:flex;flex-direction:column;align-items:flex-start;gap:4px}
+.btn-small{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 18px;border:1.5px solid var(--bg);border-radius:999px;background:transparent;color:var(--bg);font-size:15px;font-weight:700;cursor:pointer}
+.btn-small:hover{background:rgba(11,35,26,.06)}
+.sr-file{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.leader-card .lc-avatar img{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block}
+.leader-card .lc-avatar.has-photo{box-shadow:0 0 0 2px #E3B45A}
 .status{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:12px;background:#E3F6F3;color:#00584D;font-size:14px;font-weight:500}
 .status .dot{width:8px;height:8px;border-radius:50%;background:#00AF9B}
 .status.pending{background:#FFF4DC;color:#7A4B00}
@@ -258,6 +271,21 @@ button,input,select,textarea{font-family:inherit}
         <div id="statusLive" class="status" hidden><span class="dot" aria-hidden="true"></span><span id="statusText">Live on every site's tree</span></div>
 
         <div class="field">
+          <span class="label" id="photoLabel">Your photo</span>
+          <div class="photo-row" role="group" aria-labelledby="photoLabel">
+            <div class="photo-pv" id="photoPv" aria-hidden="true"></div>
+            <div class="photo-actions">
+              <input type="file" id="photoFile" class="sr-file" accept="image/jpeg,image/png,image/webp" aria-label="Choose a photo">
+              <button type="button" class="btn-small" id="photoBtn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>
+                <span id="photoBtnText">Add a photo</span>
+              </button>
+              <button type="button" class="link" id="photoRemove" hidden>Remove photo</button>
+            </div>
+          </div>
+          <div class="help">Shown on your gold ornament, your card and the site TVs. A head-and-shoulders photo works best; we crop it to a circle. JPG or PNG.</div>
+        </div>
+        <div class="field">
           <label for="lName">Name as shown</label>
           <input id="lName" class="input" type="text" maxlength="60" autocomplete="name" required>
         </div>
@@ -273,11 +301,7 @@ button,input,select,textarea{font-family:inherit}
         </div>
         <div class="field">
           <span class="label" id="langLabel">Written in</span>
-          <div class="seg" role="group" aria-labelledby="langLabel">
-            <button type="button" data-lang="en" aria-pressed="true">English</button>
-            <button type="button" data-lang="ms" aria-pressed="false">Bahasa Melayu</button>
-            <button type="button" data-lang="th" aria-pressed="false" lang="th">ภาษาไทย</button>
-          </div>
+          <div class="seg" id="langSeg" role="group" aria-labelledby="langLabel"></div>
         </div>
 
         <p id="editErr" class="err" role="alert"></p>
@@ -308,7 +332,10 @@ button,input,select,textarea{font-family:inherit}
   var DOMAIN = (CFG.ALLOWED_EMAIL_DOMAINS && CFG.ALLOWED_EMAIL_DOMAINS[0]) || 'tp.com';
   var AUTH = CFG.AUTH_MODE === 'email' ? 'email' : 'google';
 
-  var S = { view: 'loading', user: null, email: '', existing: null, name: '', title: '', message: '', lang: 'en', busy: false };
+  var S = { view: 'loading', user: null, email: '', existing: null, name: '', title: '', message: '', lang: 'en', busy: false,
+    photo: '',          // the photo shown now: saved link, or a preview of a new one
+    photoBlob: null,    // a new photo waiting to be uploaded
+    photoChanged: false };
   var sb = null;
   var $ = function (id) { return document.getElementById(id); };
   var qsa = function (sel) { return Array.prototype.slice.call(document.querySelectorAll(sel)); };
@@ -331,8 +358,14 @@ button,input,select,textarea{font-family:inherit}
     $('pvText').setAttribute('lang', S.lang);
     $('pvName').textContent = name;
     $('pvTitle').textContent = S.title.trim();
-    $('pvInitials').textContent = C.initials(name);
-    var me = { id: 'preview', display_name: name, title: S.title, message: S.message };
+    var photo = C.safePhoto(S.photo);
+    $('pvInitials').classList.toggle('has-photo', !!photo);
+    if (photo) $('pvInitials').innerHTML = '<img src="' + C.esc(photo) + '" alt="">';
+    else $('pvInitials').textContent = C.initials(name);
+    $('photoPv').innerHTML = photo ? '<img src="' + C.esc(photo) + '" alt="">' : C.esc(C.initials(name));
+    $('photoBtnText').textContent = photo ? 'Change photo' : 'Add a photo';
+    $('photoRemove').hidden = !photo;
+    var me = { id: 'preview', display_name: name, title: S.title, message: S.message, photo_url: photo };
     C.renderTree($('crownMount'), { wishes: [], leaders: [me], selected: { kind: 'leader', id: 'preview' } });
   }
 
@@ -371,6 +404,7 @@ button,input,select,textarea{font-family:inherit}
       S.title = S.existing ? (S.existing.title || '') : S.title;
       S.message = S.existing ? S.existing.message : S.message;
       S.lang = S.existing ? (S.existing.lang || 'en') : S.lang;
+      S.photo = S.existing ? (S.existing.photo_url || '') : S.photo;
       show('edit');
       return Promise.resolve();
     }
@@ -384,7 +418,7 @@ button,input,select,textarea{font-family:inherit}
       }
       if (!S.name && p.default_name) S.name = p.default_name;
       if (!S.title && p.default_title) S.title = p.default_title;
-      return sb.from('leader_messages').select('id,display_name,title,message,lang,updated_at,status').eq('user_id', S.user.id).maybeSingle().then(function (r) {
+      return sb.from('leader_messages').select('id,display_name,title,message,lang,photo_url,updated_at,status').eq('user_id', S.user.id).maybeSingle().then(function (r) {
         if (r.error) throw r.error;
         if (r.data) {
           S.existing = r.data;
@@ -392,6 +426,7 @@ button,input,select,textarea{font-family:inherit}
           S.title = r.data.title || '';
           S.message = r.data.message || '';
           S.lang = r.data.lang || 'en';
+          S.photo = r.data.photo_url || '';
         }
         show('edit');
       });
@@ -485,6 +520,7 @@ button,input,select,textarea{font-family:inherit}
     S.user = null;
     S.existing = null;
     S.name = ''; S.title = ''; S.message = ''; S.lang = 'en';
+    S.photo = ''; S.photoBlob = null; S.photoChanged = false;
     if (C.demo) { C.storageSet('wt-demo-leader-user', ''); show('signin'); return; }
     sb.auth.signOut().finally(function () { show('signin'); });
   }
@@ -502,10 +538,14 @@ button,input,select,textarea{font-family:inherit}
       message: S.message.trim().slice(0, MAX),
       lang: S.lang
     };
+    if (S.photoChanged && !S.photoBlob) row.photo_url = null;   // photo removed
     S.busy = true;
     renderEdit();
     var done = function (saved) {
       S.busy = false;
+      S.photoBlob = null;
+      S.photoChanged = false;
+      S.photo = saved && saved.photo_url ? saved.photo_url : '';
       var wasNew = !S.existing;
       S.existing = saved;
       renderEdit();
@@ -520,21 +560,72 @@ button,input,select,textarea{font-family:inherit}
       renderEdit();
       $('editErr').textContent = err && err.code === '42501'
         ? 'Your account is not on the leaders list, so the message was not saved.'
-        : 'We could not save your message. Please try again.';
+        : err && err.photo
+          ? 'We could not upload your photo. Try a smaller JPG or PNG, or send without a photo.'
+          : 'We could not save your message. Please try again.';
     };
 
     if (C.demo) {
+      // demo: the photo stays in this browser as a small picture
+      if (S.photoChanged) row.photo_url = S.photoBlob ? S.photo : null;
+      else row.photo_url = S.existing ? (S.existing.photo_url || null) : null;
       var saved = Object.assign({ updated_at: new Date().toISOString(), status: 'pending' }, row);
       C.storageSet('wt-demo-leader', JSON.stringify(saved));
       setTimeout(function () { done(saved); }, 500);
       return;
     }
-    sb.from('leader_messages')
-      .upsert(Object.assign({ user_id: S.user.id }, row), { onConflict: 'user_id' })
-      .select('id,display_name,title,message,lang,updated_at,status')
-      .single()
-      .then(function (res) { if (res.error) throw res.error; done(res.data); })
+    uploadPhoto().then(function (link) {
+      if (link) row.photo_url = link;
+      return sb.from('leader_messages')
+        .upsert(Object.assign({ user_id: S.user.id }, row), { onConflict: 'user_id' })
+        .select('id,display_name,title,message,lang,photo_url,updated_at,status')
+        .single();
+    }).then(function (res) { if (res.error) throw res.error; done(res.data); })
       .catch(fail);
+  }
+
+  /* ---------- Photo ---------- */
+  var PHOTO_BUCKET = 'leader-photos';
+  // Upload a new photo to Supabase Storage (leader-photos/<your id>/...) and return its public link
+  function uploadPhoto() {
+    if (!S.photoBlob) return Promise.resolve('');
+    var path = S.user.id + '/photo-' + Date.now() + '.jpg';
+    return sb.storage.from(PHOTO_BUCKET).upload(path, S.photoBlob, { contentType: 'image/jpeg', cacheControl: '31536000', upsert: false })
+      .then(function (res) {
+        if (res.error) { var e = new Error(res.error.message || 'upload failed'); e.photo = true; throw e; }
+        return sb.storage.from(PHOTO_BUCKET).getPublicUrl(path).data.publicUrl;
+      });
+  }
+
+  // Crop to a centred square and shrink, so uploads are small and quick
+  function preparePhoto(file) {
+    return new Promise(function (resolve, reject) {
+      if (!file || !/^image\//.test(file.type)) { reject(new Error('type')); return; }
+      if (file.size > 15 * 1024 * 1024) { reject(new Error('size')); return; }
+      var url = URL.createObjectURL(file);
+      var img = new Image();
+      img.onload = function () {
+        var side = Math.min(img.naturalWidth, img.naturalHeight);
+        // keep a little more of the top: faces are usually in the upper part of a photo
+        var sx = (img.naturalWidth - side) / 2;
+        var sy = Math.max(0, (img.naturalHeight - side) * 0.3);
+        var out = C.demo ? 256 : 512;
+        var cv = document.createElement('canvas');
+        cv.width = out; cv.height = out;
+        var x = cv.getContext('2d');
+        x.fillStyle = '#E3B45A';
+        x.fillRect(0, 0, out, out);
+        x.drawImage(img, sx, sy, side, side, 0, 0, out, out);
+        URL.revokeObjectURL(url);
+        var dataUrl = cv.toDataURL('image/jpeg', 0.85);
+        cv.toBlob(function (blob) {
+          if (!blob) { reject(new Error('encode')); return; }
+          resolve({ blob: blob, dataUrl: dataUrl });
+        }, 'image/jpeg', 0.85);
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); reject(new Error('decode')); };
+      img.src = url;
+    });
   }
 
   function removeMessage() {
@@ -575,8 +666,35 @@ button,input,select,textarea{font-family:inherit}
     $('lCounter').textContent = S.message.length + ' / ' + MAX;
     renderPreview();
   });
-  qsa('.seg button').forEach(function (b) {
-    b.addEventListener('click', function () { S.lang = b.getAttribute('data-lang'); renderEdit(); });
+  $('langSeg').innerHTML = C.LANGUAGES.map(function (l) {
+    return '<button type="button" data-lang="' + C.esc(l.code) + '" lang="' + C.esc(l.code) + '"' +
+      (l.english && l.english !== l.label ? ' title="' + C.esc(l.english) + '"' : '') + '>' + C.esc(l.label) + '</button>';
+  }).join('');
+  $('langSeg').addEventListener('click', function (e) {
+    var b = e.target.closest ? e.target.closest('button[data-lang]') : null;
+    if (b) { S.lang = b.getAttribute('data-lang'); renderEdit(); }
+  });
+  $('photoBtn').addEventListener('click', function () { $('photoFile').click(); });
+  $('photoFile').addEventListener('change', function (e) {
+    var file = e.target.files && e.target.files[0];
+    e.target.value = '';
+    if (!file) return;
+    $('editErr').textContent = '';
+    preparePhoto(file).then(function (p) {
+      S.photoBlob = p.blob;
+      S.photo = p.dataUrl;
+      S.photoChanged = true;
+      renderEdit();
+    }).catch(function () {
+      $('editErr').textContent = 'That photo could not be used. Please choose a JPG or PNG under 15 MB.';
+    });
+  });
+  $('photoRemove').addEventListener('click', function () {
+    S.photoBlob = null;
+    S.photo = '';
+    S.photoChanged = true;
+    renderEdit();
+    $('photoBtn').focus();
   });
   $('leaderForm').addEventListener('submit', publish);
   $('removeBtn').addEventListener('click', removeMessage);

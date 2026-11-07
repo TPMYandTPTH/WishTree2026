@@ -110,7 +110,7 @@ function drawTag(color, charm, back) {
   return cv;
 }
 
-function drawLeader(initials) {
+function drawLeader(initials, photo) {
   const S = 256;
   const cv = makeCanvas(S, S);
   const x = cv.getContext('2d');
@@ -120,14 +120,26 @@ function drawLeader(initials) {
   g.addColorStop(1, '#B4842F');
   x.fillStyle = g;
   x.fillRect(0, 0, S, S);
+  if (photo) {
+    // the leader's photo, cropped to a circle inside the gold rim
+    const r = S / 2 - 16;
+    const iw = photo.naturalWidth || photo.width, ih = photo.naturalHeight || photo.height;
+    const k = Math.max((2 * r) / iw, (2 * r) / ih);
+    x.save();
+    x.beginPath(); x.arc(S / 2, S / 2, r, 0, TAU); x.clip();
+    x.drawImage(photo, S / 2 - (iw * k) / 2, S / 2 - (ih * k) / 2, iw * k, ih * k);
+    x.restore();
+  }
   x.strokeStyle = '#F7DA8E';
   x.lineWidth = 10;
   x.beginPath(); x.arc(S / 2, S / 2, S / 2 - 18, 0, TAU); x.stroke();
-  x.fillStyle = '#0E2A1F';
-  x.font = '700 88px "TP Sans","Noto Sans",system-ui,sans-serif';
-  x.textAlign = 'center';
-  x.textBaseline = 'middle';
-  x.fillText(initials, S / 2, S / 2 + 2);
+  if (!photo) {
+    x.fillStyle = '#0E2A1F';
+    x.font = '700 88px "TP Sans","Noto Sans",system-ui,sans-serif';
+    x.textAlign = 'center';
+    x.textBaseline = 'middle';
+    x.fillText(initials, S / 2, S / 2 + 2);
+  }
   // red star badge
   const bx = S * 0.7, by = S * 0.72;
   x.fillStyle = '#AB2C37';
@@ -391,6 +403,41 @@ export function createTree3D(container, opts = {}) {
   // spots tags must keep clear of (none for now: the tags are the decorations)
   const obstacles = [];
 
+  /* gifts under the tree */
+  function gift(x, z, w, h, d, color, ribbon, rotY) {
+    const g = new THREE.Group();
+    const boxMat = new THREE.MeshStandardMaterial({ color, roughness: 0.6 });
+    const ribMat = new THREE.MeshStandardMaterial({ color: ribbon, roughness: 0.4, metalness: 0.3 });
+    const box = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), boxMat);
+    box.position.y = h / 2;
+    g.add(box);
+    const r1 = new THREE.Mesh(new THREE.BoxGeometry(w + 0.01, h + 0.01, d * 0.18), ribMat);
+    r1.position.y = h / 2;
+    g.add(r1);
+    const r2 = new THREE.Mesh(new THREE.BoxGeometry(w * 0.18, h + 0.012, d + 0.01), ribMat);
+    r2.position.y = h / 2;
+    g.add(r2);
+    const bowGeo = new THREE.TorusGeometry(0.09, 0.025, 8, 18);
+    const b1 = new THREE.Mesh(bowGeo, ribMat);
+    b1.position.set(-0.07, h + 0.05, 0);
+    b1.rotation.set(0, Math.PI / 2, Math.PI / 4);
+    g.add(b1);
+    const b2 = b1.clone();
+    b2.position.x = 0.07;
+    b2.rotation.z = -Math.PI / 4;
+    g.add(b2);
+    g.position.set(x, 0, z);
+    g.rotation.y = rotY;
+    world.add(g);
+  }
+  gift(1.45, 1.15, 0.7, 0.55, 0.6, 0xab2c37, 0xe3b45a, 0.4);
+  gift(-1.55, 0.95, 0.6, 0.7, 0.6, 0xe3b45a, 0xab2c37, -0.3);
+  gift(0.15, 1.75, 0.5, 0.42, 0.5, 0xf6eedc, 0xab2c37, 0.9);
+  gift(-0.95, -1.45, 0.65, 0.5, 0.55, 0x1e573d, 0xe3b45a, 0.2);
+  gift(1.75, -0.65, 0.5, 0.62, 0.5, 0xf6eedc, 0x1e573d, -0.6);
+  gift(-1.95, -0.2, 0.45, 0.38, 0.45, 0xab2c37, 0xf6eedc, 0.7);
+
+
   /* snow drifting in front of the tree */
   const SNOW = reduce ? 0 : 160;
   const snowPos = new Float32Array(SNOW * 3);
@@ -539,6 +586,7 @@ export function createTree3D(container, opts = {}) {
     swing.add(card);
     const initials = C.initials(L.display_name);
     const faceMat = new THREE.MeshStandardMaterial({ map: toTex(drawLeader(initials)), metalness: 0.25, roughness: 0.4 });
+    const photoUrl = C.safePhoto && C.safePhoto(L.photo_url);
     const turn = new THREE.Group();
     turn.rotation.z = Math.PI / 2;
     const disc = new THREE.Mesh(discGeo, [leaderGold, faceMat, leaderGold]);
@@ -559,11 +607,25 @@ export function createTree3D(container, opts = {}) {
     card.add(glow);
     leadersLayer.add(pivot);
     const h = C.hash(id);
-    return {
-      id, kind: 'leader', pivot, swing, card, mesh: disc, glow, halo, faceMat, initials, th: spot.th,
+    const o = {
+      id, kind: 'leader', pivot, swing, card, mesh: disc, glow, halo, faceMat, initials, photo: null, th: spot.th,
       ang: 0, vel: 2, scale: 0, target: 1, removing: false,
       phase: (h % 628) / 100, freq: 0.6 + (h % 30) / 60, amp: 0.035
     };
+    if (photoUrl) {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        if (o.removing) return;
+        o.photo = img;
+        const old = faceMat.map;
+        faceMat.map = toTex(drawLeader(initials, img));
+        faceMat.needsUpdate = true;
+        if (old) old.dispose();
+      };
+      img.src = photoUrl;
+    }
+    return o;
   }
 
   function disposeLeader(o) {
@@ -580,7 +642,7 @@ export function createTree3D(container, opts = {}) {
   function setData(d) {
     // leaders in the crown
     const ls = (d.leaders || []).slice(0, MAX_LEADERS);
-    const sig = ls.map((l) => l.id + ':' + C.initials(l.display_name)).join('|');
+    const sig = ls.map((l) => l.id + ':' + C.initials(l.display_name) + ':' + (l.photo_url || '').length + (l.photo_url || '').slice(-24)).join('|');
     if (sig !== leaderSig) {
       leaderSig = sig;
       leaders.forEach((o) => { o.removing = true; o.target = 0; });
@@ -876,7 +938,7 @@ export function createTree3D(container, opts = {}) {
       leaders.forEach((o) => {
         if (o.removing || !o.faceMat) return;
         const old = o.faceMat.map;
-        o.faceMat.map = toTex(drawLeader(o.initials));
+        o.faceMat.map = toTex(drawLeader(o.initials, o.photo));
         o.faceMat.needsUpdate = true;
         if (old) old.dispose();
       });

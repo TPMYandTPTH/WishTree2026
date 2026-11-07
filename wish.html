@@ -9,7 +9,7 @@
 <link rel="icon" type="image/png" href="assets/tp-logo-white.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Noto+Sans:wght@300;400;500;700&family=Noto+Sans+Thai:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Noto+Sans:wght@300;400;500;700&family=Noto+Sans+Thai:wght@300;400;500;700&family=Noto+Sans+SC:wght@300;400;700&family=Noto+Sans+JP:wght@300;400;700&family=Noto+Sans+KR:wght@300;400;700&family=Noto+Sans+Tamil:wght@300;400;700&display=swap" rel="stylesheet">
 <style>
 @font-face{font-family:'TP Sans';font-weight:300;font-display:swap;src:local('TP Sans Light'),local('TPSans-Light'),url('fonts/TPSans-Light.ttf') format('truetype')}
 @font-face{font-family:'TP Sans';font-weight:400;font-display:swap;src:local('TP Sans'),local('TPSans-Regular'),url('fonts/TPSans-Regular.ttf') format('truetype')}
@@ -120,9 +120,13 @@ button,input,select,textarea{font-family:inherit}
 .field-foot{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;font-size:12px;color:var(--slate)}
 .counter{margin-left:auto;font-variant-numeric:tabular-nums;white-space:nowrap}
 .warn{color:#A33A00;font-weight:500;line-height:1.45}
-.seg{display:flex;gap:6px;padding:4px;border-radius:999px;background:var(--paper-2)}
-.seg button{flex:1;min-height:40px;padding:0 8px;border:0;border-radius:999px;background:transparent;color:var(--ink);font-size:14px;font-weight:500;cursor:pointer}
-.seg button[aria-pressed="true"]{background:var(--bg);color:var(--cream)}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{min-height:40px;padding:0 14px;border:1px solid var(--line-2,rgba(24,51,38,.2));border-radius:999px;background:var(--paper-2);color:var(--ink);font-size:14px;font-weight:500;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--bg);border-color:var(--bg);color:var(--cream)}
+:lang(zh){font-family:'Noto Sans SC','Noto Sans',system-ui,sans-serif}
+:lang(ja){font-family:'Noto Sans JP','Noto Sans',system-ui,sans-serif}
+:lang(ko){font-family:'Noto Sans KR','Noto Sans',system-ui,sans-serif}
+:lang(ta){font-family:'Noto Sans Tamil','Noto Sans',system-ui,sans-serif}
 .radio-card{display:flex;align-items:center;gap:12px;min-height:58px;padding:8px 14px;margin-bottom:10px;border:1.5px solid var(--field-off);border-radius:12px;background:#fff;cursor:pointer}
 .radio-card:last-child{margin-bottom:0}
 .radio-card:has(input:checked){border:2px solid var(--bg)}
@@ -361,11 +365,7 @@ button,input,select,textarea{font-family:inherit}
 
       <fieldset>
         <legend data-i18n="writtenIn"></legend>
-        <div class="seg">
-          <button type="button" data-wlang="en">English</button>
-          <button type="button" data-wlang="ms">Bahasa Melayu</button>
-          <button type="button" data-wlang="th" lang="th">ภาษาไทย</button>
-        </div>
+        <div class="seg" id="wlangSeg"></div>
       </fieldset>
 
       <fieldset>
@@ -852,8 +852,10 @@ button,input,select,textarea{font-family:inherit}
 
   function effectiveWishLang() {
     if (S.wishLangTouched && S.wishLang) return S.wishLang;
-    if (/[฀-๿]/.test(S.text)) return 'th';
-    return S.wishLang || S.lang;
+    var guess = C.detectLang(S.text);      // Thai, Chinese, Japanese, Korean, Tamil and Vietnamese are spotted as you type
+    if (guess) return guess;
+    var fallback = S.wishLang || S.lang;
+    return C.LANG_LABEL[fallback] ? fallback : (C.LANGUAGES[0] ? C.LANGUAGES[0].code : 'en');
   }
 
   function hasContactDetails(text) {
@@ -1164,12 +1166,17 @@ button,input,select,textarea{font-family:inherit}
     S.text = e.target.value.slice(0, MAX);
     renderWrite();
   });
-  qsa('.seg button').forEach(function (b) {
-    b.addEventListener('click', function () {
-      S.wishLang = b.getAttribute('data-wlang');
-      S.wishLangTouched = true;
-      renderWrite();
-    });
+  // "Written in": one button per language in config.js
+  $('wlangSeg').innerHTML = C.LANGUAGES.map(function (l) {
+    return '<button type="button" data-wlang="' + C.esc(l.code) + '" lang="' + C.esc(l.code) + '"' +
+      (l.english && l.english !== l.label ? ' title="' + C.esc(l.english) + '"' : '') + '>' + C.esc(l.label) + '</button>';
+  }).join('');
+  $('wlangSeg').addEventListener('click', function (e) {
+    var b = e.target.closest ? e.target.closest('button[data-wlang]') : null;
+    if (!b) return;
+    S.wishLang = b.getAttribute('data-wlang');
+    S.wishLangTouched = true;
+    renderWrite();
   });
   qsa('input[name="mode"]').forEach(function (r) {
     r.addEventListener('change', function () { if (r.checked) { S.mode = r.value; renderWrite(); } });

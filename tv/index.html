@@ -9,7 +9,7 @@
 <link rel="icon" type="image/png" href="../assets/tp-logo-white.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Noto+Sans:wght@300;400;500;700&family=Noto+Sans+Thai:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Noto+Sans:wght@300;400;500;700&family=Noto+Sans+Thai:wght@300;400;500;700&family=Noto+Sans+SC:wght@300;400;700&family=Noto+Sans+JP:wght@300;400;700&family=Noto+Sans+KR:wght@300;400;700&family=Noto+Sans+Tamil:wght@300;400;700&display=swap" rel="stylesheet">
 <style>
 @font-face{font-family:'TP Sans';font-weight:300;font-display:swap;src:local('TP Sans Light'),local('TPSans-Light'),url('../fonts/TPSans-Light.ttf') format('truetype')}
 @font-face{font-family:'TP Sans';font-weight:400;font-display:swap;src:local('TP Sans'),local('TPSans-Regular'),url('../fonts/TPSans-Regular.ttf') format('truetype')}
@@ -26,6 +26,10 @@
   --font:'TP Sans','Noto Sans','Noto Sans Thai',Calibri,system-ui,sans-serif;
   --script:'Great Vibes',cursive;
 }
+:lang(zh){font-family:'Noto Sans SC','Noto Sans',system-ui,sans-serif}
+:lang(ja){font-family:'Noto Sans JP','Noto Sans',system-ui,sans-serif}
+:lang(ko){font-family:'Noto Sans KR','Noto Sans',system-ui,sans-serif}
+:lang(ta){font-family:'Noto Sans Tamil','Noto Sans',system-ui,sans-serif}
 html{font-size:calc(min(100vw / 120, 100vh / 67.5))}
 html.portrait{font-size:calc(min(100vw / 67.5, 100vh / 120))}
 *{box-sizing:border-box}
@@ -105,6 +109,8 @@ html.portrait .tree-box{height:49rem}
 .foot{flex:none;display:flex;align-items:center;gap:1.6rem;padding-top:1.8rem;border-top:.15rem dashed var(--card-line)}
 .avatar{flex:none;display:flex;align-items:center;justify-content:center;width:4.8rem;height:4.8rem;border-radius:50%;background:var(--card-avatar-bg);color:var(--card-avatar-fg);font-size:1.9rem;font-weight:700}
 .avatar svg{width:2.8rem;height:2.8rem}
+.avatar img{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block}
+.avatar.has-photo{box-shadow:0 0 0 .25rem #E3B45A}
 .who-box{min-width:0}
 .who{font-size:2.1rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .where{margin-top:.3rem;font-size:1.6rem;color:var(--card-sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -244,6 +250,10 @@ body.pointer .fs{opacity:1;pointer-events:auto}
 
   var siteParam = (params.get('site') || 'all').toLowerCase();
   var SITE = siteParam !== 'all' && C.siteById(siteParam) ? siteParam : 'all';
+  // ?lang=en,th shows only wishes in those languages (leaders' messages always show)
+  var LANGS = (params.get('lang') || '').split(',').map(function (x) { return x.trim().toLowerCase(); })
+    .filter(function (c) { return !!C.LANG_LABEL[c]; });
+  if (!LANGS.length || LANGS.length >= C.LANGUAGES.length) LANGS = null;
 
   var S = {
     wishes: [], leaders: [], loaded: false,
@@ -285,6 +295,7 @@ body.pointer .fs{opacity:1;pointer-events:auto}
       $('siteEyebrow').textContent = 'OUR WISH TREE';
       $('siteName').textContent = C.siteName(s.id);
     }
+    if (LANGS) $('siteEyebrow').textContent += ' · ' + LANGS.map(function (c) { return C.langLabel(c); }).join(', ').toUpperCase();
     document.title = (s ? s.label : 'All sites') + ' · TV · TP Wish Tree 2026';
   })();
 
@@ -318,7 +329,9 @@ body.pointer .fs{opacity:1;pointer-events:auto}
 
   /* ---------- Data ---------- */
   function siteWishes() {
-    return SITE === 'all' ? S.wishes : S.wishes.filter(function (w) { return w.site === SITE; });
+    return S.wishes.filter(function (w) {
+      return (SITE === 'all' || w.site === SITE) && (!LANGS || LANGS.indexOf(w.lang) !== -1);
+    });
   }
   function findItem(sel) {
     if (!sel) return null;
@@ -362,7 +375,6 @@ body.pointer .fs{opacity:1;pointer-events:auto}
   function renderCounts() {
     var likes = 0;
     siteWishes().forEach(function (w) { likes += w.like_count || 0; });
-    S.leaders.forEach(function (l) { likes += l.like_count || 0; });
     $('cWishes').textContent = fmt(siteWishes().length);
     $('cLeaders').textContent = fmt(S.leaders.length);
     $('cLikes').textContent = fmt(likes);
@@ -474,7 +486,8 @@ body.pointer .fs{opacity:1;pointer-events:auto}
   function isFresh(item, sel) {
     if (sel.kind !== 'wish') return false;
     var t = item.approved_at ? new Date(item.approved_at).getTime() : 0;
-    return t && Date.now() - t < FRESH_HOURS * 3600000;
+    var age = Date.now() - t;
+    return !!t && age >= 0 && age < FRESH_HOURS * 3600000;
   }
   function kickerFor(item, sel) {
     if (sel.kind === 'leader') return 'A MESSAGE TO EVERY TP SITE';
@@ -498,9 +511,12 @@ body.pointer .fs{opacity:1;pointer-events:auto}
     $('foot').hidden = false;
     $('who').textContent = isLeader ? (item.display_name || 'Our leaders') : C.displayName(item);
     $('where').textContent = isLeader ? (item.title || 'TP Malaysia & Thailand') : C.displayWhere(item);
-    $('avatar').innerHTML = isLeader ? C.esc(C.initials(item.display_name)) : C.iconSvg(item.charm || 'snow', 28);
+    var photo = isLeader ? C.safePhoto(item.photo_url) : '';
+    $('avatar').classList.toggle('has-photo', !!photo);
+    $('avatar').innerHTML = photo ? '<img src="' + C.esc(photo) + '" alt="">'
+      : isLeader ? C.esc(C.initials(item.display_name)) : C.iconSvg(item.charm || 'snow', 28);
     var likes = item.like_count || 0;
-    $('likes').hidden = likes < 1;
+    $('likes').hidden = isLeader || likes < 1;   // leaders' like counts aren't shown
     $('likeCount').textContent = fmt(likes);
     fitText();
     return true;

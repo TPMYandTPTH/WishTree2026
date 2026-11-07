@@ -9,9 +9,10 @@ A shared Christmas wish tree for TP Malaysia and Thailand, hosted on GitHub Page
 |---|---|---|
 | The tree | https://tpmyandtpth.github.io/WishTree2026/ | Everyone (anyone can like a message, once per device) |
 | One site's tree | `…/WishTree2026/?site=op` (ids: gtower, kcp, gbs, op, lv, jb, singha, wfh) | Site posters, intranet |
+| Tree in some languages | `…/WishTree2026/?lang=en,ms` (codes from `LANGUAGES` in `config.js`) | Sharing a link for one language group |
 | Site tour | `…/WishTree2026/?tour=1` | Laptops at events |
 | Flat tree | `…/WishTree2026/?view=flat` | Older devices; the 3D tree switches to this by itself when WebGL isn't available |
-| **TV screen** | `…/WishTree2026/tv/?site=op` (leave out `?site=` for all sites) | The TV at each site |
+| **TV screen** | `…/WishTree2026/tv/?site=op` (leave out `?site=` for all sites, add `&lang=en,ms` for some languages only) | The TV at each site |
 | Hang a wish | `…/WishTree2026/wish.html` (add `?site=op` to pre-pick the site) | Employees |
 | Leaders' messages | `…/WishTree2026/leaders/` | Leaders on the `leaders` list only |
 | **Approvals** | `…/WishTree2026/approve/` | The Wish Tree team on the `moderators` list only |
@@ -27,6 +28,14 @@ Until the Supabase keys are in `config.js`, every page runs in demo mode with sa
 5. If a leader edits an approved message, it goes back to waiting. The **Leaders' messages need approval** switch on the Approvals page turns this off if leaders should post straight to the tree.
 
 The **Accept new wishes** switch on the Approvals page closes or reopens the campaign.
+
+## How many cards fit, languages and the list
+
+- **The 3D tree holds 60 wishes** (`MAX_TAGS_3D`), plus up to 6 leaders at the top. That's the most it can hang without tags overlapping. The flat tree holds 40.
+- When a site (or "All sites") has more approved wishes than that, **the most-liked go on the tree** (ties go to the newest). Every wish, on the tree or not, is in the **Every wish** list under the tree, with search, Most liked / Newest, and a like button. The TVs still show every wish in turn.
+- **Languages:** people pick the language they wrote in (Thai, Chinese, Japanese, Korean, Tamil and Vietnamese are picked automatically as they type). Readers choose one or more languages with the **Languages** button on the tree; the choice is remembered on their device. Leaders' messages always show. Edit `LANGUAGES` in `config.js` to add or remove languages; the database accepts any 2-3 letter code.
+- **Likes:** one per device, no sign-in. Leaders' messages can be liked but their count isn't shown on the tree or the TVs (the Approvals page still sees it).
+- **Leader photos:** leaders add a photo on the leaders' page. It's cropped to a circle, shrunk and stored in the `leader-photos` bucket in Supabase Storage (created by `schema.sql`). It shows on their gold ornament, their card, the list and the TVs. A new photo goes back for approval like an edited message.
 
 ## TV screens
 
