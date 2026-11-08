@@ -644,6 +644,12 @@
     '.wt-lball{position:relative;display:flex;align-items:center;justify-content:center;width:var(--d);height:var(--d);border-radius:50%;background:#E3B45A;color:#0E2A1F;font-weight:700;font-size:calc(var(--d) * .32);letter-spacing:.02em;line-height:1;box-shadow:inset 0 0 0 calc(var(--d) * .06) #F2C766,0 0 0 calc(var(--d) * .1) rgba(242,199,102,.22),0 4px 10px rgba(0,0,0,.4);transition:box-shadow .25s ease}',
     '.wt-lball::after{content:"";position:absolute;left:18%;top:16%;width:22%;height:22%;border-radius:50%;background:rgba(255,255,255,.45)}',
     '.wt-lball.wt-photo{background-color:#E3B45A;background-size:cover;background-position:center}',
+    '.wt-gift{position:absolute;left:62%;top:86.5%;width:9%;aspect-ratio:1/0.9;padding:0;border:0;background:transparent;cursor:pointer;z-index:2;-webkit-tap-highlight-color:transparent}',
+    '.wt-gift-box{position:absolute;left:4%;right:4%;bottom:0;height:72%;border-radius:2px;background:linear-gradient(90deg,transparent 42%,#E3B45A 42%,#E3B45A 58%,transparent 58%),#AB2C37;box-shadow:0 4px 8px rgba(0,0,0,.4)}',
+    '.wt-gift-lid{position:absolute;left:0;right:0;top:12%;height:20%;border-radius:2px;background:linear-gradient(90deg,transparent 42%,#E3B45A 42%,#E3B45A 58%,transparent 58%),#B9333F;transform-origin:10% 100%;transition:transform .5s cubic-bezier(.3,1.5,.5,1)}',
+    '.wt-gift:hover .wt-gift-lid{transform:rotate(-8deg)}',
+    '.wt-gift[aria-pressed="true"] .wt-gift-lid{transform:rotate(-38deg) translateY(-30%)}',
+    '.wt-gift:focus-visible{outline:3px solid #00AF9B;outline-offset:3px;border-radius:4px}',
     '.wt-lball.wt-photo::after{display:none}',
     '.wt-lstar{position:absolute;right:-6%;bottom:-6%;width:calc(var(--d) * .4);height:calc(var(--d) * .4);border-radius:50%;background:#AB2C37;color:#F6EEDC;display:flex;align-items:center;justify-content:center}',
     '.wt-lstar svg{width:62%;height:62%}',
@@ -683,10 +689,11 @@
         '<svg class="wt-art" viewBox="0 0 620 760" aria-hidden="true">' + TREE_SVG + '</svg>' +
         '<div class="wt-crown" role="group" aria-label="Messages from our leaders"></div>' +
         '<div class="wt-tags" role="group" aria-label="Wishes on the tree"></div>' +
+        (o.secret ? '<button type="button" class="wt-gift" data-kind="secret" data-id="gift" aria-label="A gift under the tree"><span class="wt-gift-lid"></span><span class="wt-gift-box"></span></button>' : '') +
         '</div>';
       container._wt = { seen: {}, first: true, onSelect: null };
       container.querySelector('.wt-stage').addEventListener('click', function (e) {
-        var btn = e.target.closest ? e.target.closest('.wt-tag,.wt-leader') : null;
+        var btn = e.target.closest ? e.target.closest('.wt-tag,.wt-leader,.wt-gift') : null;
         if (!btn || typeof container._wt.onSelect !== 'function') return;
         container._wt.onSelect(btn.getAttribute('data-kind'), btn.getAttribute('data-id'));
       });
@@ -694,6 +701,8 @@
 
     var st = container._wt;
     st.onSelect = o.onSelect || null;
+    var giftBtn = container.querySelector('.wt-gift');
+    if (giftBtn) giftBtn.setAttribute('aria-pressed', sel.kind === 'secret' ? 'true' : 'false');
 
     // Scatter the tags at random (repeatable) spots, shrinking them if the tree gets crowded
     var scale = o.scale;

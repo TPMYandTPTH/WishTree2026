@@ -92,9 +92,10 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
 .tour:hover{background:rgba(227,180,90,.1)}
 .tour[aria-pressed="true"]{background:var(--gold);color:var(--bg)}
 
-.tree-label{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:center;gap:4px 12px;text-align:center}
-.tree-label .site{font-size:22px;font-weight:300}
-.tree-label .count{font-size:14px;color:var(--cream-3)}
+.tree-col{position:relative}
+.tree-label{position:absolute;top:6px;left:0;z-index:2;display:flex;flex-direction:column;align-items:flex-start;gap:2px;max-width:34%;text-align:left;pointer-events:none}
+.tree-label .site{font-size:20px;font-weight:300;line-height:1.2}
+.tree-label .count{font-size:13px;color:var(--cream-3)}
 
 /* tree + rotation */
 .spin-stage{position:relative;width:100%;max-width:600px;margin:0 auto;perspective:1400px}
@@ -136,6 +137,15 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
 .wish-card[data-kind="leader"] .hole{background:var(--gold);opacity:.8}
 .leader-badge{display:none;position:absolute;top:-16px;left:22px;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;background:var(--gold);color:var(--bg);font-size:11px;font-weight:700;letter-spacing:.1em}
 .wish-card[data-kind="leader"] .leader-badge{display:inline-flex}
+.gift-badge{display:none;position:absolute;top:-16px;left:22px;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;background:#AB2C37;color:#F6EEDC;font-size:11px;font-weight:700;letter-spacing:.1em;box-shadow:0 0 0 2px #E3B45A}
+.wish-card[data-kind="secret"]{--card-bg:#5E1820;--card-ink:#F6EEDC;--card-kicker:#F2C766;--card-sub:#E9D9C9;--card-pill:rgba(246,238,220,.14);--card-line:rgba(242,199,102,.4);--card-avatar-bg:#E3B45A;--card-avatar-fg:#5E1820;border-color:#E3B45A;border-radius:14px;background-image:linear-gradient(90deg,transparent calc(50% - 7px),rgba(227,180,90,.22) calc(50% - 7px),rgba(227,180,90,.22) calc(50% + 7px),transparent calc(50% + 7px));box-shadow:0 0 0 6px rgba(171,44,55,.18),0 18px 40px rgba(0,0,0,.45);animation:giftIn .6s cubic-bezier(.2,.8,.3,1.2)}
+.wish-card[data-kind="secret"] .gift-badge{display:inline-flex}
+.wish-card[data-kind="secret"] .hole{background:var(--gold);opacity:.8}
+.wish-card[data-kind="secret"] .card-text{font-size:19px;font-weight:300}
+.wish-card[data-kind="secret"] .like{display:none}
+.card-wrap[data-kind="secret"] .card-string{background:var(--gold-2)}
+@keyframes giftIn{from{transform:translateY(14px) scale(.97);opacity:0}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion: reduce){.wish-card[data-kind="secret"]{animation:none}}
 .hole{position:absolute;top:14px;left:50%;width:10px;height:10px;margin-left:-5px;border-radius:50%;background:#0E2A1F;opacity:.55}
 .card-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
 .card-kicker{font-size:12px;font-weight:500;letter-spacing:.12em;color:var(--card-kicker)}
@@ -263,7 +273,8 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
   .all-head h2{font-size:26px}
   .all-tools{width:100%}
   .search{flex:1;width:auto;min-width:0}
-  .tree-label .site{font-size:19px}
+  .tree-label .site{font-size:16px}
+  .tree-label .count{font-size:12px}
   .qr-card{display:none}
   .card-text{font-size:18px}
 }
@@ -370,6 +381,10 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
             <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg>
             FROM OUR LEADERS
           </span>
+          <span class="gift-badge">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h16v10H4zM3 7h18v3H3zM12 7v13M12 7c-1.5-3-5-3.5-5-1.5S10 7 12 7zm0 0c1.5-3 5-3.5 5-1.5S14 7 12 7z"/></svg>
+            HIDDEN IN A GIFT
+          </span>
           <div class="hole" aria-hidden="true"></div>
           <div class="card-top">
             <span id="cardKicker" class="card-kicker">LOADING WISHES</span>
@@ -441,6 +456,15 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
   'use strict';
   var C = window.WishCore;
   var CFG = C.cfg;
+  // The hidden wish in the red gift (SECRET_WISH in config.js)
+  var SW = CFG.SECRET_WISH || null;
+  var SECRET = SW && String(SW.message || '').trim() ? {
+    id: 'gift',
+    message: String(SW.message).trim().slice(0, 400),
+    display_name: String(SW.name || '').trim(),
+    title: String(SW.title || '').trim(),
+    lang: C.LANG_LABEL[SW.lang] ? SW.lang : 'en'
+  } : null;
 
   var params = new URLSearchParams(window.location.search);
   var startSite = params.get('site');
@@ -546,6 +570,7 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
   function sameSel(a, b) { return a && b && a.kind === b.kind && String(a.id) === String(b.id); }
   function findItem(sel) {
     if (!sel) return null;
+    if (sel.kind === 'secret') return SECRET;
     var src = sel.kind === 'leader' ? state.leaders : state.wishes;
     for (var i = 0; i < src.length; i++) if (String(src[i].id) === String(sel.id)) return src[i];
     return null;
@@ -561,7 +586,7 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
   function ensureSelection() {
     var sel = state.selected;
     var ok = false;
-    if (sel && sel.kind === 'leader') ok = !!findItem(sel);
+    if (sel && (sel.kind === 'leader' || sel.kind === 'secret')) ok = !!findItem(sel);
     else if (sel) ok = siteWishes().some(function (w) { return String(w.id) === String(sel.id); });
     if (!ok) state.selected = defaultSelection();
   }
@@ -711,7 +736,8 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
         wishes: state.onTree,
         leaders: crown(),
         selected: state.selected,
-        onSelect: onTreeSelect
+        onSelect: onTreeSelect,
+        secret: !!SECRET
       });
     }
   }
@@ -736,6 +762,22 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
       el('cardText').textContent = state.site === 'all'
         ? 'No wishes on the tree yet. Be the first to hang one.'
         : 'No wishes from ' + C.siteById(state.site).label + ' yet. Be the first to hang one.';
+      return;
+    }
+
+    if (state.selected.kind === 'secret') {
+      card.setAttribute('data-kind', 'secret');
+      wrap.setAttribute('data-kind', 'secret');
+      card.setAttribute('data-color', 'cream');
+      card.setAttribute('lang', item.lang);
+      el('cardKicker').textContent = 'YOU FOUND A HIDDEN WISH';
+      el('cardLang').textContent = '';
+      el('cardText').textContent = item.message;
+      el('cardFoot').hidden = false;
+      el('cardName').textContent = item.display_name || 'A TP colleague';
+      el('cardWhere').textContent = item.title;
+      el('cardInitial').classList.remove('has-photo');
+      el('cardInitial').innerHTML = C.iconSvg('gift', 20);
       return;
     }
 
@@ -792,7 +834,13 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
     if (fromUser && view3d) view3d.focus(sel);   // turn the 3D tree so the tag faces you
     if (fromUser) {
       stopTour();
-      C.track(sel.kind === 'leader' ? 'leader_open' : 'wish_open', { site: state.site });
+      C.track(sel.kind === 'secret' ? 'secret_wish_found' : sel.kind === 'leader' ? 'leader_open' : 'wish_open', { site: state.site });
+      // on phones the card sits under the tree: bring it into view once the gift has opened
+      if (sel.kind === 'secret' && window.innerWidth <= 820) {
+        setTimeout(function () {
+          try { el('cardWrap').scrollIntoView({ behavior: REDUCE ? 'auto' : 'smooth', block: 'center' }); } catch (e) { el('cardWrap').scrollIntoView(); }
+        }, REDUCE ? 0 : 700);
+      }
     }
   }
 
@@ -1028,7 +1076,7 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
     el('tree3d').hidden = false;
     treeMount.hidden = true;
     import(C.url('tree3d.js')).then(function (mod) {
-      view3d = mod.createTree3D(el('tree3d'), { onSelect: onTreeSelect });
+      view3d = mod.createTree3D(el('tree3d'), { onSelect: onTreeSelect, secret: !!SECRET });
       el('tree3dLoading').hidden = true;
       el('treeHint').hidden = false;
       ensureSelection();
