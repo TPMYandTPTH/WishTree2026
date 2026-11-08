@@ -875,6 +875,7 @@ export function createTree3D(container, opts = {}) {
   let dragging = false;
   let lastMoveT = 0;
   let hoverKey = null;
+  let giftHoverTimer = 0;
   canvasEl.addEventListener('pointerdown', (e) => {
     down = { x: e.clientX, y: e.clientY, lastX: e.clientX };
     dragging = false;
@@ -908,6 +909,15 @@ export function createTree3D(container, opts = {}) {
         hoverKey = k;
         canvasEl.style.cursor = k ? 'pointer' : 'grab';
         if (hit) { poke(hit.kind, hit.id, 4.5); markInteract(); }
+        // resting the mouse on the hidden gift opens it (a short pause, so just passing over doesn't)
+        clearTimeout(giftHoverTimer);
+        if (k === 'secret:gift' && secret) {
+          giftHoverTimer = setTimeout(() => {
+            if (hoverKey !== 'secret:gift' || down) return;
+            secret.target = 1;
+            if (selectedKey !== 'secret:gift' && typeof onSelect === 'function') onSelect('secret', 'gift');
+          }, 220);
+        }
       }
     }
   });
@@ -930,7 +940,7 @@ export function createTree3D(container, opts = {}) {
   };
   canvasEl.addEventListener('pointerup', endPointer);
   canvasEl.addEventListener('pointercancel', endPointer);
-  canvasEl.addEventListener('pointerleave', () => { if (!down) { hoverKey = null; canvasEl.style.cursor = 'grab'; } });
+  canvasEl.addEventListener('pointerleave', () => { clearTimeout(giftHoverTimer); if (!down) { hoverKey = null; canvasEl.style.cursor = 'grab'; } });
 
   /* ---------- Sizing and visibility ---------- */
   function resize() {

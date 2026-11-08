@@ -702,7 +702,22 @@
     var st = container._wt;
     st.onSelect = o.onSelect || null;
     var giftBtn = container.querySelector('.wt-gift');
-    if (giftBtn) giftBtn.setAttribute('aria-pressed', sel.kind === 'secret' ? 'true' : 'false');
+    if (giftBtn) {
+      giftBtn.setAttribute('aria-pressed', sel.kind === 'secret' ? 'true' : 'false');
+      if (!giftBtn._hover) {
+        // the hidden gift opens when the mouse rests on it (a tap still opens it on phones)
+        giftBtn._hover = true;
+        var hoverTimer = 0;
+        giftBtn.addEventListener('pointerenter', function (e) {
+          if (e.pointerType !== 'mouse') return;
+          clearTimeout(hoverTimer);
+          hoverTimer = setTimeout(function () {
+            if (giftBtn.getAttribute('aria-pressed') !== 'true' && typeof container._wt.onSelect === 'function') container._wt.onSelect('secret', 'gift');
+          }, 220);
+        });
+        giftBtn.addEventListener('pointerleave', function () { clearTimeout(hoverTimer); });
+      }
+    }
 
     // Scatter the tags at random (repeatable) spots, shrinking them if the tree gets crowded
     var scale = o.scale;

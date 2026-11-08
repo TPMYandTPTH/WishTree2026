@@ -35,7 +35,7 @@ The **Accept new wishes** switch on the Approvals page closes or reopens the cam
 - When a site (or "All sites") has more approved wishes than that, **the most-liked go on the tree** (ties go to the newest). Every wish, on the tree or not, is in the **Every wish** list under the tree, with search, Most liked / Newest, and a like button. The TVs still show every wish in turn.
 - **Languages:** people pick the language they wrote in (Thai, Chinese, Japanese, Korean, Tamil and Vietnamese are picked automatically as they type). Readers choose one or more languages with the **Languages** button on the tree; the choice is remembered on their device. Leaders' messages always show. Edit `LANGUAGES` in `config.js` to add or remove languages; the database accepts any 2-3 letter code.
 - **Likes:** one per device, no sign-in. Leaders' messages can be liked but their count isn't shown on the tree or the TVs (the Approvals page still sees it).
-- **Hidden wish:** the big red gift under the tree opens when someone taps it and shows the wish in `SECRET_WISH` in `config.js` (edit the words there, or leave the message empty to turn it off). Only the tree turns; the gifts stay still.
+- **Hidden wish:** the big red gift under the tree opens when the mouse rests on it (or a tap on phones) and shows the wish in `SECRET_WISH` in `config.js` (edit the words there, or leave the message empty to turn it off). Only the tree turns; the gifts stay still.
 - **Leader photos:** leaders add a photo on the leaders' page. It's cropped to a circle, shrunk and stored in the `leader-photos` bucket in Supabase Storage (created by `schema.sql`). It shows on their gold ornament, their card, the list and the TVs. A new photo goes back for approval like an edited message.
 
 ## TV screens
