@@ -66,7 +66,7 @@ function makeCanvas(w, h) {
 }
 
 // The little card that rises out of the hidden gift
-function drawGiftCard() {
+function drawGiftCard(lines) {
   const W = 256, H = 320;
   const cv = makeCanvas(W, H);
   const x = cv.getContext('2d');
@@ -91,8 +91,8 @@ function drawGiftCard() {
   x.fillStyle = '#AB2C37';
   x.font = '700 30px "TP Sans","Noto Sans",system-ui,sans-serif';
   x.textAlign = 'center';
-  x.fillText('A wish', W / 2, 232);
-  x.fillText('for you', W / 2, 268);
+  x.fillText(lines[0], W / 2, 232);
+  x.fillText(lines[1], W / 2, 268);
   return cv;
 }
 
@@ -269,7 +269,15 @@ export function createTree3D(container, opts = {}) {
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   renderer.setClearColor(0x000000, 0);
   const canvasEl = renderer.domElement;
-  canvasEl.style.cssText = 'display:block;width:100%;height:100%;touch-action:pan-y;cursor:grab;outline:none;-webkit-tap-highlight-color:transparent';
+  // The canvas reaches a little above the tree's box (opts.headroom, a share of its height) so the star's glow
+  // can fade out softly instead of stopping at a hard edge. Pointer events go to the box itself, so the extra
+  // room never blocks anything underneath it.
+  const headroomK = Math.max(0, Math.min(0.3, Number(opts.headroom) || 0));
+  canvasEl.style.cssText = 'display:block;position:absolute;left:0;top:0;width:100%;height:100%;outline:none;pointer-events:none';
+  const hitEl = container;
+  hitEl.style.touchAction = 'pan-y';
+  hitEl.style.cursor = 'grab';
+  hitEl.style.webkitTapHighlightColor = 'transparent';
   canvasEl.setAttribute('role', 'img');
   canvasEl.setAttribute('aria-label', '3D wish tree. Drag sideways to turn it and tap a tag to read the wish. You can also use Previous and Next.');
   container.appendChild(canvasEl);
@@ -467,20 +475,20 @@ export function createTree3D(container, opts = {}) {
     g.rotation.y = rotY;
     ground.add(g);
   }
-  gift(-1.55, 0.95, 0.6, 0.7, 0.6, 0xe3b45a, 0xab2c37, -0.3);
-  gift(0.05, 1.8, 0.5, 0.42, 0.5, 0xf6eedc, 0xab2c37, 0.9);
-  gift(-0.95, -1.45, 0.65, 0.5, 0.55, 0x1e573d, 0xe3b45a, 0.2);
-  gift(1.75, -0.65, 0.5, 0.62, 0.5, 0xf6eedc, 0x1e573d, -0.6);
-  gift(-1.95, -0.2, 0.45, 0.38, 0.45, 0xab2c37, 0xf6eedc, 0.7);
-
-  // The hidden wish: the big red gift at the front opens when someone taps it
-  const secret = (() => {
-    if (!opts.secret) return null;
-    const tag = { kind: 'secret', id: 'gift' };
-    const W = 0.94, H = 0.7, D = 0.82, LID = 0.15;
+  // Gifts that hide a wish: they open when the mouse rests on them or when they're tapped
+  const SECRET_GIFTS = {
+    red: { x: 1.5, z: 1.62, rot: 0.32, W: 0.94, H: 0.7, D: 0.82, color: 0xab2c37, ribbon: 0xe3b45a, words: ['A wish', 'for you'] },
+    gold: { x: -1.7, z: 1.5, rot: -0.3, W: 0.72, H: 0.82, D: 0.7, color: 0xe3b45a, ribbon: 0xab2c37, words: ['Where it', 'all began'] }
+  };
+  const wanted = Array.isArray(opts.secrets) ? opts.secrets : (opts.secret ? ['red'] : []);
+  const secrets = new Map();
+  function makeSecretGift(id, c) {
+    const tag = { kind: 'secret', id };
+    const { W, H, D } = c;
+    const LID = 0.15;
     const g = new THREE.Group();
-    const boxMat = new THREE.MeshStandardMaterial({ color: 0xab2c37, roughness: 0.55 });
-    const ribMat = new THREE.MeshStandardMaterial({ color: 0xe3b45a, roughness: 0.35, metalness: 0.45 });
+    const boxMat = new THREE.MeshStandardMaterial({ color: c.color, roughness: 0.55 });
+    const ribMat = new THREE.MeshStandardMaterial({ color: c.ribbon, roughness: 0.35, metalness: 0.45 });
     ribbonBox(g, W, H - LID, D, 0, boxMat, ribMat, tag);
     // warm light inside, seen when the lid opens
     const inner = new THREE.Mesh(new THREE.PlaneGeometry(W * 0.92, D * 0.92), new THREE.MeshBasicMaterial({ color: 0xffd98a, transparent: true, opacity: 0 }));
@@ -497,7 +505,7 @@ export function createTree3D(container, opts = {}) {
     bow(lidInner, LID, ribMat, tag, 1.35);
     g.add(lid);
     // the card that rises out
-    const card = new THREE.Mesh(new THREE.PlaneGeometry(0.64, 0.8), new THREE.MeshStandardMaterial({ map: toTex(drawGiftCard()), roughness: 0.7, side: THREE.DoubleSide, emissive: 0x3a2a10, emissiveIntensity: 0.6 }));
+    const card = new THREE.Mesh(new THREE.PlaneGeometry(0.64, 0.8), new THREE.MeshStandardMaterial({ map: toTex(drawGiftCard(c.words)), roughness: 0.7, side: THREE.DoubleSide, emissive: 0x3a2a10, emissiveIntensity: 0.6 }));
     card.userData = tag;
     card.visible = false;
     g.add(card);
@@ -516,13 +524,22 @@ export function createTree3D(container, opts = {}) {
     const light = new THREE.PointLight(0xffd98a, 0, 2.6, 2);
     light.position.set(0, H + 0.15, 0);
     g.add(light);
-    g.position.set(1.5, 0, 1.62);
-    g.rotation.y = 0.32;
+    g.position.set(c.x, 0, c.z);
+    g.rotation.y = c.rot;
     ground.add(g);
-    return { g, lid, card, inner, glowMat, sparkMat, light, H, LID, open: 0, target: 0, wig: 0, wigVel: 0 };
-  })();
-  function nudgeGift(strength) {
-    if (secret) secret.wigVel += (Math.random() < 0.5 ? -1 : 1) * strength;
+    // sparkles take turns, so two gifts never flash together
+    return { id, g, lid, card, inner, glowMat, sparkMat, light, H, LID, open: 0, target: 0, wig: 0, wigVel: 0, sparkOffset: secrets.size * 4.5 };
+  }
+  wanted.forEach((id) => { if (SECRET_GIFTS[id] && !secrets.has(id)) secrets.set(id, makeSecretGift(id, SECRET_GIFTS[id])); });
+  if (!secrets.has('gold')) gift(-1.55, 0.95, 0.6, 0.7, 0.6, 0xe3b45a, 0xab2c37, -0.3);
+  gift(0.05, 1.8, 0.5, 0.42, 0.5, 0xf6eedc, 0xab2c37, 0.9);
+  gift(-0.95, -1.45, 0.65, 0.5, 0.55, 0x1e573d, 0xe3b45a, 0.2);
+  gift(1.75, -0.65, 0.5, 0.62, 0.5, 0xf6eedc, 0x1e573d, -0.6);
+  gift(-1.95, -0.2, 0.45, 0.38, 0.45, 0xab2c37, 0xf6eedc, 0.7);
+  if (!secrets.has('red')) gift(1.45, 1.15, 0.7, 0.55, 0.6, 0xab2c37, 0xe3b45a, 0.4);
+  function nudgeGift(id, strength) {
+    const sg = secrets.get(id);
+    if (sg) sg.wigVel += (Math.random() < 0.5 ? -1 : 1) * strength;
   }
 
 
@@ -723,7 +740,7 @@ export function createTree3D(container, opts = {}) {
 
   function setSelected(sel) {
     selectedKey = sel && sel.id != null ? sel.kind + ':' + String(sel.id) : null;
-    if (secret) secret.target = selectedKey === 'secret:gift' ? 1 : 0;
+    secrets.forEach((sg) => { sg.target = selectedKey === 'secret:' + sg.id ? 1 : 0; });
     tags.forEach((o) => { o.glow.visible = selectedKey === 'wish:' + o.id; });
     leaders.forEach((o) => { o.glow.visible = selectedKey === 'leader:' + o.id; });
   }
@@ -800,7 +817,7 @@ export function createTree3D(container, opts = {}) {
 
   function focus(sel) {
     if (!sel) return;
-    if (sel.kind === 'secret') { if (secret) secret.target = 1; return; }   // the gifts don't turn
+    if (sel.kind === 'secret') { const sg = secrets.get(String(sel.id)); if (sg) sg.target = 1; return; }   // the gifts don't turn
     const o = itemFor(sel.kind, sel.id);
     if (!o) return;
     const to = nearestAngle(o.th - Math.PI / 2, rot);
@@ -866,7 +883,7 @@ export function createTree3D(container, opts = {}) {
   }
 
   function poke(kind, id, strength) {
-    if (kind === 'secret') { nudgeGift((strength || 5) * 0.6); return; }
+    if (kind === 'secret') { nudgeGift(String(id), (strength || 5) * 0.6); return; }
     const o = itemFor(kind, id);
     if (o) o.vel += (Math.random() < 0.5 ? -1 : 1) * (strength || 5);
   }
@@ -876,19 +893,19 @@ export function createTree3D(container, opts = {}) {
   let lastMoveT = 0;
   let hoverKey = null;
   let giftHoverTimer = 0;
-  canvasEl.addEventListener('pointerdown', (e) => {
+  hitEl.addEventListener('pointerdown', (e) => {
     down = { x: e.clientX, y: e.clientY, lastX: e.clientX };
     dragging = false;
     lastMoveT = performance.now();
-    try { canvasEl.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+    try { hitEl.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
     markInteract();
   });
-  canvasEl.addEventListener('pointermove', (e) => {
+  hitEl.addEventListener('pointermove', (e) => {
     if (down) {
       if (!dragging && Math.abs(e.clientX - down.x) > 6) {
         dragging = true;
         if (anim && anim.type === 'focus') anim = null;
-        canvasEl.style.cursor = 'grabbing';
+        hitEl.style.cursor = 'grabbing';
       }
       if (dragging && !(anim && anim.type !== 'focus')) {
         const now = performance.now();
@@ -907,15 +924,15 @@ export function createTree3D(container, opts = {}) {
       const k = hit ? hit.kind + ':' + hit.id : null;
       if (k !== hoverKey) {
         hoverKey = k;
-        canvasEl.style.cursor = k ? 'pointer' : 'grab';
+        hitEl.style.cursor = k ? 'pointer' : 'grab';
         if (hit) { poke(hit.kind, hit.id, 4.5); markInteract(); }
         // resting the mouse on the hidden gift opens it (a short pause, so just passing over doesn't)
         clearTimeout(giftHoverTimer);
-        if (k === 'secret:gift' && secret) {
+        if (hit && hit.kind === 'secret' && secrets.has(hit.id)) {
           giftHoverTimer = setTimeout(() => {
-            if (hoverKey !== 'secret:gift' || down) return;
-            secret.target = 1;
-            if (selectedKey !== 'secret:gift' && typeof onSelect === 'function') onSelect('secret', 'gift');
+            if (hoverKey !== k || down) return;
+            secrets.get(hit.id).target = 1;
+            if (selectedKey !== k && typeof onSelect === 'function') onSelect('secret', hit.id);
           }, 220);
         }
       }
@@ -928,29 +945,38 @@ export function createTree3D(container, opts = {}) {
       const hit = pick(e.clientX, e.clientY);
       if (hit) {
         poke(hit.kind, hit.id, 7);
-        if (hit.kind === 'secret' && secret) secret.target = 1;
+        if (hit.kind === 'secret' && secrets.has(hit.id)) secrets.get(hit.id).target = 1;
         if (typeof onSelect === 'function') onSelect(hit.kind, hit.id);
       }
     }
     if (performance.now() - lastMoveT > 120) rotVel = 0;
     down = null;
     dragging = false;
-    canvasEl.style.cursor = hoverKey ? 'pointer' : 'grab';
+    hitEl.style.cursor = hoverKey ? 'pointer' : 'grab';
     markInteract();
   };
-  canvasEl.addEventListener('pointerup', endPointer);
-  canvasEl.addEventListener('pointercancel', endPointer);
-  canvasEl.addEventListener('pointerleave', () => { clearTimeout(giftHoverTimer); if (!down) { hoverKey = null; canvasEl.style.cursor = 'grab'; } });
+  hitEl.addEventListener('pointerup', endPointer);
+  hitEl.addEventListener('pointercancel', endPointer);
+  hitEl.addEventListener('pointerleave', () => { clearTimeout(giftHoverTimer); if (!down) { hoverKey = null; hitEl.style.cursor = 'grab'; } });
 
   /* ---------- Sizing and visibility ---------- */
   function resize() {
     const w = container.clientWidth || 300;
-    const h = container.clientHeight || Math.round((w * 760) / 620);
+    const hb = container.clientHeight || Math.round((w * 760) / 620);   // the tree's box
+    const hr = Math.round(hb * headroomK);                              // extra room above it
+    const h = hb + hr;
+    canvasEl.style.top = -hr + 'px';
+    canvasEl.style.height = h + 'px';
+    const mask = hr ? 'linear-gradient(to bottom, transparent 0, #000 ' + hr + 'px)' : '';
+    canvasEl.style.webkitMaskImage = mask;
+    canvasEl.style.maskImage = mask;
     renderer.setSize(w, h, false);
-    camera.aspect = w / h;
+    camera.aspect = w / hb;
     // keep the whole tree in view on a frame narrower than the tree's own shape
     const base = 620 / 760;
     camera.fov = camera.aspect < base ? (2 * Math.atan(Math.tan((16 * Math.PI) / 180) * (base / camera.aspect)) * 180) / Math.PI : 32;
+    // the tree stays the same size in its box; the view just reaches higher
+    if (hr) camera.setViewOffset(w, hb, 0, -hr, w, h); else camera.clearViewOffset();
     camera.updateProjectionMatrix();
   }
   const ro = new ResizeObserver(resize);
@@ -1023,9 +1049,8 @@ export function createTree3D(container, opts = {}) {
     starGlowMat.opacity = 0.65 + 0.35 * pulse;
     if (!reduce) star.rotation.y = 0.35 * Math.sin(t * 0.8);
 
-    // the hidden gift: wobbles when touched, opens to show its card, sparkles now and then
-    if (secret) {
-      const sg = secret;
+    // the hidden gifts: wobble when touched, open to show their card, sparkle now and then
+    secrets.forEach((sg) => {
       sg.open += (sg.target - sg.open) * Math.min(1, dt * (sg.target ? 3.2 : 5));
       sg.wigVel += (-55 * sg.wig - 5 * sg.wigVel) * dt;
       sg.wig += sg.wigVel * dt;
@@ -1040,9 +1065,9 @@ export function createTree3D(container, opts = {}) {
       sg.inner.material.opacity = 0.85 * o;
       sg.glowMat.opacity = 0.75 * o * (reduce ? 1 : 0.85 + 0.15 * Math.sin(t * 2.2));
       sg.light.intensity = 5 * o;
-      const hintT = t % 9;
+      const hintT = (t + sg.sparkOffset) % 9;
       sg.sparkMat.opacity = !reduce && o < 0.05 && hintT < 0.9 ? 0.9 * Math.sin((Math.PI * hintT) / 0.9) : 0;
-    }
+    });
 
     // snow
     if (SNOW) {

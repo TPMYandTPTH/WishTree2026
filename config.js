@@ -54,14 +54,27 @@ window.WISH_CFG = {
     { code: 'ta', label: 'தமிழ்', english: 'Tamil' }
   ],
 
-  // A hidden wish inside the big red gift under the tree. People find it by tapping the gift.
-  // Change the words freely (up to about 250 characters). Leave message empty to turn it off.
-  SECRET_WISH: {
-    message: 'I built this tree so every one of us, on site or at home, could hang a wish in the same place. My wish is simple: that we keep lifting each other up in 2027. Thank you for finding this one. Merry Christmas!',
-    name: 'Amr Mihany',
-    title: 'Digital Services & Transformation',
-    lang: 'en'
-  },
+  // Hidden wishes inside two gifts under the tree. A gift opens when the mouse rests on it (or a tap on phones).
+  // gift: 'red' (big red gift, front right) or 'gold' (tall gold gift, front left).
+  // Change the words freely (up to about 250 characters). Delete an entry to make that gift a normal one again.
+  HIDDEN_WISHES: [
+    {
+      gift: 'red',
+      kicker: 'YOU FOUND A HIDDEN WISH',
+      message: 'I built this tree so every one of us, on site or at home, could hang a wish in the same place. My wish is simple: that we keep lifting each other up in 2027. Thank you for finding this one. Merry Christmas!',
+      name: 'Amr Mihany',
+      title: 'Digital Services & Transformation',
+      lang: 'en'
+    },
+    {
+      gift: 'gold',
+      kicker: 'WHERE THIS TREE BEGAN',
+      message: 'The Wish Tree started with Maszy\'s idea and the email he sent to get it going. Thank you, Maszy, for giving all of us one place to share our Christmas wishes.',
+      name: 'Maszy Ulip',
+      title: 'The idea behind the Wish Tree',
+      lang: 'en'
+    }
+  ],
 
   MAX_LENGTH: 150,          // employee wish length (keep in step with schema.sql)
   LEADER_MAX_LENGTH: 250,   // leader message length (keep in step with schema.sql)

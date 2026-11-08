@@ -109,7 +109,7 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
 .wt-leader::after{content:"";position:absolute;inset:-6px}
 .tree3d{position:relative;width:100%;aspect-ratio:620/760;max-height:max(440px, calc(100vh - 150px));border-radius:24px}
 .tree3d-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--cream-3)}
-.tree3d canvas{position:absolute;inset:0}
+.tree3d canvas{position:absolute;left:0;top:0;width:100%}
 .tree-notes{display:flex;flex-direction:column;gap:10px;padding:16px 18px;border-radius:12px;border:1px solid var(--line);font-size:13px;line-height:1.45;color:var(--cream-2)}
 .note-row{display:flex;align-items:center;gap:10px}
 .note-row svg,.note-row i{flex:none}
@@ -144,6 +144,8 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
 .wish-card[data-kind="secret"] .hole{background:var(--gold);opacity:.8}
 .wish-card[data-kind="secret"] .card-text{font-size:19px;font-weight:300}
 .wish-card[data-kind="secret"] .like{display:none}
+.wish-card[data-kind="secret"][data-gift="gold"]{--card-bg:#E3B45A;--card-ink:#0E2A1F;--card-kicker:#7E1F28;--card-sub:#183326;--card-line:rgba(14,42,31,.3);--card-avatar-bg:#0E2A1F;--card-avatar-fg:#E3B45A;border-color:#F2C766;background-image:linear-gradient(90deg,transparent calc(50% - 7px),rgba(171,44,55,.16) calc(50% - 7px),rgba(171,44,55,.16) calc(50% + 7px),transparent calc(50% + 7px));box-shadow:0 0 0 6px rgba(227,180,90,.2),0 18px 40px rgba(0,0,0,.45)}
+.wish-card[data-kind="secret"][data-gift="gold"] .hole{background:#0E2A1F;opacity:.6}
 .card-wrap[data-kind="secret"] .card-string{background:var(--gold-2)}
 @keyframes giftIn{from{transform:translateY(14px) scale(.97);opacity:0}to{transform:none;opacity:1}}
 @media (prefers-reduced-motion: reduce){.wish-card[data-kind="secret"]{animation:none}}
@@ -461,15 +463,22 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
   'use strict';
   var C = window.WishCore;
   var CFG = C.cfg;
-  // The hidden wish in the red gift (SECRET_WISH in config.js)
-  var SW = CFG.SECRET_WISH || null;
-  var SECRET = SW && String(SW.message || '').trim() ? {
-    id: 'gift',
-    message: String(SW.message).trim().slice(0, 400),
-    display_name: String(SW.name || '').trim(),
-    title: String(SW.title || '').trim(),
-    lang: C.LANG_LABEL[SW.lang] ? SW.lang : 'en'
-  } : null;
+  // Wishes hidden in gifts under the tree (HIDDEN_WISHES in config.js)
+  var SECRETS = {};
+  (Array.isArray(CFG.HIDDEN_WISHES) ? CFG.HIDDEN_WISHES : (CFG.SECRET_WISH ? [Object.assign({ gift: 'red' }, CFG.SECRET_WISH)] : []))
+    .forEach(function (h) {
+      var gid = h && (h.gift === 'gold' ? 'gold' : h.gift === 'red' ? 'red' : '');
+      if (!gid || SECRETS[gid] || !String(h.message || '').trim()) return;
+      SECRETS[gid] = {
+        id: gid,
+        kicker: String(h.kicker || 'YOU FOUND A HIDDEN WISH').trim().toUpperCase(),
+        message: String(h.message).trim().slice(0, 400),
+        display_name: String(h.name || '').trim(),
+        title: String(h.title || '').trim(),
+        lang: C.LANG_LABEL[h.lang] ? h.lang : 'en'
+      };
+    });
+  var SECRET_IDS = Object.keys(SECRETS);
 
   var params = new URLSearchParams(window.location.search);
   var startSite = params.get('site');
@@ -575,7 +584,7 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
   function sameSel(a, b) { return a && b && a.kind === b.kind && String(a.id) === String(b.id); }
   function findItem(sel) {
     if (!sel) return null;
-    if (sel.kind === 'secret') return SECRET;
+    if (sel.kind === 'secret') return SECRETS[sel.id] || null;
     var src = sel.kind === 'leader' ? state.leaders : state.wishes;
     for (var i = 0; i < src.length; i++) if (String(src[i].id) === String(sel.id)) return src[i];
     return null;
@@ -743,7 +752,7 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
         leaders: crown(),
         selected: state.selected,
         onSelect: onTreeSelect,
-        secret: !!SECRET
+        secrets: SECRET_IDS
       });
     }
   }
@@ -775,8 +784,9 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
       card.setAttribute('data-kind', 'secret');
       wrap.setAttribute('data-kind', 'secret');
       card.setAttribute('data-color', 'cream');
+      card.setAttribute('data-gift', item.id);
       card.setAttribute('lang', item.lang);
-      el('cardKicker').textContent = 'YOU FOUND A HIDDEN WISH';
+      el('cardKicker').textContent = item.kicker;
       el('cardLang').textContent = '';
       el('cardText').textContent = item.message;
       el('cardFoot').hidden = false;
@@ -1082,7 +1092,7 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
     el('tree3d').hidden = false;
     treeMount.hidden = true;
     import(C.url('tree3d.js')).then(function (mod) {
-      view3d = mod.createTree3D(el('tree3d'), { onSelect: onTreeSelect, secret: !!SECRET });
+      view3d = mod.createTree3D(el('tree3d'), { onSelect: onTreeSelect, secrets: SECRET_IDS, headroom: 0.12 });
       el('tree3dLoading').hidden = true;
       el('treeHint').hidden = false;
       ensureSelection();

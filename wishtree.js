@@ -648,6 +648,11 @@
     '.wt-gift-box{position:absolute;left:4%;right:4%;bottom:0;height:72%;border-radius:2px;background:linear-gradient(90deg,transparent 42%,#E3B45A 42%,#E3B45A 58%,transparent 58%),#AB2C37;box-shadow:0 4px 8px rgba(0,0,0,.4)}',
     '.wt-gift-lid{position:absolute;left:0;right:0;top:12%;height:20%;border-radius:2px;background:linear-gradient(90deg,transparent 42%,#E3B45A 42%,#E3B45A 58%,transparent 58%),#B9333F;transform-origin:10% 100%;transition:transform .5s cubic-bezier(.3,1.5,.5,1)}',
     '.wt-gift:hover .wt-gift-lid{transform:rotate(-8deg)}',
+    '.wt-gift-gold{left:27%;top:85%;width:8%;aspect-ratio:1/1.05}',
+    '.wt-gift-gold .wt-gift-box{background:linear-gradient(90deg,transparent 42%,#AB2C37 42%,#AB2C37 58%,transparent 58%),#E3B45A}',
+    '.wt-gift-gold .wt-gift-lid{background:linear-gradient(90deg,transparent 42%,#AB2C37 42%,#AB2C37 58%,transparent 58%),#EDC06A;transform-origin:90% 100%}',
+    '.wt-gift-gold:hover .wt-gift-lid{transform:rotate(8deg)}',
+    '.wt-gift-gold[aria-pressed="true"] .wt-gift-lid{transform:rotate(38deg) translateY(-30%)}',
     '.wt-gift[aria-pressed="true"] .wt-gift-lid{transform:rotate(-38deg) translateY(-30%)}',
     '.wt-gift:focus-visible{outline:3px solid #00AF9B;outline-offset:3px;border-radius:4px}',
     '.wt-lball.wt-photo::after{display:none}',
@@ -689,7 +694,9 @@
         '<svg class="wt-art" viewBox="0 0 620 760" aria-hidden="true">' + TREE_SVG + '</svg>' +
         '<div class="wt-crown" role="group" aria-label="Messages from our leaders"></div>' +
         '<div class="wt-tags" role="group" aria-label="Wishes on the tree"></div>' +
-        (o.secret ? '<button type="button" class="wt-gift" data-kind="secret" data-id="gift" aria-label="A gift under the tree"><span class="wt-gift-lid"></span><span class="wt-gift-box"></span></button>' : '') +
+        (o.secrets || []).map(function (id) {
+          return '<button type="button" class="wt-gift wt-gift-' + esc(id) + '" data-kind="secret" data-id="' + esc(id) + '" aria-label="A gift under the tree"><span class="wt-gift-lid"></span><span class="wt-gift-box"></span></button>';
+        }).join('') +
         '</div>';
       container._wt = { seen: {}, first: true, onSelect: null };
       container.querySelector('.wt-stage').addEventListener('click', function (e) {
@@ -701,23 +708,22 @@
 
     var st = container._wt;
     st.onSelect = o.onSelect || null;
-    var giftBtn = container.querySelector('.wt-gift');
-    if (giftBtn) {
-      giftBtn.setAttribute('aria-pressed', sel.kind === 'secret' ? 'true' : 'false');
-      if (!giftBtn._hover) {
-        // the hidden gift opens when the mouse rests on it (a tap still opens it on phones)
-        giftBtn._hover = true;
-        var hoverTimer = 0;
-        giftBtn.addEventListener('pointerenter', function (e) {
-          if (e.pointerType !== 'mouse') return;
-          clearTimeout(hoverTimer);
-          hoverTimer = setTimeout(function () {
-            if (giftBtn.getAttribute('aria-pressed') !== 'true' && typeof container._wt.onSelect === 'function') container._wt.onSelect('secret', 'gift');
-          }, 220);
-        });
-        giftBtn.addEventListener('pointerleave', function () { clearTimeout(hoverTimer); });
-      }
-    }
+    Array.prototype.forEach.call(container.querySelectorAll('.wt-gift'), function (giftBtn) {
+      var gid = giftBtn.getAttribute('data-id');
+      giftBtn.setAttribute('aria-pressed', sel.kind === 'secret' && String(sel.id) === gid ? 'true' : 'false');
+      if (giftBtn._hover) return;
+      // a hidden gift opens when the mouse rests on it (a tap still opens it on phones)
+      giftBtn._hover = true;
+      var hoverTimer = 0;
+      giftBtn.addEventListener('pointerenter', function (e) {
+        if (e.pointerType !== 'mouse') return;
+        clearTimeout(hoverTimer);
+        hoverTimer = setTimeout(function () {
+          if (giftBtn.getAttribute('aria-pressed') !== 'true' && typeof container._wt.onSelect === 'function') container._wt.onSelect('secret', gid);
+        }, 220);
+      });
+      giftBtn.addEventListener('pointerleave', function () { clearTimeout(hoverTimer); });
+    });
 
     // Scatter the tags at random (repeatable) spots, shrinking them if the tree gets crowded
     var scale = o.scale;

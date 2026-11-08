@@ -73,7 +73,7 @@ html.portrait .status{gap:1.4rem}
 .tree-box{position:relative;height:47.5rem;aspect-ratio:620/760;max-width:100%}
 html.portrait .tree-box{height:49rem}
 .tree3d{position:absolute;inset:0}
-.tree3d canvas{position:absolute;inset:0;width:100% !important;height:100% !important}
+.tree3d canvas{position:absolute;left:0;top:0;width:100%}
 .tree-flat{position:absolute;inset:0}
 .counts{display:flex;justify-content:center;gap:2.6rem;font-size:1.35rem;color:var(--cream-2);white-space:nowrap}
 .counts b{display:block;font-size:2.6rem;font-weight:300;line-height:1.1;color:var(--cream);font-variant-numeric:tabular-nums}
@@ -715,7 +715,7 @@ body.pointer .fs{opacity:1;pointer-events:auto}
     if (params.get('view') === 'flat' || !hasWebGL()) { useFlat(); return; }
     $('tree3d').hidden = false;
     import(C.url('tree3d.js')).then(function (mod) {
-      view3d = mod.createTree3D($('tree3d'), { idleDelay: SECONDS + 4 });
+      view3d = mod.createTree3D($('tree3d'), { idleDelay: SECONDS + 4, headroom: 0.1 });
       refreshTree();
       if (S.current) view3d.focus(S.current);
     }).catch(function (err) {
