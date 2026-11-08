@@ -47,7 +47,7 @@ button{font-family:inherit}
 .arc.a1{right:-520px;top:-260px;width:1100px;height:1100px;background:var(--bg-2)}
 .arc.a2{right:-400px;top:-140px;width:860px;height:860px;border:1px solid rgba(227,180,90,.16)}
 
-.wrap{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:20px 40px 40px}
+.wrap{position:relative;z-index:1;max-width:1680px;margin:0 auto;padding:20px 40px 40px}
 
 /* header */
 .top{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-bottom:20px;border-bottom:1px solid var(--line)}
@@ -60,9 +60,9 @@ button{font-family:inherit}
 .btn-gold:hover{background:var(--gold-2);color:var(--bg)}
 
 /* layout */
-.grid{display:grid;grid-template-columns:minmax(260px,320px) minmax(0,1fr) minmax(290px,350px);grid-template-areas:"intro tree side" "sites tree side";grid-template-rows:auto 1fr;gap:28px 40px;align-items:start;padding-top:32px}
+.grid{display:grid;grid-template-columns:minmax(260px,320px) minmax(0,1fr) minmax(290px,350px);grid-template-areas:"intro tree side" "sites tree side";grid-template-rows:auto 1fr;gap:28px 32px;align-items:start;padding-top:24px}
 .intro{grid-area:intro;display:flex;flex-direction:column;gap:26px;padding-top:12px}
-.tree-col{grid-area:tree;display:flex;flex-direction:column;gap:14px;min-width:0}
+.tree-col{grid-area:tree;display:flex;flex-direction:column;min-width:0}
 .side{grid-area:side;display:flex;flex-direction:column;gap:18px;padding-top:12px}
 
 /* intro */
@@ -98,7 +98,8 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
 .tree-label .count{font-size:13px;color:var(--cream-3)}
 
 /* tree + rotation */
-.spin-stage{position:relative;width:100%;max-width:600px;margin:0 auto;perspective:1400px}
+.spin-stage{position:relative;width:100%;margin:0 auto;perspective:1400px}
+#treeMount{max-width:min(100%, calc((100vh - 150px) * 620 / 760));margin:0 auto}
 #treeMount{transform-style:preserve-3d;will-change:transform}
 .spin-out #treeMount{animation:spinOut .38s ease-in forwards}
 .spin-in #treeMount{animation:spinIn .55s cubic-bezier(.2,.8,.3,1) both}
@@ -106,17 +107,17 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
 @keyframes spinIn{from{transform:rotateY(-90deg);opacity:.15}to{transform:rotateY(0);opacity:1}}
 .wt-tag::after{content:"";position:absolute;inset:-6px -4px}
 .wt-leader::after{content:"";position:absolute;inset:-6px}
-.tree3d{position:relative;width:100%;aspect-ratio:620/760;border-radius:24px}
+.tree3d{position:relative;width:100%;aspect-ratio:620/760;max-height:max(440px, calc(100vh - 150px));border-radius:24px}
 .tree3d-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--cream-3)}
 .tree3d canvas{position:absolute;inset:0}
-.tree-hint{display:flex;justify-content:center;align-items:center;gap:8px;font-size:13px;color:var(--cream-2)}
-.tree-hint svg{flex:none}
+.tree-notes{display:flex;flex-direction:column;gap:10px;padding:16px 18px;border-radius:12px;border:1px solid var(--line);font-size:13px;line-height:1.45;color:var(--cream-2)}
+.note-row{display:flex;align-items:center;gap:10px}
+.note-row svg,.note-row i{flex:none}
+.note-row .link-btn{min-height:32px;padding:0;text-align:left}
+.note-small{padding-top:10px;border-top:1px solid var(--line);font-size:12px;color:var(--cream-3)}
 
-.legend{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 22px;font-size:13px;color:var(--cream-2)}
-.legend span{display:inline-flex;align-items:center;gap:8px}
 .lg-leader{width:14px;height:14px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 3px rgba(242,199,102,.25)}
-.lg-tag{width:10px;height:14px;border-radius:2px 2px 3px 3px;background:var(--cream)}
-.tree-foot{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:4px 16px;text-align:center;font-size:13px;color:var(--cream-3)}
+.lg-tag{width:10px;height:14px;margin:0 2px;border-radius:2px 2px 3px 3px;background:var(--cream)}
 .link-btn{min-height:40px;padding:0 6px;border:0;background:transparent;color:var(--gold);font-size:14px;font-weight:500;text-decoration:underline;cursor:pointer}
 .link-btn:hover{color:var(--gold-2)}
 
@@ -273,6 +274,9 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
   .all-head h2{font-size:26px}
   .all-tools{width:100%}
   .search{flex:1;width:auto;min-width:0}
+  .spin-stage{width:calc(100% + 32px);margin:0 -16px}
+  .tree3d{border-radius:0}
+  .tree-label{left:0}
   .tree-label .site{font-size:16px}
   .tree-label .count{font-size:12px}
   .qr-card{display:none}
@@ -358,19 +362,6 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
         <div id="tree3d" class="tree3d" hidden><div id="tree3dLoading" class="tree3d-loading">Lighting up the tree…</div></div>
         <div id="treeMount"></div>
       </div>
-      <div id="treeHint" class="tree-hint" hidden>
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h16M8 8l-4 4 4 4M16 8l4 4-4 4"/></svg>
-        Drag to turn the tree · tap a tag to read it
-      </div>
-      <div class="legend" aria-hidden="true">
-        <span><i class="lg-leader"></i>Leaders' messages, on every site's tree</span>
-        <span><i class="lg-tag"></i>Wishes from colleagues</span>
-      </div>
-      <div class="tree-foot">
-        <span id="treeFull" hidden></span>
-        <a href="#allWishes" id="allLink" class="link-btn" hidden>See every wish</a>
-        <span>Every wish is reviewed by the Talent Engagement team before it appears.</span>
-      </div>
     </section>
 
     <aside class="side">
@@ -423,6 +414,20 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
           <div class="qr-sub" id="qrSub">Write it bright, hang it right. Takes about a minute on your phone.</div>
         </div>
       </a>
+
+      <div class="tree-notes">
+        <div id="treeHint" class="note-row" hidden>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h16M8 8l-4 4 4 4M16 8l4 4-4 4"/></svg>
+          <span>Drag to turn the tree · tap a tag to read it</span>
+        </div>
+        <div class="note-row"><i class="lg-leader" aria-hidden="true"></i><span>Leaders' messages, on every site's tree</span></div>
+        <div class="note-row"><i class="lg-tag" aria-hidden="true"></i><span>Wishes from colleagues</span></div>
+        <div class="note-row" id="allRow">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 7h14M5 12h14M5 17h9"/></svg>
+          <span><span id="treeFull" hidden></span> <a href="#allWishes" id="allLink" class="link-btn" hidden>See every wish</a></span>
+        </div>
+        <div class="note-small">Every wish is reviewed by the Talent Engagement team before it appears.</div>
+      </div>
     </aside>
   </main>
 
@@ -727,6 +732,7 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
     var full = total > state.onTree.length;
     el('treeFull').hidden = !full;
     el('allLink').hidden = !total;
+    el('allRow').hidden = !total;
     el('treeFull').textContent = full ? 'The tree holds ' + cap() + ' wishes, so the most-liked hang here.' : '';
     el('allLink').textContent = full ? 'See all ' + fmt(total) + ' in the list' : 'See them as a list';
     if (view3d) {

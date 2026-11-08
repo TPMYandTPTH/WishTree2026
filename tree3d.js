@@ -948,6 +948,9 @@ export function createTree3D(container, opts = {}) {
     const h = container.clientHeight || Math.round((w * 760) / 620);
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
+    // keep the whole tree in view on a frame narrower than the tree's own shape
+    const base = 620 / 760;
+    camera.fov = camera.aspect < base ? (2 * Math.atan(Math.tan((16 * Math.PI) / 180) * (base / camera.aspect)) * 180) / Math.PI : 32;
     camera.updateProjectionMatrix();
   }
   const ro = new ResizeObserver(resize);
