@@ -147,6 +147,24 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
 .wish-card[data-kind="secret"][data-gift="gold"]{--card-bg:#E3B45A;--card-ink:#0E2A1F;--card-kicker:#7E1F28;--card-sub:#183326;--card-line:rgba(14,42,31,.3);--card-avatar-bg:#0E2A1F;--card-avatar-fg:#E3B45A;border-color:#F2C766;background-image:linear-gradient(90deg,transparent calc(50% - 7px),rgba(171,44,55,.16) calc(50% - 7px),rgba(171,44,55,.16) calc(50% + 7px),transparent calc(50% + 7px));box-shadow:0 0 0 6px rgba(227,180,90,.2),0 18px 40px rgba(0,0,0,.45)}
 .wish-card[data-kind="secret"][data-gift="gold"] .hole{background:#0E2A1F;opacity:.6}
 .card-wrap[data-kind="secret"] .card-string{background:var(--gold-2)}
+.ceo-badge{display:none;position:absolute;top:-16px;left:22px;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;background:#0E2A1F;color:#F2C766;font-size:11px;font-weight:700;letter-spacing:.1em;box-shadow:0 0 0 2px #E3B45A}
+.wish-card[data-ceo="true"]{--card-bg:#FBF6EA;--card-ink:#0E2A1F;--card-kicker:#AB2C37;--card-sub:#4B4C6A;--card-pill:rgba(14,42,31,.08);--card-line:rgba(171,44,55,.28);--card-avatar-bg:#E3B45A;--card-avatar-fg:#0E2A1F;border:2px solid #E3B45A;border-radius:16px;padding-top:44px;box-shadow:inset 0 0 0 7px #FBF6EA,inset 0 0 0 8px rgba(227,180,90,.75),0 0 0 7px rgba(227,180,90,.2),0 22px 44px rgba(0,0,0,.45)}
+.wish-card[data-ceo="true"] .leader-badge{display:none}
+.wish-card[data-ceo="true"] .ceo-badge{display:inline-flex}
+.wish-card[data-ceo="true"] .hole{background:#E3B45A;opacity:1}
+.wish-card[data-ceo="true"] .card-text{font-size:21px;font-weight:400;line-height:1.55}
+.wish-card[data-ceo="true"] .who{font-family:var(--script);font-size:32px;font-weight:400;line-height:1;color:#AB2C37}
+.wish-card[data-ceo="true"] .avatar.has-photo{box-shadow:0 0 0 2px #E3B45A,0 0 0 4px #FBF6EA,0 0 0 5px rgba(227,180,90,.7)}
+.wish-card[data-ceo="true"] .like{color:#0E2A1F}
+.card-wrap[data-ceo="true"] .card-string{background:#E3B45A;width:2px}
+.li.leader.ceo{grid-column:1/-1;background:#FBF6EA;border:2px solid #E3B45A;color:#0E2A1F;box-shadow:inset 0 0 0 5px #FBF6EA,inset 0 0 0 6px rgba(227,180,90,.7)}
+.li.leader.ceo .li-kicker{color:#AB2C37}
+.li.leader.ceo .li-text{font-size:19px;font-weight:400}
+.li.leader.ceo .li-foot{border-top-color:rgba(171,44,55,.28)}
+.li.leader.ceo .li-who b{font-family:var(--script);font-size:28px;font-weight:400;line-height:1;color:#AB2C37}
+.li.leader.ceo .li-who span{color:#4B4C6A}
+.li.leader.ceo .li-find{color:#AB2C37}
+.li.leader.ceo .like{color:#0E2A1F;border-color:rgba(14,42,31,.25)}
 @keyframes giftIn{from{transform:translateY(14px) scale(.97);opacity:0}to{transform:none;opacity:1}}
 @media (prefers-reduced-motion: reduce){.wish-card[data-kind="secret"]{animation:none}}
 .hole{position:absolute;top:14px;left:50%;width:10px;height:10px;margin-left:-5px;border-radius:50%;background:#0E2A1F;opacity:.55}
@@ -374,6 +392,10 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
             <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg>
             FROM OUR LEADERS
           </span>
+          <span class="ceo-badge">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg>
+            FROM OUR CEO
+          </span>
           <span class="gift-badge">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h16v10H4zM3 7h18v3H3zM12 7v13M12 7c-1.5-3-5-3.5-5-1.5S10 7 12 7zm0 0c1.5-3 5-3.5 5-1.5S14 7 12 7z"/></svg>
             HIDDEN IN A GIFT
@@ -565,7 +587,11 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
     state.wishes.forEach(function (w) { if ((id === 'all' || w.site === id) && langOk(w)) n++; });
     return n;
   }
-  function crown() { return state.leaders.slice(0, C.LEADER_SLOTS); }
+  // Leaders: the CEO and up to 5 more at the top of the tree, up to 2 in gift boxes, any others only in the list
+  function places() { return C.leaderPlaces(state.leaders); }
+  function crown() { return places().crown; }
+  function giftLeaders() { return places().gifts; }
+  function isGiftLeader(id) { return giftLeaders().some(function (l) { return String(l.id) === String(id); }); }
 
   // The tree holds cap() wishes. With more than that, the most-liked go on it; the rest are in the list below.
   function computeTreeSet() {
@@ -703,11 +729,14 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
       b.setAttribute('aria-pressed', b.getAttribute('data-sort') === state.sort ? 'true' : 'false');
     });
 
-    el('leaderList').innerHTML = state.leaders.map(function (L) {
+    el('leaderList').innerHTML = places().all.map(function (L) {
       var photo = C.safePhoto(L.photo_url);
-      return '<article class="li leader" lang="' + C.esc(L.lang || 'en') + '">' +
-        '<div class="li-top"><span class="li-kicker">FROM OUR LEADERS</span>' +
-        '<button type="button" class="li-find" data-find-kind="leader" data-find-id="' + C.esc(L.id) + '">Read on the tree</button></div>' +
+      var ceo = L.spot === 'ceo';
+      return '<article class="li leader' + (ceo ? ' ceo' : '') + '" lang="' + C.esc(L.lang || 'en') + '">' +
+        '<div class="li-top"><span class="li-kicker">' + (ceo ? 'A MESSAGE FROM OUR CEO' : 'FROM OUR LEADERS') + '</span>' +
+        (isGiftLeader(L.id) || crown().some(function (c) { return String(c.id) === String(L.id); })
+          ? '<button type="button" class="li-find" data-find-kind="leader" data-find-id="' + C.esc(L.id) + '">' + (isGiftLeader(L.id) ? 'Open the gift' : 'Read on the tree') + '</button>'
+          : '') + '</div>' +
         '<p class="li-text">' + C.esc(L.message) + '</p>' +
         '<div class="li-foot">' +
         (photo ? '<img class="li-photo" src="' + C.esc(photo) + '" alt="" loading="lazy">' : '<span class="li-init" aria-hidden="true">' + C.esc(C.initials(L.display_name)) + '</span>') +
@@ -745,14 +774,15 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
     el('treeFull').textContent = full ? 'The tree holds ' + cap() + ' wishes, so the most-liked hang here.' : '';
     el('allLink').textContent = full ? 'See all ' + fmt(total) + ' in the list' : 'See them as a list';
     if (view3d) {
-      view3d.setData({ wishes: state.onTree, leaders: crown(), selected: state.selected });
+      view3d.setData({ wishes: state.onTree, leaders: crown(), giftLeaders: giftLeaders(), selected: state.selected });
     } else {
       C.renderTree(treeMount, {
         wishes: state.onTree,
         leaders: crown(),
         selected: state.selected,
         onSelect: onTreeSelect,
-        secrets: SECRET_IDS
+        secrets: SECRET_IDS,
+        leaderGifts: giftLeaders()
       });
     }
   }
@@ -785,6 +815,8 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
       wrap.setAttribute('data-kind', 'secret');
       card.setAttribute('data-color', 'cream');
       card.setAttribute('data-gift', item.id);
+      card.removeAttribute('data-ceo');
+      wrap.removeAttribute('data-ceo');
       card.setAttribute('lang', item.lang);
       el('cardKicker').textContent = item.kicker;
       el('cardLang').textContent = '';
@@ -806,6 +838,9 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
     el('likeCount').hidden = isLeader;
     card.setAttribute('data-kind', isLeader ? 'leader' : 'wish');
     wrap.setAttribute('data-kind', isLeader ? 'leader' : 'wish');
+    var isCeo = isLeader && item.spot === 'ceo';
+    card.setAttribute('data-ceo', isCeo ? 'true' : 'false');
+    wrap.setAttribute('data-ceo', isCeo ? 'true' : 'false');
     card.setAttribute('data-color', isLeader ? 'cream' : (C.PALETTE[item.tag_color] ? item.tag_color : 'cream'));
     card.setAttribute('lang', item.lang || 'en');
     el('cardLang').textContent = C.langLabel(item.lang || 'en');
@@ -813,7 +848,7 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
     el('cardFoot').hidden = false;
 
     if (isLeader) {
-      el('cardKicker').textContent = 'ON EVERY SITE\'S TREE';
+      el('cardKicker').textContent = isCeo ? 'A MESSAGE FROM OUR CEO' : isGiftLeader(item.id) ? 'FOUND IN A GIFT' : 'ON EVERY SITE\'S TREE';
       el('cardName').textContent = item.display_name || 'TP leadership';
       el('cardWhere').textContent = item.title || '';
       var photo = C.safePhoto(item.photo_url);
@@ -852,7 +887,7 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
       stopTour();
       C.track(sel.kind === 'secret' ? 'secret_wish_found' : sel.kind === 'leader' ? 'leader_open' : 'wish_open', { site: state.site });
       // on phones the card sits under the tree: bring it into view once the gift has opened
-      if (sel.kind === 'secret' && window.innerWidth <= 820) {
+      if ((sel.kind === 'secret' || (sel.kind === 'leader' && isGiftLeader(sel.id))) && window.innerWidth <= 820) {
         setTimeout(function () {
           try { el('cardWrap').scrollIntoView({ behavior: REDUCE ? 'auto' : 'smooth', block: 'center' }); } catch (e) { el('cardWrap').scrollIntoView(); }
         }, REDUCE ? 0 : 700);

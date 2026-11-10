@@ -287,19 +287,28 @@
       "<path d='M28 200c4-50 34-76 72-76s68 26 72 76z' fill='#F3EEE6'/></svg>";
     return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
   }
-  var PLACEHOLDER_BG = [['#9FB4CF', '#5F7396'], ['#C9A98B', '#8A6B52'], ['#9CC5B4', '#4E8270'], ['#C7B3D6', '#7D6596']];
+  var PLACEHOLDER_BG = [['#E7C77F', '#A9822F'], ['#9FB4CF', '#5F7396'], ['#C9A98B', '#8A6B52'], ['#9CC5B4', '#4E8270'],
+    ['#C7B3D6', '#7D6596'], ['#D9A5A5', '#9A5A5A'], ['#A9C7D9', '#5A7F9A'], ['#C9C49B', '#86804F']];
 
+  // Demo leaders: the real names and roles, with sample text until each leader writes their own message.
+  // spot: 'ceo' = big ornament under the star, 'crown' = top of the tree, 'gift' = inside a gift under the tree.
   var SAMPLE_LEADERS = [
-    ['Leader A', '[Title]', 'Thank you for every call, every chat and every customer you helped this year. You are the reason TP Malaysia and Thailand shine. Merry Christmas and a happy 2027!'],
-    ['Leader B', '[Title]', 'This year we grew together across our sites in two countries. Rest well this holiday, and let us make 2027 our best year yet.'],
-    ['Leader C', '[Title]', 'To everyone working from home, on site, on nights and on weekends: we see you and we are grateful. Happy holidays to you and your families.'],
-    ['Leader D', '[Title]', 'My wish for 2027: that each of you feels proud of the work you do and supported by the people around you. Merry Christmas!']
+    ['Andy', 'Chief Executive Officer', 'ceo', '[Sample] Thank you for every call, every chat and every customer you helped this year. You are the reason TP Malaysia and Thailand shine. Merry Christmas and a happy 2027!'],
+    ['DD', 'Chief Operating Officer', 'crown', '[Sample] This year we grew together across our sites in two countries. Rest well this holiday, and let us make 2027 our best year yet.'],
+    ['Himanshu', 'Chief Operating Officer', 'crown', '[Sample] To everyone working from home, on site, on nights and on weekends: we see you and we are grateful. Happy holidays to you and your families.'],
+    ['Viv', 'Vice President', 'crown', '[Sample] My wish for 2027: that each of you feels proud of the work you do and supported by the people around you. Merry Christmas!'],
+    ['Sudhar', 'Vice President', 'crown', '[Sample] Thank you for the care you bring to our customers and to each other. Enjoy the season with the people you love.'],
+    ['Chavis', 'Vice President', 'crown', '[Sample] From Bangkok to Penang, Kuala Lumpur and Johor: thank you for a remarkable year. Wishing you joy and good health.'],
+    ['Rachel', 'Human Resources', 'gift', '[Sample] Behind every wish on this tree is a person who makes TP a better place to work. Thank you, and happy holidays.'],
+    ['Sarah', 'Chief of Staff', 'gift', '[Sample] Thank you for showing up for each other all year long. May your holidays be restful and your 2027 bright.']
   ].map(function (r, i) {
     return {
       id: 'demo-leader-' + (i + 1),
       display_name: r[0],
       title: r[1],
-      message: r[2],
+      spot: r[2],
+      sort_order: i + 1,
+      message: r[3],
       lang: 'en',
       photo_url: placeholderPhoto(PLACEHOLDER_BG[i][0], PLACEHOLDER_BG[i][1]),
       updated_at: new Date(Date.UTC(2026, 11, 1, 6, i)).toISOString(),
@@ -308,7 +317,7 @@
   });
 
   var SAMPLE_PENDING_LEADERS = [
-    { id: 'demo-leader-p1', display_name: 'Leader E', title: '[Title]', message: 'Wishing every one of you rest, joy and time with the people you love. Thank you for 2026.', lang: 'en', status: 'pending', email: 'leader.e@tp.com', updated_at: new Date(Date.now() - 25 * 60000).toISOString() }
+    { id: 'demo-leader-p1', display_name: 'New leader', title: '[Title]', message: 'Wishing every one of you rest, joy and time with the people you love. Thank you for 2026.', lang: 'en', status: 'pending', email: 'leader.e@tp.com', updated_at: new Date(Date.now() - 25 * 60000).toISOString() }
   ];
 
   /* ---------- Supabase ---------- */
@@ -431,7 +440,7 @@
       var list = demoQueue().leaders.filter(function (l) { return l.status === 'approved'; }).map(function (l) {
         return Object.assign({}, l, { like_count: (l.like_count || 0) + demoLikeBonus('leader', l.id) });
       });
-      return Promise.resolve(list);
+      return Promise.resolve(list.sort(leaderOrder));
     }
     return getClient().rpc('get_leader_messages').then(function (res) {
       if (res.error) throw res.error;
@@ -498,6 +507,31 @@
     var x = String(a.approved_at || ''), y = String(b.approved_at || '');
     return x < y ? 1 : x > y ? -1 : 0;
   }
+  /* ---------- Where leaders' messages hang ---------- */
+  var CROWN_MAX = 6;        // the CEO's big ornament plus 5 around the top of the tree
+  var LEADER_GIFTS = 2;     // gift boxes under the tree that hold a leader's message
+  function leaderOrder(a, b) {
+    var ca = a.spot === 'ceo' ? 0 : 1, cb = b.spot === 'ceo' ? 0 : 1;
+    if (ca !== cb) return ca - cb;
+    var sa = a.sort_order == null ? 100 : a.sort_order, sb = b.sort_order == null ? 100 : b.sort_order;
+    if (sa !== sb) return sa - sb;
+    return String(a.updated_at || '') < String(b.updated_at || '') ? -1 : 1;
+  }
+  // { crown: [...] (CEO first), gifts: [...], extra: [...] (only in the list) }
+  function leaderPlaces(list) {
+    var all = (list || []).slice().sort(leaderOrder);
+    var crown = [], gifts = [], extra = [];
+    var ceoTaken = false;
+    all.forEach(function (L) {
+      if (L.spot === 'gift') { (gifts.length < LEADER_GIFTS ? gifts : extra).push(L); return; }
+      if (L.spot === 'ceo' && !ceoTaken) { ceoTaken = true; crown.unshift(L); return; }
+      if (crown.length < CROWN_MAX) crown.push(L);
+      else if (gifts.length < LEADER_GIFTS) gifts.push(L);   // no room at the top: into a gift
+      else extra.push(L);
+    });
+    return { crown: crown, gifts: gifts, extra: extra, all: crown.concat(gifts, extra) };
+  }
+
   // More wishes than spots: the most-liked go on the tree (ties go to the newest). Returns oldest first, like pickForTree.
   function rankForTree(list, cap) {
     if (list.length <= cap) return list.slice().sort(newestFirst).reverse();
@@ -648,7 +682,15 @@
     '.wt-gift-box{position:absolute;left:4%;right:4%;bottom:0;height:72%;border-radius:2px;background:linear-gradient(90deg,transparent 42%,#E3B45A 42%,#E3B45A 58%,transparent 58%),#AB2C37;box-shadow:0 4px 8px rgba(0,0,0,.4)}',
     '.wt-gift-lid{position:absolute;left:0;right:0;top:12%;height:20%;border-radius:2px;background:linear-gradient(90deg,transparent 42%,#E3B45A 42%,#E3B45A 58%,transparent 58%),#B9333F;transform-origin:10% 100%;transition:transform .5s cubic-bezier(.3,1.5,.5,1)}',
     '.wt-gift:hover .wt-gift-lid{transform:rotate(-8deg)}',
-    '.wt-gift-gold{left:27%;top:85%;width:8%;aspect-ratio:1/1.05}',
+    '.wt-gift-red{left:25%}',
+    '.wt-gift-gold{left:14%;top:85%;width:8%;aspect-ratio:1/1.05}',
+    '.wt-gift-green{left:64%;top:85.5%;width:8.5%}',
+    '.wt-gift-green .wt-gift-box{background:linear-gradient(90deg,transparent 42%,#E3B45A 42%,#E3B45A 58%,transparent 58%),#1E573D}',
+    '.wt-gift-green .wt-gift-lid{background:linear-gradient(90deg,transparent 42%,#E3B45A 42%,#E3B45A 58%,transparent 58%),#24684A}',
+    '.wt-gift-cream{left:76%;top:86%;width:8%}',
+    '.wt-gift-cream .wt-gift-box{background:linear-gradient(90deg,transparent 42%,#AB2C37 42%,#AB2C37 58%,transparent 58%),#F6EEDC}',
+    '.wt-gift-cream .wt-gift-lid{background:linear-gradient(90deg,transparent 42%,#AB2C37 42%,#AB2C37 58%,transparent 58%),#FBF5E8}',
+    '.wt-leader.wt-ceo .wt-lball{box-shadow:inset 0 0 0 calc(var(--d) * .06) #F2C766,0 0 0 3px #E3B45A,0 0 0 7px rgba(242,199,102,.35),0 8px 18px rgba(0,0,0,.45)}',
     '.wt-gift-gold .wt-gift-box{background:linear-gradient(90deg,transparent 42%,#AB2C37 42%,#AB2C37 58%,transparent 58%),#E3B45A}',
     '.wt-gift-gold .wt-gift-lid{background:linear-gradient(90deg,transparent 42%,#AB2C37 42%,#AB2C37 58%,transparent 58%),#EDC06A;transform-origin:90% 100%}',
     '.wt-gift-gold:hover .wt-gift-lid{transform:rotate(8deg)}',
@@ -697,6 +739,7 @@
         (o.secrets || []).map(function (id) {
           return '<button type="button" class="wt-gift wt-gift-' + esc(id) + '" data-kind="secret" data-id="' + esc(id) + '" aria-label="A gift under the tree"><span class="wt-gift-lid"></span><span class="wt-gift-box"></span></button>';
         }).join('') +
+        '<span class="wt-lgifts"></span>' +
         '</div>';
       container._wt = { seen: {}, first: true, onSelect: null };
       container.querySelector('.wt-stage').addEventListener('click', function (e) {
@@ -708,9 +751,18 @@
 
     var st = container._wt;
     st.onSelect = o.onSelect || null;
+    // gifts that hold a leader's message (they change as leaders' messages come in)
+    var lgSig = (o.leaderGifts || []).slice(0, 2).map(function (L) { return L.id; }).join('|');
+    if (st.lgSig !== lgSig) {
+      st.lgSig = lgSig;
+      container.querySelector('.wt-lgifts').innerHTML = (o.leaderGifts || []).slice(0, 2).map(function (L, i) {
+        return '<button type="button" class="wt-gift wt-gift-' + (i ? 'cream' : 'green') + '" data-kind="leader" data-id="' + esc(L.id) + '" aria-label="A gift under the tree"><span class="wt-gift-lid"></span><span class="wt-gift-box"></span></button>';
+      }).join('');
+    }
     Array.prototype.forEach.call(container.querySelectorAll('.wt-gift'), function (giftBtn) {
       var gid = giftBtn.getAttribute('data-id');
-      giftBtn.setAttribute('aria-pressed', sel.kind === 'secret' && String(sel.id) === gid ? 'true' : 'false');
+      var gkind = giftBtn.getAttribute('data-kind');
+      giftBtn.setAttribute('aria-pressed', sel.kind === gkind && String(sel.id) === gid ? 'true' : 'false');
       if (giftBtn._hover) return;
       // a hidden gift opens when the mouse rests on it (a tap still opens it on phones)
       giftBtn._hover = true;
@@ -719,7 +771,7 @@
         if (e.pointerType !== 'mouse') return;
         clearTimeout(hoverTimer);
         hoverTimer = setTimeout(function () {
-          if (giftBtn.getAttribute('aria-pressed') !== 'true' && typeof container._wt.onSelect === 'function') container._wt.onSelect('secret', gid);
+          if (giftBtn.getAttribute('aria-pressed') !== 'true' && typeof container._wt.onSelect === 'function') container._wt.onSelect(gkind, gid);
         }, 220);
       });
       giftBtn.addEventListener('pointerleave', function () { clearTimeout(hoverTimer); });
@@ -753,11 +805,11 @@
       var pos = LEADER_SLOTS[layout[li]];
       var lsel = sel.kind === 'leader' && String(sel.id) === lid;
       crown +=
-        '<button type="button" class="wt-leader" data-kind="leader" data-id="' + esc(lid) + '"' +
+        '<button type="button" class="wt-leader' + (L.spot === 'ceo' ? ' wt-ceo' : '') + '" data-kind="leader" data-id="' + esc(lid) + '"' +
         ' aria-pressed="' + (lsel ? 'true' : 'false') + '"' +
         ' aria-label="' + esc('Message from ' + (L.display_name || 'a TP leader')) + '"' +
         ' style="left:' + (pos[0] / 6.2).toFixed(2) + '%;top:' + (pos[1] / 7.6).toFixed(2) + '%;' +
-        '--d:' + u(50) + ';--lstr:' + u(10) + ';animation-delay:' + (li * -0.8) + 's">' +
+        '--d:' + u(L.spot === 'ceo' ? 64 : 50) + ';--lstr:' + u(10) + ';animation-delay:' + (li * -0.8) + 's">' +
         '<span class="wt-lstring"></span><span class="wt-lcap"></span>' +
         (safePhoto(L.photo_url)
           ? '<span class="wt-lball wt-photo" style="background-image:url(&quot;' + esc(safePhoto(L.photo_url)) + '&quot;)">'
@@ -829,6 +881,8 @@
     COUNTRY_LABEL: COUNTRY_LABEL,
     SITES: SITES,
     LEADER_SLOTS: LEADER_SLOTS.length,
+    leaderPlaces: leaderPlaces,
+    leaderOrder: leaderOrder,
     siteById: siteById,
     siteName: siteName,
     esc: esc,

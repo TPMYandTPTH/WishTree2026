@@ -25,6 +25,13 @@ create table if not exists public.leaders (
   added_at timestamptz not null default now()
 );
 
+-- Where each leader's message hangs: 'ceo' (the big ornament under the star), 'crown' (the top of the tree)
+-- or 'gift' (inside a gift box under the tree). sort_order sets the order (lower first).
+alter table public.leaders add column if not exists spot text not null default 'crown';
+alter table public.leaders add column if not exists sort_order int not null default 100;
+alter table public.leaders drop constraint if exists leaders_spot_check;
+alter table public.leaders add constraint leaders_spot_check check (spot in ('ceo', 'crown', 'gift'));
+
 create table if not exists public.moderators (
   email text primary key check (email = lower(btrim(email))),
   added_at timestamptz not null default now()
@@ -347,13 +354,17 @@ $$;
 
 drop function if exists public.get_leader_messages();
 create function public.get_leader_messages()
-returns table (id uuid, display_name text, title text, message text, lang text, photo_url text, updated_at timestamptz, like_count int)
+returns table (id uuid, display_name text, title text, message text, lang text, photo_url text, updated_at timestamptz,
+               like_count int, spot text, sort_order int)
 language sql stable security definer set search_path = '' as $$
   select m.id, m.display_name, m.title, m.message, m.lang, m.photo_url, m.updated_at,
-         (select count(*) from public.likes l where l.kind = 'leader' and l.target_id = m.id)::int
+         (select count(*) from public.likes l where l.kind = 'leader' and l.target_id = m.id)::int,
+         coalesce(ld.spot, 'crown'),
+         coalesce(ld.sort_order, m.sort_order)
   from public.leader_messages m
+  left join public.leaders ld on ld.email = lower(m.email)
   where m.status = 'approved' and not m.hidden
-  order by m.sort_order, m.created_at
+  order by (coalesce(ld.spot, 'crown') = 'ceo') desc, coalesce(ld.sort_order, m.sort_order), m.created_at
 $$;
 
 -- Like or unlike; returns the new count
@@ -382,10 +393,11 @@ end
 $$;
 
 -- Leaders page: access check
-create or replace function public.leader_profile()
-returns table (is_leader boolean, default_name text, default_title text)
+drop function if exists public.leader_profile();
+create function public.leader_profile()
+returns table (is_leader boolean, default_name text, default_title text, spot text)
 language sql stable security definer set search_path = '' as $$
-  select public.is_leader(), l.default_name, l.default_title
+  select public.is_leader(), l.default_name, l.default_title, coalesce(l.spot, 'crown')
   from (select 1) as x
   left join public.leaders l on l.email = public.current_email()
 $$;
@@ -455,11 +467,22 @@ create policy "leaders delete own photo" on storage.objects
 
 
 -- 10. Add your leaders and moderators ------------------------
--- Replace the examples, remove the leading "--", and run just these lines.
+-- Replace the emails, remove the leading "--", and run just these lines.
 -- (Or add rows in Table Editor > leaders / moderators.)
+-- spot: 'ceo' = the big ornament under the star (one person), 'crown' = top of the tree (room for 5 more),
+--       'gift' = inside a gift box under the tree (room for 2). sort_order: lower comes first.
 --
--- insert into public.leaders (email, default_name, default_title) values
---   ('firstname.lastname@tp.com', 'Full Name', 'Title, TP Malaysia');
+-- insert into public.leaders (email, default_name, default_title, spot, sort_order) values
+--   ('andy@tp.com',     'Andy',     'Chief Executive Officer', 'ceo',   1),
+--   ('dd@tp.com',       'DD',       'Chief Operating Officer', 'crown', 2),
+--   ('himanshu@tp.com', 'Himanshu', 'Chief Operating Officer', 'crown', 3),
+--   ('viv@tp.com',      'Viv',      'Vice President',          'crown', 4),
+--   ('sudhar@tp.com',   'Sudhar',   'Vice President',          'crown', 5),
+--   ('chavis@tp.com',   'Chavis',   'Vice President',          'crown', 6),
+--   ('rachel@tp.com',   'Rachel',   'Human Resources',         'gift',  7),
+--   ('sarah@tp.com',    'Sarah',    'Chief of Staff',          'gift',  8)
+-- on conflict (email) do update set default_name = excluded.default_name, default_title = excluded.default_title,
+--   spot = excluded.spot, sort_order = excluded.sort_order;
 --
 -- insert into public.moderators (email) values
 --   ('firstname.lastname@tp.com');

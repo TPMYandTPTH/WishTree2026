@@ -475,15 +475,21 @@ export function createTree3D(container, opts = {}) {
     g.rotation.y = rotY;
     ground.add(g);
   }
-  // Gifts that hide a wish: they open when the mouse rests on them or when they're tapped
-  const SECRET_GIFTS = {
-    red: { x: 1.5, z: 1.62, rot: 0.32, W: 0.94, H: 0.7, D: 0.82, color: 0xab2c37, ribbon: 0xe3b45a, words: ['A wish', 'for you'] },
-    gold: { x: -1.7, z: 1.5, rot: -0.3, W: 0.72, H: 0.82, D: 0.7, color: 0xe3b45a, ribbon: 0xab2c37, words: ['Where it', 'all began'] }
+  // Gifts that can hide something. The left pair holds the hidden wishes (opts.secrets: 'red', 'gold'),
+  // the right pair holds leaders' messages (giftLeaders in setData). They open when the mouse rests on them
+  // or when they're tapped; until something is put inside, they're ordinary gifts.
+  const GIFT_SLOTS = {
+    red: { x: -1.85, z: 1.5, rot: -0.35, W: 0.94, H: 0.7, D: 0.82, color: 0xab2c37, ribbon: 0xe3b45a, words: ['A wish', 'for you'] },
+    gold: { x: -2.75, z: 0.42, rot: -0.65, W: 0.72, H: 0.82, D: 0.7, color: 0xe3b45a, ribbon: 0xab2c37, words: ['Where it', 'all began'] },
+    green: { x: 1.85, z: 1.5, rot: 0.35, W: 0.88, H: 0.68, D: 0.8, color: 0x1e573d, ribbon: 0xe3b45a, words: ['A message', 'for you'] },
+    cream: { x: 2.75, z: 0.42, rot: 0.65, W: 0.76, H: 0.78, D: 0.72, color: 0xf6eedc, ribbon: 0xab2c37, words: ['A message', 'for you'] }
   };
+  const LEADER_GIFT_SLOTS = ['green', 'cream'];
   const wanted = Array.isArray(opts.secrets) ? opts.secrets : (opts.secret ? ['red'] : []);
-  const secrets = new Map();
-  function makeSecretGift(id, c) {
-    const tag = { kind: 'secret', id };
+  const gifts = new Map();   // slot -> gift
+  function makeGiftSlot(slot, c, n) {
+    // one shared tag on every part of the gift: changing it changes what the gift holds
+    const tag = { kind: '', id: '', slot };
     const { W, H, D } = c;
     const LID = 0.15;
     const g = new THREE.Group();
@@ -505,7 +511,8 @@ export function createTree3D(container, opts = {}) {
     bow(lidInner, LID, ribMat, tag, 1.35);
     g.add(lid);
     // the card that rises out
-    const card = new THREE.Mesh(new THREE.PlaneGeometry(0.64, 0.8), new THREE.MeshStandardMaterial({ map: toTex(drawGiftCard(c.words)), roughness: 0.7, side: THREE.DoubleSide, emissive: 0x3a2a10, emissiveIntensity: 0.6 }));
+    const cardMat = new THREE.MeshStandardMaterial({ map: toTex(drawGiftCard(c.words)), roughness: 0.7, side: THREE.DoubleSide, emissive: 0x3a2a10, emissiveIntensity: 0.6 });
+    const card = new THREE.Mesh(new THREE.PlaneGeometry(0.64, 0.8), cardMat);
     card.userData = tag;
     card.visible = false;
     g.add(card);
@@ -528,18 +535,41 @@ export function createTree3D(container, opts = {}) {
     g.rotation.y = c.rot;
     ground.add(g);
     // sparkles take turns, so two gifts never flash together
-    return { id, g, lid, card, inner, glowMat, sparkMat, light, H, LID, open: 0, target: 0, wig: 0, wigVel: 0, sparkOffset: secrets.size * 4.5 };
+    return { slot, tag, words: c.words.join('|'), g, lid, card, cardMat, inner, glowMat, sparkMat, light, H, LID,
+      open: 0, target: 0, wig: 0, wigVel: 0, sparkOffset: n * 2.25 };
   }
-  wanted.forEach((id) => { if (SECRET_GIFTS[id] && !secrets.has(id)) secrets.set(id, makeSecretGift(id, SECRET_GIFTS[id])); });
-  if (!secrets.has('gold')) gift(-1.55, 0.95, 0.6, 0.7, 0.6, 0xe3b45a, 0xab2c37, -0.3);
-  gift(0.05, 1.8, 0.5, 0.42, 0.5, 0xf6eedc, 0xab2c37, 0.9);
+  Object.keys(GIFT_SLOTS).forEach((slot, n) => gifts.set(slot, makeGiftSlot(slot, GIFT_SLOTS[slot], n)));
+  wanted.forEach((id) => { const gg = gifts.get(id); if (gg) { gg.tag.kind = 'secret'; gg.tag.id = id; } });
+  function giftFor(kind, id) {
+    if (!kind) return null;
+    for (const gg of gifts.values()) if (gg.tag.kind === kind && gg.tag.id === String(id)) return gg;
+    return null;
+  }
+  // Put leaders' messages into the right-hand gifts (the card that rises out says who it's from)
+  function setGiftLeaders(list) {
+    LEADER_GIFT_SLOTS.forEach((slot, i) => {
+      const gg = gifts.get(slot);
+      const L = (list || [])[i];
+      gg.tag.kind = L ? 'leader' : '';
+      gg.tag.id = L ? String(L.id) : '';
+      const first = L ? String(L.display_name || '').trim().split(/\s+/)[0].slice(0, 12) : '';
+      const words = first ? ['A message', 'from ' + first] : GIFT_SLOTS[slot].words;
+      if (words.join('|') !== gg.words) {
+        gg.words = words.join('|');
+        const old = gg.cardMat.map;
+        gg.cardMat.map = toTex(drawGiftCard(words));
+        gg.cardMat.needsUpdate = true;
+        if (old) old.dispose();
+      }
+      if (!L) gg.target = 0;
+    });
+  }
+  gift(0.1, 1.85, 0.5, 0.42, 0.5, 0xf6eedc, 0xab2c37, 0.9);
   gift(-0.95, -1.45, 0.65, 0.5, 0.55, 0x1e573d, 0xe3b45a, 0.2);
-  gift(1.75, -0.65, 0.5, 0.62, 0.5, 0xf6eedc, 0x1e573d, -0.6);
-  gift(-1.95, -0.2, 0.45, 0.38, 0.45, 0xab2c37, 0xf6eedc, 0.7);
-  if (!secrets.has('red')) gift(1.45, 1.15, 0.7, 0.55, 0.6, 0xab2c37, 0xe3b45a, 0.4);
-  function nudgeGift(id, strength) {
-    const sg = secrets.get(id);
-    if (sg) sg.wigVel += (Math.random() < 0.5 ? -1 : 1) * strength;
+  gift(1.2, -1.6, 0.5, 0.62, 0.5, 0xf6eedc, 0x1e573d, -0.6);
+  gift(-0.75, 2.05, 0.42, 0.34, 0.42, 0xab2c37, 0xf6eedc, 0.7);
+  function nudgeGift(gg, strength) {
+    if (gg) gg.wigVel += (Math.random() < 0.5 ? -1 : 1) * strength;
   }
 
 
@@ -664,11 +694,18 @@ export function createTree3D(container, opts = {}) {
   const leaderCapMat = new THREE.MeshStandardMaterial({ color: 0xab2c37, metalness: 0.4, roughness: 0.35 });
   const leaderCapGeo = new THREE.CylinderGeometry(0.06, 0.06, 0.07, 14);
 
-  function leaderSpots(n) {
+  // The CEO's ornament hangs at the front, right under the star; the others share the circle below it
+  function leaderSpots(ls) {
+    const hasCeo = ls.length > 0 && ls[0].spot === 'ceo';
+    const n = hasCeo ? ls.length - 1 : ls.length;
     const out = [];
+    if (hasCeo) {
+      const y = topY() - 0.72;
+      out.push({ th: Math.PI / 2, y, R: surfaceR(y), ceo: true });
+    }
     for (let k = 0; k < n; k++) {
-      const th = Math.PI / 2 + (k * TAU) / n;
-      const y = n > 3 ? (k % 2 ? 6.25 : 6.95) : 6.7;
+      const th = Math.PI / 2 + ((k + (hasCeo ? 0.5 : 0)) * TAU) / n;
+      const y = hasCeo ? (k % 2 ? 5.95 : 6.32) : n > 3 ? (k % 2 ? 6.25 : 6.95) : 6.7;
       out.push({ th, y, R: surfaceR(y) });
     }
     return out;
@@ -686,8 +723,10 @@ export function createTree3D(container, opts = {}) {
     const cap = new THREE.Mesh(leaderCapGeo, leaderCapMat);
     cap.position.y = -0.17;
     swing.add(cap);
+    const big = spot.ceo ? 1.45 : 1;
     const card = new THREE.Group();
-    card.position.y = -0.2 - 0.3;
+    card.position.y = -0.2 - 0.3 * big;
+    card.scale.setScalar(big);
     swing.add(card);
     const initials = C.initials(L.display_name);
     const faceMat = new THREE.MeshStandardMaterial({ map: toTex(drawLeader(initials)), metalness: 0.25, roughness: 0.4 });
@@ -701,7 +740,12 @@ export function createTree3D(container, opts = {}) {
     card.add(turn);
     const ring = new THREE.Mesh(ringGeo, leaderGold);
     card.add(ring);
-    const halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: 0xf2c766, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0.45 }));
+    if (spot.ceo) {
+      // the CEO's ornament: a second, finer gold ring around the first
+      const outer = new THREE.Mesh(new THREE.TorusGeometry(0.37, 0.014, 10, 64), leaderGold);
+      card.add(outer);
+    }
+    const halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: 0xf2c766, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: spot.ceo ? 0.6 : 0.45 }));
     halo.scale.set(1.15, 1.15, 1);
     halo.position.z = -0.08;
     card.add(halo);
@@ -740,7 +784,7 @@ export function createTree3D(container, opts = {}) {
 
   function setSelected(sel) {
     selectedKey = sel && sel.id != null ? sel.kind + ':' + String(sel.id) : null;
-    secrets.forEach((sg) => { sg.target = selectedKey === 'secret:' + sg.id ? 1 : 0; });
+    gifts.forEach((gg) => { gg.target = gg.tag.kind && selectedKey === gg.tag.kind + ':' + gg.tag.id ? 1 : 0; });
     tags.forEach((o) => { o.glow.visible = selectedKey === 'wish:' + o.id; });
     leaders.forEach((o) => { o.glow.visible = selectedKey === 'leader:' + o.id; });
   }
@@ -748,16 +792,19 @@ export function createTree3D(container, opts = {}) {
   function setData(d) {
     // leaders in the crown
     const ls = (d.leaders || []).slice(0, MAX_LEADERS);
-    const sig = ls.map((l) => l.id + ':' + C.initials(l.display_name) + ':' + (l.photo_url || '').length + (l.photo_url || '').slice(-24)).join('|');
+    const sig = ls.map((l) => l.id + ':' + (l.spot || '') + ':' + C.initials(l.display_name) + ':' + (l.photo_url || '').length + (l.photo_url || '').slice(-24)).join('|');
     if (sig !== leaderSig) {
       leaderSig = sig;
       leaders.forEach((o) => { o.removing = true; o.target = 0; });
-      const spots = leaderSpots(ls.length);
+      const spots = leaderSpots(ls);
       const old = Array.from(leaders.values());
       leaders.clear();
       old.forEach((o) => leaders.set('old:' + (oldSeq++), o));
       ls.forEach((L, i) => { leaders.set(String(L.id), makeLeader(L, spots[i])); });
     }
+
+    // leaders whose message is in a gift
+    setGiftLeaders(d.giftLeaders || []);
 
     // employee tags
     const list = d.wishes || [];
@@ -817,7 +864,8 @@ export function createTree3D(container, opts = {}) {
 
   function focus(sel) {
     if (!sel) return;
-    if (sel.kind === 'secret') { const sg = secrets.get(String(sel.id)); if (sg) sg.target = 1; return; }   // the gifts don't turn
+    const gg = giftFor(sel.kind, sel.id);
+    if (gg) { gg.target = 1; return; }   // the gifts don't turn
     const o = itemFor(sel.kind, sel.id);
     if (!o) return;
     const to = nearestAngle(o.th - Math.PI / 2, rot);
@@ -883,7 +931,8 @@ export function createTree3D(container, opts = {}) {
   }
 
   function poke(kind, id, strength) {
-    if (kind === 'secret') { nudgeGift(String(id), (strength || 5) * 0.6); return; }
+    const gg = giftFor(kind, id);
+    if (gg) { nudgeGift(gg, (strength || 5) * 0.6); return; }
     const o = itemFor(kind, id);
     if (o) o.vel += (Math.random() < 0.5 ? -1 : 1) * (strength || 5);
   }
@@ -928,11 +977,13 @@ export function createTree3D(container, opts = {}) {
         if (hit) { poke(hit.kind, hit.id, 4.5); markInteract(); }
         // resting the mouse on the hidden gift opens it (a short pause, so just passing over doesn't)
         clearTimeout(giftHoverTimer);
-        if (hit && hit.kind === 'secret' && secrets.has(hit.id)) {
+        const hg = hit ? giftFor(hit.kind, hit.id) : null;
+        if (hg) {
+          const hk = hit.kind, hid = hit.id;
           giftHoverTimer = setTimeout(() => {
             if (hoverKey !== k || down) return;
-            secrets.get(hit.id).target = 1;
-            if (selectedKey !== k && typeof onSelect === 'function') onSelect('secret', hit.id);
+            hg.target = 1;
+            if (selectedKey !== k && typeof onSelect === 'function') onSelect(hk, hid);
           }, 220);
         }
       }
@@ -945,7 +996,8 @@ export function createTree3D(container, opts = {}) {
       const hit = pick(e.clientX, e.clientY);
       if (hit) {
         poke(hit.kind, hit.id, 7);
-        if (hit.kind === 'secret' && secrets.has(hit.id)) secrets.get(hit.id).target = 1;
+        const gg = giftFor(hit.kind, hit.id);
+        if (gg) gg.target = 1;
         if (typeof onSelect === 'function') onSelect(hit.kind, hit.id);
       }
     }
@@ -1050,7 +1102,7 @@ export function createTree3D(container, opts = {}) {
     if (!reduce) star.rotation.y = 0.35 * Math.sin(t * 0.8);
 
     // the hidden gifts: wobble when touched, open to show their card, sparkle now and then
-    secrets.forEach((sg) => {
+    gifts.forEach((sg) => {
       sg.open += (sg.target - sg.open) * Math.min(1, dt * (sg.target ? 3.2 : 5));
       sg.wigVel += (-55 * sg.wig - 5 * sg.wigVel) * dt;
       sg.wig += sg.wigVel * dt;
@@ -1066,7 +1118,7 @@ export function createTree3D(container, opts = {}) {
       sg.glowMat.opacity = 0.75 * o * (reduce ? 1 : 0.85 + 0.15 * Math.sin(t * 2.2));
       sg.light.intensity = 5 * o;
       const hintT = (t + sg.sparkOffset) % 9;
-      sg.sparkMat.opacity = !reduce && o < 0.05 && hintT < 0.9 ? 0.9 * Math.sin((Math.PI * hintT) / 0.9) : 0;
+      sg.sparkMat.opacity = sg.tag.kind && !reduce && o < 0.05 && hintT < 0.9 ? 0.9 * Math.sin((Math.PI * hintT) / 0.9) : 0;
     });
 
     // snow

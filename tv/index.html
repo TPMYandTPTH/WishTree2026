@@ -105,6 +105,13 @@ html.portrait .tree-box{height:49rem}
 .text-box{flex:1;min-height:0;display:flex;align-items:center;overflow:hidden;padding:1.6rem 0}
 .text{margin:0;width:100%;font-size:3.6rem;line-height:1.38;font-weight:400;white-space:pre-line;overflow-wrap:anywhere}
 .card[data-kind="leader"] .text{font-weight:300}
+/* the CEO's message: a letter on ivory paper with a gold double frame and a signature */
+.card[data-ceo="true"]{--card-bg:#FBF6EA;--card-ink:#0E2A1F;--card-kicker:#AB2C37;--card-sub:#4B4C6A;--card-line:rgba(171,44,55,.28);--card-avatar-bg:#E3B45A;--card-avatar-fg:#0E2A1F;border:.25rem solid #E3B45A;border-radius:2rem;box-shadow:inset 0 0 0 .8rem #FBF6EA,inset 0 0 0 .95rem rgba(227,180,90,.75),0 0 0 .8rem rgba(227,180,90,.2),0 2.4rem 5rem rgba(0,0,0,.5)}
+.card[data-ceo="true"] .text{font-weight:400}
+.card[data-ceo="true"] .who{font-family:var(--script);font-size:4rem;font-weight:400;line-height:1;color:#AB2C37;overflow:visible}
+.card[data-ceo="true"] .badge{background:#0E2A1F;color:#F2C766;box-shadow:0 0 0 .2rem #E3B45A}
+.card[data-ceo="true"] .hole{background:#E3B45A;opacity:1}
+.card-stage[data-ceo="true"] .string{background:#E3B45A;width:3px}
 .text:lang(th){line-height:1.55}
 .foot{flex:none;display:flex;align-items:center;gap:1.6rem;padding-top:1.8rem;border-top:.15rem dashed var(--card-line)}
 .avatar{flex:none;display:flex;align-items:center;justify-content:center;width:4.8rem;height:4.8rem;border-radius:50%;background:var(--card-avatar-bg);color:var(--card-avatar-fg);font-size:1.9rem;font-weight:700}
@@ -202,7 +209,7 @@ body.pointer .fs{opacity:1;pointer-events:auto}
         <span class="string" aria-hidden="true"></span>
         <article id="card" class="card" data-kind="wish" data-color="cream">
           <span class="hole" aria-hidden="true"></span>
-          <span class="badge"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg>FROM OUR LEADERS</span>
+          <span class="badge"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg><span id="badgeText">FROM OUR LEADERS</span></span>
           <div class="card-top">
             <span class="kicker" id="kicker">LIGHTING UP THE TREE</span>
             <span class="fresh" id="fresh" hidden>JUST HUNG</span>
@@ -439,7 +446,8 @@ body.pointer .fs{opacity:1;pointer-events:auto}
     return out.slice(0, cap());
   }
   function treeData() {
-    return { wishes: S.onTree, leaders: S.leaders.slice(0, C.LEADER_SLOTS), selected: S.current };
+    var pl = C.leaderPlaces(S.leaders);
+    return { wishes: S.onTree, leaders: pl.crown, giftLeaders: pl.gifts, selected: S.current };
   }
   function drawTree() {
     if (view3d) view3d.setData(treeData());
@@ -490,7 +498,7 @@ body.pointer .fs{opacity:1;pointer-events:auto}
     return !!t && age >= 0 && age < FRESH_HOURS * 3600000;
   }
   function kickerFor(item, sel) {
-    if (sel.kind === 'leader') return 'A MESSAGE TO EVERY TP SITE';
+    if (sel.kind === 'leader') return item.spot === 'ceo' ? 'A MESSAGE FROM OUR CEO' : 'A MESSAGE TO EVERY TP SITE';
     var s = C.siteById(item.site);
     if (!s) return 'A WISH FROM OUR TEAM';
     if (s.id === 'wfh') return 'A WISH FROM HOME';
@@ -503,6 +511,10 @@ body.pointer .fs{opacity:1;pointer-events:auto}
     var isLeader = sel.kind === 'leader';
     card.setAttribute('data-kind', sel.kind);
     $('cardStage').setAttribute('data-kind', sel.kind);
+    var isCeo = sel.kind === 'leader' && item.spot === 'ceo';
+    card.setAttribute('data-ceo', isCeo ? 'true' : 'false');
+    $('cardStage').setAttribute('data-ceo', isCeo ? 'true' : 'false');
+    $('badgeText').textContent = isCeo ? 'FROM OUR CEO' : 'FROM OUR LEADERS';
     card.setAttribute('data-color', isLeader ? 'leader' : (item.tag_color || 'cream'));
     card.setAttribute('lang', item.lang || 'en');
     $('kicker').textContent = kickerFor(item, sel);
@@ -525,6 +537,8 @@ body.pointer .fs{opacity:1;pointer-events:auto}
     var card = $('card');
     card.setAttribute('data-kind', 'wish');
     $('cardStage').setAttribute('data-kind', 'wish');
+    card.setAttribute('data-ceo', 'false');
+    $('cardStage').setAttribute('data-ceo', 'false');
     card.setAttribute('data-color', 'cream');
     card.removeAttribute('lang');
     $('kicker').textContent = 'THE TREE IS WAITING';

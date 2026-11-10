@@ -251,7 +251,7 @@ button,input,select,textarea{font-family:inherit}
             <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg>
             FROM OUR LEADERS
           </span>
-          <div class="lc-kicker">ON EVERY SITE'S TREE</div>
+          <div class="lc-kicker" id="pvKicker">ON EVERY SITE'S TREE</div>
           <p class="lc-text" id="pvText"></p>
           <div class="lc-foot">
             <div class="lc-avatar" id="pvInitials"></div>
@@ -417,6 +417,9 @@ button,input,select,textarea{font-family:inherit}
         return null;
       }
       if (!S.name && p.default_name) S.name = p.default_name;
+      // where this leader's message hangs (set by the Wish Tree team)
+      $('pvKicker').textContent = p.spot === 'ceo' ? 'A MESSAGE FROM OUR CEO · UNDER THE STAR'
+        : p.spot === 'gift' ? 'INSIDE A GIFT UNDER EVERY TREE' : 'ON EVERY SITE\'S TREE';
       if (!S.title && p.default_title) S.title = p.default_title;
       return sb.from('leader_messages').select('id,display_name,title,message,lang,photo_url,updated_at,status').eq('user_id', S.user.id).maybeSingle().then(function (r) {
         if (r.error) throw r.error;
