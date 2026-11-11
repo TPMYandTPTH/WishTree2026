@@ -34,7 +34,8 @@ a:hover{color:var(--gold-2)}
 button,input,select,textarea{font-family:inherit}
 :focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 
-.demo-bar{position:relative;z-index:2;padding:8px 16px;background:#FFF1E8;color:#7A2C00;font-size:13px;font-weight:500;text-align:center}
+.demo-bar{position:relative;z-index:2;padding:9px 16px;background:#F2C766;color:#0E2A1F;font-size:13px;font-weight:500;line-height:1.45;text-align:center}
+.demo-bar .pv{display:inline-block;margin-right:8px;padding:2px 9px;border-radius:999px;background:#0E2A1F;color:#F2C766;font-size:11px;font-weight:700;letter-spacing:.12em;vertical-align:1px}
 .deco{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0}
 .deco span{position:absolute;border-radius:50%}
 .deco .d1{right:-480px;top:-300px;width:1000px;height:1000px;background:var(--bg-2)}
@@ -160,7 +161,7 @@ button,input,select,textarea{font-family:inherit}
 <script src="../wishtree.js"></script>
 </head>
 <body>
-<div id="demoBar" class="demo-bar" role="status" hidden>Demo mode: anyone can try this page and nothing is saved. In live mode only people on the leaders list can post.</div>
+<div id="demoBar" class="demo-bar" role="status" hidden><span class="pv">PREVIEW</span>Try it out: nothing is saved. Once the Wish Tree opens, only leaders on the list can post here.</div>
 <div class="deco" aria-hidden="true"><span class="d1"></span><span class="d2"></span></div>
 
 <div class="wrap">

@@ -40,7 +40,8 @@ button{font-family:inherit}
 
 .skip{position:absolute;left:-999px;top:8px;z-index:20;padding:10px 16px;border-radius:8px;background:var(--cream);color:var(--bg)}
 .skip:focus{left:8px}
-.demo-bar{position:relative;z-index:2;padding:8px 16px;background:#FFF1E8;color:#7A2C00;font-size:13px;font-weight:500;text-align:center}
+.demo-bar{position:relative;z-index:2;padding:9px 16px;background:#F2C766;color:#0E2A1F;font-size:13px;font-weight:500;line-height:1.45;text-align:center}
+.demo-bar .pv{display:inline-block;margin-right:8px;padding:2px 9px;border-radius:999px;background:#0E2A1F;color:#F2C766;font-size:11px;font-weight:700;letter-spacing:.12em;vertical-align:1px}
 
 .deco{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0}
 .arc{position:absolute;border-radius:50%}
@@ -314,7 +315,7 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
 </head>
 <body>
 <a class="skip" href="#tree">Skip to the tree</a>
-<div id="demoBar" class="demo-bar" role="status" hidden>Demo mode: sample wishes only. Add your Supabase keys in config.js to go live.</div>
+<div id="demoBar" class="demo-bar" role="status" hidden><span class="pv">PREVIEW</span>All wishes and leaders' messages here are samples. The real ones appear once the Wish Tree opens.</div>
 <div class="deco" aria-hidden="true"><span class="arc a1"></span><span class="arc a2"></span></div>
 
 <div class="wrap">
@@ -843,7 +844,8 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
     wrap.setAttribute('data-ceo', isCeo ? 'true' : 'false');
     card.setAttribute('data-color', isLeader ? 'cream' : (C.PALETTE[item.tag_color] ? item.tag_color : 'cream'));
     card.setAttribute('lang', item.lang || 'en');
-    el('cardLang').textContent = C.langLabel(item.lang || 'en');
+    // in the preview, every card says it's a sample
+    el('cardLang').textContent = (C.demo ? 'Sample · ' : '') + C.langLabel(item.lang || 'en');
     el('cardText').textContent = item.message;
     el('cardFoot').hidden = false;
 

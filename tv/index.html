@@ -61,7 +61,8 @@ html.portrait .stage{width:67.5rem;height:120rem}
 .live .dot{width:1rem;height:1rem;border-radius:50%;background:#00D769;box-shadow:0 0 0 0 rgba(0,215,105,.6);animation:pulse 2s infinite}
 .live.off .dot{background:#FF9F5A;animation:none}
 @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(0,215,105,.55)}70%{box-shadow:0 0 0 .9rem rgba(0,215,105,0)}100%{box-shadow:0 0 0 0 rgba(0,215,105,0)}}
-.demo{padding:.3rem .9rem;border-radius:999px;background:#FFF1E8;color:#7A2C00;font-size:1.1rem;font-weight:700}
+.demo{padding:.45rem 1.1rem;border-radius:999px;background:#F2C766;color:#0E2A1F;font-size:1.2rem;font-weight:700;letter-spacing:.08em}
+.sample{flex:none;display:inline-flex;align-items:center;padding:.5rem 1.2rem;border-radius:999px;border:.15rem dashed var(--card-line);color:var(--card-sub);font-size:1.2rem;font-weight:700;letter-spacing:.1em}
 
 /* main */
 .main{display:grid;grid-template-columns:40rem minmax(0,1fr);gap:3.5rem;padding:2.5rem 4rem 3rem;min-height:0}
@@ -185,7 +186,7 @@ body.pointer .fs{opacity:1;pointer-events:auto}
       <div class="site-name" id="siteName">All sites</div>
     </div>
     <div class="status">
-      <span id="demoTag" class="demo" hidden>DEMO</span>
+      <span id="demoTag" class="demo" hidden>PREVIEW · SAMPLE MESSAGES</span>
       <span id="countdown"></span>
       <span class="live" id="live"><span class="dot" aria-hidden="true"></span><span id="liveText">Live</span></span>
     </div>
@@ -213,6 +214,7 @@ body.pointer .fs{opacity:1;pointer-events:auto}
           <div class="card-top">
             <span class="kicker" id="kicker">LIGHTING UP THE TREE</span>
             <span class="fresh" id="fresh" hidden>JUST HUNG</span>
+            <span class="sample" id="sampleTag" hidden>SAMPLE</span>
           </div>
           <div class="text-box" id="textBox"><p class="text" id="text"></p></div>
           <div class="foot" id="foot" hidden>
@@ -519,6 +521,7 @@ body.pointer .fs{opacity:1;pointer-events:auto}
     card.setAttribute('lang', item.lang || 'en');
     $('kicker').textContent = kickerFor(item, sel);
     $('fresh').hidden = !isFresh(item, sel);
+    $('sampleTag').hidden = !C.demo;   // preview: every message is a sample
     $('text').textContent = item.message || '';
     $('foot').hidden = false;
     $('who').textContent = isLeader ? (item.display_name || 'Our leaders') : C.displayName(item);
@@ -543,6 +546,7 @@ body.pointer .fs{opacity:1;pointer-events:auto}
     card.removeAttribute('lang');
     $('kicker').textContent = 'THE TREE IS WAITING';
     $('fresh').hidden = true;
+    $('sampleTag').hidden = true;
     var s = C.siteById(SITE);
     $('text').textContent = text || (s && s.id !== 'wfh'
       ? 'No wishes from ' + s.label + ' yet. Scan the code and be the first to hang one.'

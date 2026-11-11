@@ -182,7 +182,8 @@ button,input,select,textarea{font-family:inherit}
 .spinner{width:36px;height:36px;border-radius:50%;border:3px solid rgba(246,238,220,.2);border-top-color:var(--gold);animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-.demo-bar{margin:0 20px 16px;padding:10px 14px;border-radius:12px;background:#FFF1E8;color:#7A2C00;font-size:12px;font-weight:500;text-align:center}
+.demo-bar{margin:0 20px 16px;padding:10px 14px;border-radius:12px;background:#F2C766;color:#0E2A1F;font-size:12px;font-weight:500;line-height:1.45;text-align:center}
+.demo-bar .pv{display:inline-block;margin-right:8px;padding:2px 9px;border-radius:999px;background:#0E2A1F;color:#F2C766;font-size:11px;font-weight:700;letter-spacing:.12em;vertical-align:1px}
 
 /* tablet: centred phone-width column */
 @media (min-width:481px) and (max-width:959px){ body{background:#0A2018} .app{box-shadow:0 0 60px rgba(0,0,0,.4)} }
@@ -509,7 +510,7 @@ button,input,select,textarea{font-family:inherit}
     </div>
   </section>
 
-  <div id="demoBar" class="demo-bar" role="status" hidden>Demo mode: nothing is saved. Add your Supabase keys in config.js to go live.</div>
+  <div id="demoBar" class="demo-bar" role="status" hidden><span class="pv">PREVIEW</span>Try it out: nothing you write here is saved or shown to anyone yet.</div>
 </div>
 
 <script>
