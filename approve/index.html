@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <!-- Security: only this site, Supabase, Google Fonts and (if set) Google Analytics can be used by the page -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://*.supabase.co https://www.googletagmanager.com https://*.google-analytics.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://*.supabase.co; connect-src 'self' https://*.supabase.co wss://*.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <style id="antiframe">html{display:none !important}</style>
 <script>if (window.self === window.top) { document.getElementById('antiframe').remove(); } else { try { window.top.location = window.self.location.href; } catch (e) { /* stay hidden */ } }</script>
@@ -311,11 +311,12 @@ a{color:var(--slate)}
 
         <div class="box" id="prizeBox">
           <h2 id="prizeTitle">Prize standings</h2>
-          <p class="small">The most-liked approved wishes. Likes count once per BMS. Rows marked "not eligible" have a BMS in <b>prize_excluded</b> (Amr, Maszy, the Wish Tree team). An orange row means most of its likes came from one connection: open "Who liked" before you announce winners.</p>
+          <p class="small">The most-liked approved wishes. Only real-looking likes are stored: one per BMS and one per device, never the sender's own wish, and none after the deadline. "Not eligible" means the wish's BMS is in <b>prize_excluded</b> (Amr, Maszy, the Wish Tree team) or looks made up (not 4 to 7 digits, one digit repeated, or a straight run like 1234567). An orange row means most of its likes came from one connection: open "Who liked" before you announce winners.</p>
           <ol id="prizeRows" class="pz-rows"></ol>
           <div class="pz-tools">
             <button type="button" id="prizeRefresh" class="btn btn-ghost">Refresh</button>
-            <button type="button" id="prizeCsv" class="btn btn-ghost">Download CSV</button>
+            <button type="button" id="prizeWinners" class="btn btn-approve">Download winners</button>
+            <button type="button" id="prizeCsv" class="btn btn-ghost">Download full standings</button>
           </div>
           <label class="small" for="rmBms">Remove every like made with one BMS (for likes that look faked)</label>
           <div class="rm-row">
@@ -402,7 +403,7 @@ a{color:var(--slate)}
       });
     }
     return Promise.all([
-      sb.from('wishes').select('id,created_at,email,message,display_mode,first_name,site,lang,tag_color,charm,status,flags,reviewed_at,reviewed_by,approved_at,bms,phone,updated_at,edit_count').order('created_at', { ascending: false }).limit(5000),
+      sb.from('wishes').select('id,created_at,email,message,display_mode,first_name,site,lang,tag_color,charm,status,flags,reviewed_at,reviewed_by,approved_at,bms,updated_at,edit_count').order('created_at', { ascending: false }).limit(5000),
       sb.from('leader_messages').select('id,created_at,updated_at,email,display_name,title,message,lang,photo_url,status,hidden,reviewed_at,reviewed_by').order('updated_at', { ascending: false }),
       sb.rpc('get_approved_wishes'),
       sb.rpc('get_leader_messages'),
@@ -489,7 +490,8 @@ a{color:var(--slate)}
     var status = x.status || 'pending';
     var editing = S.editing === key;
     var busy = !!S.busy[key];
-    var flags = isW && x.flags && x.flags.length ? x.flags : [];
+    var flags = isW && x.flags && x.flags.length ? x.flags.slice() : [];
+    if (isW && x.bms && !C.bmsLooksReal(x.bms)) flags.push("BMS looks made up: this wish can't win");
     var name = isW ? (x.first_name || 'Anonymous') : (x.display_name || 'Leader');
     var where = isW ? C.displayWhere(x) : (x.title || '');
     var when = isW ? x.created_at : (x.updated_at || x.created_at);
@@ -519,7 +521,6 @@ a{color:var(--slate)}
     }
     var metaBits = [];
     if (isW && x.bms) metaBits.push('BMS ' + x.bms);
-    if (isW && x.phone) metaBits.push('Phone ' + x.phone);
     if (isW && x.edit_count) metaBits.push('Edited by the sender ' + x.edit_count + (x.edit_count === 1 ? ' time' : ' times'));
     if (x.email) metaBits.push('From ' + x.email);
     if (status !== 'pending' && x.reviewed_by) metaBits.push((status === 'approved' ? 'Approved by ' : 'Not approved by ') + x.reviewed_by);
@@ -581,14 +582,14 @@ a{color:var(--slate)}
     if (PRIZE.enabled === false) { $('prizeBox').hidden = true; return Promise.resolve(); }
     $('prizeTitle').textContent = 'Prize standings: ' + (PRIZE.title || '');
     if (C.demo) {
-      return C.fetchPrizeTop(10).then(function (top) {
+      return C.fetchPrizeTop(30).then(function (top) {
         prize.rows = top.map(function (w) {
-          return { id: w.id, first_name: w.display_name, bms: 'sample', phone: '', site: w.site, like_count: w.like_count, distinct_ips: null, most_from_one_ip: null, excluded: false };
+          return { id: w.id, first_name: w.display_name, bms: w.bms || 'sample', site: w.site, message: w.message, like_count: w.like_count, distinct_ips: null, most_from_one_ip: null, excluded: false, bms_ok: w.bms ? C.bmsLooksReal(w.bms) : true };
         });
         renderPrize();
       });
     }
-    return sb.rpc('get_prize_check', { p_limit: 15 }).then(function (res) {
+    return sb.rpc('get_prize_check', { p_limit: 30 }).then(function (res) {
       if (res.error) throw res.error;
       prize.rows = res.data || [];
       renderPrize();
@@ -597,6 +598,9 @@ a{color:var(--slate)}
       $('prizeMsg').textContent = 'Could not load the prize standings.';
     });
   }
+  // Can this wish win? Not when its BMS is in prize_excluded or looks made up.
+  function eligible(r) { return !r.excluded && r.bms_ok !== false; }
+  function whyOut(r) { return r.excluded ? 'not eligible: Wish Tree team' : 'not eligible: BMS looks made up'; }
   function suspicious(r) {
     return r.most_from_one_ip != null && r.like_count >= 5 && r.most_from_one_ip / r.like_count > 0.5;
   }
@@ -604,17 +608,16 @@ a{color:var(--slate)}
     var place = 0;
     var winners = PRIZE.winners || 5;
     $('prizeRows').innerHTML = prize.rows.length ? prize.rows.map(function (r) {
-      var out = !!r.excluded;
+      var out = !eligible(r);
       if (!out) place++;
       var cls = 'pz-row' + (out ? ' out' : '') + (!out && suspicious(r) ? ' warn' : '');
       var sub = [];
       sub.push('BMS <span class="bms">' + esc(r.bms || '') + '</span>');
-      if (r.phone) sub.push('Phone ' + esc(r.phone));
       sub.push(esc(C.siteName(r.site) || ''));
       if (r.distinct_ips != null) sub.push('from ' + fmt(r.distinct_ips) + (r.distinct_ips === 1 ? ' connection' : ' connections') + ', up to ' + fmt(r.most_from_one_ip) + ' from one');
       var detail = prize.open[r.id] ? '<div class="pz-detail">' + (prize.likes[r.id] || 'Loading…') + '</div>' : '';
       return '<li class="' + cls + '"><div class="pz-main"><span class="pz-n">' + (out ? '-' : place) + '</span>' +
-        '<span class="pz-who"><b>' + esc(r.first_name || 'Anonymous') + (out ? ' (not eligible)' : place <= winners ? ' (winning)' : '') + '</b></span>' +
+        '<span class="pz-who"><b>' + esc(r.first_name || 'Anonymous') + (out ? ' (' + whyOut(r) + ')' : place <= winners ? ' (winning)' : '') + '</b></span>' +
         '<span class="pz-likes">' + fmt(r.like_count) + ' likes</span></div>' +
         '<div class="pz-sub">' + sub.join(' · ') + '</div>' +
         (C.demo ? '' : '<button type="button" class="link" data-pz-likes="' + esc(r.id) + '" style="min-height:28px;font-size:13px">' + (prize.open[r.id] ? 'Hide who liked' : 'Who liked') + '</button>') +
@@ -637,21 +640,36 @@ a{color:var(--slate)}
     if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
     return '"' + s.replace(/"/g, '""') + '"';
   }
-  function downloadCsv() {
-    var lines = [['Place', 'Name', 'BMS', 'Phone', 'Site', 'Likes', 'Connections', 'Most likes from one connection', 'Eligible', 'Wish'].map(csvCell).join(',')];
-    var place = 0;
-    prize.rows.forEach(function (r) {
-      var ok = !r.excluded;
-      if (ok) place++;
-      lines.push([ok ? place : '', r.first_name, r.bms, r.phone, C.siteName(r.site), r.like_count, r.distinct_ips, r.most_from_one_ip, ok ? 'yes' : 'no', r.message].map(csvCell).join(','));
-    });
+  function saveCsv(lines, name) {
     var blob = new Blob(['\ufeff' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
     var a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = 'wish-tree-prize-standings.csv';
+    a.download = name;
     document.body.appendChild(a);
     a.click();
     setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  }
+  function downloadCsv() {
+    var lines = [['Place', 'Name', 'BMS', 'Site', 'Likes', 'Connections', 'Most likes from one connection', 'Eligible', 'Why not', 'Wish'].map(csvCell).join(',')];
+    var place = 0;
+    prize.rows.forEach(function (r) {
+      var ok = eligible(r);
+      if (ok) place++;
+      lines.push([ok ? place : '', r.first_name, r.bms, C.siteName(r.site), r.like_count, r.distinct_ips, r.most_from_one_ip, ok ? 'yes' : 'no', ok ? '' : whyOut(r).replace('not eligible: ', ''), r.message].map(csvCell).join(','));
+    });
+    saveCsv(lines, 'wish-tree-prize-standings.csv');
+  }
+  // The winners only: the top eligible wishes, as many as config.js PRIZE.winners
+  function downloadWinners() {
+    var winners = PRIZE.winners || 5;
+    var top = prize.rows.filter(eligible).slice(0, winners);
+    if (!top.length) { $('prizeMsg').textContent = 'No eligible wishes with likes yet.'; return; }
+    var lines = [['Place', 'Name', 'BMS', 'Site', 'Likes', 'Prize', 'Wish'].map(csvCell).join(',')];
+    top.forEach(function (r, i) {
+      lines.push([i + 1, r.first_name, r.bms, C.siteName(r.site), r.like_count, PRIZE.amount ? PRIZE.amount + ' gift card' : '', r.message].map(csvCell).join(','));
+    });
+    saveCsv(lines, 'wish-tree-winners.csv');
+    $('prizeMsg').textContent = 'Downloaded the top ' + top.length + (top.length === 1 ? ' wish' : ' wishes') + '. Check "Who liked" on each before you announce them.';
   }
   $('prizeRows').addEventListener('click', function (e) {
     var b = e.target.closest ? e.target.closest('[data-pz-likes]') : null;
@@ -663,6 +681,7 @@ a{color:var(--slate)}
   });
   $('prizeRefresh').addEventListener('click', function () { loadPrize(); });
   $('prizeCsv').addEventListener('click', downloadCsv);
+  $('prizeWinners').addEventListener('click', downloadWinners);
   $('rmBms').addEventListener('input', function () {
     var v = $('rmBms').value.replace(/\D/g, '').slice(0, 7);
     if ($('rmBms').value !== v) $('rmBms').value = v;
@@ -671,7 +690,7 @@ a{color:var(--slate)}
   });
   $('rmBtn').addEventListener('click', function () {
     var b = $('rmBms').value;
-    if (!C.validBms(b)) { $('prizeMsg').textContent = 'Type a BMS (4 to 7 digits) first.'; return; }
+    if (!/^[0-9]{4,7}$/.test(b)) { $('prizeMsg').textContent = 'Type a BMS (4 to 7 digits) first. Only those can have likes.'; return; }
     if (prize.rmArmed !== b) { prize.rmArmed = b; $('rmBtn').textContent = 'Click again to remove'; $('prizeMsg').textContent = 'This removes every like made with BMS ' + b + '. It can\'t be undone.'; return; }
     prize.rmArmed = '';
     $('rmBtn').textContent = 'Remove likes';

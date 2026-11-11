@@ -439,17 +439,23 @@
     demoSave('wt-demo-review', review);
   }
 
-  /* ---------- BMS (employee number: 4 to 7 digits) ---------- */
-  var BMS_RE = /^[0-9]{4,7}$/;
-  function cleanBms(v) { return String(v == null ? '' : v).replace(/[\s-]+/g, ''); }
-  function validBms(v) { return BMS_RE.test(cleanBms(v)); }
+  /* ---------- BMS (employee number) ---------- */
+  // People can type any BMS; the database decides quietly which likes count and which wishes can win.
+  function cleanBms(v) { return String(v == null ? '' : v).replace(/\s+/g, '').replace(/[<>]/g, '').slice(0, 20); }
+  function validBms(v) { return cleanBms(v).length > 0; }
+  // A BMS that looks real: 4 to 7 digits, not one digit repeated (55555), not a straight run (1234567, 7654321).
+  // The database has the same rule; this copy is only used in preview mode.
+  function bmsLooksReal(v) {
+    var b = cleanBms(v);
+    return /^[0-9]{4,7}$/.test(b) && !/^(.)\1*$/.test(b) && '0123456789'.indexOf(b) === -1 && '9876543210'.indexOf(b) === -1;
+  }
   // The BMS used to like on this device (remembered so people type it once)
-  function myBms() { var b = cleanBms(storageGet('wt-bms')); return BMS_RE.test(b) ? b : ''; }
-  function saveMyBms(b) { storageSet('wt-bms', validBms(b) ? cleanBms(b) : ''); }
+  function myBms() { return cleanBms(storageGet('wt-bms')); }
+  function saveMyBms(b) { storageSet('wt-bms', cleanBms(b)); }
 
   function deviceId() {
     var id = storageGet('wt-device');
-    if (!id || id.length < 16) {
+    if (!id || !/^[A-Za-z0-9-]{16,64}$/.test(id)) {
       id = window.crypto && crypto.randomUUID ? crypto.randomUUID()
         : 'd' + Date.now().toString(36) + Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
       storageSet('wt-device', id);
@@ -457,35 +463,72 @@
     return id;
   }
 
-  /* ---------- Likes (one per BMS) ---------- */
-  function likedKey() { return 'wt-liked:' + (myBms() || 'none'); }
-  function likedMap() { return demoLoad(likedKey(), {}) || {}; }
-  function hasLiked(kind, id) { return !!likedMap()[kind + ':' + id]; }
-  function markLiked(kind, id, on) {
-    var all = likedMap();
-    if (on) all[kind + ':' + id] = 1; else delete all[kind + ':' + id];
-    demoSave(likedKey(), all);
+  /* ---------- Likes ---------- */
+  // counted: what the database counted for this device (loaded by loadMyLikes).
+  // session: likes and unlikes made since this page opened. A like that didn't count (made-up BMS, own wish,
+  // a second BMS on this device, after the deadline) stays on screen until the page is reloaded, then it's gone.
+  var counted = {};
+  var session = {};
+  function lk(kind, id) { return kind + ':' + id; }
+  function own(o, k) { return Object.prototype.hasOwnProperty.call(o, k); }
+  function reconcileLikes() {
+    Object.keys(session).forEach(function (k) { if (session[k] === !!counted[k]) delete session[k]; });
   }
-  // Resolves to { result: 'ok' | 'need_bms' | 'own_wish' | 'unknown_bms' | 'slow_down', count }
-  // (count is null in demo mode, where the page adds or removes one itself)
+  function loadMyLikes() {
+    if (DEMO) {
+      counted = demoLoad('wt-demo-likes', {}) || {};
+      reconcileLikes();
+      return Promise.resolve();
+    }
+    return getClient().rpc('get_device_likes', { p_device: deviceId() }).then(function (res) {
+      if (res.error) throw res.error;
+      var next = {};
+      (res.data || []).forEach(function (r) { next[lk(r.kind, r.target_id)] = true; });
+      counted = next;
+      reconcileLikes();
+    }).catch(function (err) { console.warn('Wish Tree: could not load your likes', err); });
+  }
+  function hasLiked(kind, id) {
+    var k = lk(kind, id);
+    return own(session, k) ? session[k] : !!counted[k];
+  }
+  // How much to add to the count the server sent, for likes made on this page since it opened
+  function likeAdjust(kind, id) {
+    var k = lk(kind, id);
+    if (!own(session, k) || session[k] === !!counted[k]) return 0;
+    return session[k] ? 1 : -1;
+  }
+  function likeCount(kind, item) { return Math.max(0, ((item && item.like_count) || 0) + likeAdjust(kind, item && item.id)); }
+
+  // Resolves to { result: 'ok' | 'need_bms' | 'slow_down' }. 'ok' doesn't say whether the like counted.
   function setLike(kind, id, on) {
     var bms = myBms();
-    if (!bms) return Promise.resolve({ result: 'need_bms', count: null });
+    if (!bms) return Promise.resolve({ result: 'need_bms' });
+    var k = lk(kind, id);
+    var had = own(session, k);
+    var before = session[k];
+    session[k] = !!on;
+    var undo = function () { if (had) session[k] = before; else delete session[k]; };
     if (DEMO) {
-      var mine = demoLoad('wt-demo-wishes', []).some(function (w, i) { return 'local-' + i === String(id) && w.bms === bms; });
-      if (kind === 'wish' && mine) return Promise.resolve({ result: 'own_wish', count: null });
-      markLiked(kind, id, on);
-      return Promise.resolve({ result: 'ok', count: null });
+      // preview mode follows the same rules; what counts is saved for the next reload
+      var store = demoLoad('wt-demo-likes', {}) || {};
+      var mine = kind === 'wish' && demoLoad('wt-demo-wishes', []).some(function (w, i) { return 'local-' + i === String(id) && w.bms === bms; });
+      if (on && !store[k] && bmsLooksReal(bms) && !mine) store[k] = true;
+      if (!on) delete store[k];
+      demoSave('wt-demo-likes', store);
+      return Promise.resolve({ result: 'ok' });
     }
     return getClient().rpc('set_like', { p_kind: kind, p_id: id, p_bms: bms, p_on: !!on, p_device: deviceId() }).then(function (res) {
       if (res.error) throw res.error;
       var row = Array.isArray(res.data) ? res.data[0] : res.data;
       var result = (row && row.result) || 'ok';
-      if (result === 'ok') markLiked(kind, id, on);
-      return { result: result, count: row && typeof row.like_count === 'number' ? row.like_count : null };
-    });
+      if (result !== 'ok') undo();
+      return { result: result };
+    }, function (err) { undo(); throw err; });
   }
-  function demoLikeBonus(kind, id) { return DEMO && hasLiked(kind, id) ? 1 : 0; }
+  function demoLikeBonus(kind, id) {
+    return DEMO && (demoLoad('wt-demo-likes', {}) || {})[lk(kind, id)] ? 1 : 0;
+  }
 
   /* ---------- Hanging a wish (no sign-in: name + BMS, one wish per BMS) ---------- */
   // What this browser remembers about the wish it sent: { bms, key, id }. The key is the only way to edit it.
@@ -499,8 +542,8 @@
     try { window.localStorage.removeItem('wt-my-wish'); window.localStorage.removeItem('wt-bms'); } catch (e) { /* ignore */ }
   }
 
-  // row: { bms, first_name, phone, message, site, lang, tag_color, charm }
-  // Resolves to { result: 'ok' | 'bms_taken' | 'unknown_bms' | 'slow_down', id, isNew }
+  // row: { bms, first_name, message, site, lang, tag_color, charm }
+  // Resolves to { result: 'ok' | 'bms_taken' | 'slow_down', id, isNew }
   function submitWish(row) {
     var ref = myWishRef();
     var key = ref && ref.bms === row.bms ? ref.key : null;
@@ -529,7 +572,7 @@
       return Promise.resolve({ result: 'ok', id: 'local-' + (list.length - 1), isNew: true });
     }
     return getClient().rpc('submit_wish', {
-      p_bms: row.bms, p_name: row.first_name, p_phone: row.phone || null, p_message: row.message,
+      p_bms: row.bms, p_name: row.first_name, p_message: row.message,
       p_site: row.site, p_lang: row.lang, p_tag_color: row.tag_color, p_charm: row.charm, p_consent: true, p_edit_key: key
     }).then(function (res) {
       if (res.error) throw res.error;
@@ -560,19 +603,16 @@
 
   /* ---------- Prize: the most-liked wishes ---------- */
   var PRIZE = Object.assign({ enabled: true, winners: 5, amount: 'RM 100' }, CFG.PRIZE || {});
+  // Preview mode only (the Approvals page reads the real standings from the database)
+  // Preview mode only (the Approvals page uses get_prize_check when live; the public pages show no standings)
   function fetchPrizeTop(n) {
     n = n || PRIZE.winners || 5;
-    if (DEMO) {
-      var list = demoQueue().wishes.filter(function (w) { return w.status === 'approved'; }).map(function (w) {
-        return { id: w.id, display_name: w.display_name || w.first_name, site: w.site, approved_at: w.approved_at, like_count: (w.like_count || 0) + demoLikeBonus('wish', w.id) };
-      }).filter(function (w) { return w.like_count > 0; });
-      list.sort(function (a, b) { return (b.like_count - a.like_count) || (a.approved_at < b.approved_at ? -1 : 1); });
-      return Promise.resolve(list.slice(0, n).map(function (w, i) { return Object.assign(w, { place: i + 1 }); }));
-    }
-    return getClient().rpc('get_prize_top', { p_limit: n }).then(function (res) {
-      if (res.error) throw res.error;
-      return res.data || [];
-    });
+    if (!DEMO) return Promise.resolve([]);
+    var list = demoQueue().wishes.filter(function (w) { return w.status === 'approved'; }).map(function (w) {
+      return { id: w.id, display_name: w.display_name || w.first_name, bms: w.bms || '', site: w.site, message: w.message, approved_at: w.approved_at, like_count: (w.like_count || 0) + demoLikeBonus('wish', w.id) };
+    }).filter(function (w) { return w.like_count > 0; });
+    list.sort(function (a, b) { return (b.like_count - a.like_count) || (a.approved_at < b.approved_at ? -1 : 1); });
+    return Promise.resolve(list.slice(0, n).map(function (w, i) { return Object.assign(w, { place: i + 1 }); }));
   }
 
   // Approved employee wishes, newest first
@@ -593,14 +633,28 @@
   function fetchLeaders() {
     if (DEMO) {
       var list = demoQueue().leaders.filter(function (l) { return l.status === 'approved'; }).map(function (l) {
-        return Object.assign({}, l, { like_count: (l.like_count || 0) + demoLikeBonus('leader', l.id) });
+        return Object.assign({}, l, { like_count: (l.like_count || 0) + demoLikeBonus('leader', l.id), photo_url: l.photo_url || leaderPhoto(l.display_name) || null });
       });
       return Promise.resolve(list.sort(leaderOrder));
     }
     return getClient().rpc('get_leader_messages').then(function (res) {
       if (res.error) throw res.error;
-      return res.data || [];
+      // no photo yet: use the default photo from config.js LEADERS for that name
+      return (res.data || []).map(function (l) {
+        return l.photo_url ? l : Object.assign({}, l, { photo_url: leaderPhoto(l.display_name) || null });
+      });
     });
+  }
+  // config.js LEADERS: the names a leader can pick on the leaders' page, with their default photos
+  function leaderList() {
+    return (CFG.LEADERS || []).filter(function (l) { return l && l.name; }).map(function (l) {
+      return { name: String(l.name).trim(), title: String(l.title || '').trim(), photo: String(l.photo || '') };
+    });
+  }
+  function leaderPhoto(name) {
+    var n = String(name || '').trim().toLowerCase();
+    var hit = leaderList().filter(function (l) { return l.name.toLowerCase() === n; })[0];
+    return hit && safePhoto(hit.photo) ? hit.photo : '';
   }
 
   /* ---------- Small helpers ---------- */
@@ -631,19 +685,39 @@
   }
 
   function initGA() {
-    if (!CFG.GA4_ID || window.gtag) return;
+    window.dataLayer = window.dataLayer || [];
+    // Google Tag Manager (GTM_ID in config.js): the container decides which tags run (GA4 and so on)
+    if (CFG.GTM_ID && !window.__wtGtm) {
+      window.__wtGtm = true;
+      if (!window.gtag) {
+        window.gtag = function () { window.dataLayer.push(arguments); };
+        window.gtag('js', new Date());
+      }
+      window.dataLayer.push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
+      var g = document.createElement('script');
+      g.async = true;
+      g.src = 'https://www.googletagmanager.com/gtm.js?id=' + encodeURIComponent(CFG.GTM_ID);
+      document.head.appendChild(g);
+    }
+    if (!CFG.GA4_ID || window.__wtGa4) return;
+    window.__wtGa4 = true;
     var s = document.createElement('script');
     s.async = true;
     s.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(CFG.GA4_ID);
     document.head.appendChild(s);
-    window.dataLayer = window.dataLayer || [];
-    window.gtag = function () { window.dataLayer.push(arguments); };
-    window.gtag('js', new Date());
+    if (!window.gtag) {
+      window.gtag = function () { window.dataLayer.push(arguments); };
+      window.gtag('js', new Date());
+    }
     window.gtag('config', CFG.GA4_ID);
   }
 
+  // Events for GTM (dataLayer events: use them as Custom Event triggers) and GA4. Never sends a BMS or a name.
   function track(name, params) {
-    try { if (window.gtag && CFG.GA4_ID) window.gtag('event', name, params || {}); } catch (e) { /* ignore */ }
+    try {
+      if (CFG.GTM_ID && window.dataLayer) window.dataLayer.push(Object.assign({ event: name }, params || {}));
+      if (CFG.GA4_ID && window.gtag) window.gtag('event', name, params || {});
+    } catch (e) { /* ignore */ }
   }
 
   function setLogo(img) {
@@ -1092,6 +1166,9 @@
     fetchLeaders: fetchLeaders,
     hasLiked: hasLiked,
     setLike: setLike,
+    loadMyLikes: loadMyLikes,
+    likeCount: likeCount,
+    bmsLooksReal: bmsLooksReal,
     COLORS: COLORS,
     validBms: validBms,
     cleanBms: cleanBms,
@@ -1103,6 +1180,8 @@
     getMyWish: getMyWish,
     PRIZE: PRIZE,
     fetchPrizeTop: fetchPrizeTop,
+    leaderList: leaderList,
+    leaderPhoto: leaderPhoto,
     demoQueue: demoQueue,
     demoReview: demoReview,
     demoLoad: demoLoad,

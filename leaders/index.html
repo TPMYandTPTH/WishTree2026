@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <!-- Security: only this site, Supabase, Google Fonts and (if set) Google Analytics can be used by the page -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://*.supabase.co https://www.googletagmanager.com https://*.google-analytics.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://*.googletagmanager.com https://tagmanager.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://tagmanager.google.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://*.supabase.co https://*.googletagmanager.com https://*.google-analytics.com https://www.google.com https://stats.g.doubleclick.net https://ssl.gstatic.com https://www.gstatic.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com https://www.google.com https://stats.g.doubleclick.net; frame-src https://*.googletagmanager.com; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <style id="antiframe">html{display:none !important}</style>
 <script>if (window.self === window.top) { document.getElementById('antiframe').remove(); } else { try { window.top.location = window.self.location.href; } catch (e) { /* stay hidden */ } }</script>
@@ -76,6 +76,8 @@ button,input,select,textarea{font-family:inherit}
 
 .input,.textarea{width:100%;min-width:0;border:1.5px solid var(--field);border-radius:12px;background:#fff;color:var(--ink);font-size:16px}
 .input{height:50px;padding:0 14px}
+select.input{padding-right:40px;-webkit-appearance:none;appearance:none;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%236C151E' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 14px center;cursor:pointer}
+select.input:disabled{opacity:1;background-color:#F4EEE3;background-image:none;color:var(--ink);font-weight:700;cursor:default}
 .textarea{padding:14px 16px;line-height:1.5;resize:vertical;min-height:150px}
 .input:focus,.textarea:focus{border-color:var(--cran);outline:none;box-shadow:0 0 0 3px rgba(108,21,30,.18)}
 .code-input{height:62px;text-align:center;font-size:26px;font-weight:500;letter-spacing:.5em}
@@ -291,11 +293,12 @@ button,input,select,textarea{font-family:inherit}
               <button type="button" class="link" id="photoRemove" hidden>Remove photo</button>
             </div>
           </div>
-          <div class="help">Shown on your gold ornament, your card and the site TVs. A head-and-shoulders photo works best; we crop it to a circle. JPG or PNG.</div>
+          <div class="help" id="photoHelp">Shown on your gold ornament, your card and the site TVs. A head-and-shoulders photo works best; we crop it to a circle. JPG or PNG.</div>
         </div>
         <div class="field">
-          <label for="lName">Name as shown</label>
-          <input id="lName" class="input" type="text" maxlength="60" autocomplete="name" required>
+          <label for="lName">Your name</label>
+          <select id="lName" class="input" required aria-describedby="nameHelp"></select>
+          <div class="help" id="nameHelp"></div>
         </div>
         <div class="field">
           <label for="lTitle">Title</label>
@@ -341,9 +344,16 @@ button,input,select,textarea{font-family:inherit}
   var AUTH = CFG.AUTH_MODE === 'email' ? 'email' : 'google';
 
   var S = { view: 'loading', user: null, email: '', existing: null, name: '', title: '', message: '', lang: 'en', busy: false,
-    photo: '',          // the photo shown now: saved link, or a preview of a new one
+    nameLocked: false,  // the name is picked once (or set by the Wish Tree team) and can't be changed
+    titleTouched: false,
+    dbPhoto: '',        // default photo set by the Wish Tree team (Table Editor > leaders > default_photo)
+    photo: '',          // the leader's own photo: saved link, or a preview of a new one ('' = use the default photo)
     photoBlob: null,    // a new photo waiting to be uploaded
     photoChanged: false };
+  var LEADERS = C.leaderList();
+  // The default photo: the one the Wish Tree team set, or the one in config.js LEADERS for the picked name
+  function defaultPhoto() { return S.dbPhoto || C.leaderPhoto(S.name) || ''; }
+  function shownPhoto() { return C.safePhoto(S.photo || defaultPhoto()); }
   var sb = null;
   var $ = function (id) { return document.getElementById(id); };
   var qsa = function (sel) { return Array.prototype.slice.call(document.querySelectorAll(sel)); };
@@ -366,20 +376,21 @@ button,input,select,textarea{font-family:inherit}
     $('pvText').setAttribute('lang', S.lang);
     $('pvName').textContent = name;
     $('pvTitle').textContent = S.title.trim();
-    var photo = C.safePhoto(S.photo);
+    var photo = shownPhoto();
     $('pvInitials').classList.toggle('has-photo', !!photo);
     if (photo) $('pvInitials').innerHTML = C.photoHtml(photo, C.initials(name));
     else $('pvInitials').textContent = C.initials(name);
     $('photoPv').innerHTML = photo ? C.photoHtml(photo, C.initials(name)) : C.esc(C.initials(name));
     $('photoBtnText').textContent = photo ? 'Change photo' : 'Add a photo';
-    $('photoRemove').hidden = !photo || (S.defaultPhoto && S.photo === S.defaultPhoto);
+    $('photoRemove').hidden = !S.photo;
+    $('photoRemove').textContent = defaultPhoto() ? 'Use the default photo' : 'Remove photo';
     var me = { id: 'preview', display_name: name, title: S.title, message: S.message, photo_url: photo };
     C.renderTree($('crownMount'), { wishes: [], leaders: [me], selected: { kind: 'leader', id: 'preview' } });
   }
 
   function renderEdit() {
     var f = function (id, v) { if ($(id).value !== v) $(id).value = v; };
-    f('lName', S.name);
+    renderNames();
     f('lTitle', S.title);
     f('lMessage', S.message);
     $('lMessage').setAttribute('maxlength', String(MAX));
@@ -402,13 +413,47 @@ button,input,select,textarea{font-family:inherit}
     renderPreview();
   }
 
+  /* ---------- Name: picked from the leaders list, once ---------- */
+  function renderNames() {
+    var names = LEADERS.map(function (l) { return l.name; });
+    if (S.name && names.indexOf(S.name) === -1) names.unshift(S.name);
+    var html = (S.nameLocked ? '' : '<option value="">Choose your name</option>') +
+      names.filter(function (n) { return !S.nameLocked || n === S.name; }).map(function (n) {
+        return '<option value="' + C.esc(n) + '">' + C.esc(n) + '</option>';
+      }).join('');
+    if ($('lName').innerHTML !== html) $('lName').innerHTML = html;
+    $('lName').value = S.name;
+    $('lName').disabled = S.nameLocked;
+    $('nameHelp').textContent = S.nameLocked
+      ? 'Your name is set and can\'t be changed. If it\'s wrong, ask the Wish Tree team.'
+      : 'Pick your name from the list. It can\'t be changed after you send your message.';
+  }
+  function pickName(n) {
+    if (S.nameLocked) return;
+    S.name = n;
+    var hit = LEADERS.filter(function (l) { return l.name === n; })[0];
+    if (hit && hit.title && !S.titleTouched) S.title = hit.title;
+    renderEdit();
+  }
+  // The name from the sign-in (e.g. Google), if it matches a name on the list
+  function matchName(full) {
+    var f = String(full || '').trim().toLowerCase();
+    if (!f) return '';
+    var hit = LEADERS.filter(function (l) { return l.name.toLowerCase() === f; })[0] ||
+      LEADERS.filter(function (l) { return l.name.toLowerCase() === f.split(/\s+/)[0]; })[0];
+    return hit ? hit.name : '';
+  }
+
   /* ---------- Access ---------- */
   function loadLeader() {
     if (C.demo) {
       var mine = null;
       try { mine = JSON.parse(C.storageGet('wt-demo-leader') || 'null'); } catch (e) { mine = null; }
       S.existing = mine && mine.message ? mine : null;
-      S.name = S.existing ? S.existing.display_name : (S.name || '');
+      // preview mode: the name picked the first time stays with this browser
+      var fixed = C.storageGet('wt-demo-leader-name') || '';
+      S.name = S.existing ? S.existing.display_name : (fixed || S.name || '');
+      S.nameLocked = !!(S.existing || fixed);
       S.title = S.existing ? (S.existing.title || '') : S.title;
       S.message = S.existing ? S.existing.message : S.message;
       S.lang = S.existing ? (S.existing.lang || 'en') : S.lang;
@@ -424,8 +469,9 @@ button,input,select,textarea{font-family:inherit}
         show('denied');
         return null;
       }
-      if (!S.name && p.default_name) S.name = p.default_name;
-      if (p.default_photo) S.defaultPhoto = p.default_photo;
+      // the Wish Tree team set this leader's name: it's picked already and can't be changed
+      if (p.default_name) { S.name = p.default_name; S.nameLocked = true; }
+      if (p.default_photo) S.dbPhoto = p.default_photo;
       // where this leader's message hangs (set by the Wish Tree team)
       $('pvKicker').textContent = p.spot === 'ceo' ? 'A MESSAGE FROM OUR CEO · UNDER THE STAR'
         : p.spot === 'gift' ? 'INSIDE A GIFT UNDER EVERY TREE' : 'ON EVERY SITE\'S TREE';
@@ -435,12 +481,11 @@ button,input,select,textarea{font-family:inherit}
         if (r.data) {
           S.existing = r.data;
           S.name = r.data.display_name || S.name;
+          S.nameLocked = true;
           S.title = r.data.title || '';
           S.message = r.data.message || '';
           S.lang = r.data.lang || 'en';
-          S.photo = r.data.photo_url || S.defaultPhoto || '';
-        } else if (S.defaultPhoto) {
-          S.photo = S.defaultPhoto;
+          S.photo = r.data.photo_url || '';
         }
         show('edit');
       });
@@ -467,7 +512,7 @@ button,input,select,textarea{font-family:inherit}
     if (S.user && S.user.id === session.user.id && S.view !== 'loading' && S.view !== 'signin' && S.view !== 'code') return;
     var meta = session.user.user_metadata || {};
     S.user = { id: session.user.id, email: email };
-    if (!S.name) S.name = meta.full_name || meta.name || '';
+    if (!S.name) S.name = matchName(meta.full_name || meta.name);
     loadLeader();
   }
 
@@ -534,6 +579,7 @@ button,input,select,textarea{font-family:inherit}
     S.user = null;
     S.existing = null;
     S.name = ''; S.title = ''; S.message = ''; S.lang = 'en';
+    S.nameLocked = false; S.titleTouched = false; S.dbPhoto = '';
     S.photo = ''; S.photoBlob = null; S.photoChanged = false;
     if (C.demo) { C.storageSet('wt-demo-leader-user', ''); show('signin'); return; }
     sb.auth.signOut().finally(function () { show('signin'); });
@@ -544,7 +590,7 @@ button,input,select,textarea{font-family:inherit}
     if (e) e.preventDefault();
     $('editErr').textContent = '';
     $('editOk').textContent = '';
-    if (!S.name.trim()) { $('editErr').textContent = 'Add your name as it should appear.'; $('lName').focus(); return; }
+    if (!S.name.trim()) { $('editErr').textContent = 'Pick your name from the list first.'; $('lName').focus(); return; }
     if (!S.message.trim()) { $('editErr').textContent = 'Write your message first.'; $('lMessage').focus(); return; }
     var row = {
       display_name: S.name.trim().slice(0, 60),
@@ -552,16 +598,18 @@ button,input,select,textarea{font-family:inherit}
       message: S.message.trim().slice(0, MAX),
       lang: S.lang
     };
-    if (S.photoChanged && !S.photoBlob) row.photo_url = null;   // photo removed
+    if (S.photoChanged && !S.photoBlob) row.photo_url = null;   // own photo removed: the default photo shows
     S.busy = true;
     renderEdit();
     var done = function (saved) {
       S.busy = false;
       S.photoBlob = null;
       S.photoChanged = false;
-      S.photo = saved && saved.photo_url ? saved.photo_url : (S.defaultPhoto || '');
+      S.photo = saved && saved.photo_url ? saved.photo_url : '';
       var wasNew = !S.existing;
       S.existing = saved;
+      S.nameLocked = true;
+      if (C.demo) C.storageSet('wt-demo-leader-name', S.name);
       renderEdit();
       $('editOk').textContent = saved && saved.status === 'approved'
         ? 'Saved. Your message is live at the top of every site\'s tree.'
@@ -673,8 +721,8 @@ button,input,select,textarea{font-family:inherit}
   $('backToEmail').addEventListener('click', function () { show('signin'); });
   $('deniedSignOut').addEventListener('click', signOut);
   $('signOutBtn').addEventListener('click', signOut);
-  $('lName').addEventListener('input', function (e) { S.name = e.target.value; renderPreview(); });
-  $('lTitle').addEventListener('input', function (e) { S.title = e.target.value; renderPreview(); });
+  $('lName').addEventListener('change', function (e) { pickName(e.target.value); });
+  $('lTitle').addEventListener('input', function (e) { S.title = e.target.value; S.titleTouched = true; renderPreview(); });
   $('lMessage').addEventListener('input', function (e) {
     S.message = e.target.value.slice(0, MAX);
     $('lCounter').textContent = S.message.length + ' / ' + MAX;
@@ -704,6 +752,7 @@ button,input,select,textarea{font-family:inherit}
     });
   });
   $('photoRemove').addEventListener('click', function () {
+    // back to the default photo (or initials when there is none)
     S.photoBlob = null;
     S.photo = '';
     S.photoChanged = true;

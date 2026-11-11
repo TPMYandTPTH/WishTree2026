@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <!-- Security: only this site, Supabase, Google Fonts and (if set) Google Analytics can be used by the page -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://*.supabase.co https://www.googletagmanager.com https://*.google-analytics.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://*.googletagmanager.com https://tagmanager.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://tagmanager.google.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://*.supabase.co https://*.googletagmanager.com https://*.google-analytics.com https://www.google.com https://stats.g.doubleclick.net https://ssl.gstatic.com https://www.gstatic.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com https://www.google.com https://stats.g.doubleclick.net; frame-src https://*.googletagmanager.com; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>TV · TP Wish Tree 2026</title>
@@ -25,7 +25,7 @@
   /* Campaign colours: Spruce, Pine, Brass, Cranberry, Eggnog. Screen is Eggnog, writing is Cranberry. */
   --spruce:#343F37; --pine:#736E52; --brass:#B18854; --cran:#6C151E; --paper:#F4EEE3;
   --bg:#CFC3B0; --bg-2:#C7BAA5; --bg-3:#C2B5A0;
-  --cream:#6C151E; --cream-2:#5B3A33; --cream-3:#5E5045;
+  --cream:#6C151E; --cream-2:#3D0B10; --cream-3:#4D1F1E;
   --gold:#674A20; --gold-2:#7E5B2B; --carmine:#6C151E; --ink:#343F37;
   --line:rgba(108,21,30,.16);
   --font:'TP Sans','Noto Sans','Noto Sans Thai',Calibri,system-ui,sans-serif;
@@ -49,7 +49,7 @@ body.idle,body.idle *{cursor:none !important}
   linear-gradient(180deg,#D3C8B6 0%,#C6B9A4 100%)}
 #snow{position:fixed;inset:0;width:100%;height:100%;pointer-events:none}
 
-.stage{position:fixed;left:50%;top:50%;width:120rem;height:67.5rem;transform:translate(-50%,-50%);display:grid;grid-template-rows:8rem minmax(0,1fr);overflow:hidden}
+.stage{position:fixed;left:50%;top:50%;width:120rem;height:67.5rem;transform:translate(-50%,-50%);display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:8rem minmax(0,1fr);overflow:hidden}
 html.portrait .stage{width:67.5rem;height:120rem}
 
 /* top bar */
@@ -61,7 +61,7 @@ html.portrait .stage{width:67.5rem;height:120rem}
 .site{flex:1;min-width:0;text-align:center}
 .site-eyebrow{font-size:1.1rem;font-weight:500;letter-spacing:.16em;color:var(--gold)}
 .site-name{margin-top:.3rem;font-size:2.3rem;font-weight:300;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.status{display:flex;align-items:center;gap:2rem;font-size:1.4rem;color:var(--cream-2);white-space:nowrap}
+.status{flex:none;display:flex;align-items:center;gap:2rem;font-size:1.4rem;color:var(--cream-2);white-space:nowrap}
 .live{display:inline-flex;align-items:center;gap:.7rem}
 .live .dot{width:1rem;height:1rem;border-radius:50%;background:#00D769;box-shadow:0 0 0 0 rgba(0,215,105,.6);animation:pulse 2s infinite}
 .live.off .dot{background:#FF9F5A;animation:none}
@@ -75,6 +75,7 @@ html.portrait .main{grid-template-columns:minmax(0,1fr);grid-template-rows:56rem
 html.portrait .brand-name,html.portrait .divider{display:none}
 html.portrait .top{gap:2rem;padding:0 3rem}
 html.portrait .status{gap:1.4rem}
+html.portrait .demo{padding:.4rem .9rem;font-size:1rem}
 .tree-col{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:1.6rem;min-height:0;min-width:0}
 .tree-box{position:relative;height:47.5rem;aspect-ratio:620/760;max-width:100%}
 html.portrait .tree-box{height:49rem}
@@ -109,18 +110,14 @@ html.portrait .tree-box{height:49rem}
 .card[data-kind="prize"]{--card-bg:#6C151E;--card-ink:#F4EEE3;--card-kicker:#E2BF85;--card-sub:#E9DCCB;--card-line:rgba(226,191,133,.4);border-color:#C99A55;border-radius:1.8rem;box-shadow:0 0 0 .8rem rgba(177,136,84,.22),0 2.4rem 5rem rgba(59,47,34,.35)}
 .prize-tv{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:flex-start;gap:1rem;padding:1.2rem 0 0;overflow:hidden}
 .pz-title{font-size:3rem;font-weight:700;line-height:1.1}
-.pz-text{font-size:1.6rem;line-height:1.4;color:var(--card-sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pz-list{margin:.3rem 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:.4rem}
-.pz-list li{display:flex;align-items:center;gap:1.2rem;padding:.25rem 1.2rem;border-radius:1rem;background:rgba(244,238,227,.1);font-size:1.9rem}
-.pz-list .n{flex:none;display:flex;align-items:center;justify-content:center;width:2.4rem;height:2.4rem;border-radius:50%;background:#C99A55;color:#241C14;font-weight:700;font-size:1.5rem}
-.pz-list .who{flex:1;min-width:0;font-size:1.9rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pz-list .site{flex:none;max-width:40%;font-size:1.4rem;color:var(--card-sub);text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pz-list .lk{flex:none;display:inline-flex;align-items:center;gap:.5rem;font-weight:700;font-variant-numeric:tabular-nums}
-.pz-list .lk svg{width:1.9rem;height:1.9rem;fill:#F4EEE3}
-.pz-empty{font-size:1.9rem;line-height:1.4;color:var(--card-sub)}
-html.portrait .pz-text{display:none}
+.pz-text{font-size:1.8rem;line-height:1.4;color:var(--card-ink)}
+.pz-deadline{display:flex;align-items:flex-start;gap:1rem;padding:1rem 1.4rem;border-radius:1.1rem;background:rgba(244,238,227,.12);font-size:1.9rem;font-weight:700;line-height:1.35}
+.pz-deadline svg{flex:none;width:2.2rem;height:2.2rem;margin-top:.2rem;color:#E2BF85}
+.pz-how{font-size:1.5rem;line-height:1.4;color:var(--card-sub)}
 html.portrait .pz-title{font-size:2.6rem}
-html.portrait .prize-tv{gap:.6rem;padding-top:.6rem}
+html.portrait .pz-text,html.portrait .pz-deadline{font-size:1.8rem}
+html.portrait .pz-how{display:none}
+html.portrait .prize-tv{gap:.8rem;padding-top:.6rem}
 .card-top{flex:none;display:flex;align-items:center;justify-content:space-between;gap:1.5rem}
 .kicker{font-size:1.4rem;font-weight:500;letter-spacing:.14em;color:var(--card-kicker)}
 .fresh{flex:none;display:inline-flex;align-items:center;gap:.6rem;padding:.5rem 1.2rem;border-radius:999px;background:var(--card-pill-bg);color:var(--card-pill-fg);font-size:1.2rem;font-weight:700;letter-spacing:.06em}
@@ -165,13 +162,13 @@ html.portrait .prize-tv{gap:.6rem;padding-top:.6rem}
 body.paused .progress span{animation-play-state:paused}
 
 .bottom{flex:none;display:flex;align-items:center;justify-content:space-between;gap:3rem;margin-top:2.2rem}
-.qr-block{display:flex;align-items:center;gap:2rem;min-width:0}
-.qr{flex:none;width:10rem;height:10rem;padding:.7rem;border-radius:1rem;background:var(--paper)}
+.qr-block{flex:none;max-width:100%;display:flex;align-items:center;gap:2rem}
+.qr{flex:none;width:13.5rem;height:13.5rem;padding:.8rem;border-radius:1.1rem;background:var(--paper)}
 .qr img,.qr canvas{display:block;width:100% !important;height:100% !important}
 .qr-title{font-size:2.2rem;font-weight:700}
-.qr-sub{margin-top:.5rem;font-size:1.5rem;line-height:1.4;color:var(--cream-2)}
-.qr-url{margin-top:.6rem;font-size:1.3rem;color:var(--gold);word-break:break-all}
-.tagline{flex:none;max-width:30rem;font-family:var(--script);font-size:3.3rem;line-height:1.1;color:var(--gold);text-align:right}
+.qr-sub{max-width:30rem;margin-top:.5rem;font-size:1.5rem;line-height:1.4;color:var(--cream-2)}
+.qr-url{margin-top:.7rem;font-size:1.35rem;font-weight:500;color:var(--gold);white-space:nowrap}
+.tagline{flex:0 1 26rem;min-width:0;font-family:var(--script);font-size:2.8rem;line-height:1.1;color:var(--gold);text-align:right}
 html.portrait .tagline{display:none}
 
 .paused-note{position:fixed;left:50%;bottom:2rem;transform:translateX(-50%);padding:.8rem 1.6rem;border-radius:999px;background:rgba(36,28,20,.65);color:#F4EEE3;font-size:1.3rem}
@@ -241,7 +238,8 @@ body.pointer .fs{opacity:1;pointer-events:auto}
           <div class="prize-tv" id="prizeTv" hidden>
             <div class="pz-title" id="pzTitle"></div>
             <div class="pz-text" id="pzText"></div>
-            <ol class="pz-list" id="pzList"></ol>
+            <div class="pz-deadline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg><span id="pzDeadline"></span></div>
+            <div class="pz-how" id="pzHow"></div>
           </div>
           <div class="foot" id="foot" hidden>
             <span class="avatar" id="avatar" aria-hidden="true"></span>
@@ -301,7 +299,7 @@ body.pointer .fs{opacity:1;pointer-events:auto}
     fresh: [],              // newly approved wishes, shown next
     cycle: [], pos: 0, cycleNo: 0,
     leaderPos: 0, sinceLeader: LEADER_EVERY, // start with a leader's message
-    sincePrize: 0, prizeTop: [],
+    sincePrize: 0,
     current: null, history: [], onTree: [],
     paused: false, timer: 0, startedAt: 0, remaining: 0
   };
@@ -389,7 +387,6 @@ body.pointer .fs{opacity:1;pointer-events:auto}
   }
 
   function load() {
-    if (PRIZE_ON) C.fetchPrizeTop(PRIZE.winners || 5).then(function (top) { S.prizeTop = top || []; }).catch(function () {});
     return Promise.all([C.fetchApproved(), C.fetchLeaders()]).then(function (r) {
       S.wishes = r[0] || [];
       S.leaders = r[1] || [];
@@ -561,13 +558,9 @@ body.pointer .fs{opacity:1;pointer-events:auto}
     $('foot').hidden = true;
     $('prizeTv').hidden = false;
     $('pzTitle').textContent = PRIZE.title || '';
-    $('pzText').textContent = 'The ' + (PRIZE.winners || 5) + ' most-liked wishes win. Likes count once per BMS.';
-    var heart = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.3s-7.4-4.3-9.2-9C1.5 7.9 3.7 4.6 7 4.6c2 0 3.6 1.1 5 3 1.4-1.9 3-3 5-3 3.3 0 5.5 3.3 4.2 6.7-1.8 4.7-9.2 9-9.2 9z"/></svg>';
-    var top = S.prizeTop || [];
-    $('pzList').innerHTML = top.length ? top.map(function (w) {
-      return '<li><span class="n">' + C.esc(w.place) + '</span><span class="who">' + C.esc(w.display_name || 'A TP colleague') + '</span>' +
-        '<span class="site">' + C.esc(C.siteName(w.site) || '') + '</span><span class="lk">' + heart + fmt(w.like_count) + '</span></li>';
-    }).join('') : '<li class="pz-empty">No likes yet. Like the wishes you love on the tree.</li>';
+    $('pzText').textContent = PRIZE.text || ('The ' + (PRIZE.winners || 5) + ' most-liked wishes win.');
+    $('pzDeadline').textContent = PRIZE.deadline || '';
+    $('pzHow').textContent = 'Like the wishes you love on the tree. Leaders\' messages and the Wish Tree team can\'t win.';
     return true;
   }
   function fillCard(sel) {

@@ -4,9 +4,12 @@
 -- Safe to run again: it updates what already exists.
 --
 -- How people are identified:
---   Employees: no sign-in. First name (or nickname) + BMS number (4-7 digits) + optional phone.
+--   Employees: no sign-in. First name (or nickname) + BMS number, with no format checks on the form.
 --              One wish per BMS. It can be edited only from the browser that sent it (a secret
---              edit key kept on that device). BMS and phone are never shown on the tree or TVs.
+--              edit key kept on that device). The BMS is never shown on the tree or TVs.
+--   Likes:     once per BMS and once per device. Likes that don't count (BMS not 4-7 digits, made-up
+--              BMS like 55555 or 1234567, own wish, a second BMS on the same device, after the deadline)
+--              are quietly dropped: the person sees their like until they reload the page.
 --   Leaders and the Wish Tree team: sign in with their TP account (leaders' page, Approvals page).
 -- =========================================================
 
@@ -18,6 +21,8 @@ create table if not exists public.app_settings (
   allowed_domains text[] not null default array['tp.com'],
   max_wishes_per_person int not null default 3 check (max_wishes_per_person between 1 and 50)  -- no longer used: one wish per BMS
 );
+-- Likes stop counting after this moment (end of Christmas Day, Malaysia time). Change it in Table Editor > app_settings.
+alter table public.app_settings add column if not exists likes_close_at timestamptz default '2026-12-25 23:59:59+08';
 alter table public.app_settings add column if not exists leaders_need_approval boolean not null default true;
 insert into public.app_settings (id) values (1) on conflict (id) do nothing;
 
@@ -119,9 +124,19 @@ create table if not exists public.bms_allowlist (
   name text
 );
 
+-- A BMS that looks real: 4 to 7 digits, not one digit repeated (5555, 55555), not a straight run (1234, 1234567, 7654321)
+create or replace function public.bms_looks_real(p_bms text) returns boolean
+language sql immutable set search_path = '' as $$
+  select coalesce(p_bms, '') ~ '^[0-9]{4,7}$'
+     and p_bms !~ '^(.)\1*$'
+     and position(p_bms in '0123456789') = 0
+     and position(p_bms in '9876543210') = 0
+$$;
+
+-- A BMS whose likes count and whose wish can win: looks real, and is on the allow-list when there is one
 create or replace function public.bms_ok(p_bms text) returns boolean
 language sql stable security definer set search_path = '' as $$
-  select coalesce(p_bms, '') ~ '^[0-9]{4,7}$'
+  select public.bms_looks_real(p_bms)
      and (not exists (select 1 from public.bms_allowlist)
           or exists (select 1 from public.bms_allowlist a where a.bms = p_bms))
 $$;
@@ -194,15 +209,15 @@ create index if not exists wishes_user_idx on public.wishes (user_id);
 alter table public.wishes alter column user_id drop not null;
 alter table public.wishes alter column email drop not null;
 alter table public.wishes add column if not exists bms text;
-alter table public.wishes add column if not exists phone text;
 alter table public.wishes add column if not exists edit_key_hash text;
 alter table public.wishes add column if not exists ip text;
 alter table public.wishes add column if not exists updated_at timestamptz;
 alter table public.wishes add column if not exists edit_count int not null default 0;
+-- No format check on the BMS people type (made-up ones just can't win); phone numbers are no longer collected
 alter table public.wishes drop constraint if exists wishes_bms_check;
-alter table public.wishes add constraint wishes_bms_check check (bms is null or bms ~ '^[0-9]{4,7}$');
+alter table public.wishes add constraint wishes_bms_check check (bms is null or char_length(bms) between 1 and 20);
 alter table public.wishes drop constraint if exists wishes_phone_check;
-alter table public.wishes add constraint wishes_phone_check check (phone is null or phone ~ '^\+?[0-9]{8,15}$');
+alter table public.wishes drop column if exists phone;
 create unique index if not exists wishes_bms_key on public.wishes (bms) where bms is not null;
 
 -- New wishes: always pending, tied to the signed-in person, limited per person, auto-flagged
@@ -321,10 +336,13 @@ language plpgsql security definer set search_path = '' as $$
 declare
   needs_ok boolean;
   is_mod boolean;
+  v_name text;
 begin
   select coalesce(s.leaders_need_approval, true) into needs_ok from public.app_settings s where s.id = 1;
   needs_ok := coalesce(needs_ok, true);
   is_mod := auth.uid() is not null and public.is_moderator();
+  -- a leader's name comes from the leaders list (Table Editor > leaders > default_name) and can't be changed by them
+  select nullif(btrim(l.default_name), '') into v_name from public.leaders l where l.email = public.current_email();
 
   new.display_name := btrim(new.display_name);
   new.title        := nullif(btrim(coalesce(new.title, '')), '');
@@ -332,6 +350,9 @@ begin
 
   if tg_op = 'INSERT' then
     if auth.uid() is not null then
+      if not is_mod and v_name is not null then
+        new.display_name := v_name;
+      end if;
       new.user_id    := auth.uid();
       new.email      := public.current_email();
       new.hidden     := false;
@@ -348,6 +369,7 @@ begin
     new.created_at := old.created_at;
     if auth.uid() is not null and not is_mod then
       -- leaders can't approve themselves; editing the words sends it back for approval
+      new.display_name := coalesce(v_name, old.display_name);
       new.hidden      := old.hidden;
       new.sort_order  := old.sort_order;
       new.status      := old.status;
@@ -398,6 +420,7 @@ alter table public.likes add constraint likes_pkey primary key (kind, target_id,
 alter table public.likes drop constraint if exists likes_bms_check;
 alter table public.likes add constraint likes_bms_check check (bms ~ '^[0-9]{4,7}$');
 create index if not exists likes_bms_idx on public.likes (bms);
+create index if not exists likes_device_idx on public.likes (device_id, kind, target_id);
 
 
 -- 7. Row level security --------------------------------------
@@ -458,7 +481,7 @@ create policy "leaders remove own message" on public.leader_messages
 -- never see the edit key hash or the IP address.
 revoke all on public.wishes from anon, authenticated;
 grant select (id, created_at, email, message, display_mode, first_name, site, lang, tag_color, charm, status, flags,
-              reviewed_at, reviewed_by, approved_at, bms, phone, updated_at, edit_count) on public.wishes to authenticated;
+              reviewed_at, reviewed_by, approved_at, bms, updated_at, edit_count) on public.wishes to authenticated;
 grant update (message, status, first_name) on public.wishes to authenticated;
 grant delete on public.wishes to authenticated;
 revoke all on public.likes, public.rate_events, public.bms_allowlist, public.prize_excluded from anon, authenticated;
@@ -497,19 +520,18 @@ $$;
 
 -- Hang or edit a wish (no sign-in). One wish per BMS: sending again from the same browser edits it
 -- (it goes back for approval); from any other browser the BMS is refused.
--- Returns result: 'ok', 'bms_taken', 'unknown_bms' or 'slow_down' (these are answers, not errors,
--- so the rate limits still count the attempt).
+-- Returns result: 'ok', 'bms_taken' or 'slow_down' (answers, not errors, so the rate limits still count the attempt).
 drop function if exists public.submit_wish(text, text, text, text, text, text, text, text, boolean, text);
+drop function if exists public.submit_wish(text, text, text, text, text, text, text, boolean, text);
 create function public.submit_wish(
-  p_bms text, p_name text, p_phone text, p_message text, p_site text, p_lang text,
+  p_bms text, p_name text, p_message text, p_site text, p_lang text,
   p_tag_color text, p_charm text, p_consent boolean, p_edit_key text default null)
 returns table (result text, wish_id uuid, edit_key text, is_new boolean)
 language plpgsql security definer set search_path = '' as $$
 declare
   st public.app_settings%rowtype;
-  v_bms text := btrim(coalesce(p_bms, ''));
+  v_bms text := regexp_replace(coalesce(p_bms, ''), '[[:space:]]+', '', 'g');
   v_name text := btrim(regexp_replace(coalesce(p_name, ''), '[[:space:]]+', ' ', 'g'));
-  v_phone text := regexp_replace(coalesce(p_phone, ''), '[[:space:]().-]', '', 'g');
   v_msg text := btrim(coalesce(p_message, ''));
   v_ip text := public.request_ip();
   v_id uuid;
@@ -519,21 +541,13 @@ begin
   select * into st from public.app_settings where id = 1;
   if not found or not st.submissions_open then raise exception 'wishes_closed'; end if;
   if not coalesce(p_consent, false) then raise exception 'consent_required'; end if;
-  if v_bms !~ '^[0-9]{4,7}$' then raise exception 'bad_bms'; end if;
+  if char_length(v_bms) not between 1 and 20 or v_bms ~ '[<>]' then raise exception 'bad_bms'; end if;
   if char_length(v_name) not between 1 and 30 or v_name ~ '[<>]' then raise exception 'name_required'; end if;
-  if v_phone = '' then
-    v_phone := null;
-  elsif v_phone !~ '^\+?[0-9]{8,15}$' then
-    raise exception 'bad_phone';
-  end if;
   if char_length(v_msg) not between 1 and 150 then raise exception 'bad_message'; end if;
 
   -- Generous for shared office connections, tight enough to stop a script
   if not public.rate_hit('submit_ip', v_ip, 60, interval '10 minutes') then
     return query select 'slow_down'::text, null::uuid, null::text, false; return;
-  end if;
-  if not public.bms_ok(v_bms) then
-    return query select 'unknown_bms'::text, null::uuid, null::text, false; return;
   end if;
 
   select w.id, w.edit_key_hash into v_id, v_hash from public.wishes w where w.bms = v_bms for update;
@@ -546,7 +560,7 @@ begin
     end if;
     begin
       update public.wishes w
-         set message = v_msg, first_name = v_name, display_mode = 'name', phone = v_phone,
+         set message = v_msg, first_name = v_name, display_mode = 'name',
              site = p_site, lang = p_lang, tag_color = p_tag_color, charm = p_charm, consent = true,
              status = 'pending', flags = public.wish_flags(v_msg), updated_at = now(), edit_count = w.edit_count + 1
        where w.id = v_id;
@@ -559,8 +573,8 @@ begin
 
   v_key := replace(gen_random_uuid()::text || gen_random_uuid()::text, '-', '');
   begin
-    insert into public.wishes (bms, first_name, display_mode, phone, message, site, lang, tag_color, charm, consent, edit_key_hash, ip)
-    values (v_bms, v_name, 'name', v_phone, v_msg, p_site, p_lang, p_tag_color, p_charm, true,
+    insert into public.wishes (bms, first_name, display_mode, message, site, lang, tag_color, charm, consent, edit_key_hash, ip)
+    values (v_bms, v_name, 'name', v_msg, p_site, p_lang, p_tag_color, p_charm, true,
             encode(sha256(convert_to(v_key, 'UTF8')), 'hex'), v_ip)
     returning id into v_id;
   exception
@@ -576,10 +590,10 @@ $$;
 -- The wish sent from this browser (needs its edit key), so it can be edited
 drop function if exists public.get_my_wish(text, text);
 create function public.get_my_wish(p_bms text, p_edit_key text)
-returns table (id uuid, first_name text, phone text, message text, site text, lang text, tag_color text, charm text,
+returns table (id uuid, first_name text, message text, site text, lang text, tag_color text, charm text,
                status text, like_count int, updated_at timestamptz)
 language sql stable security definer set search_path = '' as $$
-  select w.id, w.first_name, w.phone, w.message, w.site, w.lang, w.tag_color, w.charm, w.status,
+  select w.id, w.first_name, w.message, w.site, w.lang, w.tag_color, w.charm, w.status,
          (select count(*) from public.likes l where l.kind = 'wish' and l.target_id = w.id)::int,
          coalesce(w.updated_at, w.created_at)
   from public.wishes w
@@ -588,18 +602,22 @@ language sql stable security definer set search_path = '' as $$
     and w.edit_key_hash = encode(sha256(convert_to(p_edit_key, 'UTF8')), 'hex')
 $$;
 
--- Like or unlike, once per BMS. Returns result ('ok', 'own_wish', 'unknown_bms', 'slow_down') and the new count.
+-- Like or unlike. Always answers 'ok' (or 'slow_down' under heavy load), so nobody can tell which likes count.
+-- A like only counts with a device id, a real-looking BMS (on the allow-list if there is one), not on your own
+-- wish, once per BMS, once per device, and before app_settings.likes_close_at. Anything else is quietly dropped:
+-- the page shows the like until it's reloaded, then it's gone.
 drop function if exists public.set_like(text, uuid, text, boolean);
 drop function if exists public.set_like(text, uuid, text, boolean, text);
 create function public.set_like(p_kind text, p_id uuid, p_bms text, p_on boolean, p_device text default null)
-returns table (result text, like_count int)
+returns table (result text)
 language plpgsql security definer set search_path = '' as $$
 declare
-  v_bms text := btrim(coalesce(p_bms, ''));
+  v_bms text := regexp_replace(coalesce(p_bms, ''), '[[:space:]]+', '', 'g');
+  v_dev text := btrim(coalesce(p_device, ''));
   v_ip text := public.request_ip();
-  n int;
+  v_close timestamptz;
 begin
-  if p_kind not in ('wish', 'leader') or v_bms !~ '^[0-9]{4,7}$' then
+  if p_kind not in ('wish', 'leader') then
     raise exception 'bad_like';
   end if;
   if p_kind = 'wish' and not exists (select 1 from public.wishes w where w.id = p_id and w.status = 'approved') then
@@ -609,62 +627,63 @@ begin
     raise exception 'not_found';
   end if;
   if not public.rate_hit('like_ip', v_ip, 400, interval '10 minutes')
-     or not public.rate_hit('like_bms', v_bms, 60, interval '10 minutes') then
-    return query select 'slow_down'::text, null::int; return;
+     or not public.rate_hit('like_dev', v_dev, 120, interval '10 minutes') then
+    return query select 'slow_down'::text; return;
   end if;
-  if not public.bms_ok(v_bms) then
-    return query select 'unknown_bms'::text, null::int; return;
+
+  if not coalesce(p_on, false) then
+    -- unlike: removes the like this device made
+    if v_dev <> '' then
+      delete from public.likes l where l.kind = p_kind and l.target_id = p_id and l.device_id = v_dev;
+    end if;
+    return query select 'ok'::text; return;
   end if;
-  if p_kind = 'wish' and exists (select 1 from public.wishes w where w.id = p_id and w.bms = v_bms) then
-    return query select 'own_wish'::text, null::int; return;
+
+  select s.likes_close_at into v_close from public.app_settings s where s.id = 1;
+  if (v_close is not null and now() > v_close)                                  -- after the deadline
+     or v_dev !~ '^[A-Za-z0-9-]{16,64}$'                                          -- no device id
+     or not public.bms_ok(v_bms)                                                  -- short, long or made-up BMS
+     or (p_kind = 'wish' and exists (select 1 from public.wishes w where w.id = p_id and w.bms = v_bms))   -- own wish
+     or exists (select 1 from public.likes l where l.kind = p_kind and l.target_id = p_id and l.device_id = v_dev)  -- this device already liked it
+  then
+    return query select 'ok'::text; return;
   end if;
-  if p_on then
-    insert into public.likes (kind, target_id, bms, device_id, ip)
-    values (p_kind, p_id, v_bms, left(p_device, 64), v_ip)
-    on conflict do nothing;
-  else
-    delete from public.likes l where l.kind = p_kind and l.target_id = p_id and l.bms = v_bms;
-  end if;
-  select count(*) into n from public.likes l where l.kind = p_kind and l.target_id = p_id;
-  return query select 'ok'::text, n;
+
+  insert into public.likes (kind, target_id, bms, device_id, ip)
+  values (p_kind, p_id, v_bms, v_dev, v_ip)
+  on conflict do nothing;                                                         -- this BMS already liked it elsewhere
+  return query select 'ok'::text;
 end
 $$;
 
--- RM 100 prize: the most-liked approved wishes, leaving out prize_excluded BMS numbers.
--- Ties: the wish that reached that number of likes first ranks higher.
-drop function if exists public.get_prize_top(int);
-create function public.get_prize_top(p_limit int default 5)
-returns table (id uuid, display_name text, site text, like_count int, place int)
+-- The likes this device made that counted (so a reload shows the truth)
+drop function if exists public.get_device_likes(text);
+create function public.get_device_likes(p_device text)
+returns table (kind text, target_id uuid)
 language sql stable security definer set search_path = '' as $$
-  select x.id, x.first_name, x.site, x.n,
-         (row_number() over (order by x.n desc, x.last_at asc))::int
-  from (
-    select w.id, w.first_name, w.site, count(l.bms)::int as n, max(l.created_at) as last_at
-    from public.wishes w
-    join public.likes l on l.kind = 'wish' and l.target_id = w.id
-    where w.status = 'approved'
-      and not exists (select 1 from public.prize_excluded e where e.bms = w.bms)
-    group by w.id, w.first_name, w.site
-  ) x
-  order by x.n desc, x.last_at asc
-  limit least(greatest(coalesce(p_limit, 5), 1), 20)
+  select l.kind, l.target_id from public.likes l
+  where coalesce(p_device, '') ~ '^[A-Za-z0-9-]{16,64}$' and l.device_id = p_device
 $$;
 
--- Approvals page: the prize standings with BMS and phone, and signs of like-farming
+-- The public top 5 was removed from the tree (only the Wish Tree team sees the standings)
+drop function if exists public.get_prize_top(int);
+
+-- Approvals page: the prize standings with BMS, and signs of like-farming
 drop function if exists public.get_prize_check(int);
 create function public.get_prize_check(p_limit int default 10)
-returns table (id uuid, first_name text, bms text, phone text, site text, message text, like_count int,
-               distinct_ips int, most_from_one_ip int, last_like_at timestamptz, excluded boolean)
+returns table (id uuid, first_name text, bms text, site text, message text, like_count int,
+               distinct_ips int, most_from_one_ip int, last_like_at timestamptz, excluded boolean, bms_ok boolean)
 language plpgsql stable security definer set search_path = '' as $$
 begin
   if not public.is_moderator() then raise exception 'not_allowed'; end if;
   return query
-  select w.id, w.first_name, w.bms, w.phone, w.site, w.message, count(l.bms)::int,
+  select w.id, w.first_name, w.bms, w.site, w.message, count(l.bms)::int,
          count(distinct l.ip)::int,
          coalesce((select max(c) from (select count(*)::int as c from public.likes l2
                    where l2.kind = 'wish' and l2.target_id = w.id group by l2.ip) q), 0),
          max(l.created_at),
-         exists (select 1 from public.prize_excluded e where e.bms = w.bms)
+         exists (select 1 from public.prize_excluded e where e.bms = w.bms),
+         public.bms_ok(w.bms)
   from public.wishes w
   join public.likes l on l.kind = 'wish' and l.target_id = w.id
   where w.status = 'approved'
@@ -739,14 +758,15 @@ $$;
 -- Function rights. Supabase lets everyone run new functions by default, so the internal ones are locked first.
 revoke execute on function public.rate_hit(text, text, int, interval) from public, anon, authenticated;
 revoke execute on function public.bms_ok(text) from public, anon, authenticated;
+revoke execute on function public.bms_looks_real(text) from public, anon, authenticated;
 revoke execute on function public.request_ip() from public, anon, authenticated;
 revoke execute on function public.wish_flags(text) from public, anon, authenticated;
 grant execute on function public.get_approved_wishes() to anon, authenticated;
 grant execute on function public.get_leader_messages() to anon, authenticated;
-grant execute on function public.submit_wish(text, text, text, text, text, text, text, text, boolean, text) to anon, authenticated;
+grant execute on function public.submit_wish(text, text, text, text, text, text, text, boolean, text) to anon, authenticated;
 grant execute on function public.get_my_wish(text, text) to anon, authenticated;
 grant execute on function public.set_like(text, uuid, text, boolean, text) to anon, authenticated;
-grant execute on function public.get_prize_top(int) to anon, authenticated;
+grant execute on function public.get_device_likes(text) to anon, authenticated;
 revoke execute on function public.get_prize_check(int) from public, anon;
 revoke execute on function public.get_wish_likes(uuid) from public, anon;
 revoke execute on function public.remove_likes_by_bms(text) from public, anon;
@@ -812,10 +832,8 @@ create policy "leaders delete own photo" on storage.objects
 -- insert into public.moderators (email) values
 --   ('firstname.lastname@tp.com');
 --
--- People who can't win the RM 100 prize (Amr, Maszy, the Wish Tree team):
--- insert into public.prize_excluded (bms, note) values
---   ('1234567', 'Amr Mihany'),
---   ('7654321', 'Maszy Ulip');
+-- People who can't win the RM 100 prize (Amr, Maszy, the Wish Tree team): add their BMS numbers in
+-- Table Editor > prize_excluded (bms, note). Don't write real BMS numbers in this file: the repo is public.
 --
 -- Optional: only real BMS numbers can post or like. In Table Editor > bms_allowlist > Insert > Import data from CSV,
 -- upload a CSV with a "bms" column (and "name" if you like). Leave the table empty to accept any 4-7 digit BMS.

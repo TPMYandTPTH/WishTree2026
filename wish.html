@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <!-- Security: only this site, Supabase, Google Fonts and (if set) Google Analytics can be used by the page -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://*.supabase.co https://www.googletagmanager.com https://*.google-analytics.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://*.googletagmanager.com https://tagmanager.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://tagmanager.google.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://*.supabase.co https://*.googletagmanager.com https://*.google-analytics.com https://www.google.com https://stats.g.doubleclick.net https://ssl.gstatic.com https://www.gstatic.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com https://www.google.com https://stats.g.doubleclick.net; frame-src https://*.googletagmanager.com; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Hang your wish · TP Wish Tree 2026</title>
@@ -284,7 +284,7 @@ button,input,select,textarea{font-family:inherit}
         <div class="two">
           <div class="field small">
             <label for="bms" data-i18n="bms"></label>
-            <input id="bms" class="input digits" type="text" inputmode="numeric" autocomplete="off" maxlength="7" pattern="[0-9]{4,7}" aria-describedby="bmsHelp">
+            <input id="bms" class="input digits" type="text" inputmode="numeric" autocomplete="off" maxlength="20" aria-describedby="bmsHelp">
           </div>
           <div class="field small">
             <label for="siteSel" data-i18n="site"></label>
@@ -292,11 +292,6 @@ button,input,select,textarea{font-family:inherit}
           </div>
         </div>
         <div class="help" id="bmsHelp" data-i18n="bmsHelp" style="margin-top:-6px"></div>
-        <div class="field small">
-          <label for="phone" data-i18n="phone"></label>
-          <input id="phone" class="input" type="tel" inputmode="tel" autocomplete="tel" maxlength="20" aria-describedby="phoneHelp">
-          <div class="help" id="phoneHelp" data-i18n="phoneHelp"></div>
-        </div>
       </fieldset>
 
       <fieldset>
@@ -484,12 +479,11 @@ button,input,select,textarea{font-family:inherit}
       writeTitle: 'Hang your wish on the TP tree',
       editTitle: 'Change your wish',
       writeSub: 'For every TP Malaysia and Thailand colleague, on site or working from home.',
-      privacy: 'Only your first name (or nickname), site and wish are shown. Your BMS and phone number stay with the Wish Tree team.',
+      privacy: 'Only your first name (or nickname), site and wish are shown. Your BMS stays with the Wish Tree team.',
       errGeneric: 'Something went wrong. Please try again.',
       errSubmit: "We couldn't hang your wish. Please try again.",
       errClosed: 'Wishes are closed for this year.',
       errBmsTaken: 'This BMS already has a wish on the tree. Each BMS hangs one wish, and it can only be changed from the phone or browser that sent it. If that was you on another device, open the wish page there. Need help? Ask the Wish Tree team.',
-      errUnknownBms: "We couldn't find that BMS. Check the number and try again.",
       errSlow: 'Lots of wishes are coming in from here. Please try again in a few minutes.',
       step1: 'STEP 1 OF 2',
       step2: 'STEP 2 OF 2',
@@ -507,9 +501,7 @@ button,input,select,textarea{font-family:inherit}
       firstName: 'First name or nickname',
       firstHelp: 'Shown on your tag with your site.',
       bms: 'BMS number',
-      bmsHelp: '4 to 7 digits. Only the Wish Tree team sees it. One wish per BMS.',
-      phone: 'Phone number (optional)',
-      phoneHelp: 'Only used to reach you if your wish wins a prize. Never shown.',
+      bmsHelp: 'Your TP employee number. Only the Wish Tree team sees it. One wish per BMS.',
       colourLegend: 'Tag colour',
       c_cream: 'Eggnog', c_red: 'Cranberry', c_gold: 'Brass',
       charmLegend: 'Charm',
@@ -524,12 +516,11 @@ button,input,select,textarea{font-family:inherit}
       site: 'Site',
       sitePick: 'Choose your site',
       rules: 'Keep it kind and personal. No client or account names, phone numbers or anything confidential. Every wish is reviewed before it goes up.',
-      consent: 'I agree that my wish, name and site can be shown on the TP Wish Tree and site screens during the campaign, and that the Wish Tree team can use my BMS and phone number to check wishes and contact prize winners.',
+      consent: 'I agree that my wish, name and site can be shown on the TP Wish Tree and site screens during the campaign, and that the Wish Tree team can use my BMS to check wishes and contact prize winners.',
       previewBtn: 'Preview my wish',
       needText: 'Write your wish to continue.',
       needName: 'Add your first name or a nickname.',
-      needBms: 'Add your BMS number: 4 to 7 digits, numbers only.',
-      needPhone: 'Check the phone number, or leave it empty.',
+      needBms: 'Add your BMS number.',
       needSite: 'Choose your site.',
       needConsent: 'Tick the consent box to continue.',
       tagPlaceholder: 'Your wish will appear here as you type.',
@@ -564,12 +555,11 @@ button,input,select,textarea{font-family:inherit}
       writeTitle: 'Gantung hajat anda di pokok TP',
       editTitle: 'Ubah hajat anda',
       writeSub: 'Untuk semua rakan TP Malaysia dan Thailand, di pejabat atau bekerja dari rumah.',
-      privacy: 'Hanya nama pertama (atau nama panggilan), lokasi dan hajat anda dipaparkan. Nombor BMS dan telefon anda hanya untuk pasukan Pokok Hajat.',
+      privacy: 'Hanya nama pertama (atau nama panggilan), lokasi dan hajat anda dipaparkan. Nombor BMS anda hanya untuk pasukan Pokok Hajat.',
       errGeneric: 'Ada masalah. Sila cuba lagi.',
       errSubmit: 'Kami tidak dapat menggantung hajat anda. Sila cuba lagi.',
       errClosed: 'Hajat telah ditutup untuk tahun ini.',
       errBmsTaken: 'BMS ini sudah mempunyai hajat di pokok. Setiap BMS boleh menggantung satu hajat, dan ia hanya boleh diubah daripada telefon atau pelayar yang menghantarnya. Jika itu anda pada peranti lain, buka halaman hajat di sana. Perlu bantuan? Hubungi pasukan Pokok Hajat.',
-      errUnknownBms: 'Kami tidak menemui BMS itu. Semak nombor dan cuba lagi.',
       errSlow: 'Banyak hajat sedang dihantar dari sini. Sila cuba lagi dalam beberapa minit.',
       step1: 'LANGKAH 1 DARIPADA 2',
       step2: 'LANGKAH 2 DARIPADA 2',
@@ -587,9 +577,7 @@ button,input,select,textarea{font-family:inherit}
       firstName: 'Nama pertama atau nama panggilan',
       firstHelp: 'Dipaparkan pada tag anda bersama lokasi.',
       bms: 'Nombor BMS',
-      bmsHelp: '4 hingga 7 digit. Hanya pasukan Pokok Hajat yang melihatnya. Satu hajat bagi setiap BMS.',
-      phone: 'Nombor telefon (pilihan)',
-      phoneHelp: 'Hanya digunakan untuk menghubungi anda jika hajat anda memenangi hadiah. Tidak dipaparkan.',
+      bmsHelp: 'Nombor pekerja TP anda. Hanya pasukan Pokok Hajat yang melihatnya. Satu hajat bagi setiap BMS.',
       colourLegend: 'Warna tag',
       c_cream: 'Krim', c_red: 'Merah', c_gold: 'Tembaga',
       charmLegend: 'Hiasan',
@@ -604,12 +592,11 @@ button,input,select,textarea{font-family:inherit}
       site: 'Lokasi',
       sitePick: 'Pilih lokasi anda',
       rules: 'Tulis dengan baik dan ikhlas. Jangan sertakan nama klien atau akaun, nombor telefon atau maklumat sulit. Setiap hajat disemak sebelum dipaparkan.',
-      consent: 'Saya bersetuju hajat, nama dan lokasi saya dipaparkan di Pokok Hajat TP dan skrin di lokasi sepanjang kempen, dan pasukan Pokok Hajat boleh menggunakan nombor BMS dan telefon saya untuk menyemak hajat dan menghubungi pemenang hadiah.',
+      consent: 'Saya bersetuju hajat, nama dan lokasi saya dipaparkan di Pokok Hajat TP dan skrin di lokasi sepanjang kempen, dan pasukan Pokok Hajat boleh menggunakan nombor BMS saya untuk menyemak hajat dan menghubungi pemenang hadiah.',
       previewBtn: 'Pratonton hajat saya',
       needText: 'Tulis hajat anda untuk teruskan.',
       needName: 'Masukkan nama pertama atau nama panggilan anda.',
-      needBms: 'Masukkan nombor BMS anda: 4 hingga 7 digit, nombor sahaja.',
-      needPhone: 'Semak nombor telefon, atau biarkan kosong.',
+      needBms: 'Masukkan nombor BMS anda.',
       needSite: 'Pilih lokasi anda.',
       needConsent: 'Tandakan kotak persetujuan untuk teruskan.',
       tagPlaceholder: 'Hajat anda akan muncul di sini semasa anda menaip.',
@@ -644,12 +631,11 @@ button,input,select,textarea{font-family:inherit}
       writeTitle: 'แขวนคำอวยพรของคุณบนต้นไม้ TP',
       editTitle: 'แก้ไขคำอวยพรของคุณ',
       writeSub: 'สำหรับเพื่อนร่วมงาน TP มาเลเซียและไทยทุกคน ทั้งที่ออฟฟิศและทำงานจากบ้าน',
-      privacy: 'จะแสดงเฉพาะชื่อจริง (หรือชื่อเล่น) สาขา และคำอวยพรของคุณเท่านั้น หมายเลข BMS และเบอร์โทรศัพท์จะอยู่กับทีมต้นไม้แห่งคำอวยพรเท่านั้น',
+      privacy: 'จะแสดงเฉพาะชื่อจริง (หรือชื่อเล่น) สาขา และคำอวยพรของคุณเท่านั้น หมายเลข BMS จะอยู่กับทีมต้นไม้แห่งคำอวยพรเท่านั้น',
       errGeneric: 'เกิดข้อผิดพลาด กรุณาลองอีกครั้ง',
       errSubmit: 'ไม่สามารถแขวนคำอวยพรได้ กรุณาลองอีกครั้ง',
       errClosed: 'ปิดรับคำอวยพรสำหรับปีนี้แล้ว',
       errBmsTaken: 'BMS นี้มีคำอวยพรบนต้นไม้แล้ว แต่ละ BMS แขวนคำอวยพรได้หนึ่งรายการ และแก้ไขได้จากโทรศัพท์หรือเบราว์เซอร์ที่ใช้ส่งเท่านั้น หากคุณส่งจากอุปกรณ์อื่น กรุณาเปิดหน้าคำอวยพรบนอุปกรณ์นั้น ต้องการความช่วยเหลือ ติดต่อทีมต้นไม้แห่งคำอวยพร',
-      errUnknownBms: 'ไม่พบ BMS นี้ กรุณาตรวจสอบหมายเลขแล้วลองอีกครั้ง',
       errSlow: 'มีคำอวยพรส่งมาจากที่นี่จำนวนมาก กรุณาลองอีกครั้งในอีกไม่กี่นาที',
       step1: 'ขั้นตอนที่ 1 จาก 2',
       step2: 'ขั้นตอนที่ 2 จาก 2',
@@ -667,9 +653,7 @@ button,input,select,textarea{font-family:inherit}
       firstName: 'ชื่อจริงหรือชื่อเล่น',
       firstHelp: 'จะแสดงบนป้ายของคุณพร้อมสาขา',
       bms: 'หมายเลข BMS',
-      bmsHelp: 'ตัวเลข 4 ถึง 7 หลัก เฉพาะทีมต้นไม้แห่งคำอวยพรเท่านั้นที่เห็น หนึ่ง BMS ต่อหนึ่งคำอวยพร',
-      phone: 'เบอร์โทรศัพท์ (ไม่บังคับ)',
-      phoneHelp: 'ใช้เพื่อติดต่อคุณหากคำอวยพรของคุณได้รับรางวัลเท่านั้น และจะไม่แสดง',
+      bmsHelp: 'รหัสพนักงาน TP ของคุณ เฉพาะทีมต้นไม้แห่งคำอวยพรเท่านั้นที่เห็น หนึ่ง BMS ต่อหนึ่งคำอวยพร',
       colourLegend: 'สีป้าย',
       c_cream: 'ครีม', c_red: 'แดง', c_gold: 'ทองเหลือง',
       charmLegend: 'สัญลักษณ์',
@@ -684,12 +668,11 @@ button,input,select,textarea{font-family:inherit}
       site: 'สาขา',
       sitePick: 'เลือกสาขาของคุณ',
       rules: 'เขียนด้วยความสุภาพและจริงใจ ห้ามระบุชื่อลูกค้าหรือโปรเจกต์ เบอร์โทรศัพท์ หรือข้อมูลที่เป็นความลับ ทุกคำอวยพรจะได้รับการตรวจสอบก่อนแสดง',
-      consent: 'ฉันยินยอมให้แสดงคำอวยพร ชื่อ และสาขาของฉันบนต้นไม้แห่งคำอวยพร TP และหน้าจอในสาขาตลอดช่วงแคมเปญ และยินยอมให้ทีมต้นไม้แห่งคำอวยพรใช้หมายเลข BMS และเบอร์โทรศัพท์ของฉันเพื่อตรวจสอบคำอวยพรและติดต่อผู้ได้รับรางวัล',
+      consent: 'ฉันยินยอมให้แสดงคำอวยพร ชื่อ และสาขาของฉันบนต้นไม้แห่งคำอวยพร TP และหน้าจอในสาขาตลอดช่วงแคมเปญ และยินยอมให้ทีมต้นไม้แห่งคำอวยพรใช้หมายเลข BMS ของฉันเพื่อตรวจสอบคำอวยพรและติดต่อผู้ได้รับรางวัล',
       previewBtn: 'ดูตัวอย่างคำอวยพร',
       needText: 'กรุณาเขียนคำอวยพรเพื่อดำเนินการต่อ',
       needName: 'กรุณาใส่ชื่อจริงหรือชื่อเล่น',
-      needBms: 'กรุณาใส่หมายเลข BMS: ตัวเลข 4 ถึง 7 หลักเท่านั้น',
-      needPhone: 'กรุณาตรวจสอบเบอร์โทรศัพท์ หรือเว้นว่างไว้',
+      needBms: 'กรุณาใส่หมายเลข BMS ของคุณ',
       needSite: 'กรุณาเลือกสาขาของคุณ',
       needConsent: 'กรุณาทำเครื่องหมายยินยอมเพื่อดำเนินการต่อ',
       tagPlaceholder: 'คำอวยพรของคุณจะแสดงที่นี่ระหว่างที่พิมพ์',
@@ -735,7 +718,6 @@ button,input,select,textarea{font-family:inherit}
     wishLangTouched: false,
     first: '',
     bms: '',
-    phone: '',
     site: siteParam && C.siteById(siteParam) ? siteParam : (C.siteById(C.storageGet('wt-site')) ? C.storageGet('wt-site') : ''),
     consent: false,
     triedPreview: false,
@@ -762,8 +744,6 @@ button,input,select,textarea{font-family:inherit}
 
   /* ---------- Field rules ---------- */
   function cleanName(v) { return String(v || '').replace(/[<>]/g, '').replace(/\s+/g, ' ').slice(0, 30); }
-  function phoneDigits(v) { return String(v || '').replace(/[\s().-]/g, ''); }
-  function phoneOk(v) { var p = phoneDigits(v); return p === '' || /^\+?[0-9]{8,15}$/.test(p); }
   function editing() { return !!(S.mine && S.mine.bms === S.bms); }
 
   /* ---------- Views ---------- */
@@ -840,7 +820,6 @@ button,input,select,textarea{font-family:inherit}
     if (!S.first.trim()) return 'needName';
     if (!C.validBms(S.bms)) return 'needBms';
     if (!S.site) return 'needSite';
-    if (!phoneOk(S.phone)) return 'needPhone';
     if (!S.text.trim()) return 'needText';
     if (!S.consent) return 'needConsent';
     return '';
@@ -886,7 +865,6 @@ button,input,select,textarea{font-family:inherit}
 
     if ($('firstName').value !== S.first) $('firstName').value = S.first;
     if ($('bms').value !== S.bms) $('bms').value = S.bms;
-    if ($('phone').value !== S.phone) $('phone').value = S.phone;
     $('siteSel').value = S.site;
     $('consent').checked = S.consent;
 
@@ -895,7 +873,6 @@ button,input,select,textarea{font-family:inherit}
     $('blocker').textContent = shown ? t(key) : '';
     $('firstName').setAttribute('aria-invalid', shown && key === 'needName' ? 'true' : 'false');
     $('bms').setAttribute('aria-invalid', shown && key === 'needBms' ? 'true' : 'false');
-    $('phone').setAttribute('aria-invalid', shown && key === 'needPhone' ? 'true' : 'false');
 
     paintTag($('liveTag'), false);
   }
@@ -937,7 +914,6 @@ button,input,select,textarea{font-family:inherit}
     if (!m) return;
     S.bms = m.bms;
     S.first = m.first_name || '';
-    S.phone = m.phone || '';
     S.site = C.siteById(m.site) ? m.site : S.site;
     S.text = m.message || '';
     S.color = C.PALETTE[m.tag_color] ? m.tag_color : 'cream';
@@ -957,7 +933,6 @@ button,input,select,textarea{font-family:inherit}
     var row = {
       bms: C.cleanBms(S.bms),
       first_name: cleanName(S.first).trim(),
-      phone: phoneDigits(S.phone) || null,
       message: S.text.trim().slice(0, MAX),
       site: S.site,
       lang: effectiveWishLang(),
@@ -979,14 +954,14 @@ button,input,select,textarea{font-family:inherit}
         show('done');
         return;
       }
-      S.errKey = r.result === 'bms_taken' ? 'errBmsTaken' : r.result === 'unknown_bms' ? 'errUnknownBms' : r.result === 'slow_down' ? 'errSlow' : 'errSubmit';
+      S.errKey = r.result === 'bms_taken' ? 'errBmsTaken'  : r.result === 'slow_down' ? 'errSlow' : 'errSubmit';
       renderPreview();
     }).catch(function (err) {
       console.error(err);
       S.busy = false;
       var m = String((err && (err.message || err.details)) || '').toLowerCase();
       S.errKey = m.indexOf('wishes_closed') !== -1 ? 'errClosed' : m.indexOf('bad_bms') !== -1 ? 'needBms'
-        : m.indexOf('bad_phone') !== -1 ? 'needPhone' : m.indexOf('name_required') !== -1 ? 'needName' : 'errSubmit';
+        : m.indexOf('name_required') !== -1 ? 'needName' : 'errSubmit';
       renderPreview();
     });
   }
@@ -1057,15 +1032,9 @@ button,input,select,textarea{font-family:inherit}
   });
   $('bms').addEventListener('input', function (e) {
     if (editing()) return;
-    var v = e.target.value.replace(/\D/g, '').slice(0, 7);
+    var v = C.cleanBms(e.target.value);
     if (v !== e.target.value) e.target.value = v;
     S.bms = v;
-    renderWrite();
-  });
-  $('phone').addEventListener('input', function (e) {
-    var v = e.target.value.replace(/[^\d+\s().-]/g, '').slice(0, 20);
-    if (v !== e.target.value) e.target.value = v;
-    S.phone = v;
     renderWrite();
   });
   $('siteSel').addEventListener('change', function (e) { S.site = e.target.value; C.storageSet('wt-site', S.site); renderWrite(); });
@@ -1074,7 +1043,6 @@ button,input,select,textarea{font-family:inherit}
     S.mine = null;
     S.bms = '';
     S.first = '';
-    S.phone = '';
     S.text = '';
     S.consent = false;
     S.triedPreview = false;
@@ -1095,7 +1063,6 @@ button,input,select,textarea{font-family:inherit}
     S.mine = null;
     S.bms = '';
     S.first = '';
-    S.phone = '';
     S.text = '';
     S.consent = false;
     S.triedPreview = false;
@@ -1111,7 +1078,7 @@ button,input,select,textarea{font-family:inherit}
     if (key) {
       S.triedPreview = true;
       renderWrite();
-      var focusMap = { needText: 'wishText', needName: 'firstName', needBms: 'bms', needPhone: 'phone', needSite: 'siteSel', needConsent: 'consent' };
+      var focusMap = { needText: 'wishText', needName: 'firstName', needBms: 'bms', needSite: 'siteSel', needConsent: 'consent' };
       var f = $(focusMap[key]);
       if (f) f.focus();
       return;

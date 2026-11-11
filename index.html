@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <!-- Security: only this site, Supabase, Google Fonts and (if set) Google Analytics can be used by the page -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://*.supabase.co https://www.googletagmanager.com https://*.google-analytics.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://*.googletagmanager.com https://tagmanager.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://tagmanager.google.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://*.supabase.co https://*.googletagmanager.com https://*.google-analytics.com https://www.google.com https://stats.g.doubleclick.net https://ssl.gstatic.com https://www.gstatic.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com https://www.google.com https://stats.g.doubleclick.net; frame-src https://*.googletagmanager.com; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>TP Wish Tree 2026</title>
@@ -23,7 +23,7 @@
   /* Campaign colours: Spruce, Pine, Brass, Cranberry, Eggnog. Page is Eggnog, writing is Cranberry. */
   --spruce:#343F37; --pine:#736E52; --brass:#B18854; --cran:#6C151E; --eggnog:#CFC3B0; --paper:#F4EEE3;
   --bg:#CFC3B0; --bg-2:#C7BAA5; --bg-3:#BDB09A;
-  --cream:#6C151E; --cream-2:#5B3A33; --cream-3:#5E5045;
+  --cream:#6C151E; --cream-2:#3D0B10; --cream-3:#4D1F1E;
   --gold:#674A20; --gold-2:#7E5B2B; --carmine:#6C151E;
   --ink:#343F37; --slate:#5A5550; --focus:#0E6E63;
   --line:rgba(108,21,30,.16);
@@ -75,7 +75,7 @@ button{font-family:inherit}
 .eyebrow{font-size:13px;font-weight:500;letter-spacing:.14em;color:var(--gold)}
 h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacing:-.01em}
 .script{margin-top:8px;font-family:var(--script);font-size:50px;line-height:1.05;color:var(--gold)}
-.lede{margin:0;font-size:16px;line-height:1.55;font-weight:300;color:var(--cream-2)}
+.lede{margin:0;font-size:16px;line-height:1.55;font-weight:400;color:var(--cream-2)}
 .stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;padding:18px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
 .num{display:block;font-size:34px;font-weight:300;line-height:1;font-variant-numeric:tabular-nums}
 .lbl{display:block;margin-top:6px;font-size:13px;line-height:1.3;color:var(--cream-3)}
@@ -179,18 +179,9 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
 .wish-card[data-kind="prize"] .card-text{margin-bottom:10px;font-size:26px;font-weight:700;line-height:1.2}
 .prize-box{display:flex;flex-direction:column;gap:14px}
 .prize-text{margin:0;font-size:15px;line-height:1.5;color:var(--card-ink)}
-.prize-head{margin-top:2px;font-size:12px;font-weight:700;letter-spacing:.12em;color:var(--card-kicker)}
-.prize-list{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
-.pz{display:flex;align-items:center;gap:10px;width:100%;min-height:46px;padding:6px 10px;border:0;border-radius:10px;background:rgba(244,238,227,.1);color:var(--card-ink);font-size:14px;text-align:left;cursor:pointer}
-.pz:hover{background:rgba(244,238,227,.18)}
-.pz-place{flex:none;display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:#C99A55;color:#241C14;font-size:13px;font-weight:700}
-.pz-who{flex:1;min-width:0}
-.pz-who b{display:block;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.pz-who span{display:block;font-size:12px;color:var(--card-sub);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.pz-likes{flex:none;display:inline-flex;align-items:center;gap:5px;font-weight:700;font-variant-numeric:tabular-nums}
-.pz-likes svg{fill:#F4EEE3}
-.prize-empty{padding:12px;border-radius:10px;border:1px dashed rgba(244,238,227,.35);font-size:14px;line-height:1.45;color:var(--card-sub)}
-.prize-rules{margin:0;font-size:12px;line-height:1.5;color:var(--card-sub)}
+.prize-deadline{display:flex;align-items:flex-start;gap:8px;margin:0;padding:12px 14px;border-radius:10px;background:rgba(244,238,227,.12);color:#F4EEE3;font-size:15px;font-weight:700;line-height:1.45}
+.prize-deadline svg{flex:none;margin-top:2px;color:#E2BF85}
+.prize-rules{margin:0;font-size:13px;line-height:1.55;color:var(--card-sub)}
 @keyframes giftIn{from{transform:translateY(14px) scale(.97);opacity:0}to{transform:none;opacity:1}}
 @media (prefers-reduced-motion: reduce){.wish-card[data-kind="secret"]{animation:none}}
 .hole{position:absolute;top:14px;left:50%;width:10px;height:10px;margin-left:-5px;border-radius:50%;background:#343F37;opacity:.55}
@@ -219,8 +210,8 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
 
 .qr-card{display:flex;align-items:center;gap:18px;padding:18px;border-radius:12px;border:1px solid rgba(108,21,30,.22);background:rgba(255,255,255,.3);color:var(--cream);text-decoration:none}
 .qr-card:hover{background:rgba(255,255,255,.45);color:var(--cream)}
-.qr{flex:none;width:100px;height:100px;padding:6px;border-radius:8px;background:var(--paper)}
-.qr img,.qr canvas{display:block;width:88px !important;height:88px !important}
+.qr{flex:none;width:136px;height:136px;padding:7px;border-radius:10px;background:var(--paper)}
+.qr img,.qr canvas{display:block;width:100% !important;height:100% !important}
 .qr-title{font-size:17px;font-weight:700}
 .qr-sub{margin-top:6px;font-size:14px;line-height:1.45;color:var(--cream-2)}
 
@@ -465,8 +456,7 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
           <p id="cardText" class="card-text">Lighting up the tree…</p>
           <div id="prizeBox" class="prize-box" hidden>
             <p id="prizeText" class="prize-text"></p>
-            <div class="prize-head">LEADING RIGHT NOW</div>
-            <ol id="prizeList" class="prize-list"></ol>
+            <p class="prize-deadline"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg><span id="prizeDeadline"></span></p>
             <p id="prizeRules" class="prize-rules"></p>
           </div>
           <div id="cardFoot" class="card-foot" hidden>
@@ -546,7 +536,7 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
       <h2 id="bmsTitle">Like with your BMS</h2>
       <p>Each person can like a message once. Your BMS keeps the likes fair for the RM 100 prizes. It's never shown on the tree, and this device remembers it so you only type it once.</p>
       <label for="bmsInput">Your BMS number</label>
-      <input id="bmsInput" class="bms-input" type="text" inputmode="numeric" autocomplete="off" maxlength="7" pattern="[0-9]{4,7}" aria-describedby="bmsErr">
+      <input id="bmsInput" class="bms-input" type="text" inputmode="numeric" autocomplete="off" maxlength="20" aria-describedby="bmsErr">
       <p id="bmsErr" class="bms-err" role="alert"></p>
       <div class="bms-actions">
         <button type="button" id="bmsCancel" class="btn-ghost">Cancel</button>
@@ -609,7 +599,6 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
     loadedOnce: false,
     spinning: false,
     pendingSite: null,
-    prizeTop: [],      // the most-liked wishes right now
     sort: 'likes',     // list order: 'likes' or 'new'
     q: '',
     shown: LIST_PAGE
@@ -658,7 +647,7 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
     var box = el('qr');
     box.innerHTML = '';
     try {
-      new window.QRCode(box, { text: link, width: 176, height: 176, colorDark: '#241C14', colorLight: '#F4EEE3', correctLevel: window.QRCode.CorrectLevel.M });
+      new window.QRCode(box, { text: link, width: 256, height: 256, colorDark: '#241C14', colorLight: '#F4EEE3', correctLevel: window.QRCode.CorrectLevel.M });
       box.removeAttribute('title');
     } catch (e) { /* QR is optional */ }
   }
@@ -795,8 +784,8 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
     var liked = C.hasLiked(kind, item.id);
     var showCount = kind !== 'leader';
     return '<button type="button" class="like" data-like-kind="' + kind + '" data-like-id="' + C.esc(item.id) + '" aria-pressed="' + (liked ? 'true' : 'false') + '"' +
-      ' aria-label="' + (liked ? 'Unlike' : 'Like') + ' this message' + (showCount ? ', ' + (item.like_count || 0) + ' likes' : '') + '">' +
-      HEART + (showCount ? '<span>' + fmt(item.like_count || 0) + '</span>' : '') + '</button>';
+      ' aria-label="' + (liked ? 'Unlike' : 'Like') + ' this message' + (showCount ? ', ' + C.likeCount(kind, item) + ' likes' : '') + '">' +
+      HEART + (showCount ? '<span>' + fmt(C.likeCount(kind, item)) + '</span>' : '') + '</button>';
   }
   function listWishes() {
     var q = state.q.trim().toLowerCase();
@@ -888,15 +877,9 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
   }
 
   function renderPrize() {
-    var top = state.prizeTop || [];
     el('prizeText').textContent = PRIZE.text || '';
+    el('prizeDeadline').textContent = PRIZE.deadline || '';
     el('prizeRules').textContent = PRIZE.rules || '';
-    el('prizeList').innerHTML = top.length ? top.map(function (w) {
-      return '<li><button type="button" class="pz" data-pz="' + C.esc(w.id) + '">' +
-        '<span class="pz-place">' + C.esc(w.place) + '</span>' +
-        '<span class="pz-who"><b>' + C.esc(w.display_name || 'A TP colleague') + '</b><span>' + C.esc(C.siteName(w.site) || '') + '</span></span>' +
-        '<span class="pz-likes">' + HEART + fmt(w.like_count || 0) + '</span></button></li>';
-    }).join('') : '<li class="prize-empty">No likes yet. Like the wishes you love: the 5 with the most likes win.</li>';
   }
 
   function renderCard() {
@@ -962,8 +945,8 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
     var liked = C.hasLiked(state.selected.kind, item.id);
     el('likeBtn').setAttribute('aria-pressed', liked ? 'true' : 'false');
     // leaders' messages can be liked, but their like count isn't shown
-    el('likeBtn').setAttribute('aria-label', (liked ? 'Unlike' : 'Like') + ' this message' + (isLeader ? '' : ', ' + (item.like_count || 0) + ' likes'));
-    el('likeCount').textContent = fmt(item.like_count || 0);
+    el('likeBtn').setAttribute('aria-label', (liked ? 'Unlike' : 'Like') + ' this message' + (isLeader ? '' : ', ' + C.likeCount(state.selected.kind, item) + ' likes'));
+    el('likeCount').textContent = fmt(C.likeCount(state.selected.kind, item));
     el('likeCount').hidden = isLeader;
     card.setAttribute('data-kind', isLeader ? 'leader' : 'wish');
     wrap.setAttribute('data-kind', isLeader ? 'leader' : 'wish');
@@ -1133,16 +1116,8 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
   }
 
   /* ---------- Data ---------- */
-  function loadPrize() {
-    if (!PRIZE_ON) return Promise.resolve();
-    return C.fetchPrizeTop(PRIZE.winners || 5).then(function (top) {
-      state.prizeTop = top || [];
-      if (state.selected && state.selected.kind === 'prize') renderPrize();
-    }).catch(function (err) { console.warn('Wish Tree: prize standings not available', err); });
-  }
   function load() {
-    loadPrize();
-    return Promise.all([C.fetchApproved(), C.fetchLeaders()]).then(function (res) {
+    return Promise.all([C.fetchApproved(), C.fetchLeaders(), C.loadMyLikes()]).then(function (res) {
       state.wishes = res[0] || [];
       state.leaders = res[1] || [];
       state.loadedOnce = true;
@@ -1202,15 +1177,11 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
     var d = el('bmsDialog');
     if (typeof d.close === 'function' && d.open) d.close(); else d.removeAttribute('open');
   }
-  el('bmsInput').addEventListener('input', function () {
-    var v = el('bmsInput').value.replace(/\D/g, '').slice(0, 7);
-    if (el('bmsInput').value !== v) el('bmsInput').value = v;
-    el('bmsErr').textContent = '';
-  });
+  el('bmsInput').addEventListener('input', function () { el('bmsErr').textContent = ''; });
   el('bmsForm').addEventListener('submit', function (e) {
     e.preventDefault();
     var v = C.cleanBms(el('bmsInput').value);
-    if (!C.validBms(v)) { el('bmsErr').textContent = 'Your BMS is 4 to 7 digits, numbers only.'; el('bmsInput').focus(); return; }
+    if (!C.validBms(v)) { el('bmsErr').textContent = 'Type your BMS number to like.'; el('bmsInput').focus(); return; }
     C.saveMyBms(v);
     closeBms();
     renderBmsRow();
@@ -1223,37 +1194,29 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
   el('bmsCancel').addEventListener('click', function () { afterBms = null; closeBms(); });
   el('bmsChange').addEventListener('click', function () { askBms(null); });
 
-  // Like or unlike, from the card or the list
+  // Like or unlike, from the card or the list. The like shows straight away; the database decides
+  // quietly whether it counts (a like that doesn't count is gone after the page is reloaded).
   function toggleLike(kind, item, btn) {
     if (!C.myBms()) { askBms(function () { toggleLike(kind, item, btn); }); return; }
     var on = !C.hasLiked(kind, item.id);
-    var before = item.like_count || 0;
-    item.like_count = Math.max(0, before + (on ? 1 : -1));
     if (btn) {
       btn.classList.remove('pop');
       void btn.offsetWidth;
       if (on) btn.classList.add('pop');
     }
-    var undo = function () { item.like_count = before; renderCard(); renderList(); };
     var p = C.setLike(kind, item.id, on);
     renderCard();
     renderList();
     p.then(function (r) {
-      if (r.result === 'ok') {
-        if (typeof r.count === 'number') item.like_count = r.count;
-        renderCard();
-        renderList();
-        if (kind === 'wish') loadPrize();
-        return;
-      }
-      undo();
-      if (r.result === 'own_wish') toast("That's your own wish, so it can't take your like. Share the tree so others can like it.");
-      else if (r.result === 'unknown_bms') { C.saveMyBms(''); renderBmsRow(); askBms(function () { toggleLike(kind, item, btn); }, "We couldn't find that BMS. Check the number and try again."); }
-      else if (r.result === 'slow_down') toast('Lots of likes at once. Please try again in a minute.');
+      if (r.result === 'ok') return;
+      renderCard();
+      renderList();
+      if (r.result === 'slow_down') toast('Lots of likes at once. Please try again in a minute.');
       else if (r.result === 'need_bms') askBms(function () { toggleLike(kind, item, btn); });
     }).catch(function (err) {
       console.error('Wish Tree: like failed', err);
-      undo();
+      renderCard();
+      renderList();
       toast("That like didn't go through. Please try again.");
     });
     C.track(on ? 'wish_like' : 'wish_unlike', { kind: kind, site: state.site });
@@ -1283,21 +1246,6 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
     }
   }
   el('allList').addEventListener('click', onListClick);
-  el('prizeList').addEventListener('click', function (e) {
-    var b = e.target.closest ? e.target.closest('[data-pz]') : null;
-    if (!b) return;
-    var id = b.getAttribute('data-pz');
-    var w = state.wishes.find(function (x) { return String(x.id) === id; });
-    if (!w) return;
-    // the wish may be on another site's tree or filtered out by language: show everything
-    if (!langOk(w)) setLangs(null);
-    if (state.site !== 'all' && w.site !== state.site) {
-      state.pendingSelect = { kind: 'wish', id: id };
-      changeSite('all', false);
-      return;
-    }
-    select({ kind: 'wish', id: id }, true);
-  });
   el('prizeLink').addEventListener('click', function () {
     select({ kind: 'prize', id: 'prize' }, true);
     var target = window.innerWidth <= 820 ? el('cardWrap') : el('tree');

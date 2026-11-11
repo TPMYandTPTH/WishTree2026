@@ -9,7 +9,7 @@ window.WISH_CFG = {
   SUPABASE_URL: '',
   SUPABASE_ANON_KEY: '',
 
-  // Employees don't sign in: they give a first name (or nickname), their BMS number and an optional phone.
+  // Employees don't sign in: they give a first name (or nickname) and their BMS number.
   // Sign-in is only for the leaders' page and the Approvals page:
   //   'google' = "Continue with your TP Google account" (no email setup needed)
   //   'email'  = 6-digit code sent by email (needs custom SMTP in Supabase)
@@ -55,6 +55,20 @@ window.WISH_CFG = {
     { code: 'ta', label: 'தமிழ்', english: 'Tamil' }
   ],
 
+  // The leaders. The leaders' page offers these names in a list: a leader picks theirs once and can't change it.
+  // photo: the default photo in assets/leaders/ (see the README there), shown until the leader uploads their own.
+  // With Supabase live, a leader whose email has a default_name in Table Editor > leaders gets that name, already picked.
+  LEADERS: [
+    { name: 'Andy', title: 'Chief Executive Officer', photo: 'assets/leaders/andy.jpg' },
+    { name: 'Divya Dutta', title: 'Chief Operating Officer', photo: 'assets/leaders/divya-dutta.jpg' },
+    { name: 'Sarah', title: 'Chief of Staff', photo: 'assets/leaders/sarah.jpg' },
+    { name: 'Rachel', title: 'Human Resources', photo: 'assets/leaders/rachel.jpg' },
+    { name: 'Himanshu', title: 'Chief Operating Officer', photo: 'assets/leaders/himanshu.jpg' },
+    { name: 'Vivienne', title: 'Vice President', photo: 'assets/leaders/vivienne.jpg' },
+    { name: 'Chavis', title: 'Vice President', photo: 'assets/leaders/chavis.jpg' },
+    { name: 'Sudhar', title: 'Vice President', photo: 'assets/leaders/sudhar.jpg' }
+  ],
+
   // Hidden wishes inside two small gifts on the left under the tree. A gift opens when the mouse rests on it
   // (or a tap on phones). gift: 'red' (Cranberry gift, front left) or 'gold' (Brass gift, behind it).
   // Change the words freely (up to about 250 characters). Delete an entry to make that gift a normal one again.
@@ -84,8 +98,10 @@ window.WISH_CFG = {
     winners: 5,
     amount: 'RM 100',
     title: '5 x RM 100 gift cards',
-    text: 'The 5 most-liked wishes each win a RM 100 gift card. Likes count once per BMS, until the Wish Tree closes.',
-    rules: 'Leaders\' messages and the Wish Tree team can\'t win. If two wishes have the same likes, the one that got there first ranks higher.'
+    text: 'The 5 most-liked wishes each win a RM 100 gift card. Each person can like a wish once.',
+    deadline: 'Likes count until 11:59 pm on 25 December 2026 (Malaysia time).',
+    rules: 'Leaders\' messages and the Wish Tree team can\'t win. The Wish Tree team checks every like before the winners are announced. If two wishes have the same likes, the one that got there first ranks higher.'
+    // The database stops counting likes at app_settings.likes_close_at (25 Dec 2026, 23:59 Malaysia time)
   },
 
   MAX_LENGTH: 150,          // employee wish length (keep in step with schema.sql)
@@ -99,8 +115,11 @@ window.WISH_CFG = {
   // TV screens (tv/ page)
   TV_SECONDS: 12,           // how long each message stays on screen
   TV_LEADER_EVERY: 4,       // show a leader's message after every N wishes
-  TV_PRIZE_EVERY: 9,        // show the prize slide (5 most-liked wishes) every N messages
+  TV_PRIZE_EVERY: 9,        // show the prize slide (prize, deadline and rules) every N messages
 
-  // Optional GA4 measurement ID, e.g. 'G-XXXXXXXXXX'
+  // Google Tag Manager container (set up GA4 and other tags inside GTM). Page events go to the dataLayer as
+  // custom events: wish_open, leader_open, prize_open, secret_wish_found, wish_like, wish_unlike, wish_submit, ...
+  GTM_ID: 'GTM-P4TRBDVQ',
+  // Optional GA4 measurement ID if you ever want GA4 without GTM, e.g. 'G-XXXXXXXXXX' (leave blank when using GTM)
   GA4_ID: ''
 };
