@@ -1,0 +1,710 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Gift Exchange · TP Wish Tree 2026</title>
+<meta name="description" content="Join your team's Secret Santa gift exchange. Add your name and find out who you're getting a gift for.">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0E2A1F">
+<link rel="icon" type="image/png" href="../assets/tp-logo-white.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Noto+Sans:wght@300;400;500;700&family=Noto+Sans+Thai:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="gift.css">
+<style>
+.hero.tight{padding-bottom:8px}
+.note{margin:2px 0 0;padding:10px 14px;border-left:3px solid var(--gold);border-radius:0 10px 10px 0;background:rgba(246,238,220,.06);font-size:14px;line-height:1.5;color:var(--cream-2);white-space:pre-line}
+.sheet-title{margin:0;font-size:17px;font-weight:700;color:var(--ink)}
+.after{display:flex;flex-direction:column;gap:12px;padding:18px 20px 0}
+.secret-note{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border-radius:14px;border:1px solid rgba(227,180,90,.35);background:rgba(246,238,220,.04);font-size:14px;line-height:1.5;color:var(--cream-2)}
+.secret-note svg{flex:none;margin-top:2px;color:var(--gold)}
+.drawn-banner{display:flex;align-items:center;gap:10px;margin:0 20px;padding:12px 16px;border-radius:14px;background:rgba(227,180,90,.16);color:var(--gold-2);font-size:14px;font-weight:500}
+.wait-box{display:flex;flex-direction:column;align-items:center;gap:6px;padding:4px 20px 18px;text-align:center}
+.wait-box .giftbox{width:150px}
+.wait-box p{margin:0;font-size:13px;color:var(--cream-3)}
+.live-dot{display:inline-block;width:8px;height:8px;margin-right:6px;border-radius:50%;background:var(--focus);box-shadow:0 0 0 0 rgba(0,175,155,.6);animation:ping 2s ease-out infinite;vertical-align:1px}
+@keyframes ping{0%{box-shadow:0 0 0 0 rgba(0,175,155,.6)}100%{box-shadow:0 0 0 10px rgba(0,175,155,0)}}
+@media (prefers-reduced-motion:reduce){ .live-dot{animation:none} }
+</style>
+</head>
+<body>
+<div class="arcs" aria-hidden="true"><span class="a1"></span><span class="a2"></span><span class="a3"></span></div>
+
+<div class="app">
+  <header class="bar">
+    <a class="bar-left" href="../" aria-label="TP Wish Tree 2026">
+      <img class="logo" src="../assets/tp-logo-white.png" alt="TP">
+      <span class="bar-name">Gift <b>Exchange</b></span>
+    </a>
+  </header>
+  <div id="demo" class="demo-bar" hidden>Demo mode - nothing is saved outside this browser. Open the host page in another tab to try the full flow.</div>
+
+  <main id="main">
+    <!-- loading -->
+    <section class="view" id="v-loading" aria-busy="true">
+      <div class="center-msg"><div class="spinner" aria-hidden="true"></div><p>Loading the gift exchange...</p></div>
+    </section>
+
+    <!-- no code in the link -->
+    <section class="view" id="v-start" hidden>
+      <div class="hero">
+        <span class="script">Secret Santa</span>
+        <h1>Join a gift exchange</h1>
+        <p>Scan the QR code from your host. Or type the 6-letter exchange code below.</p>
+      </div>
+      <form class="sheet" id="startForm" novalidate>
+        <div class="field">
+          <label for="startCode">Exchange code</label>
+          <input class="input code-input" id="startCode" maxlength="7" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="ABC123">
+        </div>
+        <p class="err" id="startErr" role="alert"></p>
+        <button class="btn btn-dark" type="submit">Find the exchange</button>
+        <a class="link center" href="host.html">Host your own gift exchange</a>
+      </form>
+    </section>
+
+    <!-- not found -->
+    <section class="view" id="v-notfound" hidden>
+      <div class="center-msg">
+        <span class="script" style="font-family:var(--script);font-size:40px;color:var(--gold)">Oh no</span>
+        <h1>We couldn't find this exchange</h1>
+        <p>The link may be cut short. Scan the QR again, or ask your host for the link.</p>
+        <a class="btn btn-line" href="./" style="max-width:280px">Type a code instead</a>
+      </div>
+    </section>
+
+    <!-- error -->
+    <section class="view" id="v-error" hidden>
+      <div class="center-msg">
+        <h1>Something went wrong</h1>
+        <p id="errText">Couldn't reach the server. Check your connection and try again.</p>
+        <button class="btn btn-gold" id="retry" type="button" style="max-width:240px">Try again</button>
+      </div>
+    </section>
+
+    <!-- join -->
+    <section class="view" id="v-join" hidden>
+      <div class="hero">
+        <span class="script">You're invited</span>
+        <h1 id="j-title">Gift exchange</h1>
+        <p id="j-text">Add your name. When everyone's in, names are drawn and this page shows who you're getting a gift for. Only you will see it.</p>
+        <div class="meta" id="j-meta"></div>
+        <p class="note" id="j-note" hidden></p>
+      </div>
+      <form class="sheet" id="joinForm" novalidate>
+        <div class="field">
+          <label for="name">Your name</label>
+          <input class="input" id="name" maxlength="40" autocomplete="name" enterkeyhint="next" placeholder="e.g. Amr Mihany">
+          <span class="help">Use the name your team knows you by, so your Secret Santa knows who it is.</span>
+        </div>
+        <div class="field">
+          <label for="hints">Gift hints for your Secret Santa <span class="opt-tag">(optional)</span></label>
+          <textarea class="textarea" id="hints" maxlength="200" rows="3" placeholder="Things you like, your size, or anything to avoid"></textarea>
+          <div class="field-foot"><span>Only the person who draws you sees this.</span><span class="counter" id="hintsCount">0/200</span></div>
+          <div class="starters" id="starters" aria-label="Quick ideas">
+            <button type="button">Coffee or tea</button>
+            <button type="button">Snacks</button>
+            <button type="button">Books</button>
+            <button type="button">Plants</button>
+            <button type="button">Stationery</button>
+            <button type="button">Surprise me</button>
+          </div>
+        </div>
+        <p class="err" id="j-err" role="alert"></p>
+        <button class="btn btn-dark" id="joinBtn" type="submit">Join the exchange</button>
+        <button class="link center" type="button" data-go="v-code">Joined on another phone? Use your secret code</button>
+        <div class="privacy">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+          <span>No sign-in. Your name is only shown to people in this exchange. Nobody, not even the host, can see who has who.</span>
+        </div>
+      </form>
+    </section>
+
+    <!-- enter secret code (before the draw, from another device) -->
+    <section class="view" id="v-code" hidden>
+      <div class="hero">
+        <span class="script">Welcome back</span>
+        <h1>Enter your secret code</h1>
+        <p>You got a 10-character code when you joined. It looks like <b style="font-weight:500;color:var(--cream)">K7QM2-PX4RD</b>.</p>
+      </div>
+      <form class="sheet" id="codeForm" novalidate>
+        <div class="field">
+          <label for="codeInput">Secret code</label>
+          <input class="input code-input" id="codeInput" maxlength="11" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="XXXXX-XXXXX">
+        </div>
+        <p class="err" id="c-err" role="alert"></p>
+        <button class="btn btn-dark" type="submit">Continue</button>
+        <button class="link center" type="button" data-go="v-join">Back to joining</button>
+      </form>
+    </section>
+
+    <!-- joined, waiting for the draw -->
+    <section class="view" id="v-wait" hidden>
+      <div class="hero tight">
+        <span class="script" id="w-script">You're in</span>
+        <h1 id="w-title">See you at the draw</h1>
+        <p id="w-text">When the host draws names, this page shows who you're getting a gift for. Only you will see it.</p>
+        <div class="meta" id="w-meta"></div>
+        <p class="note" id="w-note" hidden></p>
+      </div>
+      <div class="wait-box">
+        <button class="giftbox idle" type="button" disabled aria-hidden="true" tabindex="-1">
+          <svg viewBox="0 0 240 236" aria-hidden="true"><use href="#giftSvg"/></svg>
+        </button>
+        <p><span class="live-dot" aria-hidden="true"></span>This page updates by itself when names are drawn</p>
+      </div>
+      <div class="sheet">
+        <div class="secret">
+          <div class="secret-top">
+            <span class="secret-label">YOUR SECRET CODE</span>
+            <button class="btn btn-ink sm" type="button" id="w-copyCode">Copy</button>
+          </div>
+          <span class="secret-code" id="w-code">-----</span>
+          <span class="help">Screenshot this. You'll need it to see your match on another phone or browser.</span>
+          <button class="link" type="button" id="w-copyLink" style="min-height:32px;color:#8A5A12">Copy my private link instead</button>
+        </div>
+
+        <div class="field">
+          <span class="label" id="w-whoLabel">Who's in</span>
+          <div class="names" id="w-names"></div>
+        </div>
+
+        <div class="field">
+          <label for="w-hints">Your gift hints</label>
+          <textarea class="textarea" id="w-hints" maxlength="200" rows="3" placeholder="Things you like, your size, or anything to avoid"></textarea>
+          <div class="field-foot"><span>Your Secret Santa sees these. You can change them any time.</span><span class="counter" id="w-hintsCount">0/200</span></div>
+          <div class="row"><button class="btn btn-dark sm" type="button" id="w-saveHints">Save hints</button><p class="ok" id="w-hintsOk" role="status"></p></div>
+          <p class="err" id="w-err" role="alert"></p>
+        </div>
+
+        <button class="link" type="button" id="leaveBtn">Leave this exchange</button>
+      </div>
+    </section>
+
+    <!-- names drawn: the gift -->
+    <section class="view" id="v-gift" hidden>
+      <div class="hero tight">
+        <span class="script" id="g-script">Names are drawn</span>
+        <h1 id="g-title">Your gift is ready</h1>
+        <p id="g-text">Tap the gift to see who you're getting a gift for.</p>
+        <div class="meta" id="g-meta"></div>
+      </div>
+      <div class="stage" id="stage">
+        <div id="boxWrap" style="display:flex;flex-direction:column;align-items:center">
+          <button class="giftbox idle" type="button" id="giftBtn" aria-label="Open your gift">
+            <svg viewBox="0 0 240 236" aria-hidden="true"></svg>
+          </button>
+          <span class="tap-hint pulse" id="tapHint">TAP TO UNWRAP</span>
+        </div>
+        <div class="tag-stage" id="reveal" hidden>
+          <div class="tag-string"></div>
+          <article class="tag" aria-live="polite">
+            <span class="hole" aria-hidden="true"></span>
+            <svg class="charm" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 8h-2.2A3 3 0 0 0 12 4.4 3 3 0 0 0 6.2 8H4a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7a1 1 0 0 0 1-1V9a1 1 0 0 0-1-1Zm-5-2a1 1 0 1 1 0 2h-2V7a1 1 0 0 1 2-1ZM9 6a1 1 0 0 1 2 1v1H9a1 1 0 0 1 0-2Zm-4 4h6v2H5v-2Zm1 4h5v6H6v-6Zm7 6v-6h5v6h-5Zm6-8h-6v-2h6v2Z"/></svg>
+            <p class="kicker">You're the Secret Santa for</p>
+            <p class="match-name" id="matchName"></p>
+            <p class="hl">Their gift hints</p>
+            <p class="hints" id="matchHints"></p>
+            <div class="tag-sig" id="matchMeta"></div>
+          </article>
+        </div>
+      </div>
+      <div class="after" id="g-after" hidden>
+        <div class="secret-note">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+          <span id="g-secretText">Keep it a secret until the exchange. Their hints update here if they change them, so check back before you shop.</span>
+        </div>
+        <button class="btn btn-line" type="button" id="wrapAgain">Wrap it up again</button>
+      </div>
+      <div class="sheet" style="margin-top:22px">
+        <div class="field">
+          <label for="g-hints">Your own gift hints</label>
+          <textarea class="textarea" id="g-hints" maxlength="200" rows="3" placeholder="Things you like, your size, or anything to avoid"></textarea>
+          <div class="field-foot"><span>The person who drew you sees these.</span><span class="counter" id="g-hintsCount">0/200</span></div>
+          <div class="row"><button class="btn btn-dark sm" type="button" id="g-saveHints">Save hints</button><p class="ok" id="g-hintsOk" role="status"></p></div>
+          <p class="err" id="g-err" role="alert"></p>
+        </div>
+        <div class="secret">
+          <div class="secret-top">
+            <span class="secret-label">YOUR SECRET CODE</span>
+            <button class="btn btn-ink sm" type="button" id="g-copyCode">Copy</button>
+          </div>
+          <span class="secret-code" id="g-code">-----</span>
+          <span class="help">Use it to see your match on another phone or browser.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- names drawn, this phone hasn't joined -->
+    <section class="view" id="v-closed" hidden>
+      <div class="hero">
+        <span class="script">Names are drawn</span>
+        <h1 id="x-title">Gift exchange</h1>
+        <p>Joining is closed. If you joined on another phone or browser, enter your secret code to see your match.</p>
+        <div class="meta" id="x-meta"></div>
+      </div>
+      <form class="sheet" id="closedForm" novalidate>
+        <div class="field">
+          <label for="closedCode">Secret code</label>
+          <input class="input code-input" id="closedCode" maxlength="11" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="XXXXX-XXXXX">
+        </div>
+        <p class="err" id="x-err" role="alert"></p>
+        <button class="btn btn-dark" type="submit">Show my match</button>
+        <p class="help" style="margin:0;text-align:center">Missed it? Ask the host to undo the draw and add you. Everyone then gets a fresh match.</p>
+      </form>
+    </section>
+  </main>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<!-- the gift drawing, used in two places -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <pattern id="paper" width="22" height="22" patternUnits="userSpaceOnUse">
+      <circle cx="5" cy="6" r="1.7" fill="#F6EEDC" opacity=".26"/>
+      <circle cx="16" cy="17" r="1.7" fill="#F6EEDC" opacity=".26"/>
+    </pattern>
+    <g id="giftSvg">
+      <ellipse class="gb-shadow" cx="120" cy="222" rx="88" ry="9" fill="#000" opacity=".28"/>
+      <g class="gb-body">
+        <rect x="42" y="110" width="156" height="108" rx="6" fill="#AB2C37"/>
+        <rect x="42" y="110" width="156" height="108" rx="6" fill="url(#paper)"/>
+        <rect x="42" y="110" width="156" height="12" fill="#000" opacity=".16"/>
+        <rect x="110" y="110" width="20" height="108" fill="#E3B45A"/>
+        <rect x="124" y="110" width="6" height="108" fill="#000" opacity=".08"/>
+      </g>
+      <g class="gb-lid">
+        <rect x="34" y="86" width="172" height="30" rx="6" fill="#C23B47"/>
+        <rect x="34" y="86" width="172" height="30" rx="6" fill="url(#paper)"/>
+        <rect x="110" y="86" width="20" height="30" fill="#F2C766"/>
+        <g class="gb-bow">
+          <path d="M120 86 C 100 52, 64 58, 78 81 C 86 93, 108 91, 120 86 Z" fill="#E3B45A"/>
+          <path d="M120 86 C 140 52, 176 58, 162 81 C 154 93, 132 91, 120 86 Z" fill="#E3B45A"/>
+          <path d="M120 86 C 106 68, 88 66, 90 78 C 96 84, 110 86, 120 86 Z" fill="#000" opacity=".12"/>
+          <path d="M120 86 C 134 68, 152 66, 150 78 C 144 84, 130 86, 120 86 Z" fill="#000" opacity=".12"/>
+          <circle cx="120" cy="85" r="9" fill="#F2C766"/>
+        </g>
+      </g>
+    </g>
+  </defs>
+</svg>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../config.js"></script>
+<script src="gift-config.js"></script>
+<script src="gift.js"></script>
+<script>
+(function () {
+  'use strict';
+  var G = window.GIFT, api = G.api, $ = G.$;
+  var REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var params = new URLSearchParams(location.search);
+  var code = G.norm(params.get('g') || params.get('code') || '');
+  var key = null;
+  var state = { group: null, me: null, people: [], match: null };
+  var current = null, pollTimer = null, justJoined = false, opening = false;
+
+  // A private link carries the secret code after # (never sent to any server). Save it, then tidy the address bar.
+  if (code) {
+    var hm = location.hash.match(/k=([A-Za-z0-9-]{10,12})/);
+    if (hm && G.norm(hm[1]).length === 10) {
+      G.device.savePlayerKey(code, hm[1]);
+      try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { /* fine */ }
+    }
+    key = G.device.playerKey(code);
+  }
+  if (!G.LIVE) $('#demo').hidden = false;
+  G.snow(26);
+
+  // The gift that opens needs its own copy of the drawing so the lid, bow and box can move separately.
+  (function () {
+    var svg = $('#giftBtn svg');
+    Array.prototype.forEach.call($('#giftSvg').childNodes, function (n) { svg.appendChild(n.cloneNode(true)); });
+  })();
+
+  /* ---------- small UI helpers ---------- */
+  var ICON = {
+    budget: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8Z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>',
+    day: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>',
+    people: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14.5a6.5 6.5 0 0 1 3.5 5.5"/></svg>',
+    host: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3 14.6 8.3 20.5 9.2 16.2 13.3 17.2 19.2 12 16.4 6.8 19.2 7.8 13.3 3.5 9.2 9.4 8.3Z"/></svg>'
+  };
+  function chip(icon, text, cls) { return '<span class="chip' + (cls ? ' ' + cls : '') + '">' + icon + G.esc(text) + '</span>'; }
+  function metaHTML(g, withCount) {
+    var out = [];
+    if (g.budget) out.push(chip(ICON.budget, 'Budget ' + g.budget));
+    if (g.exchange_day) out.push(chip(ICON.day, g.exchange_day));
+    if (withCount) out.push(chip(ICON.people, g.count + (g.count === 1 ? ' person' : ' people') + ' in', 'gold'));
+    if (g.host_name) out.push(chip(ICON.host, 'Host: ' + g.host_name));
+    return out.join('');
+  }
+  function setNote(el, g) { el.textContent = g.note || ''; el.hidden = !g.note; }
+
+  function show(id) {
+    G.$all('.view').forEach(function (v) { v.hidden = v.id !== id; });
+    var changed = current !== id;
+    current = id;
+    if (changed) {
+      window.scrollTo(0, 0);
+      var h = $('#' + id + ' h1');
+      if (h && id !== 'v-loading') { h.setAttribute('tabindex', '-1'); try { h.focus({ preventScroll: true }); } catch (e) { /* fine */ } }
+    }
+  }
+  function setErr(sel, msg) { $(sel).textContent = msg || ''; }
+  function busyBtn(btn, on, label) {
+    if (on) { btn.setAttribute('data-label', btn.textContent); btn.textContent = label || 'One moment...'; btn.disabled = true; btn.classList.add('busy'); }
+    else { btn.textContent = btn.getAttribute('data-label') || btn.textContent; btn.disabled = false; btn.classList.remove('busy'); }
+  }
+  var toastTimer = null;
+  function toast(msg) {
+    var t = $('#toast'); t.textContent = msg; t.classList.add('on');
+    clearTimeout(toastTimer); toastTimer = setTimeout(function () { t.classList.remove('on'); }, 3200);
+  }
+  function showError(err) { $('#errText').textContent = G.messageOf(err); show('v-error'); }
+
+  function startPoll(fn, ms) {
+    stopPoll();
+    pollTimer = setInterval(function () { if (document.visibilityState === 'visible') fn(); }, ms);
+  }
+  function stopPoll() { if (pollTimer) clearInterval(pollTimer); pollTimer = null; }
+
+  function wireCounter(ta, counter) {
+    function upd() { counter.textContent = ta.value.length + '/200'; }
+    ta.addEventListener('input', function () { ta.dataset.dirty = '1'; upd(); });
+    upd(); return upd;
+  }
+  var updJoinCount = wireCounter($('#hints'), $('#hintsCount'));
+  var updWaitCount = wireCounter($('#w-hints'), $('#w-hintsCount'));
+  var updGiftCount = wireCounter($('#g-hints'), $('#g-hintsCount'));
+
+  /* ---------- start ---------- */
+  function start() {
+    if (!code) { show('v-start'); return; }
+    show('v-loading');
+    if (key) { loadMe(); } else { loadInfo(); }
+  }
+
+  function loadInfo() {
+    return api.info(code).then(function (g) {
+      if (!g) { show('v-notfound'); return; }
+      state.group = g;
+      if (g.status === 'open') showJoin(); else showClosed();
+    }, showError);
+  }
+
+  function loadMe() {
+    return api.me(code, key).then(apply, function (err) {
+      var c = G.codeOf(err);
+      if (c === 'bad_key') { G.device.forgetPlayer(code); key = null; return loadInfo(); }
+      if (c === 'gift_not_found') { show('v-notfound'); return; }
+      showError(err);
+    });
+  }
+
+  function apply(d) {
+    var wasWaiting = current === 'v-wait';
+    state.group = d.group; state.me = d.me; state.people = d.people || []; state.match = d.match;
+    if (d.group.status === 'drawn' && d.match) showGift(wasWaiting);
+    else showWait();
+  }
+
+  /* ---------- join ---------- */
+  function showJoin() {
+    var g = state.group;
+    $('#j-title').textContent = g.name;
+    $('#j-meta').innerHTML = metaHTML(g, true);
+    setNote($('#j-note'), g);
+    show('v-join');
+    startPoll(function () {
+      api.info(code).then(function (g2) {
+        if (!g2 || current !== 'v-join') return;
+        state.group = g2;
+        if (g2.status !== 'open') { showClosed(); return; }
+        $('#j-meta').innerHTML = metaHTML(g2, true);
+      }, function () { /* try again next time */ });
+    }, 20000);
+  }
+
+  G.$all('#starters button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var ta = $('#hints');
+      var add = b.textContent;
+      if (ta.value.toLowerCase().indexOf(add.toLowerCase()) !== -1) return;
+      var next = ta.value.trim() ? ta.value.replace(/[\s,]+$/, '') + ', ' + add : add;
+      if (next.length <= 200) { ta.value = next; updJoinCount(); }
+      ta.focus();
+    });
+  });
+
+  $('#joinForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var btn = $('#joinBtn');
+    if (btn.disabled) return;
+    var name = $('#name').value.trim();
+    setErr('#j-err', '');
+    if (!name) { setErr('#j-err', 'Please add your name.'); $('#name').focus(); return; }
+    busyBtn(btn, true, 'Joining...');
+    api.join(code, name, $('#hints').value).then(function (r) {
+      key = G.norm(r.key);
+      G.device.savePlayerKey(code, key);
+      justJoined = true;
+      busyBtn(btn, false);
+      return loadMe();
+    }, function (err) {
+      busyBtn(btn, false);
+      if (G.codeOf(err) === 'gift_closed') { loadInfo(); return; }
+      setErr('#j-err', G.messageOf(err));
+      if (G.codeOf(err) === 'name_taken') $('#name').focus();
+    });
+  });
+
+  G.$all('[data-go]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var to = b.getAttribute('data-go');
+      if (to === 'v-join' && state.group) { showJoin(); return; }
+      stopPoll(); show(to);
+      if (to === 'v-code') setTimeout(function () { $('#codeInput').focus(); }, 50);
+    });
+  });
+
+  /* ---------- secret code entry (two places) ---------- */
+  function useCode(input, errSel, btn) {
+    var k = G.norm(input.value);
+    setErr(errSel, '');
+    if (k.length !== 10) { setErr(errSel, 'Your secret code has 10 letters and numbers, like K7QM2-PX4RD.'); input.focus(); return; }
+    busyBtn(btn, true, 'Checking...');
+    api.me(code, k).then(function (d) {
+      key = k; G.device.savePlayerKey(code, k); busyBtn(btn, false); apply(d);
+    }, function (err) { busyBtn(btn, false); setErr(errSel, G.messageOf(err)); });
+  }
+  function formatOnType(input) {
+    input.addEventListener('input', function () {
+      var k = G.norm(input.value).slice(0, 10);
+      input.value = k.length > 5 ? k.slice(0, 5) + '-' + k.slice(5) : k;
+    });
+  }
+  formatOnType($('#codeInput')); formatOnType($('#closedCode'));
+  $('#codeForm').addEventListener('submit', function (e) { e.preventDefault(); useCode($('#codeInput'), '#c-err', e.target.querySelector('button[type=submit]')); });
+  $('#closedForm').addEventListener('submit', function (e) { e.preventDefault(); useCode($('#closedCode'), '#x-err', e.target.querySelector('button[type=submit]')); });
+
+  $('#startCode').addEventListener('input', function () { this.value = G.norm(this.value).slice(0, 6); });
+  $('#startForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var c = G.norm($('#startCode').value);
+    if (c.length !== 6) { setErr('#startErr', 'The exchange code has 6 letters and numbers.'); return; }
+    location.search = '?g=' + c;
+  });
+
+  /* ---------- waiting for the draw ---------- */
+  function namesHTML(list, mine) {
+    return list.map(function (n) {
+      var you = mine && n.toLowerCase() === mine.toLowerCase();
+      return '<span' + (you ? ' class="you"' : '') + '>' + G.esc(n) + (you ? ' (you)' : '') + '</span>';
+    }).join('');
+  }
+  function fillHints(ta, upd, value) {
+    if (document.activeElement === ta || ta.dataset.dirty === '1') return;
+    ta.value = value || ''; upd();
+  }
+
+  function showWait() {
+    var g = state.group, me = state.me;
+    $('#w-script').textContent = justJoined ? 'You\'re in' : 'Welcome back';
+    $('#w-title').textContent = 'See you at the draw, ' + G.firstName(me.name);
+    $('#w-text').textContent = 'When ' + (g.host_name || 'the host') + ' draws names, this page shows who you\'re getting a gift for. Only you will see it.';
+    $('#w-meta').innerHTML = metaHTML(g, false);
+    setNote($('#w-note'), g);
+    $('#w-code').textContent = G.fmtKey(key);
+    $('#w-whoLabel').textContent = 'Who\'s in (' + state.people.length + ')';
+    $('#w-names').innerHTML = namesHTML(state.people, me.name);
+    fillHints($('#w-hints'), updWaitCount, me.hints);
+    show('v-wait');
+    if (justJoined) { toast('You\'re in! Screenshot your secret code.'); justJoined = false; }
+    startPoll(refreshMe, 15000);
+  }
+
+  function refreshMe() {
+    if (!key) return;
+    api.me(code, key).then(function (d) {
+      if (current !== 'v-wait') return;
+      if (d.group.status === 'drawn' && d.match) { apply(d); return; }
+      state.group = d.group; state.people = d.people || []; state.me = d.me;
+      $('#w-whoLabel').textContent = 'Who\'s in (' + state.people.length + ')';
+      $('#w-names').innerHTML = namesHTML(state.people, d.me.name);
+      $('#w-meta').innerHTML = metaHTML(d.group, false);
+      setNote($('#w-note'), d.group);
+    }, function (err) {
+      if (G.codeOf(err) === 'bad_key') { stopPoll(); G.device.forgetPlayer(code); key = null; toast('You were taken off this exchange.'); loadInfo(); }
+    });
+  }
+
+  function saveHints(ta, okSel, errSel, btn) {
+    setErr(errSel, ''); $(okSel).textContent = '';
+    busyBtn(btn, true, 'Saving...');
+    api.setHints(code, key, ta.value).then(function () {
+      busyBtn(btn, false); ta.dataset.dirty = '';
+      if (state.me) state.me.hints = ta.value.trim() || null;
+      $(okSel).textContent = 'Saved';
+      setTimeout(function () { $(okSel).textContent = ''; }, 2500);
+    }, function (err) { busyBtn(btn, false); setErr(errSel, G.messageOf(err)); });
+  }
+  $('#w-saveHints').addEventListener('click', function () { saveHints($('#w-hints'), '#w-hintsOk', '#w-err', this); });
+  $('#g-saveHints').addEventListener('click', function () { saveHints($('#g-hints'), '#g-hintsOk', '#g-err', this); });
+
+  $('#w-copyCode').addEventListener('click', function () { G.copy(G.fmtKey(key), this); });
+  $('#g-copyCode').addEventListener('click', function () { G.copy(G.fmtKey(key), this); });
+  $('#w-copyLink').addEventListener('click', function () {
+    G.copy(G.privateUrl(code, key)).then(function () { toast('Private link copied. It opens your match, so keep it to yourself.'); });
+  });
+
+  var leaveArmed = null;
+  $('#leaveBtn').addEventListener('click', function () {
+    var btn = this;
+    if (!leaveArmed) {
+      btn.textContent = 'Tap again to leave the exchange';
+      leaveArmed = setTimeout(function () { btn.textContent = 'Leave this exchange'; leaveArmed = null; }, 4000);
+      return;
+    }
+    clearTimeout(leaveArmed); leaveArmed = null;
+    btn.disabled = true;
+    api.leave(code, key).then(function () {
+      btn.disabled = false; btn.textContent = 'Leave this exchange';
+      G.device.forgetPlayer(code); key = null; state.me = null;
+      $('#name').value = ''; $('#hints').value = ''; updJoinCount();
+      toast('You left the exchange.');
+      loadInfo();
+    }, function (err) {
+      btn.disabled = false; btn.textContent = 'Leave this exchange';
+      setErr('#w-err', G.messageOf(err));
+      if (G.codeOf(err) === 'already_drawn') loadMe();
+    });
+  });
+
+  /* ---------- the gift ---------- */
+  function showGift(justDrawn) {
+    stopPoll();
+    var g = state.group, m = state.match, me = state.me;
+    var first = G.firstName(me.name);
+    $('#g-script').textContent = justDrawn ? 'Names are drawn!' : 'Names are drawn';
+    $('#g-title').textContent = me.opened ? 'Here\'s your gift, ' + first : 'Your gift is ready, ' + first;
+    $('#g-text').textContent = me.opened ? 'Tap the gift to see your match again.' : 'Tap the gift to see who you\'re getting a gift for. Make sure nobody is looking over your shoulder.';
+    $('#g-meta').innerHTML = metaHTML(g, false);
+
+    $('#matchName').textContent = m.name;
+    var hints = $('#matchHints');
+    if (m.hints) { hints.textContent = m.hints; hints.classList.remove('none'); }
+    else { hints.textContent = 'No hints yet. Check back later, they may add some.'; hints.classList.add('none'); }
+    var bits = [];
+    if (g.budget) bits.push('Budget ' + g.budget);
+    if (g.exchange_day) bits.push(g.exchange_day);
+    $('#matchMeta').textContent = bits.join(' · ') || g.name;
+    $('#matchMeta').hidden = false;
+    $('#g-secretText').textContent = 'Keep it a secret until ' + (g.exchange_day ? 'the exchange (' + g.exchange_day + ')' : 'the exchange') + '. Their hints update here if they change them, so check back before you shop.';
+
+    $('#g-code').textContent = G.fmtKey(key);
+    fillHints($('#g-hints'), updGiftCount, me.hints);
+    wrapUp();
+    show('v-gift');
+    if (justDrawn) toast('Names are drawn! Tap your gift to open it.');
+  }
+
+  function wrapUp() {
+    opening = false;
+    var box = $('#giftBtn');
+    box.className = 'giftbox idle';
+    box.disabled = false;
+    $('#boxWrap').hidden = false;
+    $('#tapHint').textContent = state.me && state.me.opened ? 'TAP TO OPEN AGAIN' : 'TAP TO UNWRAP';
+    var r = $('#reveal'); r.hidden = true; r.classList.remove('in');
+    $('#g-after').hidden = true;
+    var old = $('#stage .burst'); if (old) old.remove();
+  }
+
+  function burst() {
+    var b = document.createElement('div'); b.className = 'burst'; b.setAttribute('aria-hidden', 'true');
+    var colors = ['#E3B45A', '#F2C766', '#F6EEDC', '#AB2C37', '#00AF9B'];
+    for (var i = 0; i < 26; i++) {
+      var p = document.createElement('i');
+      var ang = (Math.PI * 2 * i) / 26 + Math.random() * 0.4;
+      var dist = 90 + Math.random() * 90;
+      p.style.setProperty('--x', (Math.cos(ang) * dist).toFixed(0) + 'px');
+      p.style.setProperty('--y', (Math.sin(ang) * dist - 30).toFixed(0) + 'px');
+      p.style.setProperty('--r', (Math.random() * 540 - 270).toFixed(0) + 'deg');
+      p.style.background = colors[i % colors.length];
+      if (i % 3 === 0) p.style.borderRadius = '50%';
+      p.style.animationDelay = (Math.random() * 0.12).toFixed(2) + 's';
+      b.appendChild(p);
+    }
+    $('#stage').appendChild(b);
+    setTimeout(function () { b.remove(); }, 1600);
+  }
+
+  $('#giftBtn').addEventListener('click', function () {
+    if (opening) return;
+    opening = true;
+    var box = this;
+    box.disabled = true;
+    $('#tapHint').textContent = '';
+    box.classList.remove('idle');
+    if (!state.me.opened) {
+      state.me.opened = true;
+      api.opened(code, key).catch(function () { /* only a tick on the host page */ });
+    }
+    var shakeMs = REDUCED ? 0 : 560, revealMs = REDUCED ? 0 : 1250;
+    if (!REDUCED) box.classList.add('shake');
+    setTimeout(function () {
+      box.classList.remove('shake');
+      box.classList.add('open');
+      if (!REDUCED) burst();
+    }, shakeMs);
+    setTimeout(function () {
+      $('#boxWrap').hidden = true;
+      var r = $('#reveal'); r.hidden = false;
+      if (!REDUCED) { void r.offsetWidth; r.classList.add('in'); }
+      $('#g-after').hidden = false;
+      $('#g-title').textContent = 'You\'re giving a gift to ' + G.firstName(state.match.name);
+      $('#g-text').textContent = 'Shh. Only you can see this.';
+    }, shakeMs + revealMs);
+  });
+
+  $('#wrapAgain').addEventListener('click', function () {
+    var first = G.firstName(state.me.name);
+    $('#g-title').textContent = 'Here\'s your gift, ' + first;
+    $('#g-text').textContent = 'Tap the gift to see your match again.';
+    wrapUp();
+    $('#giftBtn').focus();
+  });
+
+  /* ---------- closed ---------- */
+  function showClosed() {
+    var g = state.group;
+    $('#x-title').textContent = g.name;
+    $('#x-meta').innerHTML = metaHTML(g, false);
+    stopPoll();
+    show('v-closed');
+  }
+
+  $('#retry').addEventListener('click', start);
+
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState !== 'visible') return;
+    if (current === 'v-wait') refreshMe();
+    else if (current === 'v-gift' && key) {
+      api.me(code, key).then(function (d) {
+        if (d.match && current === 'v-gift') {
+          state.match = d.match;
+          var h = $('#matchHints');
+          if (d.match.hints) { h.textContent = d.match.hints; h.classList.remove('none'); }
+        } else if (d.group.status === 'open') { apply(d); }
+      }, function () { /* fine */ });
+    }
+  });
+
+  start();
+})();
+</script>
+</body>
+</html>

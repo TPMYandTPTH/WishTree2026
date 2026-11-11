@@ -16,6 +16,7 @@ A shared Christmas wish tree for TP Malaysia and Thailand, hosted on GitHub Page
 | Hang a wish | `…/WishTree2026/wish.html` (add `?site=op` to pre-pick the site) | Employees |
 | Leaders' messages | `…/WishTree2026/leaders/` | Leaders on the `leaders` list only |
 | **Approvals** | `…/WishTree2026/approve/` | The Wish Tree team on the `moderators` list only |
+| **Gift exchange** | `…/WishTree2026/gift/host.html` (players join through the QR it makes) | Any team running a Secret Santa. Live on its own keys in `gift/gift-config.js`; details in `gift/README.md` |
 
 Until the Supabase keys are in `config.js`, every page runs in demo mode with sample wishes and nothing is saved outside your browser.
 
