@@ -9,7 +9,8 @@ window.WISH_CFG = {
   SUPABASE_URL: '',
   SUPABASE_ANON_KEY: '',
 
-  // How people prove they are TP before posting (employee page and leaders page):
+  // Employees don't sign in: they give a first name (or nickname), their BMS number and an optional phone.
+  // Sign-in is only for the leaders' page and the Approvals page:
   //   'google' = "Continue with your TP Google account" (no email setup needed)
   //   'email'  = 6-digit code sent by email (needs custom SMTP in Supabase)
   AUTH_MODE: 'google',
@@ -25,8 +26,8 @@ window.WISH_CFG = {
   // Leave blank to use wish.html next to the tree page.
   WISH_PAGE_URL: '',
 
-  // Official TP logo (white, for the dark pages). Path is relative to the site root.
-  LOGO_URL: 'assets/tp-logo-white.png',
+  // Official TP logo (black, for the light Eggnog pages; the TP logo is only ever black or white).
+  LOGO_URL: 'assets/tp-logo-black.png',
 
   // TP Malaysia & Thailand sites. id is stored with each wish - don't change an id once wishes exist.
   SITES: [
@@ -54,8 +55,8 @@ window.WISH_CFG = {
     { code: 'ta', label: 'தமிழ்', english: 'Tamil' }
   ],
 
-  // Hidden wishes inside two gifts under the tree. A gift opens when the mouse rests on it (or a tap on phones).
-  // gift: 'red' (big red gift, front right) or 'gold' (tall gold gift, front left).
+  // Hidden wishes inside two small gifts on the left under the tree. A gift opens when the mouse rests on it
+  // (or a tap on phones). gift: 'red' (Cranberry gift, front left) or 'gold' (Brass gift, behind it).
   // Change the words freely (up to about 250 characters). Delete an entry to make that gift a normal one again.
   HIDDEN_WISHES: [
     {
@@ -76,6 +77,17 @@ window.WISH_CFG = {
     }
   ],
 
+  // The prize: the big gift on the right of the tree. The most-liked wishes win; leaders' messages and the
+  // BMS numbers in the prize_excluded table (Amr, Maszy, the Wish Tree team) don't count. Set enabled: false to hide it.
+  PRIZE: {
+    enabled: true,
+    winners: 5,
+    amount: 'RM 100',
+    title: '5 x RM 100 gift cards',
+    text: 'The 5 most-liked wishes each win a RM 100 gift card. Likes count once per BMS, until the Wish Tree closes.',
+    rules: 'Leaders\' messages and the Wish Tree team can\'t win. If two wishes have the same likes, the one that got there first ranks higher.'
+  },
+
   MAX_LENGTH: 150,          // employee wish length (keep in step with schema.sql)
   LEADER_MAX_LENGTH: 250,   // leader message length (keep in step with schema.sql)
   TREE_REFRESH_SECONDS: 60,
@@ -87,6 +99,7 @@ window.WISH_CFG = {
   // TV screens (tv/ page)
   TV_SECONDS: 12,           // how long each message stays on screen
   TV_LEADER_EVERY: 4,       // show a leader's message after every N wishes
+  TV_PRIZE_EVERY: 9,        // show the prize slide (5 most-liked wishes) every N messages
 
   // Optional GA4 measurement ID, e.g. 'G-XXXXXXXXXX'
   GA4_ID: ''

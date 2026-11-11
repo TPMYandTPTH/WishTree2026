@@ -33,8 +33,9 @@ const CONE = { y0: 1.0, top: 8.15, r: 2.85 };
 const TAG = { w: 0.42, h: 0.56, d: 0.02, string: 0.12, tilt: 0.5 };
 const TAG_Y = [1.75, 5.7];          // where employee tags can hang (the leaders are above)
 const MAX_LEADERS = 8;
-const BG = { cream: '#F6EEDC', red: '#AB2C37', gold: '#E3B45A' };
-const FG = { cream: '#AB2C37', red: '#F6EEDC', gold: '#0E2A1F' };
+// Campaign colours: Spruce #343F37, Pine #736E52, Brass #B18854, Cranberry #6C151E, Eggnog #CFC3B0
+const BG = { cream: '#F4EEE3', red: '#6C151E', gold: '#B18854' };
+const FG = { cream: '#6C151E', red: '#F4EEE3', gold: '#241C14' };
 
 function topY() { return STYLE === 'tiers' ? 8.0 : CONE.top; }
 
@@ -78,16 +79,16 @@ function drawGiftCard(lines) {
   const W = 256, H = 320;
   const cv = makeCanvas(W, H);
   const x = cv.getContext('2d');
-  x.fillStyle = '#F6EEDC';
+  x.fillStyle = '#F4EEE3';
   x.fillRect(0, 0, W, H);
-  x.strokeStyle = '#E3B45A';
+  x.strokeStyle = '#B18854';
   x.lineWidth = 10;
   x.strokeRect(14, 14, W - 28, H - 28);
-  x.fillStyle = 'rgba(14,42,31,0.55)';
+  x.fillStyle = 'rgba(52,63,55,0.55)';
   x.beginPath(); x.arc(W / 2, 40, 9, 0, TAU); x.fill();
   x.save();
   x.translate(W / 2, 128);
-  x.fillStyle = '#E3B45A';
+  x.fillStyle = '#B18854';
   x.beginPath();
   for (let i = 0; i < 10; i++) {
     const r = i % 2 ? 22 : 52;
@@ -96,11 +97,29 @@ function drawGiftCard(lines) {
   }
   x.closePath(); x.fill();
   x.restore();
-  x.fillStyle = '#AB2C37';
+  x.fillStyle = '#6C151E';
   x.font = '700 30px "TP Sans","Noto Sans",system-ui,sans-serif';
   x.textAlign = 'center';
   x.fillText(lines[0], W / 2, 232);
   x.fillText(lines[1], W / 2, 268);
+  return cv;
+}
+
+// The label on the front of the prize gift
+function drawPrizeLabel(text) {
+  const W = 320, H = 128;
+  const cv = makeCanvas(W, H);
+  const x = cv.getContext('2d');
+  x.fillStyle = '#F4EEE3';
+  x.fillRect(0, 0, W, H);
+  x.strokeStyle = '#B18854';
+  x.lineWidth = 8;
+  x.strokeRect(8, 8, W - 16, H - 16);
+  x.fillStyle = '#6C151E';
+  x.font = '700 52px "TP Sans","Noto Sans",system-ui,sans-serif';
+  x.textAlign = 'center';
+  x.textBaseline = 'middle';
+  x.fillText(text, W / 2, H / 2 + 3, W - 36);
   return cv;
 }
 
@@ -116,13 +135,13 @@ function drawTag(color, charm, back) {
   g.addColorStop(1, 'rgba(0,0,0,0.14)');
   x.fillStyle = g;
   x.fillRect(0, 0, W, H);
-  x.strokeStyle = color === 'cream' ? 'rgba(171,44,55,0.35)' : 'rgba(246,238,220,0.5)';
+  x.strokeStyle = color === 'cream' ? 'rgba(108,21,30,0.35)' : 'rgba(244,238,227,0.5)';
   x.lineWidth = 4;
   x.strokeRect(12, 12, W - 24, H - 24);
   // eyelet
-  x.fillStyle = 'rgba(14,42,31,0.6)';
+  x.fillStyle = 'rgba(52,63,55,0.6)';
   x.beginPath(); x.arc(W / 2, 32, 9, 0, TAU); x.fill();
-  x.strokeStyle = '#C9A36B';
+  x.strokeStyle = '#B18854';
   x.lineWidth = 4;
   x.beginPath(); x.arc(W / 2, 32, 12, 0, TAU); x.stroke();
   if (!back) {
@@ -139,7 +158,7 @@ function drawTag(color, charm, back) {
     x.restore();
   } else {
     // the back looks like handwriting
-    x.strokeStyle = color === 'cream' ? 'rgba(24,51,38,0.28)' : 'rgba(246,238,220,0.4)';
+    x.strokeStyle = color === 'cream' ? 'rgba(52,63,55,0.28)' : 'rgba(244,238,227,0.4)';
     x.lineWidth = 7;
     x.lineCap = 'round';
     [[100, 0.72], [132, 0.58], [164, 0.66], [196, 0.4]].forEach(([y, f]) => {
@@ -154,9 +173,9 @@ function drawLeader(initials, photo) {
   const cv = makeCanvas(S, S);
   const x = cv.getContext('2d');
   const g = x.createRadialGradient(S * 0.36, S * 0.32, S * 0.04, S / 2, S / 2, S * 0.52);
-  g.addColorStop(0, '#FCE6A8');
-  g.addColorStop(0.55, '#E3B45A');
-  g.addColorStop(1, '#B4842F');
+  g.addColorStop(0, '#EBD0A2');
+  g.addColorStop(0.55, '#B18854');
+  g.addColorStop(1, '#7E5B2B');
   x.fillStyle = g;
   x.fillRect(0, 0, S, S);
   if (photo) {
@@ -169,11 +188,11 @@ function drawLeader(initials, photo) {
     x.drawImage(photo, S / 2 - (iw * k) / 2, S / 2 - (ih * k) / 2, iw * k, ih * k);
     x.restore();
   }
-  x.strokeStyle = '#F7DA8E';
+  x.strokeStyle = '#D9B983';
   x.lineWidth = 10;
   x.beginPath(); x.arc(S / 2, S / 2, S / 2 - 18, 0, TAU); x.stroke();
   if (!photo) {
-    x.fillStyle = '#0E2A1F';
+    x.fillStyle = '#241C14';
     x.font = '700 88px "TP Sans","Noto Sans",system-ui,sans-serif';
     x.textAlign = 'center';
     x.textBaseline = 'middle';
@@ -181,13 +200,13 @@ function drawLeader(initials, photo) {
   }
   // red star badge
   const bx = S * 0.7, by = S * 0.72;
-  x.fillStyle = '#AB2C37';
+  x.fillStyle = '#6C151E';
   x.beginPath(); x.arc(bx, by, 30, 0, TAU); x.fill();
   const star = new Path2D(C.STAR_D);
   x.save();
   x.translate(bx - 12 * 1.7, by - 12 * 1.7);
   x.scale(1.7, 1.7);
-  x.fillStyle = '#F6EEDC';
+  x.fillStyle = '#F4EEE3';
   x.fill(star);
   x.restore();
   return cv;
@@ -304,7 +323,7 @@ export function createTree3D(container, opts = {}) {
   camera.lookAt(0, 4.15, 0);
 
   /* lights */
-  scene.add(new THREE.HemisphereLight(0xfff3dc, 0x0b231a, 1.25));
+  scene.add(new THREE.HemisphereLight(0xfff3dc, 0x343f37, 1.25));
   const key = new THREE.DirectionalLight(0xfff1d8, 2.1);
   key.position.set(-6, 10, 10);
   scene.add(key);
@@ -323,7 +342,7 @@ export function createTree3D(container, opts = {}) {
   scene.add(world);
 
   const glowTex = toTex(drawGlow());
-  const shadowTex = toTex(drawSoftDisc('rgba(0,0,0,0.55)', 'rgba(0,0,0,0)'));
+  const shadowTex = toTex(drawSoftDisc('rgba(59,47,34,0.42)', 'rgba(59,47,34,0)'));
   const snowTex = toTex(drawSoftDisc('rgba(255,255,255,1)', 'rgba(255,255,255,0)'));
 
   // ground shadow, a simple planter and the trunk
@@ -331,10 +350,10 @@ export function createTree3D(container, opts = {}) {
   shadow.rotation.x = -Math.PI / 2;
   shadow.position.y = 0.005;
   world.add(shadow);
-  const planter = new THREE.Mesh(new THREE.CylinderGeometry(0.62, 0.5, 0.62, 48), new THREE.MeshStandardMaterial({ color: 0xefe5cf, roughness: 0.55 }));
+  const planter = new THREE.Mesh(new THREE.CylinderGeometry(0.62, 0.5, 0.62, 48), new THREE.MeshStandardMaterial({ color: 0xf4eee3, roughness: 0.55 }));
   planter.position.y = 0.31;
   world.add(planter);
-  const band = new THREE.Mesh(new THREE.TorusGeometry(0.62, 0.025, 10, 64), new THREE.MeshStandardMaterial({ color: 0xe3b45a, metalness: 0.8, roughness: 0.3 }));
+  const band = new THREE.Mesh(new THREE.TorusGeometry(0.62, 0.025, 10, 64), new THREE.MeshStandardMaterial({ color: 0xb18854, metalness: 0.8, roughness: 0.3 }));
   band.rotation.x = Math.PI / 2;
   band.position.y = 0.6;
   world.add(band);
@@ -363,14 +382,14 @@ export function createTree3D(container, opts = {}) {
     foliage.push(m);
   } else {
     // a tree made of light: a dark core with strands of tiny lights spiralling round it
-    const core = new THREE.Mesh(new THREE.ConeGeometry(CONE.r * 0.8, (CONE.top - CONE.y0) * 0.97, 64, 1, true), new THREE.MeshStandardMaterial({ color: 0x0c2c1f, roughness: 1, side: THREE.DoubleSide }));
+    const core = new THREE.Mesh(new THREE.ConeGeometry(CONE.r * 0.8, (CONE.top - CONE.y0) * 0.97, 64, 1, true), new THREE.MeshStandardMaterial({ color: 0x2c362f, roughness: 1, side: THREE.DoubleSide }));
     core.position.y = CONE.y0 + ((CONE.top - CONE.y0) * 0.97) / 2;
     world.add(core);
     foliage.push(core);
     const STRANDS = 9, PER = 150;
     const pts = new Float32Array(STRANDS * PER * 3);
     const cols = new Float32Array(STRANDS * PER * 3);
-    const warm = [new THREE.Color('#FFF1C9'), new THREE.Color('#FFD98A'), new THREE.Color('#F2C766'), new THREE.Color('#7FD8A8')];
+    const warm = [new THREE.Color('#FFF1C9'), new THREE.Color('#FFD98A'), new THREE.Color('#E8B86A'), new THREE.Color('#E58A93')];
     const pr = C.random(9);
     let n = 0;
     for (let k = 0; k < STRANDS; k++) {
@@ -395,7 +414,7 @@ export function createTree3D(container, opts = {}) {
   const starGroup = new THREE.Group();
   starGroup.position.y = topY() + 0.38;
   scene.add(starGroup);
-  const star = new THREE.Mesh(makeStarGeometry(), new THREE.MeshStandardMaterial({ color: 0xf2c766, emissive: 0xf2b640, emissiveIntensity: 0.9, metalness: 0.55, roughness: 0.3 }));
+  const star = new THREE.Mesh(makeStarGeometry(), new THREE.MeshStandardMaterial({ color: 0xd9ad62, emissive: 0xc99a55, emissiveIntensity: 0.75, metalness: 0.55, roughness: 0.3 }));
   starGroup.add(star);
   const starGlowMat = new THREE.SpriteMaterial({ map: glowTex, color: 0xffd98a, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true });
   const starGlow = new THREE.Sprite(starGlowMat);
@@ -484,14 +503,18 @@ export function createTree3D(container, opts = {}) {
     g.rotation.y = rotY;
     ground.add(g);
   }
-  // Gifts that can hide something. The left pair holds the hidden wishes (opts.secrets: 'red', 'gold'),
-  // the right pair holds leaders' messages (giftLeaders in setData). They open when the mouse rests on them
-  // or when they're tapped; until something is put inside, they're ordinary gifts.
+  // Gifts that can hide something. The small pair on the left holds the hidden wishes (opts.secrets: 'red', 'gold');
+  // the big one on the right is the prize for the most-liked wishes (opts.prize), and it keeps moving a little;
+  // the two small ones in front hold leaders' messages if any are set to 'gift'. They open when the mouse rests
+  // on them or when they're tapped; until something is put inside, they're ordinary gifts.
+  const PRIZE_CFG = Object.assign({ winners: 5, amount: 'RM 100' }, (C.PRIZE || {}));
+  const prizeTag = opts.prizeTag || (PRIZE_CFG.winners + ' x ' + PRIZE_CFG.amount);
   const GIFT_SLOTS = {
-    red: { x: -1.85, z: 1.5, rot: -0.35, W: 0.94, H: 0.7, D: 0.82, color: 0xab2c37, ribbon: 0xe3b45a, words: ['A wish', 'for you'] },
-    gold: { x: -2.75, z: 0.42, rot: -0.65, W: 0.72, H: 0.82, D: 0.7, color: 0xe3b45a, ribbon: 0xab2c37, words: ['Where it', 'all began'] },
-    green: { x: 1.85, z: 1.5, rot: 0.35, W: 0.88, H: 0.68, D: 0.8, color: 0x1e573d, ribbon: 0xe3b45a, words: ['A message', 'for you'] },
-    cream: { x: 2.75, z: 0.42, rot: 0.65, W: 0.76, H: 0.78, D: 0.72, color: 0xf6eedc, ribbon: 0xab2c37, words: ['A message', 'for you'] }
+    red: { x: -1.75, z: 1.6, rot: -0.35, W: 0.62, H: 0.5, D: 0.56, color: 0x6c151e, ribbon: 0xb18854, words: ['A wish', 'for you'] },
+    gold: { x: -2.45, z: 0.7, rot: -0.6, W: 0.5, H: 0.58, D: 0.48, color: 0xb18854, ribbon: 0x6c151e, words: ['Where it', 'all began'] },
+    prize: { x: 2.0, z: 1.2, rot: 0.38, W: 1.25, H: 0.98, D: 1.1, color: 0x6c151e, ribbon: 0xc99a55, words: [prizeTag, 'gift cards'], prize: true },
+    green: { x: 0.2, z: 2.1, rot: 0.9, W: 0.5, H: 0.42, D: 0.5, color: 0x343f37, ribbon: 0xb18854, words: ['A message', 'for you'] },
+    cream: { x: -0.8, z: 2.2, rot: 0.7, W: 0.42, H: 0.36, D: 0.42, color: 0xf4eee3, ribbon: 0x6c151e, words: ['A message', 'for you'] }
   };
   const LEADER_GIFT_SLOTS = ['green', 'cream'];
   const wanted = Array.isArray(opts.secrets) ? opts.secrets : (opts.secret ? ['red'] : []);
@@ -517,11 +540,20 @@ export function createTree3D(container, opts = {}) {
     lidInner.position.set(0, 0, D / 2 + 0.02);
     lid.add(lidInner);
     ribbonBox(lidInner, W + 0.05, LID, D + 0.05, 0, boxMat, ribMat, tag);
-    bow(lidInner, LID, ribMat, tag, 1.35);
+    bow(lidInner, LID, ribMat, tag, c.prize ? 2.4 : 1.35);
     g.add(lid);
+    if (c.prize) {
+      // "5 x RM 100" on the front, so it reads as the prize from across the room
+      const label = new THREE.Mesh(new THREE.PlaneGeometry(W * 0.62, W * 0.62 * 0.4),
+        new THREE.MeshStandardMaterial({ map: toTex(drawPrizeLabel(prizeTag)), roughness: 0.6 }));
+      label.position.set(0, (H - LID) * 0.48, D / 2 + 0.012);
+      label.userData = tag;
+      g.add(label);
+      giftMeshes.push(label);
+    }
     // the card that rises out
     const cardMat = new THREE.MeshStandardMaterial({ map: toTex(drawGiftCard(c.words)), roughness: 0.7, side: THREE.DoubleSide, emissive: 0x3a2a10, emissiveIntensity: 0.6 });
-    const card = new THREE.Mesh(new THREE.PlaneGeometry(0.64, 0.8), cardMat);
+    const card = new THREE.Mesh(new THREE.PlaneGeometry(c.prize ? 0.8 : 0.64, c.prize ? 1.0 : 0.8), cardMat);
     card.userData = tag;
     card.visible = false;
     g.add(card);
@@ -545,10 +577,11 @@ export function createTree3D(container, opts = {}) {
     ground.add(g);
     // sparkles take turns, so two gifts never flash together
     return { slot, tag, words: c.words.join('|'), g, lid, card, cardMat, inner, glowMat, sparkMat, light, H, LID,
-      open: 0, target: 0, wig: 0, wigVel: 0, sparkOffset: n * 2.25 };
+      open: 0, target: 0, wig: 0, wigVel: 0, sparkOffset: n * 2.25, prize: !!c.prize, baseY: 0 };
   }
   Object.keys(GIFT_SLOTS).forEach((slot, n) => gifts.set(slot, makeGiftSlot(slot, GIFT_SLOTS[slot], n)));
   wanted.forEach((id) => { const gg = gifts.get(id); if (gg) { gg.tag.kind = 'secret'; gg.tag.id = id; } });
+  if (opts.prize) { const pg = gifts.get('prize'); pg.tag.kind = 'prize'; pg.tag.id = 'prize'; }
   function giftFor(kind, id) {
     if (!kind) return null;
     for (const gg of gifts.values()) if (gg.tag.kind === kind && gg.tag.id === String(id)) return gg;
@@ -573,10 +606,8 @@ export function createTree3D(container, opts = {}) {
       if (!L) gg.target = 0;
     });
   }
-  gift(0.1, 1.85, 0.5, 0.42, 0.5, 0xf6eedc, 0xab2c37, 0.9);
-  gift(-0.95, -1.45, 0.65, 0.5, 0.55, 0x1e573d, 0xe3b45a, 0.2);
-  gift(1.2, -1.6, 0.5, 0.62, 0.5, 0xf6eedc, 0x1e573d, -0.6);
-  gift(-0.75, 2.05, 0.42, 0.34, 0.42, 0xab2c37, 0xf6eedc, 0.7);
+  gift(-0.95, -1.45, 0.65, 0.5, 0.55, 0x343f37, 0xb18854, 0.2);
+  gift(1.2, -1.6, 0.5, 0.62, 0.5, 0xf4eee3, 0x343f37, -0.6);
   function nudgeGift(gg, strength) {
     if (gg) gg.wigVel += (Math.random() < 0.5 ? -1 : 1) * strength;
   }
@@ -601,8 +632,8 @@ export function createTree3D(container, opts = {}) {
   /* ---------- Tags and leaders ---------- */
   const tagGeo = new THREE.BoxGeometry(TAG.w, TAG.h, TAG.d);
   const stringGeo = new THREE.CylinderGeometry(0.006, 0.006, 1, 4);
-  const stringMat = new THREE.MeshBasicMaterial({ color: 0xd9c59a });
-  const goldStringMat = new THREE.MeshBasicMaterial({ color: 0xf2c766 });
+  const stringMat = new THREE.MeshBasicMaterial({ color: 0xa89b78 });
+  const goldStringMat = new THREE.MeshBasicMaterial({ color: 0xc99a55 });
   const selGlowMat = new THREE.SpriteMaterial({ map: glowTex, color: 0xffd27a, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0.85 });
   const matCache = new Map();
   function tagMaterials(color, charm) {
@@ -699,8 +730,8 @@ export function createTree3D(container, opts = {}) {
 
   const discGeo = new THREE.CylinderGeometry(0.3, 0.3, 0.06, 48);
   const ringGeo = new THREE.TorusGeometry(0.3, 0.028, 12, 48);
-  const leaderGold = new THREE.MeshStandardMaterial({ color: 0xe3b45a, metalness: 0.75, roughness: 0.28 });
-  const leaderCapMat = new THREE.MeshStandardMaterial({ color: 0xab2c37, metalness: 0.4, roughness: 0.35 });
+  const leaderGold = new THREE.MeshStandardMaterial({ color: 0xb18854, metalness: 0.75, roughness: 0.28 });
+  const leaderCapMat = new THREE.MeshStandardMaterial({ color: 0x6c151e, metalness: 0.4, roughness: 0.35 });
   const leaderCapGeo = new THREE.CylinderGeometry(0.06, 0.06, 0.07, 14);
 
   // The CEO's ornament hangs at the front, right under the star and higher than everyone else. The other
@@ -759,7 +790,7 @@ export function createTree3D(container, opts = {}) {
       const outer = new THREE.Mesh(new THREE.TorusGeometry(0.37, 0.014, 10, 64), leaderGold);
       card.add(outer);
     }
-    const halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: 0xf2c766, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: spot.ceo ? 0.6 : 0.45 }));
+    const halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: 0xd9ad62, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: spot.ceo ? 0.6 : 0.45 }));
     halo.scale.set(1.15, 1.15, 1);
     halo.position.z = -0.08;
     card.add(halo);
@@ -989,16 +1020,16 @@ export function createTree3D(container, opts = {}) {
         hoverKey = k;
         hitEl.style.cursor = k ? 'pointer' : 'grab';
         if (hit) { poke(hit.kind, hit.id, 4.5); markInteract(); }
-        // resting the mouse on the hidden gift opens it (a short pause, so just passing over doesn't)
+        // resting the mouse on a tag, an ornament or a gift opens it (a short pause, so passing over doesn't)
         clearTimeout(giftHoverTimer);
-        const hg = hit ? giftFor(hit.kind, hit.id) : null;
-        if (hg) {
+        if (hit) {
           const hk = hit.kind, hid = hit.id;
           giftHoverTimer = setTimeout(() => {
             if (hoverKey !== k || down) return;
-            hg.target = 1;
-            if (selectedKey !== k && typeof onSelect === 'function') onSelect(hk, hid);
-          }, 220);
+            const hg = giftFor(hk, hid);
+            if (hg) hg.target = 1;
+            if (selectedKey !== k && typeof onSelect === 'function') onSelect(hk, hid, { hover: true });
+          }, 260);
         }
       }
     }
@@ -1123,6 +1154,14 @@ export function createTree3D(container, opts = {}) {
       const o = sg.open;
       const ease = 1 - Math.pow(1 - o, 3);
       sg.g.rotation.z = sg.wig * 0.06;
+      if (sg.prize && sg.tag.kind && !reduce) {
+        // the prize gift hops and wiggles every few seconds while it's closed
+        const ph = (t % 3.2) / 3.2;
+        const hop = ph > 0.62 && ph < 0.9 ? Math.sin(((ph - 0.62) / 0.28) * Math.PI) : 0;
+        const still = 1 - Math.min(1, o * 1.5);
+        sg.g.position.y = (0.16 * hop + 0.015 * Math.sin(t * 2.1)) * still;
+        sg.g.rotation.z += (0.07 * hop * Math.sin(t * 18) + 0.02 * Math.sin(t * 1.7)) * still;
+      }
       sg.lid.rotation.x = -1.95 * ease - Math.abs(sg.wig) * 0.12;
       sg.card.visible = o > 0.03;
       // the card rises up and a little forward, tilted towards you

@@ -2,10 +2,13 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<!-- Security: only this site, Supabase, Google Fonts and (if set) Google Analytics can be used by the page -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://*.supabase.co https://www.googletagmanager.com https://*.google-analytics.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>TV · TP Wish Tree 2026</title>
 <meta name="robots" content="noindex, nofollow">
-<meta name="theme-color" content="#0E2A1F">
+<meta name="theme-color" content="#CFC3B0">
 <link rel="icon" type="image/png" href="../assets/tp-logo-white.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,10 +22,12 @@
 /* The whole screen is drawn on a 120 x 67.5 rem canvas (16:9) that scales to any TV.
    1rem = 16px on a 1920 x 1080 screen. */
 :root{
-  --bg:#0E2A1F; --bg-2:#11302A; --bg-3:#0B231A;
-  --cream:#F6EEDC; --cream-2:#DCD3BF; --cream-3:#B9B19E;
-  --gold:#E3B45A; --gold-2:#F2C766; --carmine:#AB2C37; --ink:#183326;
-  --line:rgba(246,238,220,.14);
+  /* Campaign colours: Spruce, Pine, Brass, Cranberry, Eggnog. Screen is Eggnog, writing is Cranberry. */
+  --spruce:#343F37; --pine:#736E52; --brass:#B18854; --cran:#6C151E; --paper:#F4EEE3;
+  --bg:#CFC3B0; --bg-2:#C7BAA5; --bg-3:#C2B5A0;
+  --cream:#6C151E; --cream-2:#5B3A33; --cream-3:#5E5045;
+  --gold:#674A20; --gold-2:#7E5B2B; --carmine:#6C151E; --ink:#343F37;
+  --line:rgba(108,21,30,.16);
   --font:'TP Sans','Noto Sans','Noto Sans Thai',Calibri,system-ui,sans-serif;
   --script:'Great Vibes',cursive;
 }
@@ -39,9 +44,9 @@ body{cursor:default}
 body.idle,body.idle *{cursor:none !important}
 
 .backdrop{position:fixed;inset:0;background:
-  radial-gradient(60% 75% at 26% 58%,rgba(227,180,90,.16),rgba(227,180,90,0) 60%),
-  radial-gradient(90% 80% at 70% 0%,#163B2E 0%,rgba(22,59,46,0) 60%),
-  linear-gradient(180deg,#0F2D22 0%,#0B231A 100%)}
+  radial-gradient(60% 75% at 26% 58%,rgba(255,246,226,.55),rgba(255,246,226,0) 60%),
+  radial-gradient(90% 80% at 70% 0%,#D8CDBB 0%,rgba(216,205,187,0) 60%),
+  linear-gradient(180deg,#D3C8B6 0%,#C6B9A4 100%)}
 #snow{position:fixed;inset:0;width:100%;height:100%;pointer-events:none}
 
 .stage{position:fixed;left:50%;top:50%;width:120rem;height:67.5rem;transform:translate(-50%,-50%);display:grid;grid-template-rows:8rem minmax(0,1fr);overflow:hidden}
@@ -51,7 +56,7 @@ html.portrait .stage{width:67.5rem;height:120rem}
 .top{display:flex;align-items:center;justify-content:space-between;gap:3rem;padding:0 4rem;border-bottom:1px solid var(--line)}
 .brand{display:flex;align-items:center;gap:1.5rem;min-width:0}
 .logo{height:3.6rem;width:auto;display:block}
-.divider{width:1px;height:2.6rem;background:rgba(246,238,220,.3)}
+.divider{width:1px;height:2.6rem;background:rgba(108,21,30,.3)}
 .brand-name{font-size:2rem;font-weight:500;white-space:nowrap}
 .site{flex:1;min-width:0;text-align:center}
 .site-eyebrow{font-size:1.1rem;font-weight:500;letter-spacing:.16em;color:var(--gold)}
@@ -61,7 +66,7 @@ html.portrait .stage{width:67.5rem;height:120rem}
 .live .dot{width:1rem;height:1rem;border-radius:50%;background:#00D769;box-shadow:0 0 0 0 rgba(0,215,105,.6);animation:pulse 2s infinite}
 .live.off .dot{background:#FF9F5A;animation:none}
 @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(0,215,105,.55)}70%{box-shadow:0 0 0 .9rem rgba(0,215,105,0)}100%{box-shadow:0 0 0 0 rgba(0,215,105,0)}}
-.demo{padding:.45rem 1.1rem;border-radius:999px;background:#F2C766;color:#0E2A1F;font-size:1.2rem;font-weight:700;letter-spacing:.08em}
+.demo{padding:.45rem 1.1rem;border-radius:999px;background:#B18854;color:#241C14;font-size:1.2rem;font-weight:700;letter-spacing:.08em}
 .sample{flex:none;display:inline-flex;align-items:center;padding:.5rem 1.2rem;border-radius:999px;border:.15rem dashed var(--card-line);color:var(--card-sub);font-size:1.2rem;font-weight:700;letter-spacing:.1em}
 
 /* main */
@@ -82,24 +87,40 @@ html.portrait .tree-box{height:49rem}
 
 .msg-col{display:flex;flex-direction:column;min-height:0;min-width:0}
 .card-stage{position:relative;flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;padding-top:0}
-.string{flex:none;width:2px;height:2.6rem;background:#D9C59A;opacity:.8}
-.card-stage[data-kind="leader"] .string{background:var(--gold-2)}
+.string{flex:none;width:2px;height:2.6rem;background:#8E8467;opacity:.9}
+.card-stage[data-kind="leader"] .string,.card-stage[data-kind="prize"] .string{background:var(--brass)}
 
 .card{
-  --card-bg:#F6EEDC; --card-ink:#183326; --card-kicker:#AB2C37; --card-sub:#4B4C6A; --card-line:rgba(24,51,38,.25);
-  --card-avatar-bg:#0E2A1F; --card-avatar-fg:#E3B45A; --card-pill-bg:#AB2C37; --card-pill-fg:#F6EEDC;
+  --card-bg:#F4EEE3; --card-ink:#343F37; --card-kicker:#6C151E; --card-sub:#5A5550; --card-line:rgba(52,63,55,.25);
+  --card-avatar-bg:#343F37; --card-avatar-fg:#D9B77E; --card-pill-bg:#6C151E; --card-pill-fg:#F4EEE3;
   position:relative;flex:1;min-height:0;width:100%;display:flex;flex-direction:column;
   padding:4rem 4.4rem 2.6rem;border-radius:.8rem .8rem 1.4rem 1.4rem;border:.2rem solid transparent;
-  background:var(--card-bg);color:var(--card-ink);box-shadow:0 2.4rem 5rem rgba(0,0,0,.4);
+  background:var(--card-bg);color:var(--card-ink);box-shadow:0 2.4rem 5rem rgba(59,47,34,.3);
   transform-origin:50% -2.6rem;transition:background-color .4s ease,color .4s ease
 }
-.card[data-color="red"]{--card-bg:#AB2C37;--card-ink:#F6EEDC;--card-kicker:#F2C766;--card-sub:#F6EEDC;--card-line:rgba(246,238,220,.35);--card-pill-bg:#F6EEDC;--card-pill-fg:#AB2C37}
-.card[data-color="gold"]{--card-bg:#E3B45A;--card-ink:#0E2A1F;--card-kicker:#0E2A1F;--card-sub:#183326;--card-line:rgba(14,42,31,.3);--card-pill-bg:#0E2A1F;--card-pill-fg:#F2C766}
-.card[data-kind="leader"]{--card-bg:#0B231A;--card-ink:#F6EEDC;--card-kicker:#F2C766;--card-sub:#DCD3BF;--card-line:rgba(242,199,102,.35);--card-avatar-bg:#E3B45A;--card-avatar-fg:#0E2A1F;--card-pill-bg:#E3B45A;--card-pill-fg:#0E2A1F;border-color:#E3B45A;border-radius:1.8rem;box-shadow:0 0 0 .8rem rgba(227,180,90,.12),0 2.4rem 5rem rgba(0,0,0,.5)}
-.hole{position:absolute;top:1.6rem;left:50%;width:1.2rem;height:1.2rem;margin-left:-.6rem;border-radius:50%;background:#0E2A1F;opacity:.55}
-.card[data-kind="leader"] .hole{background:var(--gold);opacity:.85}
-.badge{display:none;position:absolute;top:-1.8rem;left:3rem;align-items:center;gap:.7rem;padding:.6rem 1.4rem;border-radius:999px;background:var(--gold);color:var(--bg);font-size:1.2rem;font-weight:700;letter-spacing:.12em}
-.card[data-kind="leader"] .badge{display:inline-flex}
+.card[data-color="red"]{--card-bg:#6C151E;--card-ink:#F4EEE3;--card-kicker:#E2BF85;--card-sub:#F4EEE3;--card-line:rgba(244,238,227,.35);--card-pill-bg:#F4EEE3;--card-pill-fg:#6C151E;--card-avatar-bg:#B18854;--card-avatar-fg:#241C14}
+.card[data-color="gold"]{--card-bg:#B18854;--card-ink:#241C14;--card-kicker:#3D0B10;--card-sub:#241C14;--card-line:rgba(36,28,20,.3);--card-pill-bg:#343F37;--card-pill-fg:#D9B77E}
+.card[data-kind="leader"]{--card-bg:#343F37;--card-ink:#F4EEE3;--card-kicker:#D9B77E;--card-sub:#CFC3B0;--card-line:rgba(217,183,126,.35);--card-avatar-bg:#B18854;--card-avatar-fg:#241C14;--card-pill-bg:#B18854;--card-pill-fg:#241C14;border-color:#B18854;border-radius:1.8rem;box-shadow:0 0 0 .8rem rgba(177,136,84,.18),0 2.4rem 5rem rgba(59,47,34,.35)}
+.hole{position:absolute;top:1.6rem;left:50%;width:1.2rem;height:1.2rem;margin-left:-.6rem;border-radius:50%;background:#343F37;opacity:.55}
+.card[data-kind="leader"] .hole,.card[data-kind="prize"] .hole{background:var(--brass);opacity:.9}
+.badge{display:none;position:absolute;top:-1.8rem;left:3rem;align-items:center;gap:.7rem;padding:.6rem 1.4rem;border-radius:999px;background:#B18854;color:#241C14;font-size:1.2rem;font-weight:700;letter-spacing:.12em}
+.card[data-kind="leader"] .badge,.card[data-kind="prize"] .badge{display:inline-flex}
+/* the prize slide */
+.card[data-kind="prize"]{--card-bg:#6C151E;--card-ink:#F4EEE3;--card-kicker:#E2BF85;--card-sub:#E9DCCB;--card-line:rgba(226,191,133,.4);border-color:#C99A55;border-radius:1.8rem;box-shadow:0 0 0 .8rem rgba(177,136,84,.22),0 2.4rem 5rem rgba(59,47,34,.35)}
+.prize-tv{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:flex-start;gap:1rem;padding:1.2rem 0 0;overflow:hidden}
+.pz-title{font-size:3rem;font-weight:700;line-height:1.1}
+.pz-text{font-size:1.6rem;line-height:1.4;color:var(--card-sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pz-list{margin:.3rem 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:.4rem}
+.pz-list li{display:flex;align-items:center;gap:1.2rem;padding:.25rem 1.2rem;border-radius:1rem;background:rgba(244,238,227,.1);font-size:1.9rem}
+.pz-list .n{flex:none;display:flex;align-items:center;justify-content:center;width:2.4rem;height:2.4rem;border-radius:50%;background:#C99A55;color:#241C14;font-weight:700;font-size:1.5rem}
+.pz-list .who{flex:1;min-width:0;font-size:1.9rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pz-list .site{flex:none;max-width:40%;font-size:1.4rem;color:var(--card-sub);text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pz-list .lk{flex:none;display:inline-flex;align-items:center;gap:.5rem;font-weight:700;font-variant-numeric:tabular-nums}
+.pz-list .lk svg{width:1.9rem;height:1.9rem;fill:#F4EEE3}
+.pz-empty{font-size:1.9rem;line-height:1.4;color:var(--card-sub)}
+html.portrait .pz-text{display:none}
+html.portrait .pz-title{font-size:2.6rem}
+html.portrait .prize-tv{gap:.6rem;padding-top:.6rem}
 .card-top{flex:none;display:flex;align-items:center;justify-content:space-between;gap:1.5rem}
 .kicker{font-size:1.4rem;font-weight:500;letter-spacing:.14em;color:var(--card-kicker)}
 .fresh{flex:none;display:inline-flex;align-items:center;gap:.6rem;padding:.5rem 1.2rem;border-radius:999px;background:var(--card-pill-bg);color:var(--card-pill-fg);font-size:1.2rem;font-weight:700;letter-spacing:.06em}
@@ -107,24 +128,24 @@ html.portrait .tree-box{height:49rem}
 .text{margin:0;width:100%;font-size:3.6rem;line-height:1.38;font-weight:400;white-space:pre-line;overflow-wrap:anywhere}
 .card[data-kind="leader"] .text{font-weight:300}
 /* the CEO's message: a letter on ivory paper with a gold double frame and a signature */
-.card[data-ceo="true"]{--card-bg:#FBF6EA;--card-ink:#0E2A1F;--card-kicker:#AB2C37;--card-sub:#4B4C6A;--card-line:rgba(171,44,55,.28);--card-avatar-bg:#E3B45A;--card-avatar-fg:#0E2A1F;border:.25rem solid #E3B45A;border-radius:2rem;box-shadow:inset 0 0 0 .8rem #FBF6EA,inset 0 0 0 .95rem rgba(227,180,90,.75),0 0 0 .8rem rgba(227,180,90,.2),0 2.4rem 5rem rgba(0,0,0,.5)}
+.card[data-ceo="true"]{--card-bg:#F4EEE3;--card-ink:#343F37;--card-kicker:#6C151E;--card-sub:#5A5550;--card-line:rgba(108,21,30,.28);--card-avatar-bg:#B18854;--card-avatar-fg:#241C14;border:.25rem solid #B18854;border-radius:2rem;box-shadow:inset 0 0 0 .8rem #F4EEE3,inset 0 0 0 .95rem rgba(177,136,84,.75),0 0 0 .8rem rgba(177,136,84,.2),0 2.4rem 5rem rgba(59,47,34,.35)}
 .card[data-ceo="true"] .text{font-weight:400}
-.card[data-ceo="true"] .who{font-family:var(--script);font-size:4rem;font-weight:400;line-height:1;color:#AB2C37;overflow:visible}
-.card[data-ceo="true"] .badge{background:#0E2A1F;color:#F2C766;box-shadow:0 0 0 .2rem #E3B45A}
-.card[data-ceo="true"] .hole{background:#E3B45A;opacity:1}
-.card-stage[data-ceo="true"] .string{background:#E3B45A;width:3px}
+.card[data-ceo="true"] .who{font-family:var(--script);font-size:4rem;font-weight:400;line-height:1;color:#6C151E;overflow:visible}
+.card[data-ceo="true"] .badge{background:#343F37;color:#D9B77E;box-shadow:0 0 0 .2rem #B18854}
+.card[data-ceo="true"] .hole{background:#B18854;opacity:1}
+.card-stage[data-ceo="true"] .string{background:#B18854;width:3px}
 .text:lang(th){line-height:1.55}
 .foot{flex:none;display:flex;align-items:center;gap:1.6rem;padding-top:1.8rem;border-top:.15rem dashed var(--card-line)}
 .avatar{flex:none;display:flex;align-items:center;justify-content:center;width:4.8rem;height:4.8rem;border-radius:50%;background:var(--card-avatar-bg);color:var(--card-avatar-fg);font-size:1.9rem;font-weight:700}
 .avatar svg{width:2.8rem;height:2.8rem}
 .avatar img{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block}
-.avatar.has-photo{box-shadow:0 0 0 .25rem #E3B45A}
+.avatar.has-photo{box-shadow:0 0 0 .25rem #B18854}
 .who-box{min-width:0}
 .who{font-size:2.1rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .where{margin-top:.3rem;font-size:1.6rem;color:var(--card-sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .likes{margin-left:auto;flex:none;display:inline-flex;align-items:center;gap:.8rem;padding:.8rem 1.6rem;border:.15rem solid var(--card-line);border-radius:999px;font-size:2rem;font-weight:700;font-variant-numeric:tabular-nums}
-.likes svg{width:2.2rem;height:2.2rem;fill:#E04C5C}
-.card[data-color="red"] .likes svg{fill:#F6EEDC}
+.likes svg{width:2.2rem;height:2.2rem;fill:#B3263A}
+.card[data-color="red"] .likes svg{fill:#F4EEE3}
 
 /* change of message */
 .card.leaving{opacity:0;transform:translateY(1.6rem) scale(.985);transition:opacity .45s ease,transform .45s ease}
@@ -137,15 +158,15 @@ html.portrait .tree-box{height:49rem}
   100%{transform:rotate(0)}
 }
 
-.progress{flex:none;height:.4rem;margin:1.8rem 0 0;border-radius:999px;background:rgba(246,238,220,.12);overflow:hidden}
-.progress span{display:block;height:100%;background:var(--gold);transform-origin:0 50%;transform:scaleX(0)}
+.progress{flex:none;height:.4rem;margin:1.8rem 0 0;border-radius:999px;background:rgba(108,21,30,.12);overflow:hidden}
+.progress span{display:block;height:100%;background:var(--cran);transform-origin:0 50%;transform:scaleX(0)}
 .progress span.run{animation:grow linear forwards}
 @keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
 body.paused .progress span{animation-play-state:paused}
 
 .bottom{flex:none;display:flex;align-items:center;justify-content:space-between;gap:3rem;margin-top:2.2rem}
 .qr-block{display:flex;align-items:center;gap:2rem;min-width:0}
-.qr{flex:none;width:10rem;height:10rem;padding:.7rem;border-radius:1rem;background:var(--cream)}
+.qr{flex:none;width:10rem;height:10rem;padding:.7rem;border-radius:1rem;background:var(--paper)}
 .qr img,.qr canvas{display:block;width:100% !important;height:100% !important}
 .qr-title{font-size:2.2rem;font-weight:700}
 .qr-sub{margin-top:.5rem;font-size:1.5rem;line-height:1.4;color:var(--cream-2)}
@@ -153,10 +174,10 @@ body.paused .progress span{animation-play-state:paused}
 .tagline{flex:none;max-width:30rem;font-family:var(--script);font-size:3.3rem;line-height:1.1;color:var(--gold);text-align:right}
 html.portrait .tagline{display:none}
 
-.paused-note{position:fixed;left:50%;bottom:2rem;transform:translateX(-50%);padding:.8rem 1.6rem;border-radius:999px;background:rgba(0,0,0,.55);font-size:1.3rem}
-.fs{position:fixed;top:1.4rem;right:1.4rem;z-index:5;min-height:44px;padding:0 18px;border:1px solid rgba(246,238,220,.5);border-radius:999px;background:rgba(11,35,26,.85);color:var(--cream);font-family:inherit;font-size:15px;cursor:pointer;opacity:0;pointer-events:none;transition:opacity .3s}
+.paused-note{position:fixed;left:50%;bottom:2rem;transform:translateX(-50%);padding:.8rem 1.6rem;border-radius:999px;background:rgba(36,28,20,.65);color:#F4EEE3;font-size:1.3rem}
+.fs{position:fixed;top:1.4rem;right:1.4rem;z-index:5;min-height:44px;padding:0 18px;border:1px solid rgba(108,21,30,.4);border-radius:999px;background:rgba(244,238,227,.92);color:var(--cream);font-family:inherit;font-size:15px;cursor:pointer;opacity:0;pointer-events:none;transition:opacity .3s}
 body.pointer .fs{opacity:1;pointer-events:auto}
-.fs:focus-visible{outline:3px solid #00AF9B;outline-offset:2px;opacity:1}
+.fs:focus-visible{outline:3px solid #0E6E63;outline-offset:2px;opacity:1}
 
 @media (prefers-reduced-motion: reduce){
   .card.arriving{animation:fadeIn .5s ease both}
@@ -165,8 +186,8 @@ body.pointer .fs{opacity:1;pointer-events:auto}
   .live .dot{animation:none}
 }
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="../vendor/supabase.js"></script>
+<script src="../vendor/qrcode.min.js"></script>
 <script src="../config.js"></script>
 <script src="../wishtree.js"></script>
 </head>
@@ -217,6 +238,11 @@ body.pointer .fs{opacity:1;pointer-events:auto}
             <span class="sample" id="sampleTag" hidden>SAMPLE</span>
           </div>
           <div class="text-box" id="textBox"><p class="text" id="text"></p></div>
+          <div class="prize-tv" id="prizeTv" hidden>
+            <div class="pz-title" id="pzTitle"></div>
+            <div class="pz-text" id="pzText"></div>
+            <ol class="pz-list" id="pzList"></ol>
+          </div>
           <div class="foot" id="foot" hidden>
             <span class="avatar" id="avatar" aria-hidden="true"></span>
             <div class="who-box"><div class="who" id="who"></div><div class="where" id="where"></div></div>
@@ -230,7 +256,7 @@ body.pointer .fs{opacity:1;pointer-events:auto}
           <div id="qr" class="qr" aria-hidden="true"></div>
           <div>
             <div class="qr-title">Scan to hang your wish</div>
-            <div class="qr-sub">Sign in with your TP account. Your wish shows here once it's approved.</div>
+            <div class="qr-sub">Your first name and BMS are all you need. Your wish shows here once it's approved.</div>
             <div class="qr-url" id="qrUrl"></div>
           </div>
         </div>
@@ -256,6 +282,11 @@ body.pointer .fs{opacity:1;pointer-events:auto}
   var LEADER_EVERY = Math.max(1, Number(params.get('leaders')) || Number(CFG.TV_LEADER_EVERY) || 4);
   var REFRESH = Math.max(15, Number(CFG.TREE_REFRESH_SECONDS) || 60) * 1000;
   var FRESH_HOURS = 3;
+  // The prize for the most-liked wishes: shown as its own slide every few messages, opening the big gift
+  var PRIZE = C.PRIZE || {};
+  var PRIZE_ON = PRIZE.enabled !== false;
+  var PRIZE_EVERY = Math.max(3, Number(params.get('prize')) || Number(CFG.TV_PRIZE_EVERY) || 9);
+  var PRIZE_ITEM = { id: 'prize' };
 
   var siteParam = (params.get('site') || 'all').toLowerCase();
   var SITE = siteParam !== 'all' && C.siteById(siteParam) ? siteParam : 'all';
@@ -270,6 +301,7 @@ body.pointer .fs{opacity:1;pointer-events:auto}
     fresh: [],              // newly approved wishes, shown next
     cycle: [], pos: 0, cycleNo: 0,
     leaderPos: 0, sinceLeader: LEADER_EVERY, // start with a leader's message
+    sincePrize: 0, prizeTop: [],
     current: null, history: [], onTree: [],
     paused: false, timer: 0, startedAt: 0, remaining: 0
   };
@@ -331,7 +363,7 @@ body.pointer .fs{opacity:1;pointer-events:auto}
     $('qrUrl').textContent = link.replace(/^https?:\/\//, '').replace(/\?.*$/, '');
     if (!window.QRCode) return;
     try {
-      new window.QRCode($('qr'), { text: link, width: 256, height: 256, colorDark: '#0E2A1F', colorLight: '#F6EEDC', correctLevel: window.QRCode.CorrectLevel.M });
+      new window.QRCode($('qr'), { text: link, width: 256, height: 256, colorDark: '#241C14', colorLight: '#F4EEE3', correctLevel: window.QRCode.CorrectLevel.M });
       $('qr').removeAttribute('title');
     } catch (e) { /* the QR is optional */ }
   })();
@@ -344,6 +376,7 @@ body.pointer .fs{opacity:1;pointer-events:auto}
   }
   function findItem(sel) {
     if (!sel) return null;
+    if (sel.kind === 'prize') return PRIZE_ON ? PRIZE_ITEM : null;
     var list = sel.kind === 'leader' ? S.leaders : S.wishes;
     for (var i = 0; i < list.length; i++) if (String(list[i].id) === String(sel.id)) return list[i];
     return null;
@@ -356,6 +389,7 @@ body.pointer .fs{opacity:1;pointer-events:auto}
   }
 
   function load() {
+    if (PRIZE_ON) C.fetchPrizeTop(PRIZE.winners || 5).then(function (top) { S.prizeTop = top || []; }).catch(function () {});
     return Promise.all([C.fetchApproved(), C.fetchLeaders()]).then(function (r) {
       S.wishes = r[0] || [];
       S.leaders = r[1] || [];
@@ -425,6 +459,11 @@ body.pointer .fs{opacity:1;pointer-events:auto}
   function pickNext() {
     var hasW = siteWishes().length > 0, hasL = S.leaders.length > 0;
     if (!hasW && !hasL) return null;
+    S.sincePrize++;
+    if (PRIZE_ON && hasW && S.sincePrize >= PRIZE_EVERY) {
+      S.sincePrize = 0;
+      return { kind: 'prize', id: 'prize' };
+    }
     if (hasL && (!hasW || S.sinceLeader >= LEADER_EVERY)) {
       S.sinceLeader = 0;
       var L = S.leaders[S.leaderPos % S.leaders.length];
@@ -455,7 +494,7 @@ body.pointer .fs{opacity:1;pointer-events:auto}
     if (view3d) view3d.setData(treeData());
     else if (!$('treeFlat').hidden) {
       var d = treeData();
-      C.renderTree($('treeFlat'), { wishes: d.wishes, leaders: d.leaders, selected: d.selected || {}, onSelect: function () {} });
+      C.renderTree($('treeFlat'), { wishes: d.wishes, leaders: d.leaders, selected: d.selected || {}, onSelect: function () {}, prize: PRIZE_ON });
     }
   }
   function onTree(id) {
@@ -506,10 +545,38 @@ body.pointer .fs{opacity:1;pointer-events:auto}
     if (s.id === 'wfh') return 'A WISH FROM HOME';
     return 'A WISH FROM ' + s.label.toUpperCase();
   }
+  function fillPrize() {
+    var card = $('card');
+    card.setAttribute('data-kind', 'prize');
+    $('cardStage').setAttribute('data-kind', 'prize');
+    card.setAttribute('data-ceo', 'false');
+    $('cardStage').setAttribute('data-ceo', 'false');
+    card.setAttribute('data-color', 'prize');
+    card.setAttribute('lang', 'en');
+    $('badgeText').textContent = 'THE WISH TREE PRIZE';
+    $('kicker').textContent = 'THE MOST-LIKED WISHES WIN';
+    $('fresh').hidden = true;
+    $('sampleTag').hidden = !C.demo;
+    $('textBox').hidden = true;
+    $('foot').hidden = true;
+    $('prizeTv').hidden = false;
+    $('pzTitle').textContent = PRIZE.title || '';
+    $('pzText').textContent = 'The ' + (PRIZE.winners || 5) + ' most-liked wishes win. Likes count once per BMS.';
+    var heart = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.3s-7.4-4.3-9.2-9C1.5 7.9 3.7 4.6 7 4.6c2 0 3.6 1.1 5 3 1.4-1.9 3-3 5-3 3.3 0 5.5 3.3 4.2 6.7-1.8 4.7-9.2 9-9.2 9z"/></svg>';
+    var top = S.prizeTop || [];
+    $('pzList').innerHTML = top.length ? top.map(function (w) {
+      return '<li><span class="n">' + C.esc(w.place) + '</span><span class="who">' + C.esc(w.display_name || 'A TP colleague') + '</span>' +
+        '<span class="site">' + C.esc(C.siteName(w.site) || '') + '</span><span class="lk">' + heart + fmt(w.like_count) + '</span></li>';
+    }).join('') : '<li class="pz-empty">No likes yet. Like the wishes you love on the tree.</li>';
+    return true;
+  }
   function fillCard(sel) {
     var item = findItem(sel);
     var card = $('card');
     if (!item) return false;
+    if (sel.kind === 'prize') return fillPrize();
+    $('textBox').hidden = false;
+    $('prizeTv').hidden = true;
     var isLeader = sel.kind === 'leader';
     card.setAttribute('data-kind', sel.kind);
     $('cardStage').setAttribute('data-kind', sel.kind);
@@ -538,6 +605,8 @@ body.pointer .fs{opacity:1;pointer-events:auto}
   }
   function renderEmpty(text) {
     var card = $('card');
+    $('textBox').hidden = false;
+    $('prizeTv').hidden = true;
     card.setAttribute('data-kind', 'wish');
     $('cardStage').setAttribute('data-kind', 'wish');
     card.setAttribute('data-ceo', 'false');
@@ -701,7 +770,7 @@ body.pointer .fs{opacity:1;pointer-events:auto}
       last = now;
       var w = snowCanvas.width, h = snowCanvas.height, k = w / 1920;
       snowCtx.clearRect(0, 0, w, h);
-      snowCtx.fillStyle = 'rgba(246,238,220,0.55)';
+      snowCtx.fillStyle = 'rgba(255,255,255,0.8)';
       snowCtx.beginPath();
       for (var i = 0; i < flakes.length; i++) {
         var f = flakes[i];
@@ -740,7 +809,7 @@ body.pointer .fs{opacity:1;pointer-events:auto}
         $('tree3d').hidden = false;
         $('treeFlat').hidden = true;
         try {
-          view3d = mod.createTree3D($('tree3d'), { idleDelay: SECONDS + 4, headroom: 0.1 });
+          view3d = mod.createTree3D($('tree3d'), { idleDelay: SECONDS + 4, headroom: 0.1, prize: PRIZE_ON });
         } catch (err) {
           console.warn('Wish Tree TV: 3D tree not available, using the flat tree', err);
           useFlat();

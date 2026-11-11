@@ -13,7 +13,7 @@ A shared Christmas wish tree for TP Malaysia and Thailand, hosted on GitHub Page
 | Site tour | `…/WishTree2026/?tour=1` | Laptops at events |
 | Flat tree | `…/WishTree2026/?view=flat` | Older devices; the 3D tree switches to this by itself when WebGL isn't available |
 | **TV screen** | `…/WishTree2026/tv/?site=op` (leave out `?site=` for all sites, add `&lang=en,ms` for some languages only) | The TV at each site |
-| Hang a wish | `…/WishTree2026/wish.html` (add `?site=op` to pre-pick the site) | Employees |
+| Hang a wish | `…/WishTree2026/wish.html` (add `?site=op` to pre-pick the site) | Employees: first name or nickname + BMS, no sign-in |
 | Leaders' messages | `…/WishTree2026/leaders/` | Leaders on the `leaders` list only |
 | **Approvals** | `…/WishTree2026/approve/` | The Wish Tree team on the `moderators` list only |
 | **Gift exchange** | `…/WishTree2026/gift/host.html` (players join through the QR it makes) | Any team running a Secret Santa. Live on its own keys in `gift/gift-config.js`; details in `gift/README.md` |
@@ -22,7 +22,7 @@ Until the Supabase keys are in `config.js`, every page runs in demo mode with sa
 
 ## How a message gets on the tree
 
-1. An employee hangs a wish (150 characters max) or a leader writes a message (250 max).
+1. An employee hangs a wish (150 characters max) with their first name or a nickname, their BMS number (4 to 7 digits) and, if they like, a phone number for prize winners. No sign-in. **One wish per BMS:** sending again from the same phone or browser edits the first one (it goes back to waiting); any other device that types the same BMS is refused. A leader writes a message (250 max) on the leaders' page.
 2. It waits on the **Approvals** page. Nothing shows on the tree or the TVs until someone approves it.
 3. Approvers can Approve, Edit and approve, or Don't approve. Wishes with a phone number or email are flagged in orange. "Approve all without flags" clears the clean ones in one go (click twice to confirm).
 4. Approved messages appear on the tree and the TVs within a minute. New ones jump the TV queue with a "Just hung" label.
@@ -35,9 +35,28 @@ The **Accept new wishes** switch on the Approvals page closes or reopens the cam
 - **The 3D tree holds 60 wishes** (`MAX_TAGS_3D`), plus up to 8 leaders at the top. That's the most it can hang without tags overlapping. The flat tree holds 40.
 - When a site (or "All sites") has more approved wishes than that, **the most-liked go on the tree** (ties go to the newest). Every wish, on the tree or not, is in the **Every wish** list under the tree, with search, Most liked / Newest, and a like button. The TVs still show every wish in turn.
 - **Languages:** people pick the language they wrote in (Thai, Chinese, Japanese, Korean, Tamil and Vietnamese are picked automatically as they type). Readers choose one or more languages with the **Languages** button on the tree; the choice is remembered on their device. Leaders' messages always show. Edit `LANGUAGES` in `config.js` to add or remove languages; the database accepts any 2-3 letter code.
-- **Likes:** one per device, no sign-in. Leaders' messages can be liked but their count isn't shown on the tree or the TVs (the Approvals page still sees it).
+- **Likes:** once per BMS. The first like asks for the BMS; the device remembers it ("Liking as BMS … · Change" under the tree). Nobody can like their own wish. Leaders' messages can be liked but their count isn't shown on the tree or the TVs.
+- **Reading:** with a mouse, resting on a tag, an ornament or a gift opens its card (the tree doesn't turn); a click or tap also opens it and turns the tree to face it.
 - **Leaders' places:** set `spot` for each leader in Table Editor > leaders. `ceo` = the big ornament with a double gold ring right under the star, and a card styled like a signed letter (shown first on the tree and the TVs). `crown` = around the top of the tree on every side, in a mixed order that stays the same each visit (room for 7 besides the CEO, always lower than the CEO). In the **Every wish** list the CEO's letter comes first, then the other leaders in two lines by `sort_order`: Divya Dutta, Sarah, Rachel, Himanshu, then Vivienne, Chavis, Sudhar. `gift` = inside one of the two gift boxes on the right under the tree (they open on hover or tap; on the TVs they open when that message plays). If the top is full, the next leaders go into the gifts, then the list only. Section 10 of `schema.sql` has the 8 leaders ready to paste once you have their emails.
-- **Hidden wishes:** the two gifts on the left under the tree open when the mouse rests on them (or a tap on phones): the big red one holds Amr's wish, the tall gold one credits Maszy for the idea. Edit the words in `HIDDEN_WISHES` in `config.js`, or delete an entry to make that gift a normal one. Only the tree turns; the gifts stay still.
+- **Hidden wishes:** the two small gifts on the left under the tree (they don't move) open when the mouse rests on them (or a tap on phones): the Cranberry one holds Amr's wish, the Brass one credits Maszy for the idea. Edit the words in `HIDDEN_WISHES` in `config.js`, or delete an entry to make that gift a normal one. Only the tree turns; the gifts stay still.
+
+## The prize: 5 x RM 100 gift cards
+
+- The big Cranberry gift on the right of the tree hops every few seconds. Opening it shows the rules and the 5 most-liked wishes right now (click one to read it). On the TVs it's its own slide every 9 messages (`TV_PRIZE_EVERY`), and the gift opens on the tree.
+- **Who can win:** approved employee wishes only. Leaders' messages never count. BMS numbers in **Table Editor > prize_excluded** can't win (add Amr's, Maszy's and the Wish Tree team's BMS; section 10 of `schema.sql` has the lines). Ties: the wish that reached that number of likes first ranks higher.
+- **Before announcing winners:** the Approvals page has **Prize standings** with each wish's BMS and phone, how many connections the likes came from (an orange row means most came from one), **Who liked** (BMS, connection, time), **Download CSV**, and **Remove likes** for a BMS whose likes look faked.
+- Change the wording, number of winners or amount in `PRIZE` in `config.js`; `enabled: false` hides the prize everywhere.
+
+## Security
+
+- **What's private:** BMS numbers, phone numbers and the IP behind each like are only readable by the Wish Tree team (the `moderators` list), through the Approvals page. The tree and the TVs only ever get first name, site, wish, language, tag and like count.
+- **No direct database access:** the public can't read or write the tables; wishes and likes only go through checked functions (`submit_wish`, `set_like`). Every input is checked in the database: BMS 4 to 7 digits, phone 8 to 15 digits, name up to 30 characters, wish up to 150, site and language from the lists.
+- **Editing:** each wish gets a random secret key kept on the phone that sent it (only a fingerprint of it is stored). Without that key, a BMS that already has a wish can't be changed. Every edit goes back to waiting, so nothing changes on the tree without approval. On a shared phone or laptop, "Forget me on this device" clears it.
+- **Spam and like-farming:** limits per connection and per BMS (60 new wishes per connection per 10 minutes, 20 edits per BMS per hour, 400 likes per connection and 60 per BMS per 10 minutes; generous enough for a whole site on one office connection). Optional: import the real BMS list into **Table Editor > bms_allowlist** (CSV with a `bms` column); then only those BMS can post or like.
+- **The pages:** no outside scripts (Supabase, three.js and the QR code library are kept in `vendor/`), a Content Security Policy on every page that only allows this site, Supabase, Google Fonts and Google Analytics, everything people type is shown as text (never as HTML), and the Approvals and leaders' pages refuse to load inside another site's frame.
+- **What's left:** a BMS isn't a password, so someone who knows a colleague's BMS could hang a wish in their name before they do (it still waits for approval) or like with it. If that happens, delete the wish on the Approvals page so the real person can post, and use Remove likes. Loading the real BMS list (above) and checking the prize standings before announcing winners covers the rest.
+- If your Supabase project uses a custom domain instead of `*.supabase.co`, add it to the Content Security Policy line at the top of each page.
+- **Colours:** Spruce `#343F37`, Pine `#736E52`, Brass `#B18854`, Cranberry `#6C151E`, Eggnog `#CFC3B0`. The pages are Eggnog with Cranberry writing; the logo is the black TP logo (`assets/tp-logo-black.png`).
 - **Leader photos:** put each leader's photo in `assets/leaders/` with the file name listed in `assets/leaders/README.md` (for example `divya-dutta.jpg`). Until a file is there, the leader's initials show. Leaders can also add their own photo on the leaders' page: it's cropped to a circle, shrunk and stored in the `leader-photos` bucket in Supabase Storage (created by `schema.sql`), replaces the one in the folder, and goes back for approval like an edited message. Photos show on the gold ornament, the card, the list and the TVs.
 
 ## TV screens
@@ -51,8 +70,8 @@ The **Accept new wishes** switch on the Approvals page closes or reopens the cam
 ## Going live (all in the browser)
 
 1. **Database:** create a Supabase project, open **SQL Editor**, paste all of `schema.sql`, click **Run**. It's safe to run again after updates; existing wishes are kept.
-2. **Leaders and approvers:** in **Table Editor**, add rows to `leaders` (email, name, title) and `moderators` (email). Emails in lower case. Only `leaders` can post on the leaders' page and only `moderators` can open the Approvals page; the database blocks everyone else.
-3. **Google sign-in:** **Authentication > Sign In / Providers > Google**, turn it on and paste the Client ID and Secret from a Google Cloud OAuth client (Web application). In Google Cloud, add the callback URL Supabase shows you as an authorised redirect URI.
+2. **Leaders and approvers:** in **Table Editor**, add rows to `leaders` (email, name, title) and `moderators` (email). Emails in lower case. Only `leaders` can post on the leaders' page and only `moderators` can open the Approvals page; the database blocks everyone else. Add the prize exclusions to `prize_excluded`, and (optional) the real BMS list to `bms_allowlist`.
+3. **Google sign-in (leaders and approvers only; employees don't sign in):** **Authentication > Sign In / Providers > Google**, turn it on and paste the Client ID and Secret from a Google Cloud OAuth client (Web application). In Google Cloud, add the callback URL Supabase shows you as an authorised redirect URI.
 4. **Allowed links:** **Authentication > URL Configuration**. Site URL: `https://tpmyandtpth.github.io/WishTree2026/`. Redirect URLs: add `https://tpmyandtpth.github.io/WishTree2026/**`.
 5. **Keys:** **Project Settings > API**, copy the Project URL and the anon / publishable key into `config.js`, then commit and push with GitHub Desktop.
 
@@ -63,6 +82,6 @@ The **Accept new wishes** switch on the Approvals page closes or reopens the cam
 - The tree is 3D (`tree3d.js`, built with three.js, kept in `vendor/` so it doesn't depend on an outside CDN). People can drag it to turn it; it turns a full circle when a site is picked.
 - **Weak connections:** the 3D tree needs about 0.7 MB of files. If they haven't arrived after a few seconds (or the download breaks), the flat tree shows so nobody is left waiting, the page keeps trying in the background (and again when the connection comes back), and the 3D tree takes over once it's in. Devices without WebGL always get the flat tree.
 - Tree look: `TREE_STYLE` in `config.js`. `light` (a tree made of light, the current choice), `cone` (one smooth cone) or `tiers` (smooth layers). Add `?style=cone` to any tree or TV link to preview another look.
-- Each person can post up to 3 wishes (change `max_wishes_per_person` in `app_settings`).
+- One wish per BMS. To let someone start again (lost phone, typo in the BMS), delete their wish on the Approvals page.
 - To add a site: add it to `SITES` in `config.js` and add its id to `wishes_site_check` in `schema.sql`, then run that part again.
 - Logo: `assets/tp-logo-white.png` (from the ELP repo). TP Sans is used when installed on the device; otherwise the pages fall back to Noto Sans. Only add the TP Sans font files to `fonts/` if TP allows them in a public repo.

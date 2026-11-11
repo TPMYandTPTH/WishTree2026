@@ -22,10 +22,13 @@
     return BASE + String(path).replace(/^\.\//, '');
   }
 
+  // Campaign colours: Spruce, Pine, Brass, Cranberry, Eggnog
+  var COLORS = { spruce: '#343F37', pine: '#736E52', brass: '#B18854', cranberry: '#6C151E', eggnog: '#CFC3B0', paper: '#F4EEE3' };
+  // Tag colours (the database keeps the names cream / red / gold: Eggnog, Cranberry and Brass on screen)
   var PALETTE = {
-    cream: { bg: '#F6EEDC', fg: '#AB2C37', text: '#183326' },
-    red: { bg: '#AB2C37', fg: '#F6EEDC', text: '#F6EEDC' },
-    gold: { bg: '#E3B45A', fg: '#0E2A1F', text: '#0E2A1F' }
+    cream: { bg: '#F4EEE3', fg: '#6C151E', text: '#343F37' },
+    red: { bg: '#6C151E', fg: '#F4EEE3', text: '#F4EEE3' },
+    gold: { bg: '#B18854', fg: '#241C14', text: '#241C14' }
   };
   /* ---------- Languages ---------- */
   var DEFAULT_LANGS = [
@@ -405,8 +408,8 @@
       var flags = [];
       if (/[^\s@]+@[^\s@]+\.[^\s@]{2,}/.test(w.message || '')) flags.push('Email address');
       if (phone && phone[0].replace(/\D/g, '').length >= 9) flags.push('Phone number');
-      wishes.unshift(Object.assign({ id: 'local-' + i, status: 'pending', flags: flags, email: 'you@tp.com' }, w, {
-        display_name: w.display_mode === 'name' ? w.first_name : null
+      wishes.unshift(Object.assign({ id: 'local-' + i, status: 'pending', flags: flags }, w, {
+        display_name: w.first_name || null, key: undefined
       }));
     });
     var leaders = SAMPLE_PENDING_LEADERS.map(function (l) { return applyReview(l, 'leader:' + l.id); })
@@ -436,7 +439,14 @@
     demoSave('wt-demo-review', review);
   }
 
-  /* ---------- Likes (one per device, no sign-in needed) ---------- */
+  /* ---------- BMS (employee number: 4 to 7 digits) ---------- */
+  var BMS_RE = /^[0-9]{4,7}$/;
+  function cleanBms(v) { return String(v == null ? '' : v).replace(/[\s-]+/g, ''); }
+  function validBms(v) { return BMS_RE.test(cleanBms(v)); }
+  // The BMS used to like on this device (remembered so people type it once)
+  function myBms() { var b = cleanBms(storageGet('wt-bms')); return BMS_RE.test(b) ? b : ''; }
+  function saveMyBms(b) { storageSet('wt-bms', validBms(b) ? cleanBms(b) : ''); }
+
   function deviceId() {
     var id = storageGet('wt-device');
     if (!id || id.length < 16) {
@@ -446,20 +456,124 @@
     }
     return id;
   }
-  function likedMap() { return demoLoad('wt-liked', {}) || {}; }
+
+  /* ---------- Likes (one per BMS) ---------- */
+  function likedKey() { return 'wt-liked:' + (myBms() || 'none'); }
+  function likedMap() { return demoLoad(likedKey(), {}) || {}; }
   function hasLiked(kind, id) { return !!likedMap()[kind + ':' + id]; }
-  // Resolves to the new count from the server (or null in demo mode, where the page adds or removes one itself)
-  function setLike(kind, id, on) {
+  function markLiked(kind, id, on) {
     var all = likedMap();
     if (on) all[kind + ':' + id] = 1; else delete all[kind + ':' + id];
-    demoSave('wt-liked', all);
-    if (DEMO) return Promise.resolve(null);
-    return getClient().rpc('set_like', { p_kind: kind, p_id: id, p_device: deviceId(), p_on: !!on }).then(function (res) {
+    demoSave(likedKey(), all);
+  }
+  // Resolves to { result: 'ok' | 'need_bms' | 'own_wish' | 'unknown_bms' | 'slow_down', count }
+  // (count is null in demo mode, where the page adds or removes one itself)
+  function setLike(kind, id, on) {
+    var bms = myBms();
+    if (!bms) return Promise.resolve({ result: 'need_bms', count: null });
+    if (DEMO) {
+      var mine = demoLoad('wt-demo-wishes', []).some(function (w, i) { return 'local-' + i === String(id) && w.bms === bms; });
+      if (kind === 'wish' && mine) return Promise.resolve({ result: 'own_wish', count: null });
+      markLiked(kind, id, on);
+      return Promise.resolve({ result: 'ok', count: null });
+    }
+    return getClient().rpc('set_like', { p_kind: kind, p_id: id, p_bms: bms, p_on: !!on, p_device: deviceId() }).then(function (res) {
       if (res.error) throw res.error;
-      return typeof res.data === 'number' ? res.data : null;
+      var row = Array.isArray(res.data) ? res.data[0] : res.data;
+      var result = (row && row.result) || 'ok';
+      if (result === 'ok') markLiked(kind, id, on);
+      return { result: result, count: row && typeof row.like_count === 'number' ? row.like_count : null };
     });
   }
   function demoLikeBonus(kind, id) { return DEMO && hasLiked(kind, id) ? 1 : 0; }
+
+  /* ---------- Hanging a wish (no sign-in: name + BMS, one wish per BMS) ---------- */
+  // What this browser remembers about the wish it sent: { bms, key, id }. The key is the only way to edit it.
+  function myWishRef() {
+    var r = demoLoad('wt-my-wish', null);
+    return r && validBms(r.bms) && r.key ? r : null;
+  }
+  function saveMyWishRef(r) { demoSave('wt-my-wish', r); }
+  // On a shared phone or laptop: forget the wish and the BMS this browser remembers
+  function forgetMe() {
+    try { window.localStorage.removeItem('wt-my-wish'); window.localStorage.removeItem('wt-bms'); } catch (e) { /* ignore */ }
+  }
+
+  // row: { bms, first_name, phone, message, site, lang, tag_color, charm }
+  // Resolves to { result: 'ok' | 'bms_taken' | 'unknown_bms' | 'slow_down', id, isNew }
+  function submitWish(row) {
+    var ref = myWishRef();
+    var key = ref && ref.bms === row.bms ? ref.key : null;
+    if (DEMO) {
+      var list = demoLoad('wt-demo-wishes', []);
+      var idx = -1;
+      list.forEach(function (w, i) { if (w.bms === row.bms && w.status !== 'deleted') idx = i; });
+      var flagsOf = function (m) {
+        var f = [];
+        if (/[^\s@]+@[^\s@]+\.[^\s@]{2,}/.test(m)) f.push('Email address');
+        var ph = /\+?\d[\d\s\-().]{6,}\d/.exec(m);
+        if (ph && ph[0].replace(/\D/g, '').length >= 9) f.push('Phone number');
+        return f;
+      };
+      var rec = Object.assign({}, row, { display_mode: 'name', status: 'pending', flags: flagsOf(row.message), updated_at: new Date().toISOString() });
+      if (idx >= 0) {
+        if (!key || list[idx].key !== key) return Promise.resolve({ result: 'bms_taken' });
+        list[idx] = Object.assign({}, list[idx], rec);
+        demoSave('wt-demo-wishes', list);
+        return Promise.resolve({ result: 'ok', id: 'local-' + idx, isNew: false });
+      }
+      var newKey = 'demo-' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+      list.push(Object.assign({ created_at: new Date().toISOString(), key: newKey }, rec));
+      demoSave('wt-demo-wishes', list);
+      saveMyWishRef({ bms: row.bms, key: newKey, id: 'local-' + (list.length - 1) });
+      return Promise.resolve({ result: 'ok', id: 'local-' + (list.length - 1), isNew: true });
+    }
+    return getClient().rpc('submit_wish', {
+      p_bms: row.bms, p_name: row.first_name, p_phone: row.phone || null, p_message: row.message,
+      p_site: row.site, p_lang: row.lang, p_tag_color: row.tag_color, p_charm: row.charm, p_consent: true, p_edit_key: key
+    }).then(function (res) {
+      if (res.error) throw res.error;
+      var r = Array.isArray(res.data) ? res.data[0] : res.data;
+      if (!r) throw new Error('No answer from the server');
+      if (r.result === 'ok' && r.edit_key) saveMyWishRef({ bms: row.bms, key: r.edit_key, id: r.wish_id });
+      return { result: r.result, id: r.wish_id, isNew: !!r.is_new };
+    });
+  }
+
+  // The wish this browser sent (or null)
+  function getMyWish() {
+    var ref = myWishRef();
+    if (!ref) return Promise.resolve(null);
+    if (DEMO) {
+      var found = null;
+      demoLoad('wt-demo-wishes', []).forEach(function (w, i) {
+        if (w.bms === ref.bms && w.key === ref.key) found = Object.assign({ id: 'local-' + i, like_count: 0 }, w);
+      });
+      return Promise.resolve(found ? Object.assign({ bms: ref.bms }, found) : null);
+    }
+    return getClient().rpc('get_my_wish', { p_bms: ref.bms, p_edit_key: ref.key }).then(function (res) {
+      if (res.error) throw res.error;
+      var r = Array.isArray(res.data) ? res.data[0] : res.data;
+      return r ? Object.assign({ bms: ref.bms }, r) : null;
+    });
+  }
+
+  /* ---------- Prize: the most-liked wishes ---------- */
+  var PRIZE = Object.assign({ enabled: true, winners: 5, amount: 'RM 100' }, CFG.PRIZE || {});
+  function fetchPrizeTop(n) {
+    n = n || PRIZE.winners || 5;
+    if (DEMO) {
+      var list = demoQueue().wishes.filter(function (w) { return w.status === 'approved'; }).map(function (w) {
+        return { id: w.id, display_name: w.display_name || w.first_name, site: w.site, approved_at: w.approved_at, like_count: (w.like_count || 0) + demoLikeBonus('wish', w.id) };
+      }).filter(function (w) { return w.like_count > 0; });
+      list.sort(function (a, b) { return (b.like_count - a.like_count) || (a.approved_at < b.approved_at ? -1 : 1); });
+      return Promise.resolve(list.slice(0, n).map(function (w, i) { return Object.assign(w, { place: i + 1 }); }));
+    }
+    return getClient().rpc('get_prize_top', { p_limit: n }).then(function (res) {
+      if (res.error) throw res.error;
+      return res.data || [];
+    });
+  }
 
   // Approved employee wishes, newest first
   function fetchApproved() {
@@ -667,21 +781,21 @@
     [126, 602], [172, 612], [219, 618], [265, 621], [312, 621], [359, 618], [406, 612], [453, 603], [500, 590]
   ];
   var BALLS = [
-    [312, 287, 11, '#AB2C37'], [260, 361, 10, '#E3B45A'], [350, 359, 10, '#AB2C37'],
-    [257, 441, 10, '#AB2C37'], [343, 441, 10, '#E3B45A'], [140, 463, 9, '#E3B45A'], [480, 471, 9, '#AB2C37'],
-    [217, 521, 10, '#E3B45A'], [387, 523, 10, '#AB2C37'], [215, 604, 11, '#AB2C37'], [415, 604, 11, '#E3B45A']
+    [312, 287, 11, '#8E1F2A'], [260, 361, 10, '#B18854'], [350, 359, 10, '#8E1F2A'],
+    [257, 441, 10, '#8E1F2A'], [343, 441, 10, '#B18854'], [140, 463, 9, '#B18854'], [480, 471, 9, '#8E1F2A'],
+    [217, 521, 10, '#B18854'], [387, 523, 10, '#8E1F2A'], [215, 604, 11, '#8E1F2A'], [415, 604, 11, '#B18854']
   ];
 
   var TREE_SVG = (function () {
     var p = [];
-    p.push('<ellipse cx="310" cy="702" rx="240" ry="16" fill="#000" opacity="0.28"/>');
+    p.push('<ellipse cx="310" cy="702" rx="250" ry="16" fill="#3B2F22" opacity="0.2"/>');
     p.push('<rect x="289" y="628" width="42" height="72" rx="6" fill="#5A3A26"/><rect x="310" y="628" width="21" height="72" fill="#4A2F1F"/>');
-    p.push('<path d="M310,370 L30,650 Q170,682 310,662 Z" fill="#23664A"/><path d="M310,370 L310,662 Q450,682 590,650 Z" fill="#184B34"/>');
-    p.push('<path d="M310,250 L90,500 Q200,528 310,510 Z" fill="#287052"/><path d="M310,250 L310,510 Q420,528 530,500 Z" fill="#1B5139"/>');
-    p.push('<path d="M310,150 L145,360 Q228,384 310,368 Z" fill="#2C7858"/><path d="M310,150 L310,368 Q392,384 475,360 Z" fill="#1E573D"/>');
-    p.push('<path d="M310,70 L200,230 Q255,250 310,236 Z" fill="#318060"/><path d="M310,70 L310,236 Q365,250 420,230 Z" fill="#205D41"/>');
+    p.push('<path d="M310,370 L30,650 Q170,682 310,662 Z" fill="#424F46"/><path d="M310,370 L310,662 Q450,682 590,650 Z" fill="#29322C"/>');
+    p.push('<path d="M310,250 L90,500 Q200,528 310,510 Z" fill="#46534A"/><path d="M310,250 L310,510 Q420,528 530,500 Z" fill="#2B342E"/>');
+    p.push('<path d="M310,150 L145,360 Q228,384 310,368 Z" fill="#4A574B"/><path d="M310,150 L310,368 Q392,384 475,360 Z" fill="#2D3730"/>');
+    p.push('<path d="M310,70 L200,230 Q255,250 310,236 Z" fill="#4F5C4F"/><path d="M310,70 L310,236 Q365,250 420,230 Z" fill="#303A33"/>');
     ['M232,190 Q310,222 392,182', 'M178,300 Q310,350 448,290', 'M128,440 Q310,500 498,420', 'M80,590 Q310,660 548,575'].forEach(function (d) {
-      p.push('<path d="' + d + '" fill="none" stroke="#E3B45A" stroke-width="1.5" opacity="0.55"/>');
+      p.push('<path d="' + d + '" fill="none" stroke="#B18854" stroke-width="1.6" opacity="0.8"/>');
     });
     LIGHTS.forEach(function (l, i) {
       // each light glows high and low at its own pace
@@ -696,9 +810,9 @@
       p.push('<circle cx="' + b[0] + '" cy="' + b[1] + '" r="' + b[2] + '" fill="' + b[3] + '"/>');
       p.push('<circle cx="' + (b[0] - 3) + '" cy="' + (b[1] - 3) + '" r="' + (b[2] * 0.28).toFixed(1) + '" fill="#fff" opacity="0.38"/>');
     });
-    p.push('<circle cx="310" cy="52" r="44" fill="#F2C766" opacity="0.10"/><circle cx="310" cy="52" r="30" fill="#F2C766" opacity="0.18"/>');
-    p.push('<polygon points="310,26 316.47,43.1 334.73,43.97 320.46,55.4 325.28,73.03 310,63 294.72,73.03 299.54,55.4 285.27,43.97 303.53,43.1" fill="#F2C766"/>');
-    p.push('<polygon points="310,26 316.47,43.1 334.73,43.97 320.46,55.4 310,52" fill="#FFE3A0"/>');
+    p.push('<circle cx="310" cy="52" r="44" fill="#B18854" opacity="0.16"/><circle cx="310" cy="52" r="30" fill="#B18854" opacity="0.24"/>');
+    p.push('<polygon points="310,26 316.47,43.1 334.73,43.97 320.46,55.4 325.28,73.03 310,63 294.72,73.03 299.54,55.4 285.27,43.97 303.53,43.1" fill="#C99A55"/>');
+    p.push('<polygon points="310,26 316.47,43.1 334.73,43.97 320.46,55.4 310,52" fill="#E2BF85"/>');
     return p.join('');
   })();
 
@@ -718,51 +832,57 @@
     '@keyframes wt-wiggle{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(4deg)}}',
     '.wt-tag:hover .wt-swing{animation:wt-jiggle .7s ease-in-out}',
     '@keyframes wt-jiggle{0%{transform:rotate(0)}20%{transform:rotate(-14deg)}45%{transform:rotate(10deg)}70%{transform:rotate(-5deg)}100%{transform:rotate(0)}}',
-    '.wt-string{display:block;width:1px;height:var(--str);background:#D9C59A}',
+    '.wt-string{display:block;width:1px;height:var(--str);background:#A89B78}',
     '.wt-body{position:relative;display:flex;align-items:center;justify-content:center;width:var(--w);height:var(--h);background:var(--bg);color:var(--fg);border-radius:3px 3px 5px 5px;box-shadow:0 3px 6px rgba(0,0,0,.35);transition:box-shadow .25s ease}',
     '.wt-body svg{width:var(--ic);height:var(--ic);margin-top:var(--icm)}',
-    '.wt-hole{position:absolute;top:var(--holet);left:50%;width:var(--hole);height:var(--hole);transform:translateX(-50%);border-radius:50%;background:rgba(14,42,31,.5)}',
+    '.wt-hole{position:absolute;top:var(--holet);left:50%;width:var(--hole);height:var(--hole);transform:translateX(-50%);border-radius:50%;background:rgba(52,63,55,.5)}',
     '.wt-tag[aria-pressed="true"]{transform:translateX(-50%) rotate(0deg);z-index:2}',
-    '.wt-tag[aria-pressed="true"] .wt-body{box-shadow:0 0 0 2px #F6EEDC,0 0 0 6px rgba(227,180,90,.55),0 8px 18px rgba(0,0,0,.45)}',
+    '.wt-tag[aria-pressed="true"] .wt-body{box-shadow:0 0 0 2px #F4EEE3,0 0 0 6px rgba(177,136,84,.75),0 8px 18px rgba(0,0,0,.45)}',
     '.wt-tag:focus,.wt-leader:focus{outline:none}',
-    '.wt-tag:focus-visible .wt-body,.wt-leader:focus-visible .wt-lball{box-shadow:0 0 0 2px #0E2A1F,0 0 0 5px #00AF9B}',
+    '.wt-tag:focus-visible .wt-body,.wt-leader:focus-visible .wt-lball{box-shadow:0 0 0 2px #F4EEE3,0 0 0 5px #0E6E63}',
     '.wt-tag.wt-dim{opacity:.22}',
     '.wt-tag.wt-new{animation:wt-drop .8s cubic-bezier(.2,.9,.3,1.2) both}',
     '@keyframes wt-drop{from{opacity:0;transform:translateX(-50%) translateY(-40px) rotate(var(--r,0deg))}to{opacity:1;transform:translateX(-50%) rotate(var(--r,0deg))}}',
     /* leaders' ornaments in the crown */
     '.wt-leader{position:absolute;padding:0;margin:0;border:0;background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;width:var(--d);transform:translateX(-50%);transform-origin:50% 0;z-index:3;-webkit-tap-highlight-color:transparent;animation:wt-sway 5s ease-in-out infinite}',
     '@keyframes wt-sway{0%,100%{transform:translateX(-50%) rotate(-2deg)}50%{transform:translateX(-50%) rotate(2deg)}}',
-    '.wt-lstring{display:block;width:1px;height:var(--lstr);background:#F2C766}',
-    '.wt-lcap{display:block;width:calc(var(--d) * .26);height:calc(var(--d) * .14);margin-bottom:-1px;border-radius:2px 2px 0 0;background:#AB2C37}',
-    '.wt-lball{position:relative;display:flex;align-items:center;justify-content:center;width:var(--d);height:var(--d);border-radius:50%;background:#E3B45A;color:#0E2A1F;font-weight:700;font-size:calc(var(--d) * .32);letter-spacing:.02em;line-height:1;box-shadow:inset 0 0 0 calc(var(--d) * .06) #F2C766,0 0 0 calc(var(--d) * .1) rgba(242,199,102,.22),0 4px 10px rgba(0,0,0,.4);transition:box-shadow .25s ease}',
+    '.wt-lstring{display:block;width:1px;height:var(--lstr);background:#C99A55}',
+    '.wt-lcap{display:block;width:calc(var(--d) * .26);height:calc(var(--d) * .14);margin-bottom:-1px;border-radius:2px 2px 0 0;background:#6C151E}',
+    '.wt-lball{position:relative;display:flex;align-items:center;justify-content:center;width:var(--d);height:var(--d);border-radius:50%;background:#B18854;color:#241C14;font-weight:700;font-size:calc(var(--d) * .32);letter-spacing:.02em;line-height:1;box-shadow:inset 0 0 0 calc(var(--d) * .06) #D2AE78,0 0 0 calc(var(--d) * .1) rgba(201,154,85,.28),0 4px 10px rgba(0,0,0,.35);transition:box-shadow .25s ease}',
     '.wt-lball::after{content:"";position:absolute;left:18%;top:16%;width:22%;height:22%;border-radius:50%;background:rgba(255,255,255,.45)}',
-    '.wt-lball.wt-photo{background-color:#E3B45A}',
+    '.wt-lball.wt-photo{background-color:#B18854}',
     '.wt-limg{position:absolute;inset:0;width:100%;height:100%;border-radius:50%;object-fit:cover}',
-    '.wt-gift{position:absolute;left:62%;top:86.5%;width:9%;aspect-ratio:1/0.9;padding:0;border:0;background:transparent;cursor:pointer;z-index:2;-webkit-tap-highlight-color:transparent}',
-    '.wt-gift-box{position:absolute;left:4%;right:4%;bottom:0;height:72%;border-radius:2px;background:linear-gradient(90deg,transparent 42%,#E3B45A 42%,#E3B45A 58%,transparent 58%),#AB2C37;box-shadow:0 4px 8px rgba(0,0,0,.4)}',
-    '.wt-gift-lid{position:absolute;left:0;right:0;top:12%;height:20%;border-radius:2px;background:linear-gradient(90deg,transparent 42%,#E3B45A 42%,#E3B45A 58%,transparent 58%),#B9333F;transform-origin:10% 100%;transition:transform .5s cubic-bezier(.3,1.5,.5,1)}',
+    '.wt-gift{position:absolute;left:23%;top:87.5%;width:7%;aspect-ratio:1/0.9;padding:0;border:0;background:transparent;cursor:pointer;z-index:2;-webkit-tap-highlight-color:transparent;--box:#6C151E;--lid:#7D1C26;--rib:#B18854}',
+    '.wt-gift-box{position:absolute;left:4%;right:4%;bottom:0;height:72%;border-radius:2px;background:linear-gradient(90deg,transparent 42%,var(--rib) 42%,var(--rib) 58%,transparent 58%),var(--box);box-shadow:0 4px 8px rgba(0,0,0,.3)}',
+    '.wt-gift-lid{position:absolute;left:0;right:0;top:12%;height:20%;border-radius:2px;background:linear-gradient(90deg,transparent 42%,var(--rib) 42%,var(--rib) 58%,transparent 58%),var(--lid);transform-origin:10% 100%;transition:transform .5s cubic-bezier(.3,1.5,.5,1)}',
     '.wt-gift:hover .wt-gift-lid{transform:rotate(-8deg)}',
-    '.wt-gift-red{left:25%}',
-    '.wt-gift-gold{left:14%;top:85%;width:8%;aspect-ratio:1/1.05}',
-    '.wt-gift-green{left:64%;top:85.5%;width:8.5%}',
-    '.wt-gift-green .wt-gift-box{background:linear-gradient(90deg,transparent 42%,#E3B45A 42%,#E3B45A 58%,transparent 58%),#1E573D}',
-    '.wt-gift-green .wt-gift-lid{background:linear-gradient(90deg,transparent 42%,#E3B45A 42%,#E3B45A 58%,transparent 58%),#24684A}',
-    '.wt-gift-cream{left:76%;top:86%;width:8%}',
-    '.wt-gift-cream .wt-gift-box{background:linear-gradient(90deg,transparent 42%,#AB2C37 42%,#AB2C37 58%,transparent 58%),#F6EEDC}',
-    '.wt-gift-cream .wt-gift-lid{background:linear-gradient(90deg,transparent 42%,#AB2C37 42%,#AB2C37 58%,transparent 58%),#FBF5E8}',
-    '.wt-leader.wt-ceo .wt-lball{box-shadow:inset 0 0 0 calc(var(--d) * .06) #F2C766,0 0 0 3px #E3B45A,0 0 0 7px rgba(242,199,102,.35),0 8px 18px rgba(0,0,0,.45)}',
-    '.wt-gift-gold .wt-gift-box{background:linear-gradient(90deg,transparent 42%,#AB2C37 42%,#AB2C37 58%,transparent 58%),#E3B45A}',
-    '.wt-gift-gold .wt-gift-lid{background:linear-gradient(90deg,transparent 42%,#AB2C37 42%,#AB2C37 58%,transparent 58%),#EDC06A;transform-origin:90% 100%}',
+    '.wt-gift-gold{left:15%;top:87%;width:5.6%;aspect-ratio:1/1.05;--box:#B18854;--lid:#BE9663;--rib:#6C151E}',
+    '.wt-gift-gold .wt-gift-lid{transform-origin:90% 100%}',
     '.wt-gift-gold:hover .wt-gift-lid{transform:rotate(8deg)}',
     '.wt-gift-gold[aria-pressed="true"] .wt-gift-lid{transform:rotate(38deg) translateY(-30%)}',
+    '.wt-gift-green{left:52%;top:89%;width:6.5%;--box:#343F37;--lid:#3D493F;--rib:#B18854}',
+    '.wt-gift-cream{left:38%;top:89.5%;width:6%;--box:#F4EEE3;--lid:#FBF7EF;--rib:#6C151E}',
+    /* the prize gift: big, on the right, always moving a little */
+    '.wt-gift-prize{left:72%;top:84.5%;width:14%;aspect-ratio:1/0.92;z-index:3;--box:#6C151E;--lid:#7D1C26;--rib:#C99A55;animation:wt-hop 3s ease-in-out infinite;transform-origin:50% 100%}',
+    '.wt-gift-prize .wt-gift-box{height:70%;box-shadow:0 8px 14px rgba(0,0,0,.3)}',
+    '.wt-gift-prize .wt-gift-lid{top:16%;height:18%}',
+    '.wt-gift-bow{position:absolute;left:50%;top:2%;width:44%;height:18%;transform:translateX(-50%);pointer-events:none;transition:transform .5s cubic-bezier(.3,1.5,.5,1)}',
+    '.wt-gift-bow::before,.wt-gift-bow::after{content:"";position:absolute;top:0;width:48%;height:100%;border:max(2px,.5cqw) solid var(--rib);border-radius:50% 50% 40% 40%}',
+    '.wt-gift-bow::before{left:0;transform:rotate(-18deg)}',
+    '.wt-gift-bow::after{right:0;transform:rotate(18deg)}',
+    '.wt-gift-label{position:absolute;left:50%;bottom:20%;transform:translateX(-50%);padding:.4cqw 1.1cqw;border-radius:.6cqw;background:#F4EEE3;color:#6C151E;font-size:1.9cqw;font-weight:700;line-height:1.15;white-space:nowrap;text-align:center;pointer-events:none;box-shadow:0 1px 3px rgba(0,0,0,.25)}',
+    '.wt-gift-prize[aria-pressed="true"]{animation:none}',
+    '.wt-gift-prize[aria-pressed="true"] .wt-gift-bow{transform:translateX(-50%) translateY(-60%) rotate(-12deg)}',
+    '@keyframes wt-hop{0%,58%,100%{transform:none}64%{transform:translateY(-7%) rotate(-3deg)}70%{transform:translateY(0) rotate(2.5deg)}76%{transform:translateY(-3%) rotate(-1.5deg)}82%{transform:rotate(1deg)}88%{transform:none}}',
+    '.wt-leader.wt-ceo .wt-lball{box-shadow:inset 0 0 0 calc(var(--d) * .06) #D2AE78,0 0 0 3px #B18854,0 0 0 7px rgba(201,154,85,.35),0 8px 18px rgba(0,0,0,.4)}',
     '.wt-gift[aria-pressed="true"] .wt-gift-lid{transform:rotate(-38deg) translateY(-30%)}',
-    '.wt-gift:focus-visible{outline:3px solid #00AF9B;outline-offset:3px;border-radius:4px}',
+    '.wt-gift:focus-visible{outline:3px solid #0E6E63;outline-offset:3px;border-radius:4px}',
     '.wt-lball.wt-photo::after{display:none}',
-    '.wt-lstar{position:absolute;right:-6%;bottom:-6%;width:calc(var(--d) * .4);height:calc(var(--d) * .4);border-radius:50%;background:#AB2C37;color:#F6EEDC;display:flex;align-items:center;justify-content:center}',
+    '.wt-lstar{position:absolute;right:-6%;bottom:-6%;width:calc(var(--d) * .4);height:calc(var(--d) * .4);border-radius:50%;background:#6C151E;color:#F4EEE3;display:flex;align-items:center;justify-content:center}',
     '.wt-lstar svg{width:62%;height:62%}',
     '.wt-leader[aria-pressed="true"]{animation:none}',
-    '.wt-leader[aria-pressed="true"] .wt-lball{box-shadow:inset 0 0 0 calc(var(--d) * .06) #F2C766,0 0 0 3px #F6EEDC,0 0 0 8px rgba(242,199,102,.45),0 8px 18px rgba(0,0,0,.45)}',
-    '@media (prefers-reduced-motion:reduce){.wt-tag,.wt-body{transition:none}.wt-tag.wt-new,.wt-light,.wt-halo,.wt-leader,.wt-swing,.wt-tag:hover .wt-swing{animation:none}}'
+    '.wt-leader[aria-pressed="true"] .wt-lball{box-shadow:inset 0 0 0 calc(var(--d) * .06) #D2AE78,0 0 0 3px #F4EEE3,0 0 0 8px rgba(201,154,85,.55),0 8px 18px rgba(0,0,0,.4)}',
+    '@media (prefers-reduced-motion:reduce){.wt-tag,.wt-body{transition:none}.wt-tag.wt-new,.wt-light,.wt-halo,.wt-leader,.wt-swing,.wt-tag:hover .wt-swing,.wt-gift-prize{animation:none}}'
   ].join('\n');
 
   function ensureCss() {
@@ -776,10 +896,12 @@
   /*
     renderTree(container, {
       wishes:   employee wishes, oldest first (use pickForTree)
-      leaders:  leaders' messages (first 6 hang in the crown)
-      selected: { kind: 'wish' | 'leader', id }
+      leaders:  leaders' messages (the CEO plus 7 hang at the top)
+      selected: { kind: 'wish' | 'leader' | 'secret' | 'prize', id }
       isDimmed: function(wish) -> true to fade a tag
-      onSelect: function(kind, id)
+      onSelect: function(kind, id, how) - how is { hover: true } when the mouse rested on it
+      secrets:  hidden gift ids on the left ('red', 'gold')
+      prize:    true to show the big prize gift on the right
       scale:    optional fixed tag size; otherwise picked to fit
     })
   */
@@ -799,14 +921,36 @@
         (o.secrets || []).map(function (id) {
           return '<button type="button" class="wt-gift wt-gift-' + esc(id) + '" data-kind="secret" data-id="' + esc(id) + '" aria-label="A gift under the tree"><span class="wt-gift-lid"></span><span class="wt-gift-box"></span></button>';
         }).join('') +
+        (o.prize ? '<button type="button" class="wt-gift wt-gift-prize" data-kind="prize" data-id="prize" aria-label="' + esc(o.prizeLabel || 'Prize for the most-liked wishes') + '">' +
+          '<span class="wt-gift-bow"></span><span class="wt-gift-lid"></span><span class="wt-gift-box"></span>' +
+          '<span class="wt-gift-label">' + esc(o.prizeTag || (PRIZE.winners + ' x ' + PRIZE.amount)) + '</span></button>' : '') +
         '<span class="wt-lgifts"></span>' +
         '</div>';
       container._wt = { seen: {}, first: true, onSelect: null };
-      container.querySelector('.wt-stage').addEventListener('click', function (e) {
-        var btn = e.target.closest ? e.target.closest('.wt-tag,.wt-leader,.wt-gift') : null;
+      var stageEl = container.querySelector('.wt-stage');
+      var pick = function (target) { return target && target.closest ? target.closest('.wt-tag,.wt-leader,.wt-gift') : null; };
+      stageEl.addEventListener('click', function (e) {
+        var btn = pick(e.target);
         if (!btn || typeof container._wt.onSelect !== 'function') return;
         container._wt.onSelect(btn.getAttribute('data-kind'), btn.getAttribute('data-id'));
       });
+      // With a mouse, resting on a tag, an ornament or a gift opens it (a short pause, so passing over doesn't)
+      var hoverTimer = 0;
+      var hoverBtn = null;
+      stageEl.addEventListener('pointerover', function (e) {
+        if (e.pointerType !== 'mouse') return;
+        var btn = pick(e.target);
+        if (btn === hoverBtn) return;
+        hoverBtn = btn;
+        clearTimeout(hoverTimer);
+        if (!btn) return;
+        var kind = btn.getAttribute('data-kind'), id = btn.getAttribute('data-id');
+        hoverTimer = setTimeout(function () {
+          if (btn.getAttribute('aria-pressed') === 'true' || typeof container._wt.onSelect !== 'function') return;
+          container._wt.onSelect(kind, id, { hover: true });
+        }, 260);
+      });
+      stageEl.addEventListener('pointerleave', function () { clearTimeout(hoverTimer); hoverBtn = null; });
     }
 
     var st = container._wt;
@@ -823,18 +967,6 @@
       var gid = giftBtn.getAttribute('data-id');
       var gkind = giftBtn.getAttribute('data-kind');
       giftBtn.setAttribute('aria-pressed', sel.kind === gkind && String(sel.id) === gid ? 'true' : 'false');
-      if (giftBtn._hover) return;
-      // a hidden gift opens when the mouse rests on it (a tap still opens it on phones)
-      giftBtn._hover = true;
-      var hoverTimer = 0;
-      giftBtn.addEventListener('pointerenter', function (e) {
-        if (e.pointerType !== 'mouse') return;
-        clearTimeout(hoverTimer);
-        hoverTimer = setTimeout(function () {
-          if (giftBtn.getAttribute('aria-pressed') !== 'true' && typeof container._wt.onSelect === 'function') container._wt.onSelect(gkind, gid);
-        }, 220);
-      });
-      giftBtn.addEventListener('pointerleave', function () { clearTimeout(hoverTimer); });
     });
 
     // Scatter the tags at random (repeatable) spots, shrinking them if the tree gets crowded
@@ -960,6 +1092,17 @@
     fetchLeaders: fetchLeaders,
     hasLiked: hasLiked,
     setLike: setLike,
+    COLORS: COLORS,
+    validBms: validBms,
+    cleanBms: cleanBms,
+    myBms: myBms,
+    saveMyBms: saveMyBms,
+    myWishRef: myWishRef,
+    forgetMe: forgetMe,
+    submitWish: submitWish,
+    getMyWish: getMyWish,
+    PRIZE: PRIZE,
+    fetchPrizeTop: fetchPrizeTop,
     demoQueue: demoQueue,
     demoReview: demoReview,
     demoLoad: demoLoad,

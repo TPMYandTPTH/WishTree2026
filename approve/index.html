@@ -2,10 +2,15 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<!-- Security: only this site, Supabase, Google Fonts and (if set) Google Analytics can be used by the page -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://*.supabase.co https://www.googletagmanager.com https://*.google-analytics.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<style id="antiframe">html{display:none !important}</style>
+<script>if (window.self === window.top) { document.getElementById('antiframe').remove(); } else { try { window.top.location = window.self.location.href; } catch (e) { /* stay hidden */ } }</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Approvals · TP Wish Tree 2026</title>
 <meta name="robots" content="noindex, nofollow">
-<meta name="theme-color" content="#4B4C6A">
+<meta name="theme-color" content="#343F37">
 <link rel="icon" type="image/png" href="../assets/tp-logo-white.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,10 +22,11 @@
 @font-face{font-family:'TP Sans';font-weight:700;font-display:swap;src:local('TP Sans Bold'),local('TPSans-Bold'),url('../fonts/TPSans-Bold.ttf') format('truetype')}
 
 :root{
-  --slate:#4B4C6A; --slate-2:#848DAD; --ink:#414141; --muted:#676767; --line:#E6E6E5; --line-2:#CCCCCC;
-  --page:#F7F5F2; --card:#FFFFFF; --violet-soft:#E2DFE8;
+  /* Campaign colours: Spruce #343F37, Pine #736E52, Brass #B18854, Cranberry #6C151E, Eggnog #CFC3B0 */
+  --slate:#343F37; --slate-2:#8E8467; --ink:#343F37; --muted:#5E5650; --line:#E2D9C9; --line-2:#C9BEAA;
+  --page:#EFE8DB; --card:#FFFDF8; --violet-soft:#E9E0D0;
   --teal:#00AF9B; --teal-ink:#04261F; --teal-soft:#E3F6F3; --teal-dark:#00695C;
-  --carmine:#AB2C37; --carmine-soft:#F8E5E7;
+  --carmine:#6C151E; --carmine-soft:#F3DADC;
   --orange-ink:#A33A00; --orange-soft:#FFF1E8; --orange-line:#FFC7A6;
   --focus:#00AF9B;
   --font:'TP Sans','Noto Sans','Noto Sans Thai',Calibri,system-ui,sans-serif;
@@ -33,8 +39,8 @@ button,input,select,textarea{font-family:inherit}
 h1[tabindex="-1"]:focus{outline:none}
 a{color:var(--slate)}
 
-.demo-bar{padding:9px 16px;background:#F2C766;color:#0E2A1F;font-size:13px;font-weight:500;line-height:1.45;text-align:center}
-.demo-bar .pv{display:inline-block;margin-right:8px;padding:2px 9px;border-radius:999px;background:#0E2A1F;color:#F2C766;font-size:11px;font-weight:700;letter-spacing:.12em;vertical-align:1px}
+.demo-bar{padding:9px 16px;background:#B18854;color:#241C14;font-size:13px;font-weight:500;line-height:1.45;text-align:center}
+.demo-bar .pv{display:inline-block;margin-right:8px;padding:2px 9px;border-radius:999px;background:#6C151E;color:#F4EEE3;font-size:11px;font-weight:700;letter-spacing:.12em;vertical-align:1px}
 .top{background:var(--slate);color:#fff}
 .top-in{max-width:1320px;margin:0 auto;padding:14px 32px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 24px}
 .brand{display:flex;align-items:center;gap:14px}
@@ -58,12 +64,12 @@ a{color:var(--slate)}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;border-radius:999px;border:0;font-size:15px;font-weight:700;cursor:pointer;text-decoration:none}
 .btn-block{width:100%;min-height:50px}
 .btn-slate{background:var(--slate);color:#fff}
-.btn-slate:hover{background:#3d3e58}
+.btn-slate:hover{background:#2A332C}
 .btn-google{background:#fff;color:#1F1F1F;border:1.5px solid var(--line-2);font-weight:500}
 .btn-approve{background:var(--teal);color:var(--teal-ink)}
 .btn-approve:hover{background:#00c2ac}
 .btn-ghost{background:#fff;color:var(--slate);border:1px solid var(--slate-2);font-weight:500}
-.btn-ghost:hover{background:#f2f1f6}
+.btn-ghost:hover{background:#F4EEE3}
 .btn-reject{background:#fff;color:var(--carmine);border:1px solid var(--carmine);font-weight:500}
 .btn-reject:hover{background:var(--carmine-soft)}
 .btn[disabled]{opacity:.55;cursor:progress}
@@ -112,8 +118,8 @@ a{color:var(--slate)}
 .item-top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 14px}
 .who{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
 .who b{font-size:15px}
-.who .ph{width:44px;height:44px;border-radius:50%;object-fit:cover;box-shadow:0 0 0 2px #E3B45A}
-.who .ph-none{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:50%;background:#E3B45A;color:#0B231A;font-size:14px;font-weight:700}
+.who .ph{width:44px;height:44px;border-radius:50%;object-fit:cover;box-shadow:0 0 0 2px #B18854}
+.who .ph-none{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:50%;background:#B18854;color:#241C14;font-size:14px;font-weight:700}
 .item[lang] .who b,.item[lang] .where,.item[lang] .meta,.item[lang] .chip,.item[lang] .actions{font-family:var(--font)}
 :lang(zh){font-family:'Noto Sans SC','Noto Sans',system-ui,sans-serif}
 :lang(ja){font-family:'Noto Sans JP','Noto Sans',system-ui,sans-serif}
@@ -130,7 +136,25 @@ a{color:var(--slate)}
 .meta{font-size:12px;color:var(--muted)}
 .actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
 .likes{display:inline-flex;align-items:center;gap:6px;margin-right:auto;font-size:14px;color:var(--muted)}
-.likes svg{fill:#E04C5C}
+.likes svg{fill:#B3263A}
+.bms{font-variant-numeric:tabular-nums;font-weight:700;color:var(--ink)}
+/* prize standings */
+.pz-rows{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px}
+.pz-row{display:flex;flex-direction:column;gap:6px;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:#fff}
+.pz-row.out{opacity:.6}
+.pz-row.warn{border-color:var(--orange-line);background:var(--orange-soft)}
+.pz-main{display:flex;align-items:center;gap:10px}
+.pz-n{flex:none;display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:#B18854;color:#241C14;font-size:13px;font-weight:700}
+.pz-row.out .pz-n{background:var(--line-2)}
+.pz-who{flex:1;min-width:0;font-size:14px;line-height:1.35}
+.pz-who b{display:block}
+.pz-likes{flex:none;font-size:15px;font-weight:700;font-variant-numeric:tabular-nums}
+.pz-sub{font-size:12px;line-height:1.45;color:var(--muted)}
+.pz-detail{margin:2px 0 0;padding:8px 10px;border-radius:8px;background:var(--page);font-size:12px;line-height:1.6;font-variant-numeric:tabular-nums;max-height:200px;overflow:auto}
+.pz-tools{display:flex;flex-wrap:wrap;gap:8px}
+.pz-tools .btn{min-height:38px;font-size:14px}
+.rm-row{display:flex;gap:8px}
+.rm-row input{flex:1;min-width:0;height:38px;padding:0 10px;border:1px solid var(--line-2);border-radius:8px;font-size:14px}
 .edit-box{display:flex;flex-direction:column;gap:6px}
 .edit-box textarea{width:100%;min-height:90px;padding:12px 14px;border:1.5px solid var(--slate);border-radius:10px;color:var(--ink);font-size:16px;line-height:1.45;resize:vertical}
 .edit-foot{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
@@ -144,7 +168,7 @@ a{color:var(--slate)}
 .switch{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:14px;line-height:1.4;cursor:pointer}
 .switch input{appearance:none;-webkit-appearance:none;flex:none;width:44px;height:26px;border-radius:999px;background:var(--line-2);position:relative;cursor:pointer;transition:background .2s}
 .switch input::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .2s}
-.switch input:checked{background:var(--teal)}
+.switch input:checked{background:var(--teal-dark)}
 .switch input:checked::after{transform:translateX(18px)}
 .small{font-size:12px;line-height:1.45;color:var(--muted)}
 .links a{display:block;padding:6px 0;font-size:14px}
@@ -164,7 +188,7 @@ a{color:var(--slate)}
   .likes{width:100%}
 }
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../vendor/supabase.js"></script>
 <script src="../config.js"></script>
 <script src="../wishtree.js"></script>
 </head>
@@ -285,6 +309,22 @@ a{color:var(--slate)}
           <div class="small">Orange flags are automatic checks for phone numbers and emails. A person always decides. Use Edit to fix a small thing and approve in one step.</div>
         </div>
 
+        <div class="box" id="prizeBox">
+          <h2 id="prizeTitle">Prize standings</h2>
+          <p class="small">The most-liked approved wishes. Likes count once per BMS. Rows marked "not eligible" have a BMS in <b>prize_excluded</b> (Amr, Maszy, the Wish Tree team). An orange row means most of its likes came from one connection: open "Who liked" before you announce winners.</p>
+          <ol id="prizeRows" class="pz-rows"></ol>
+          <div class="pz-tools">
+            <button type="button" id="prizeRefresh" class="btn btn-ghost">Refresh</button>
+            <button type="button" id="prizeCsv" class="btn btn-ghost">Download CSV</button>
+          </div>
+          <label class="small" for="rmBms">Remove every like made with one BMS (for likes that look faked)</label>
+          <div class="rm-row">
+            <input id="rmBms" type="text" inputmode="numeric" maxlength="7" placeholder="BMS" aria-label="BMS whose likes to remove">
+            <button type="button" id="rmBtn" class="btn btn-reject">Remove likes</button>
+          </div>
+          <p id="prizeMsg" class="small" role="status"></p>
+        </div>
+
         <div class="box">
           <h2>Campaign switches</h2>
           <label class="switch"><span>Accept new wishes</span><input type="checkbox" id="swOpen"></label>
@@ -362,7 +402,7 @@ a{color:var(--slate)}
       });
     }
     return Promise.all([
-      sb.from('wishes').select('id,created_at,email,message,display_mode,first_name,site,lang,tag_color,charm,status,flags,reviewed_at,reviewed_by,approved_at').order('created_at', { ascending: false }).limit(5000),
+      sb.from('wishes').select('id,created_at,email,message,display_mode,first_name,site,lang,tag_color,charm,status,flags,reviewed_at,reviewed_by,approved_at,bms,phone,updated_at,edit_count').order('created_at', { ascending: false }).limit(5000),
       sb.from('leader_messages').select('id,created_at,updated_at,email,display_name,title,message,lang,photo_url,status,hidden,reviewed_at,reviewed_by').order('updated_at', { ascending: false }),
       sb.rpc('get_approved_wishes'),
       sb.rpc('get_leader_messages'),
@@ -392,7 +432,7 @@ a{color:var(--slate)}
       if ((x.status || 'pending') !== S.status) return false;
       if (S.kind === 'wish' && S.site !== 'all' && x.site !== S.site) return false;
       if (q) {
-        var hay = [x.message, x.first_name, x.display_name, x.title, x.email].join(' ').toLowerCase();
+        var hay = [x.message, x.first_name, x.display_name, x.title, x.email, x.bms, x.phone].join(' ').toLowerCase();
         if (hay.indexOf(q) === -1) return false;
       }
       return true;
@@ -441,7 +481,7 @@ a{color:var(--slate)}
     $('bulkBtn').textContent = S.bulkArmed ? 'Click again to approve ' + clean.length : 'Approve all ' + clean.length + ' without flags';
   }
 
-  var SWATCH = { cream: '#F6EEDC', red: '#AB2C37', gold: '#E3B45A' };
+  var SWATCH = { cream: '#F4EEE3', red: '#6C151E', gold: '#B18854' };
 
   function itemHtml(x) {
     var isW = S.kind === 'wish';
@@ -450,7 +490,7 @@ a{color:var(--slate)}
     var editing = S.editing === key;
     var busy = !!S.busy[key];
     var flags = isW && x.flags && x.flags.length ? x.flags : [];
-    var name = isW ? (x.display_mode === 'name' && x.first_name ? x.first_name : 'Anonymous') : (x.display_name || 'Leader');
+    var name = isW ? (x.first_name || 'Anonymous') : (x.display_name || 'Leader');
     var where = isW ? C.displayWhere(x) : (x.title || '');
     var when = isW ? x.created_at : (x.updated_at || x.created_at);
     var h = '<article class="item' + (flags.length ? ' flagged' : '') + '" data-key="' + esc(key) + '" lang="' + esc(x.lang || 'en') + '">';
@@ -478,6 +518,9 @@ a{color:var(--slate)}
       h += '<p class="msg">' + esc(x.message) + '</p>';
     }
     var metaBits = [];
+    if (isW && x.bms) metaBits.push('BMS ' + x.bms);
+    if (isW && x.phone) metaBits.push('Phone ' + x.phone);
+    if (isW && x.edit_count) metaBits.push('Edited by the sender ' + x.edit_count + (x.edit_count === 1 ? ' time' : ' times'));
     if (x.email) metaBits.push('From ' + x.email);
     if (status !== 'pending' && x.reviewed_by) metaBits.push((status === 'approved' ? 'Approved by ' : 'Not approved by ') + x.reviewed_by);
     if (metaBits.length) h += '<div class="meta">' + esc(metaBits.join(' · ')) + '</div>';
@@ -500,6 +543,10 @@ a{color:var(--slate)}
     } else {
       h += '<button type="button" class="btn btn-approve" data-act="approve"' + dis + '>' + checkIcon() + 'Approve</button>';
       h += '<button type="button" class="btn btn-ghost" data-act="pending"' + dis + '>Move back to waiting</button>';
+    }
+    if (isW && status !== 'approved' && x.bms) {
+      h += '<button type="button" class="btn btn-reject" data-act="delete"' + dis + ' title="Removes the wish for good so this BMS can hang a new one">' +
+        (deleteArmed === key ? 'Click again to delete' : 'Delete (frees the BMS)') + '</button>';
     }
     h += '</div></article>';
     return h;
@@ -526,6 +573,117 @@ a{color:var(--slate)}
     $('siteFilter').innerHTML = html;
     $('siteFilter').value = S.site;
   }
+
+  /* ---------- Prize standings ---------- */
+  var PRIZE = C.PRIZE || {};
+  var prize = { rows: [], open: {}, likes: {}, rmArmed: '' };
+  function loadPrize() {
+    if (PRIZE.enabled === false) { $('prizeBox').hidden = true; return Promise.resolve(); }
+    $('prizeTitle').textContent = 'Prize standings: ' + (PRIZE.title || '');
+    if (C.demo) {
+      return C.fetchPrizeTop(10).then(function (top) {
+        prize.rows = top.map(function (w) {
+          return { id: w.id, first_name: w.display_name, bms: 'sample', phone: '', site: w.site, like_count: w.like_count, distinct_ips: null, most_from_one_ip: null, excluded: false };
+        });
+        renderPrize();
+      });
+    }
+    return sb.rpc('get_prize_check', { p_limit: 15 }).then(function (res) {
+      if (res.error) throw res.error;
+      prize.rows = res.data || [];
+      renderPrize();
+    }).catch(function (err) {
+      console.error(err);
+      $('prizeMsg').textContent = 'Could not load the prize standings.';
+    });
+  }
+  function suspicious(r) {
+    return r.most_from_one_ip != null && r.like_count >= 5 && r.most_from_one_ip / r.like_count > 0.5;
+  }
+  function renderPrize() {
+    var place = 0;
+    var winners = PRIZE.winners || 5;
+    $('prizeRows').innerHTML = prize.rows.length ? prize.rows.map(function (r) {
+      var out = !!r.excluded;
+      if (!out) place++;
+      var cls = 'pz-row' + (out ? ' out' : '') + (!out && suspicious(r) ? ' warn' : '');
+      var sub = [];
+      sub.push('BMS <span class="bms">' + esc(r.bms || '') + '</span>');
+      if (r.phone) sub.push('Phone ' + esc(r.phone));
+      sub.push(esc(C.siteName(r.site) || ''));
+      if (r.distinct_ips != null) sub.push('from ' + fmt(r.distinct_ips) + (r.distinct_ips === 1 ? ' connection' : ' connections') + ', up to ' + fmt(r.most_from_one_ip) + ' from one');
+      var detail = prize.open[r.id] ? '<div class="pz-detail">' + (prize.likes[r.id] || 'Loading…') + '</div>' : '';
+      return '<li class="' + cls + '"><div class="pz-main"><span class="pz-n">' + (out ? '-' : place) + '</span>' +
+        '<span class="pz-who"><b>' + esc(r.first_name || 'Anonymous') + (out ? ' (not eligible)' : place <= winners ? ' (winning)' : '') + '</b></span>' +
+        '<span class="pz-likes">' + fmt(r.like_count) + ' likes</span></div>' +
+        '<div class="pz-sub">' + sub.join(' · ') + '</div>' +
+        (C.demo ? '' : '<button type="button" class="link" data-pz-likes="' + esc(r.id) + '" style="min-height:28px;font-size:13px">' + (prize.open[r.id] ? 'Hide who liked' : 'Who liked') + '</button>') +
+        detail + '</li>';
+    }).join('') : '<li class="small">No likes yet.</li>';
+  }
+  function loadLikes(id) {
+    sb.rpc('get_wish_likes', { p_id: id }).then(function (res) {
+      if (res.error) throw res.error;
+      var rows = res.data || [];
+      prize.likes[id] = rows.length ? rows.map(function (l) {
+        return esc(l.bms) + ' · ' + esc(l.ip || '') + ' · ' + esc(new Date(l.created_at).toLocaleString('en-GB'));
+      }).join('<br>') : 'No likes.';
+      renderPrize();
+    }).catch(function (err) { console.error(err); prize.likes[id] = 'Could not load the likes.'; renderPrize(); });
+  }
+  // CSV for the Wish Tree team (cells that start like a formula are quoted so spreadsheets don't run them)
+  function csvCell(v) {
+    var s = String(v == null ? '' : v);
+    if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
+    return '"' + s.replace(/"/g, '""') + '"';
+  }
+  function downloadCsv() {
+    var lines = [['Place', 'Name', 'BMS', 'Phone', 'Site', 'Likes', 'Connections', 'Most likes from one connection', 'Eligible', 'Wish'].map(csvCell).join(',')];
+    var place = 0;
+    prize.rows.forEach(function (r) {
+      var ok = !r.excluded;
+      if (ok) place++;
+      lines.push([ok ? place : '', r.first_name, r.bms, r.phone, C.siteName(r.site), r.like_count, r.distinct_ips, r.most_from_one_ip, ok ? 'yes' : 'no', r.message].map(csvCell).join(','));
+    });
+    var blob = new Blob(['\ufeff' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'wish-tree-prize-standings.csv';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  }
+  $('prizeRows').addEventListener('click', function (e) {
+    var b = e.target.closest ? e.target.closest('[data-pz-likes]') : null;
+    if (!b) return;
+    var id = b.getAttribute('data-pz-likes');
+    prize.open[id] = !prize.open[id];
+    renderPrize();
+    if (prize.open[id]) loadLikes(id);
+  });
+  $('prizeRefresh').addEventListener('click', function () { loadPrize(); });
+  $('prizeCsv').addEventListener('click', downloadCsv);
+  $('rmBms').addEventListener('input', function () {
+    var v = $('rmBms').value.replace(/\D/g, '').slice(0, 7);
+    if ($('rmBms').value !== v) $('rmBms').value = v;
+    prize.rmArmed = '';
+    $('rmBtn').textContent = 'Remove likes';
+  });
+  $('rmBtn').addEventListener('click', function () {
+    var b = $('rmBms').value;
+    if (!C.validBms(b)) { $('prizeMsg').textContent = 'Type a BMS (4 to 7 digits) first.'; return; }
+    if (prize.rmArmed !== b) { prize.rmArmed = b; $('rmBtn').textContent = 'Click again to remove'; $('prizeMsg').textContent = 'This removes every like made with BMS ' + b + '. It can\'t be undone.'; return; }
+    prize.rmArmed = '';
+    $('rmBtn').textContent = 'Remove likes';
+    if (C.demo) { $('prizeMsg').textContent = 'Preview: nothing to remove.'; return; }
+    sb.rpc('remove_likes_by_bms', { p_bms: b }).then(function (res) {
+      if (res.error) throw res.error;
+      $('prizeMsg').textContent = 'Removed ' + fmt(res.data) + ' likes made with BMS ' + b + '.';
+      $('rmBms').value = '';
+      load();
+      loadPrize();
+    }).catch(function (err) { console.error(err); $('prizeMsg').textContent = 'Could not remove the likes.'; });
+  });
 
   /* ---------- Actions ---------- */
   function findByKey(key) {
@@ -554,9 +712,35 @@ a{color:var(--slate)}
     }, Promise.resolve());
   }
 
+  // Delete a wish for good, so its BMS can hang a new one (two clicks)
+  var deleteArmed = '';
+  function removeWish(key, f) {
+    if (deleteArmed !== key) { deleteArmed = key; renderList(); return; }
+    deleteArmed = '';
+    S.busy[key] = true;
+    renderList();
+    var p = C.demo ? Promise.resolve(C.demoReview('wish', f.id, { status: 'deleted' }))
+      : sb.from('wishes').delete().eq('id', f.id).select('id').then(function (res) {
+        if (res.error) throw res.error;
+        if (!(res.data || []).length) throw new Error('Nothing was deleted. You may not be on the approvers list.');
+      });
+    p.then(function () {
+      S.busy[key] = false;
+      S.wishes = S.wishes.filter(function (w) { return String(w.id) !== String(f.id); });
+      render();
+      if (!C.demo) load();
+    }).catch(function (err) {
+      console.error(err);
+      S.busy[key] = false;
+      renderList();
+      $('mainErr').textContent = 'That didn\'t delete. ' + (err && err.message ? err.message : 'Please try again.');
+    });
+  }
+
   function act(key, action) {
     var f = findByKey(key);
     if (!f) return;
+    if (action === 'delete') { removeWish(key, f); return; }
     if (action === 'edit') { S.editing = key; S.draft = f.item.message; renderList(); return; }
     if (action === 'cancel') { S.editing = null; renderList(); return; }
     var changes;
@@ -629,7 +813,7 @@ a{color:var(--slate)}
 
   /* ---------- Sign-in ---------- */
   function checkAccess() {
-    if (C.demo) { show('main'); renderSites(); load(); return; }
+    if (C.demo) { show('main'); renderSites(); load(); loadPrize(); return; }
     sb.rpc('am_i_moderator').then(function (res) {
       if (res.error) throw res.error;
       if (!res.data) {
@@ -641,6 +825,7 @@ a{color:var(--slate)}
       show('main');
       renderSites();
       load();
+      loadPrize();
     }).catch(function (err) {
       console.error(err);
       $('signinErr').textContent = 'We could not check your access. Please try again.';
@@ -744,7 +929,7 @@ a{color:var(--slate)}
   if (C.demo) $('demoBar').hidden = false;
 
   // keep the queue fresh while the page is open
-  setInterval(function () { if (S.view === 'main' && !S.editing && !document.hidden) load(); }, 30000);
+  setInterval(function () { if (S.view === 'main' && !S.editing && !document.hidden) { load(); loadPrize(); } }, 30000);
 
   if (C.demo) {
     if (C.storageGet('wt-demo-approver')) { S.user = { id: 'demo', email: 'approver@' + DOMAIN }; $('meEmail').textContent = S.user.email; checkAccess(); }

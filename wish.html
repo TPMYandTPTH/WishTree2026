@@ -2,10 +2,13 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<!-- Security: only this site, Supabase, Google Fonts and (if set) Google Analytics can be used by the page -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://*.supabase.co https://www.googletagmanager.com https://*.google-analytics.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Hang your wish · TP Wish Tree 2026</title>
 <meta name="description" content="Write a Christmas wish and hang it on the shared TP Malaysia and Thailand wish tree.">
-<meta name="theme-color" content="#0E2A1F">
+<meta name="theme-color" content="#CFC3B0">
 <link rel="icon" type="image/png" href="assets/tp-logo-white.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,10 +20,12 @@
 @font-face{font-family:'TP Sans';font-weight:700;font-display:swap;src:local('TP Sans Bold'),local('TPSans-Bold'),url('fonts/TPSans-Bold.ttf') format('truetype')}
 
 :root{
-  --bg:#0E2A1F; --bg-2:#11302A;
-  --cream:#F6EEDC; --cream-2:#DCD3BF; --paper:#FBF6EA; --paper-2:#EFE6D2;
-  --gold:#E3B45A; --gold-2:#F2C766; --carmine:#AB2C37;
-  --ink:#183326; --slate:#4B4C6A; --field:#C9BFA8; --field-off:#DDD3BE; --focus:#00AF9B;
+  /* Campaign colours: Spruce, Pine, Brass, Cranberry, Eggnog. Page is Eggnog, writing is Cranberry. */
+  --spruce:#343F37; --pine:#736E52; --brass:#B18854; --cran:#6C151E; --eggnog:#CFC3B0;
+  --bg:#CFC3B0; --bg-2:#C7BAA5;
+  --cream:#6C151E; --cream-2:#5B3A33; --paper:#F4EEE3; --paper-2:#E9E0D0;
+  --gold:#674A20;
+  --ink:#343F37; --slate:#5A5550; --field:#B9AE99; --field-off:#D8CEBD; --focus:#0E6E63;
   --font:'TP Sans','Noto Sans','Noto Sans Thai',Calibri,system-ui,sans-serif;
   --script:'Great Vibes',cursive;
 }
@@ -37,122 +42,115 @@ button,input,select,textarea{font-family:inherit}
 .bar{position:relative;z-index:3;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 20px 0;padding-top:max(14px, env(safe-area-inset-top))}
 .bar-left{display:flex;align-items:center;gap:10px;min-height:36px}
 .logo{height:28px;width:auto;display:block}
-.bar-name{font-size:14px;font-weight:500;color:var(--cream-2)}
-.langs{display:flex;gap:4px;padding:3px;border-radius:999px;background:rgba(246,238,220,.1)}
+.bar-name{font-size:14px;font-weight:500;color:var(--cream)}
+.langs{display:flex;gap:4px;padding:3px;border-radius:999px;background:rgba(108,21,30,.08)}
 .langs button{min-width:48px;min-height:36px;padding:0 12px;border:0;border-radius:999px;background:transparent;color:var(--cream);font-size:14px;font-weight:500;cursor:pointer}
-.langs button[aria-pressed="true"]{background:var(--cream);color:var(--bg)}
+.langs button[aria-pressed="true"]{background:var(--cran);color:var(--paper)}
 
 .view{position:relative;flex:1;display:flex;flex-direction:column}
 .view h1{margin:0;font-weight:300;line-height:1.15}
 .view h1:focus{outline:none}
 
-/* dark hero */
+/* hero */
 .hero{position:relative;display:flex;flex-direction:column;gap:10px;padding:24px 24px 28px}
 .hero .script{font-family:var(--script);font-size:40px;line-height:1;color:var(--gold)}
 .hero h1{font-size:30px;color:var(--cream)}
-.hero p{margin:0;font-size:15px;line-height:1.5;font-weight:300;color:var(--cream-2)}
+.hero p{margin:0;font-size:15px;line-height:1.5;font-weight:400;color:var(--cream-2)}
 .arc{position:absolute;border-radius:50%;pointer-events:none}
-.arc-1{right:-150px;top:-140px;width:360px;height:360px;border:1px solid rgba(227,180,90,.18)}
+.arc-1{right:-150px;top:-140px;width:360px;height:360px;border:1px solid rgba(108,21,30,.14)}
 .arc-2{right:-180px;top:160px;width:380px;height:380px;background:var(--bg-2)}
-.deco-tags{position:absolute;right:30px;top:0;display:flex;gap:14px;align-items:flex-start;pointer-events:none}
-.deco-tags span{display:flex;flex-direction:column;align-items:center;transform-origin:50% 0}
-.deco-tags i{display:block;width:1px;background:#D9C59A}
-.deco-tags b{display:block;width:30px;height:40px;border-radius:3px 3px 5px 5px}
 
 /* progress */
 .progress{display:flex;align-items:center;gap:12px}
 .back{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;margin-left:-10px;border:0;border-radius:50%;background:transparent;color:var(--cream);cursor:pointer}
-.back:hover{background:rgba(246,238,220,.08)}
+.back:hover{background:rgba(108,21,30,.08)}
 .progress-main{flex:1;display:flex;flex-direction:column;gap:6px}
 .step-label{font-size:12px;font-weight:500;letter-spacing:.12em;color:var(--gold)}
 .bars{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
-.bars span{height:4px;border-radius:2px;background:rgba(246,238,220,.2)}
-.bars span.on{background:var(--gold)}
+.bars span{height:4px;border-radius:2px;background:rgba(108,21,30,.18)}
+.bars span.on{background:var(--cran)}
 
-/* cream sheet */
+/* form sheet */
 .sheet{position:relative;z-index:2;flex:1;display:flex;flex-direction:column;gap:22px;padding:24px 20px 32px;padding-bottom:max(32px, env(safe-area-inset-bottom));border-radius:24px 24px 0 0;background:var(--paper);color:var(--ink)}
 .sheet fieldset{margin:0;padding:0;border:0;min-width:0}
 .sheet legend,.sheet .label{padding:0;margin-bottom:10px;font-size:15px;font-weight:700;color:var(--ink)}
 .field{display:flex;flex-direction:column;gap:8px;min-width:0}
 .field label{font-size:15px;font-weight:700}
-.field.small label{font-size:13px;font-weight:500}
+.field.small label{font-size:13px;font-weight:700}
 .input,.select,.textarea{width:100%;min-width:0;border:1.5px solid var(--field);border-radius:12px;background:#fff;color:var(--ink);font-size:16px}
 .input,.select{height:52px;padding:0 16px}
 .select{padding:0 12px}
 .textarea{padding:14px 16px;line-height:1.45;resize:none}
-.input:focus,.select:focus,.textarea:focus{border-color:var(--bg);outline:none;box-shadow:0 0 0 3px rgba(0,175,155,.35)}
+.input:focus,.select:focus,.textarea:focus{border-color:var(--cran);outline:none;box-shadow:0 0 0 3px rgba(108,21,30,.18)}
+.input[aria-invalid="true"]{border-color:#8E1F2A}
+.input[readonly]{background:var(--paper-2);color:var(--slate)}
+.input.digits{letter-spacing:.1em;font-variant-numeric:tabular-nums}
 .help{font-size:13px;line-height:1.45;color:var(--slate)}
-.err{margin:0;padding:10px 12px;border-radius:10px;background:#F8E5E7;color:#7E1F28;font-size:14px;line-height:1.45}
+.err{margin:0;padding:10px 12px;border-radius:10px;background:#F3DADC;color:#6C151E;font-size:14px;line-height:1.45}
 .err:empty{display:none}
 
 .btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:56px;padding:0 20px;border:0;border-radius:999px;font-size:17px;font-weight:700;text-decoration:none;cursor:pointer}
-.btn-dark{background:var(--bg);color:var(--cream)}
-.btn-dark:hover{background:#163D2E}
-.btn-gold{background:var(--gold);color:var(--bg)}
-.btn-gold:hover{background:var(--gold-2)}
-.btn-line{min-height:52px;border:1px solid rgba(246,238,220,.4);background:transparent;color:var(--cream);font-weight:500;font-size:16px}
-.btn-line:hover{background:rgba(246,238,220,.08)}
-.btn-google{background:#fff;color:#1F1F1F;border:1.5px solid var(--field);font-weight:500;font-size:16px}
-.btn-google:hover{background:#F7F7F7}
+.btn-dark,.btn-gold{background:var(--cran);color:var(--paper)}
+.btn-dark:hover,.btn-gold:hover{background:#85202A}
+.btn-line{min-height:52px;border:1px solid rgba(108,21,30,.4);background:transparent;color:var(--cream);font-weight:500;font-size:16px}
+.btn-line:hover{background:rgba(108,21,30,.06)}
 .btn[disabled]{opacity:.6;cursor:progress}
-.link{min-height:44px;padding:0;border:0;background:transparent;color:var(--carmine);font-size:14px;font-weight:500;text-decoration:underline;cursor:pointer;align-self:flex-start}
-.link-cream{color:var(--cream)}
+.link{min-height:44px;padding:0;border:0;background:transparent;color:var(--cran);font-size:14px;font-weight:500;text-decoration:underline;cursor:pointer;align-self:flex-start}
 
-.privacy{display:flex;align-items:flex-start;gap:10px;margin-top:auto;font-size:12px;line-height:1.5;color:var(--slate)}
+.privacy{display:flex;align-items:flex-start;gap:10px;font-size:12px;line-height:1.5;color:var(--slate)}
 .privacy svg{flex:none;margin-top:1px}
 
-.code-input{height:64px;padding:0 16px;text-align:center;font-size:28px;font-weight:500;letter-spacing:.5em}
+/* your wish already on the tree */
+.mine{display:flex;flex-direction:column;gap:8px;padding:14px 16px;border-radius:12px;background:#F7E9D6;border:1px solid rgba(108,21,30,.2);font-size:14px;line-height:1.45;color:var(--ink)}
+.mine-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.mine-top b{color:var(--cran)}
+.status{flex:none;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700;background:#E6DCCB;color:var(--ink)}
+.status[data-s="approved"]{background:#DDE6DA;color:#25402D}
+.status[data-s="rejected"]{background:#F3DADC;color:#6C151E}
+.mine .link{min-height:32px;font-size:13px}
 
 /* write view */
-.who{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:4px 12px;margin:-6px 0 -8px;font-size:13px;color:var(--slate)}
-.who .link{min-height:36px;font-size:13px;color:var(--slate)}
 .opt-grid{display:grid;gap:10px}
 .opt-grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
 .opt-grid.four{grid-template-columns:repeat(4,minmax(0,1fr))}
 .opt{display:flex;align-items:center;gap:10px;min-height:52px;padding:0 12px;border:1.5px solid var(--field-off);border-radius:12px;background:#fff;color:var(--ink);font-size:14px;font-weight:500;cursor:pointer;text-align:left}
-.opt[aria-pressed="true"]{border:2px solid var(--bg);box-shadow:0 0 0 2px rgba(14,42,31,.08)}
-.opt .sw{flex:none;width:22px;height:28px;border-radius:3px 3px 4px 4px;box-shadow:inset 0 0 0 1px rgba(14,42,31,.15)}
-.opt.charm{flex-direction:column;justify-content:center;gap:4px;min-height:66px;padding:6px 4px;color:var(--carmine);text-align:center}
+.opt[aria-pressed="true"]{border:2px solid var(--cran);box-shadow:0 0 0 2px rgba(108,21,30,.08)}
+.opt .sw{flex:none;width:22px;height:28px;border-radius:3px 3px 4px 4px;box-shadow:inset 0 0 0 1px rgba(52,63,55,.2)}
+.opt.charm{flex-direction:column;justify-content:center;gap:4px;min-height:66px;padding:6px 4px;color:var(--cran);text-align:center}
 .opt.charm span{font-size:12px;font-weight:400;color:var(--slate)}
 .starters{display:flex;flex-wrap:wrap;gap:8px}
 .starters button{min-height:36px;padding:0 14px;border:1px solid var(--field);border-radius:999px;background:transparent;color:var(--ink);font-size:13px;cursor:pointer}
 .starters button:hover{background:var(--paper-2)}
 .field-foot{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;font-size:12px;color:var(--slate)}
 .counter{margin-left:auto;font-variant-numeric:tabular-nums;white-space:nowrap}
-.warn{color:#A33A00;font-weight:500;line-height:1.45}
+.warn{color:#8A3A10;font-weight:500;line-height:1.45}
 .seg{display:flex;flex-wrap:wrap;gap:6px}
-.seg button{min-height:40px;padding:0 14px;border:1px solid var(--line-2,rgba(24,51,38,.2));border-radius:999px;background:var(--paper-2);color:var(--ink);font-size:14px;font-weight:500;cursor:pointer}
-.seg button[aria-pressed="true"]{background:var(--bg);border-color:var(--bg);color:var(--cream)}
+.seg button{min-height:40px;padding:0 14px;border:1px solid rgba(52,63,55,.2);border-radius:999px;background:var(--paper-2);color:var(--ink);font-size:14px;font-weight:500;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--cran);border-color:var(--cran);color:var(--paper)}
 :lang(zh){font-family:'Noto Sans SC','Noto Sans',system-ui,sans-serif}
 :lang(ja){font-family:'Noto Sans JP','Noto Sans',system-ui,sans-serif}
 :lang(ko){font-family:'Noto Sans KR','Noto Sans',system-ui,sans-serif}
 :lang(ta){font-family:'Noto Sans Tamil','Noto Sans',system-ui,sans-serif}
-.radio-card{display:flex;align-items:center;gap:12px;min-height:58px;padding:8px 14px;margin-bottom:10px;border:1.5px solid var(--field-off);border-radius:12px;background:#fff;cursor:pointer}
-.radio-card:last-child{margin-bottom:0}
-.radio-card:has(input:checked){border:2px solid var(--bg)}
-.radio-card input{flex:none;width:20px;height:20px;margin:0;accent-color:var(--bg)}
-.radio-card .rc-main{display:block;font-size:15px;font-weight:500}
-.radio-card .rc-ex{display:block;margin-top:2px;font-size:13px;color:var(--slate)}
 .two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-.two.one{grid-template-columns:minmax(0,1fr)}
+.about{display:flex;flex-direction:column;gap:14px}
 .rules{display:flex;gap:12px;padding:14px 16px;border-radius:12px;background:var(--paper-2);font-size:13px;line-height:1.5}
 .rules svg{flex:none;margin-top:1px}
 .check{display:flex;align-items:flex-start;gap:12px;font-size:14px;line-height:1.45;cursor:pointer}
-.check input{flex:none;width:22px;height:22px;margin:0;accent-color:var(--bg)}
-.blocker{margin:-10px 0 0;text-align:center;font-size:13px;color:var(--carmine);min-height:1em}
+.check input{flex:none;width:22px;height:22px;margin:0;accent-color:var(--cran)}
+.blocker{margin:-10px 0 0;text-align:center;font-size:13px;color:var(--cran);min-height:1em}
 
 /* tags */
 .tag-stage{display:flex;flex-direction:column;align-items:center;padding-top:4px}
-.tag-string{width:1px;height:22px;background:#D9C59A}
-.tag{--tag-bg:#F6EEDC;--tag-fg:#AB2C37;--tag-ink:#183326;--tag-line:rgba(24,51,38,.25);position:relative;width:250px;max-width:100%;padding:30px 20px 16px;border-radius:5px 5px 9px 9px;background:var(--tag-bg);color:var(--tag-ink);box-shadow:0 14px 30px rgba(0,0,0,.4);transform:rotate(-2deg);transition:background-color .25s ease,color .25s ease}
-.tag[data-color="red"]{--tag-bg:#AB2C37;--tag-fg:#F6EEDC;--tag-ink:#F6EEDC;--tag-line:rgba(246,238,220,.35)}
-.tag[data-color="gold"]{--tag-bg:#E3B45A;--tag-fg:#0E2A1F;--tag-ink:#0E2A1F;--tag-line:rgba(14,42,31,.3)}
-.tag .hole{position:absolute;top:10px;left:50%;width:8px;height:8px;margin-left:-4px;border-radius:50%;background:rgba(14,42,31,.5)}
+.tag-string{width:1px;height:22px;background:#8E8467}
+.tag{--tag-bg:#F4EEE3;--tag-fg:#6C151E;--tag-ink:#343F37;--tag-line:rgba(52,63,55,.25);position:relative;width:250px;max-width:100%;padding:30px 20px 16px;border-radius:5px 5px 9px 9px;background:var(--tag-bg);color:var(--tag-ink);box-shadow:0 14px 30px rgba(59,47,34,.3);transform:rotate(-2deg);transition:background-color .25s ease,color .25s ease}
+.tag[data-color="red"]{--tag-bg:#6C151E;--tag-fg:#F4EEE3;--tag-ink:#F4EEE3;--tag-line:rgba(244,238,227,.35)}
+.tag[data-color="gold"]{--tag-bg:#B18854;--tag-fg:#241C14;--tag-ink:#241C14;--tag-line:rgba(36,28,20,.3)}
+.tag .hole{position:absolute;top:10px;left:50%;width:8px;height:8px;margin-left:-4px;border-radius:50%;background:rgba(52,63,55,.5)}
 .tag .charm-icon{position:absolute;top:11px;right:14px;color:var(--tag-fg)}
 .tag .tag-text{margin:0 0 12px;font-size:15px;line-height:1.45;font-weight:400;color:var(--tag-ink);white-space:pre-line;overflow-wrap:anywhere}
 .tag .tag-text.placeholder{opacity:.6}
 .tag .tag-sig{padding-top:10px;border-top:1px dashed var(--tag-line);font-size:13px;font-weight:700}
-.tag.big{width:310px;padding:40px 26px 22px;border-radius:6px 6px 10px 10px;transform:rotate(-1.5deg);box-shadow:0 20px 40px rgba(0,0,0,.45)}
+.tag.big{width:310px;padding:40px 26px 22px;border-radius:6px 6px 10px 10px;transform:rotate(-1.5deg);box-shadow:0 20px 40px rgba(59,47,34,.3)}
 .tag.big .hole{top:13px;width:10px;height:10px;margin-left:-5px}
 .tag.big .charm-icon{top:14px;right:16px}
 .tag.big .tag-text{font-size:19px;line-height:1.5;margin-bottom:18px}
@@ -160,8 +158,8 @@ button,input,select,textarea{font-family:inherit}
 
 /* preview + done */
 .chips{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;padding:22px 20px 0}
-.chip{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:rgba(246,238,220,.1);font-size:13px;color:var(--cream)}
-.next{display:flex;flex-direction:column;gap:12px;margin:22px 20px 0;padding:18px;border-radius:14px;border:1px solid rgba(246,238,220,.14)}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:rgba(108,21,30,.08);font-size:13px;color:var(--cream)}
+.next{display:flex;flex-direction:column;gap:12px;margin:22px 20px 0;padding:18px;border-radius:14px;border:1px solid rgba(108,21,30,.18);background:rgba(255,255,255,.25)}
 .next-title{font-size:13px;font-weight:500;letter-spacing:.12em;color:var(--gold)}
 .next-row{display:flex;gap:12px;align-items:baseline;font-size:14px;line-height:1.45;color:var(--cream-2)}
 .next-row b{flex:none;color:var(--cream)}
@@ -169,34 +167,33 @@ button,input,select,textarea{font-family:inherit}
 .done-copy{display:flex;flex-direction:column;align-items:center;gap:12px;padding:12px 28px 0;text-align:center}
 .done-copy .script{font-family:var(--script);font-size:42px;line-height:1;color:var(--gold)}
 .done-copy h1{font-size:28px}
-.done-copy p{margin:0;font-size:15px;line-height:1.55;font-weight:300;color:var(--cream-2)}
-.invite{display:flex;align-items:center;gap:14px;margin:26px 20px 0;padding:16px;border-radius:14px;border:1px solid rgba(227,180,90,.35);background:rgba(246,238,220,.04)}
-.invite-icon{flex:none;display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:50%;background:rgba(227,180,90,.16);color:var(--gold)}
+.done-copy p{margin:0;font-size:15px;line-height:1.55;font-weight:400;color:var(--cream-2)}
+.invite{display:flex;align-items:center;gap:14px;margin:26px 20px 0;padding:16px;border-radius:14px;border:1px solid rgba(108,21,30,.2);background:rgba(255,255,255,.3)}
+.invite-icon{flex:none;display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:50%;background:rgba(177,136,84,.25);color:var(--gold)}
 .invite-main{flex:1;min-width:0}
 .invite-title{font-size:15px;font-weight:700}
 .invite-sub{margin-top:2px;font-size:13px;line-height:1.4;color:var(--cream-2)}
-.invite button{flex:none;min-height:44px;padding:0 14px;border:1px solid rgba(246,238,220,.4);border-radius:999px;background:transparent;color:var(--cream);font-size:14px;font-weight:500;cursor:pointer}
+.invite button{flex:none;min-height:44px;padding:0 14px;border:1px solid rgba(108,21,30,.35);border-radius:999px;background:transparent;color:var(--cream);font-size:14px;font-weight:500;cursor:pointer}
 .center-msg{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:40px 28px;text-align:center}
 .center-msg h1{font-size:28px}
 .center-msg p{margin:0;font-size:15px;line-height:1.55;color:var(--cream-2)}
-.spinner{width:36px;height:36px;border-radius:50%;border:3px solid rgba(246,238,220,.2);border-top-color:var(--gold);animation:spin 1s linear infinite}
+.spinner{width:36px;height:36px;border-radius:50%;border:3px solid rgba(108,21,30,.2);border-top-color:var(--cran);animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-.demo-bar{margin:0 20px 16px;padding:10px 14px;border-radius:12px;background:#F2C766;color:#0E2A1F;font-size:12px;font-weight:500;line-height:1.45;text-align:center}
-.demo-bar .pv{display:inline-block;margin-right:8px;padding:2px 9px;border-radius:999px;background:#0E2A1F;color:#F2C766;font-size:11px;font-weight:700;letter-spacing:.12em;vertical-align:1px}
+.demo-bar{margin:0 20px 16px;padding:10px 14px;border-radius:12px;background:#B18854;color:#241C14;font-size:12px;font-weight:500;line-height:1.45;text-align:center}
+.demo-bar .pv{display:inline-block;margin-right:8px;padding:2px 9px;border-radius:999px;background:#6C151E;color:#F4EEE3;font-size:11px;font-weight:700;letter-spacing:.12em;vertical-align:1px}
 
 /* tablet: centred phone-width column */
-@media (min-width:481px) and (max-width:959px){ body{background:#0A2018} .app{box-shadow:0 0 60px rgba(0,0,0,.4)} }
+@media (min-width:481px) and (max-width:959px){ body{background:#C2B5A0} .app{box-shadow:0 0 60px rgba(59,47,34,.25)} }
 /* desktop: wider page, live tag beside the form while writing */
 @media (min-width:960px){
-  body{background:#0A2018}
-  .app{max-width:1120px;box-shadow:0 0 80px rgba(0,0,0,.4)}
+  body{background:#C2B5A0}
+  .app{max-width:1120px;box-shadow:0 0 80px rgba(59,47,34,.25)}
   .bar{padding:22px 40px 0}
   .logo{height:34px}
   .bar-name{font-size:16px}
   .view{width:100%;max-width:580px;margin:0 auto;padding-bottom:40px}
   .sheet{flex:0 0 auto;border-radius:24px;margin:0 20px}
-  .deco-tags{right:70px}
   #view-write{max-width:none;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,560px);gap:0 56px;align-items:start;padding:8px 48px 48px}
   #view-write .hero{position:sticky;top:24px;padding:48px 0 0}
   #view-write .hero h1{font-size:34px !important}
@@ -206,10 +203,10 @@ button,input,select,textarea{font-family:inherit}
   #view-write .tag .tag-sig{font-size:14px}
   #view-preview .actions,#view-done .actions{padding-bottom:20px}
 }
-@media (max-width:360px){ .opt-grid.three{grid-template-columns:minmax(0,1fr)} .tag.big{width:100%} }
+@media (max-width:360px){ .opt-grid.three{grid-template-columns:minmax(0,1fr)} .two{grid-template-columns:minmax(0,1fr)} .tag.big{width:100%} }
 @media (prefers-reduced-motion:reduce){ .spinner{animation:none} .tag{transition:none} }
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="vendor/supabase.js"></script>
 <script src="config.js"></script>
 <script src="wishtree.js"></script>
 </head>
@@ -243,69 +240,6 @@ button,input,select,textarea{font-family:inherit}
     </div>
   </section>
 
-  <!-- Sign in -->
-  <section id="view-signin" class="view" hidden>
-    <div class="deco-tags" aria-hidden="true">
-      <span style="transform:rotate(-6deg)"><i style="height:30px"></i><b style="background:#F6EEDC"></b></span>
-      <span style="transform:rotate(4deg)"><i style="height:52px"></i><b style="background:#AB2C37"></b></span>
-      <span style="transform:rotate(-3deg)"><i style="height:16px"></i><b style="background:#E3B45A"></b></span>
-    </div>
-    <div class="hero" style="padding-top:96px">
-      <div class="script">Write it bright,</div>
-      <h1 tabindex="-1" data-i18n="signinTitle"></h1>
-      <p data-i18n="signinSub"></p>
-    </div>
-    <div class="sheet">
-      <div id="googleBlock" class="field" hidden>
-        <button type="button" id="googleBtn" class="btn btn-google">
-          <svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>
-          <span data-i18n="googleBtn"></span>
-        </button>
-        <div class="help" id="googleHelp"></div>
-      </div>
-
-      <form id="emailForm" class="field" novalidate hidden>
-        <label for="email" data-i18n="emailLabel"></label>
-        <input id="email" class="input" type="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" required>
-        <div class="help" data-i18n="emailHelp"></div>
-        <button type="submit" id="sendCodeBtn" class="btn btn-dark" style="margin-top:12px">
-          <span data-i18n="sendCode"></span>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-        </button>
-      </form>
-
-      <p id="signinErr" class="err" role="alert"></p>
-
-      <div class="privacy">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4B4C6A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
-        <span data-i18n="privacy"></span>
-      </div>
-    </div>
-  </section>
-
-  <!-- Email code -->
-  <section id="view-code" class="view" hidden>
-    <div class="hero" style="padding-top:40px">
-      <div class="script">Write it bright,</div>
-      <h1 tabindex="-1" data-i18n="codeTitle"></h1>
-    </div>
-    <div class="sheet">
-      <form id="codeForm" class="field" novalidate>
-        <label for="code" id="codeLabel"></label>
-        <input id="code" class="input code-input" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]*" maxlength="6" required>
-        <button type="submit" id="verifyBtn" class="btn btn-dark" style="margin-top:12px">
-          <span data-i18n="verify"></span>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-        </button>
-      </form>
-      <p id="codeErr" class="err" role="alert"></p>
-      <div style="display:flex;flex-wrap:wrap;gap:4px 20px">
-        <button type="button" id="resendBtn" class="link" data-i18n="resend"></button>
-        <button type="button" id="changeEmailBtn" class="link" data-i18n="changeEmail"></button>
-      </div>
-    </div>
-  </section>
-
   <!-- Write -->
   <section id="view-write" class="view" hidden>
     <div class="arc arc-2" aria-hidden="true" style="top:-60px"></div>
@@ -316,7 +250,9 @@ button,input,select,textarea{font-family:inherit}
           <div class="bars"><span class="on"></span><span></span></div>
         </div>
       </div>
-      <h1 tabindex="-1" style="font-size:26px" data-i18n="writeTitle"></h1>
+      <div class="script">Write it bright,</div>
+      <h1 tabindex="-1" style="font-size:26px" id="writeTitle"></h1>
+      <p data-i18n="writeSub"></p>
       <div class="tag-stage">
         <span class="tag-string" aria-hidden="true"></span>
         <div id="liveTag" class="tag" data-color="cream" role="img">
@@ -329,14 +265,46 @@ button,input,select,textarea{font-family:inherit}
     </div>
 
     <div class="sheet">
-      <div class="who"><span id="whoText"></span><button type="button" class="link" id="signOutBtn" data-i18n="signOut"></button></div>
+      <div id="mineBox" class="mine" hidden>
+        <div class="mine-top"><b data-i18n="mineTitle"></b><span id="mineStatus" class="status"></span></div>
+        <div id="mineText"></div>
+        <div style="display:flex;flex-wrap:wrap;gap:0 18px">
+          <button type="button" class="link" id="otherBmsBtn" data-i18n="otherBms"></button>
+          <button type="button" class="link" id="forgetBtn" data-i18n="forgetMe"></button>
+        </div>
+      </div>
+
+      <fieldset class="about">
+        <legend data-i18n="aboutLegend"></legend>
+        <div class="field small">
+          <label for="firstName" data-i18n="firstName"></label>
+          <input id="firstName" class="input" type="text" autocomplete="nickname" maxlength="30" aria-describedby="firstHelp">
+          <div class="help" id="firstHelp" data-i18n="firstHelp"></div>
+        </div>
+        <div class="two">
+          <div class="field small">
+            <label for="bms" data-i18n="bms"></label>
+            <input id="bms" class="input digits" type="text" inputmode="numeric" autocomplete="off" maxlength="7" pattern="[0-9]{4,7}" aria-describedby="bmsHelp">
+          </div>
+          <div class="field small">
+            <label for="siteSel" data-i18n="site"></label>
+            <select id="siteSel" class="select"></select>
+          </div>
+        </div>
+        <div class="help" id="bmsHelp" data-i18n="bmsHelp" style="margin-top:-6px"></div>
+        <div class="field small">
+          <label for="phone" data-i18n="phone"></label>
+          <input id="phone" class="input" type="tel" inputmode="tel" autocomplete="tel" maxlength="20" aria-describedby="phoneHelp">
+          <div class="help" id="phoneHelp" data-i18n="phoneHelp"></div>
+        </div>
+      </fieldset>
 
       <fieldset>
         <legend data-i18n="colourLegend"></legend>
         <div class="opt-grid three">
-          <button type="button" class="opt" data-color="cream"><span class="sw" style="background:#F6EEDC"></span><span data-i18n="c_cream"></span></button>
-          <button type="button" class="opt" data-color="red"><span class="sw" style="background:#AB2C37"></span><span data-i18n="c_red"></span></button>
-          <button type="button" class="opt" data-color="gold"><span class="sw" style="background:#E3B45A"></span><span data-i18n="c_gold"></span></button>
+          <button type="button" class="opt" data-color="cream"><span class="sw" style="background:#F4EEE3"></span><span data-i18n="c_cream"></span></button>
+          <button type="button" class="opt" data-color="red"><span class="sw" style="background:#6C151E"></span><span data-i18n="c_red"></span></button>
+          <button type="button" class="opt" data-color="gold"><span class="sw" style="background:#B18854"></span><span data-i18n="c_gold"></span></button>
         </div>
       </fieldset>
 
@@ -369,31 +337,8 @@ button,input,select,textarea{font-family:inherit}
         <div class="seg" id="wlangSeg"></div>
       </fieldset>
 
-      <fieldset>
-        <legend data-i18n="nameLegend"></legend>
-        <label class="radio-card">
-          <input type="radio" name="mode" value="name">
-          <span><span class="rc-main" data-i18n="modeName"></span><span class="rc-ex" id="exName"></span></span>
-        </label>
-        <label class="radio-card">
-          <input type="radio" name="mode" value="anon">
-          <span><span class="rc-main" data-i18n="modeAnon"></span><span class="rc-ex" id="exAnon"></span></span>
-        </label>
-      </fieldset>
-
-      <div id="nameRow" class="two">
-        <div class="field small" id="firstWrap">
-          <label for="firstName" data-i18n="firstName"></label>
-          <input id="firstName" class="input" type="text" autocomplete="given-name" maxlength="40">
-        </div>
-        <div class="field small">
-          <label for="siteSel" data-i18n="site"></label>
-          <select id="siteSel" class="select"></select>
-        </div>
-      </div>
-
       <div class="rules">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0E2A1F" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v6c0 4.4-3 7.6-7 9-4-1.4-7-4.6-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#343F37" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v6c0 4.4-3 7.6-7 9-4-1.4-7-4.6-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg>
         <span data-i18n="rules"></span>
       </div>
 
@@ -407,6 +352,11 @@ button,input,select,textarea{font-family:inherit}
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
       </button>
       <p id="blocker" class="blocker" role="status"></p>
+
+      <div class="privacy">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5A5550" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+        <span data-i18n="privacy"></span>
+      </div>
     </div>
   </section>
 
@@ -440,6 +390,10 @@ button,input,select,textarea{font-family:inherit}
         <span id="previewLang"></span>
       </span>
       <span class="chip">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c.9-3.8 3.6-5.8 7-5.8s6.1 2 7 5.8"/></svg>
+        <span id="previewBms"></span>
+      </span>
+      <span class="chip">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v6c0 4.4-3 7.6-7 9-4-1.4-7-4.6-7-9V6z"/></svg>
         <span data-i18n="shownAfterReview"></span>
       </span>
@@ -448,13 +402,13 @@ button,input,select,textarea{font-family:inherit}
       <div class="next-title" data-i18n="nextTitle"></div>
       <div class="next-row"><b>1</b><span data-i18n="next1"></span></div>
       <div class="next-row"><b>2</b><span data-i18n="next2"></span></div>
-      <div class="next-row"><b>3</b><span data-i18n="next3"></span></div>
+      <div class="next-row"><b>3</b><span id="next3"></span></div>
     </div>
     <p id="submitErr" class="err" role="alert" style="margin:16px 20px 0"></p>
     <div class="actions">
       <button type="button" id="hangBtn" class="btn btn-gold">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.5v4.5M8 7h8a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1z"/><circle cx="12" cy="10.5" r="1.2"/></svg>
-        <span id="hangLabel" data-i18n="hangBtn"></span>
+        <span id="hangLabel"></span>
       </button>
       <button type="button" id="editBtn" class="btn btn-line" data-i18n="editBtn"></button>
     </div>
@@ -463,33 +417,34 @@ button,input,select,textarea{font-family:inherit}
   <!-- Done -->
   <section id="view-done" class="view" hidden>
     <svg width="100%" viewBox="0 0 390 290" aria-hidden="true" style="display:block;max-width:480px">
-      <path d="M-10,80 Q140,40 290,78 Q340,90 400,70" fill="none" stroke="#4A2F1F" stroke-width="7" stroke-linecap="round"/>
-      <ellipse cx="20" cy="70" rx="26" ry="8" fill="#23664A" transform="rotate(-25 20 70)"/><ellipse cx="24" cy="80" rx="24" ry="7" fill="#318060" transform="rotate(20 24 80)"/>
-      <ellipse cx="65" cy="61" rx="26" ry="8" fill="#23664A" transform="rotate(-25 65 61)"/><ellipse cx="69" cy="72" rx="24" ry="7" fill="#318060" transform="rotate(22 69 72)"/>
-      <ellipse cx="110" cy="56" rx="26" ry="8" fill="#23664A" transform="rotate(-22 110 56)"/><ellipse cx="114" cy="67" rx="24" ry="7" fill="#318060" transform="rotate(20 114 67)"/>
-      <ellipse cx="155" cy="56" rx="26" ry="8" fill="#23664A" transform="rotate(-20 155 56)"/><ellipse cx="159" cy="67" rx="24" ry="7" fill="#318060" transform="rotate(22 159 67)"/>
-      <ellipse cx="245" cy="64" rx="26" ry="8" fill="#23664A" transform="rotate(-18 245 64)"/><ellipse cx="249" cy="75" rx="24" ry="7" fill="#318060" transform="rotate(24 249 75)"/>
-      <ellipse cx="290" cy="74" rx="26" ry="8" fill="#23664A" transform="rotate(-15 290 74)"/><ellipse cx="294" cy="85" rx="24" ry="7" fill="#318060" transform="rotate(25 294 85)"/>
-      <ellipse cx="342" cy="78" rx="26" ry="8" fill="#23664A" transform="rotate(-20 342 78)"/><ellipse cx="346" cy="89" rx="24" ry="7" fill="#318060" transform="rotate(18 346 89)"/>
-      <ellipse cx="388" cy="68" rx="26" ry="8" fill="#23664A" transform="rotate(-25 388 68)"/>
-      <g fill="#FFD98A" opacity="0.22"><circle cx="42" cy="70" r="7"/><circle cx="88" cy="62" r="7"/><circle cx="133" cy="58" r="7"/><circle cx="178" cy="60" r="7"/><circle cx="222" cy="66" r="7"/><circle cx="268" cy="74" r="7"/><circle cx="318" cy="82" r="7"/><circle cx="368" cy="78" r="7"/></g>
+      <path d="M-10,80 Q140,40 290,78 Q340,90 400,70" fill="none" stroke="#5A4632" stroke-width="7" stroke-linecap="round"/>
+      <ellipse cx="20" cy="70" rx="26" ry="8" fill="#343F37" transform="rotate(-25 20 70)"/><ellipse cx="24" cy="80" rx="24" ry="7" fill="#4A574B" transform="rotate(20 24 80)"/>
+      <ellipse cx="65" cy="61" rx="26" ry="8" fill="#343F37" transform="rotate(-25 65 61)"/><ellipse cx="69" cy="72" rx="24" ry="7" fill="#4A574B" transform="rotate(22 69 72)"/>
+      <ellipse cx="110" cy="56" rx="26" ry="8" fill="#343F37" transform="rotate(-22 110 56)"/><ellipse cx="114" cy="67" rx="24" ry="7" fill="#4A574B" transform="rotate(20 114 67)"/>
+      <ellipse cx="155" cy="56" rx="26" ry="8" fill="#343F37" transform="rotate(-20 155 56)"/><ellipse cx="159" cy="67" rx="24" ry="7" fill="#4A574B" transform="rotate(22 159 67)"/>
+      <ellipse cx="245" cy="64" rx="26" ry="8" fill="#343F37" transform="rotate(-18 245 64)"/><ellipse cx="249" cy="75" rx="24" ry="7" fill="#4A574B" transform="rotate(24 249 75)"/>
+      <ellipse cx="290" cy="74" rx="26" ry="8" fill="#343F37" transform="rotate(-15 290 74)"/><ellipse cx="294" cy="85" rx="24" ry="7" fill="#4A574B" transform="rotate(25 294 85)"/>
+      <ellipse cx="342" cy="78" rx="26" ry="8" fill="#343F37" transform="rotate(-20 342 78)"/><ellipse cx="346" cy="89" rx="24" ry="7" fill="#4A574B" transform="rotate(18 346 89)"/>
+      <ellipse cx="388" cy="68" rx="26" ry="8" fill="#343F37" transform="rotate(-25 388 68)"/>
+      <g fill="#E8B86A" opacity="0.35"><circle cx="42" cy="70" r="7"/><circle cx="88" cy="62" r="7"/><circle cx="133" cy="58" r="7"/><circle cx="178" cy="60" r="7"/><circle cx="222" cy="66" r="7"/><circle cx="268" cy="74" r="7"/><circle cx="318" cy="82" r="7"/><circle cx="368" cy="78" r="7"/></g>
       <g fill="#FFF1C9"><circle cx="42" cy="70" r="2.8"/><circle cx="88" cy="62" r="2.8"/><circle cx="133" cy="58" r="2.8"/><circle cx="178" cy="60" r="2.8"/><circle cx="222" cy="66" r="2.8"/><circle cx="268" cy="74" r="2.8"/><circle cx="318" cy="82" r="2.8"/><circle cx="368" cy="78" r="2.8"/></g>
-      <line x1="110" y1="62" x2="110" y2="96" stroke="#D9C59A"/><rect x="106" y="94" width="8" height="5" rx="1" fill="#C9A36B"/><circle cx="110" cy="111" r="12" fill="#AB2C37"/><circle cx="106" cy="107" r="3.2" fill="#fff" opacity="0.35"/>
-      <line x1="300" y1="80" x2="300" y2="118" stroke="#D9C59A"/><rect x="296" y="116" width="8" height="5" rx="1" fill="#C9A36B"/><circle cx="300" cy="132" r="11" fill="#E3B45A"/><circle cx="296" cy="128" r="3" fill="#fff" opacity="0.4"/>
+      <line x1="110" y1="62" x2="110" y2="96" stroke="#8E8467"/><rect x="106" y="94" width="8" height="5" rx="1" fill="#B18854"/><circle cx="110" cy="111" r="12" fill="#6C151E"/><circle cx="106" cy="107" r="3.2" fill="#fff" opacity="0.35"/>
+      <line x1="300" y1="80" x2="300" y2="118" stroke="#8E8467"/><rect x="296" y="116" width="8" height="5" rx="1" fill="#6C151E"/><circle cx="300" cy="132" r="11" fill="#B18854"/><circle cx="296" cy="128" r="3" fill="#fff" opacity="0.4"/>
       <g transform="rotate(-4 200 62)">
-        <line x1="200" y1="62" x2="200" y2="130" stroke="#D9C59A"/>
-        <rect id="doneTagRect" x="160" y="128" width="80" height="104" rx="5" fill="#F6EEDC"/>
-        <circle cx="200" cy="141" r="4" fill="#0E2A1F" opacity="0.5"/>
-        <g id="doneTagIcon" transform="translate(182 164) scale(1.5)" fill="none" stroke="#AB2C37" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></g>
+        <line x1="200" y1="62" x2="200" y2="130" stroke="#8E8467"/>
+        <rect id="doneTagRect" x="160" y="128" width="80" height="104" rx="5" fill="#F4EEE3"/>
+        <circle cx="200" cy="141" r="4" fill="#343F37" opacity="0.5"/>
+        <g id="doneTagIcon" transform="translate(182 164) scale(1.5)" fill="none" stroke="#6C151E" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></g>
       </g>
-      <path d="M310,160 L312.5,167.5 L320,170 L312.5,172.5 L310,180 L307.5,172.5 L300,170 L307.5,167.5 Z" fill="#E3B45A"/>
-      <path d="M86,182 L87.8,187.2 L93,189 L87.8,190.8 L86,196 L84.2,190.8 L79,189 L84.2,187.2 Z" fill="#F6EEDC" opacity="0.8"/>
-      <path d="M338,228 L339.5,232.5 L344,234 L339.5,235.5 L338,240 L336.5,235.5 L332,234 L336.5,232.5 Z" fill="#E3B45A" opacity="0.8"/>
+      <path d="M310,160 L312.5,167.5 L320,170 L312.5,172.5 L310,180 L307.5,172.5 L300,170 L307.5,167.5 Z" fill="#B18854"/>
+      <path d="M86,182 L87.8,187.2 L93,189 L87.8,190.8 L86,196 L84.2,190.8 L79,189 L84.2,187.2 Z" fill="#6C151E" opacity="0.7"/>
+      <path d="M338,228 L339.5,232.5 L344,234 L339.5,235.5 L338,240 L336.5,235.5 L332,234 L336.5,232.5 Z" fill="#B18854" opacity="0.8"/>
     </svg>
     <div class="done-copy">
       <div class="script">Let your wish take flight!</div>
-      <h1 tabindex="-1" data-i18n="doneTitle"></h1>
+      <h1 tabindex="-1" id="doneTitle"></h1>
       <p id="doneText"></p>
+      <p id="donePrize" hidden></p>
     </div>
     <div class="invite">
       <div class="invite-icon" aria-hidden="true">
@@ -506,7 +461,8 @@ button,input,select,textarea{font-family:inherit}
         <span data-i18n="seeTree"></span>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
       </a>
-      <button type="button" id="anotherBtn" class="link link-cream" style="align-self:center" data-i18n="another"></button>
+      <button type="button" id="anotherBtn" class="link" style="align-self:center" data-i18n="changeMine"></button>
+      <button type="button" id="forgetDoneBtn" class="link" style="align-self:center;min-height:36px;font-size:13px" data-i18n="forgetShared"></button>
     </div>
   </section>
 
@@ -518,42 +474,44 @@ button,input,select,textarea{font-family:inherit}
   'use strict';
   var C = window.WishCore;
   var CFG = C.cfg;
-  var MAX = Number(CFG.MAX_LENGTH) || 200;
-  var DOMAIN = (CFG.ALLOWED_EMAIL_DOMAINS && CFG.ALLOWED_EMAIL_DOMAINS[0]) || 'tp.com';
-  var AUTH = CFG.AUTH_MODE === 'email' ? 'email' : 'google';
+  var MAX = Number(CFG.MAX_LENGTH) || 150;
+  var PRIZE = C.PRIZE || {};
 
   /* ---------- Copy (EN / BM / TH) ---------- */
   var T = {
     en: {
       loading: 'Getting the tree ready…',
-      signinTitle: 'Hang your wish on the TP tree',
-      signinSub: 'For every TP Malaysia and Thailand colleague, on site or working from home.',
-      googleBtn: 'Continue with your TP Google account',
-      googleHelp: 'Use your work account (@{domain}). We only use it to check you are part of TP. Your email is never shown on the tree.',
-      emailLabel: 'Your TP work email',
-      emailHelp: 'We will email you a 6-digit code. Your email is never shown on the tree.',
-      sendCode: 'Send my code',
-      codeTitle: 'Check your inbox',
-      codeLabel: 'Enter the 6-digit code we sent to {email}',
-      verify: 'Continue',
-      resend: 'Resend code',
-      changeEmail: 'Use a different email',
-      privacy: 'Only your chosen display name and wish are shown. Your email stays private.',
-      errDomain: 'Please use your TP work email (@{domain}).',
-      errCode: "That code didn't work. Check it and try again.",
-      errSend: "We couldn't send the code. Please try again in a minute.",
+      writeTitle: 'Hang your wish on the TP tree',
+      editTitle: 'Change your wish',
+      writeSub: 'For every TP Malaysia and Thailand colleague, on site or working from home.',
+      privacy: 'Only your first name (or nickname), site and wish are shown. Your BMS and phone number stay with the Wish Tree team.',
       errGeneric: 'Something went wrong. Please try again.',
       errSubmit: "We couldn't hang your wish. Please try again.",
-      errNotAllowed: 'Only TP work accounts can hang wishes.',
-      errLimit: "You've hung the maximum number of wishes. Thank you!",
       errClosed: 'Wishes are closed for this year.',
+      errBmsTaken: 'This BMS already has a wish on the tree. Each BMS hangs one wish, and it can only be changed from the phone or browser that sent it. If that was you on another device, open the wish page there. Need help? Ask the Wish Tree team.',
+      errUnknownBms: "We couldn't find that BMS. Check the number and try again.",
+      errSlow: 'Lots of wishes are coming in from here. Please try again in a few minutes.',
       step1: 'STEP 1 OF 2',
       step2: 'STEP 2 OF 2',
-      writeTitle: 'Write your wish',
-      signedInAs: 'Signed in as {email}',
-      signOut: 'Sign out',
+      mineTitle: 'Your wish',
+      mineText: 'You hung a wish from this phone with BMS {bms}. Change it below: it goes back for a quick check before it shows on the tree again.',
+      status_pending: 'Waiting for approval',
+      status_approved: 'On the tree',
+      status_rejected: 'Not approved yet',
+      mineRejected: 'It wasn’t approved as it was. Change it below and send it again.',
+      otherBms: 'Hang a wish for a different BMS',
+      forgetMe: 'Forget me on this device',
+      forgetShared: 'Using a shared phone or laptop? Forget me on this device',
+      forgotten: 'Done. This device no longer remembers your wish or BMS.',
+      aboutLegend: 'About you',
+      firstName: 'First name or nickname',
+      firstHelp: 'Shown on your tag with your site.',
+      bms: 'BMS number',
+      bmsHelp: '4 to 7 digits. Only the Wish Tree team sees it. One wish per BMS.',
+      phone: 'Phone number (optional)',
+      phoneHelp: 'Only used to reach you if your wish wins a prize. Never shown.',
       colourLegend: 'Tag colour',
-      c_cream: 'Cream', c_red: 'Carmine', c_gold: 'Gold',
+      c_cream: 'Eggnog', c_red: 'Cranberry', c_gold: 'Brass',
       charmLegend: 'Charm',
       ch_snow: 'Snowflake', ch_star: 'Star', ch_tree: 'Tree', ch_gift: 'Gift',
       wishLabel: 'Your wish',
@@ -562,73 +520,78 @@ button,input,select,textarea{font-family:inherit}
       placeholder: 'A thank you, a shout-out or a hope for 2027',
       contactWarn: "This looks like a phone number or email. Wishes with contact details can't be approved.",
       writtenIn: 'Written in',
-      nameLegend: 'Show my name as',
-      modeName: 'First name and site',
-      modeAnon: 'Anonymous',
-      anonName: 'A TP colleague',
       yourName: 'Your name',
-      firstName: 'First name',
       site: 'Site',
       sitePick: 'Choose your site',
       rules: 'Keep it kind and personal. No client or account names, phone numbers or anything confidential. Every wish is reviewed before it goes up.',
-      consent: 'I agree that my wish and display name can be shown on the TP Wish Tree and site screens during the campaign.',
+      consent: 'I agree that my wish, name and site can be shown on the TP Wish Tree and site screens during the campaign, and that the Wish Tree team can use my BMS and phone number to check wishes and contact prize winners.',
       previewBtn: 'Preview my wish',
       needText: 'Write your wish to continue.',
-      needName: 'Add your first name, or choose Anonymous.',
+      needName: 'Add your first name or a nickname.',
+      needBms: 'Add your BMS number: 4 to 7 digits, numbers only.',
+      needPhone: 'Check the phone number, or leave it empty.',
       needSite: 'Choose your site.',
       needConsent: 'Tick the consent box to continue.',
       tagPlaceholder: 'Your wish will appear here as you type.',
       previewTitle: 'Check your wish',
+      bmsChip: 'BMS {bms}',
       shownAfterReview: 'Shown after review',
       nextTitle: 'WHAT HAPPENS NEXT',
       next1: 'Talent Engagement checks your wish, usually within a day.',
       next2: 'Your tag goes up on the shared tree and the site screens.',
-      next3: 'Look for it on the tree once it is approved.',
+      next3: 'Colleagues can like it: the {n} most-liked wishes win a {amount} gift card.',
+      next3plain: 'Look for it on the tree once it is approved.',
       hangBtn: 'Hang it on the tree',
+      saveBtn: 'Save my changes',
       sending: 'Hanging your wish…',
       editBtn: 'Edit my wish',
       doneTitle: 'Your wish is on its way to the tree',
+      doneEditTitle: 'Your changes are on their way',
       doneText: 'Once it is approved it will appear on the tree. The tree lights up for everyone on {reveal}.',
+      donePrize: 'The {n} most-liked wishes each win a {amount} gift card. Share the tree so colleagues can like yours.',
       inviteTitle: 'Invite your team',
       inviteSub: 'The more wishes, the fuller the tree.',
       copyLink: 'Share link',
       copied: 'Link copied',
       seeTree: 'See the tree',
-      another: 'Write another wish',
+      changeMine: 'Change my wish',
       closedTitle: 'Wishes are closed for this year',
       closedText: 'Thank you for every wish. You can still visit the tree.',
       shareText: 'Hang your Christmas wish on the TP Wish Tree'
     },
     ms: {
       loading: 'Menyediakan pokok…',
-      signinTitle: 'Gantung hajat anda di pokok TP',
-      signinSub: 'Untuk semua rakan TP Malaysia dan Thailand, di pejabat atau bekerja dari rumah.',
-      googleBtn: 'Teruskan dengan akaun Google TP anda',
-      googleHelp: 'Gunakan akaun kerja anda (@{domain}). Kami hanya menggunakannya untuk mengesahkan anda warga TP. E-mel anda tidak akan dipaparkan di pokok.',
-      emailLabel: 'E-mel kerja TP anda',
-      emailHelp: 'Kami akan menghantar kod 6 digit. E-mel anda tidak akan dipaparkan di pokok.',
-      sendCode: 'Hantar kod saya',
-      codeTitle: 'Semak peti masuk anda',
-      codeLabel: 'Masukkan kod 6 digit yang kami hantar ke {email}',
-      verify: 'Teruskan',
-      resend: 'Hantar semula kod',
-      changeEmail: 'Guna e-mel lain',
-      privacy: 'Hanya nama paparan dan hajat anda dipaparkan. E-mel anda kekal peribadi.',
-      errDomain: 'Sila gunakan e-mel kerja TP anda (@{domain}).',
-      errCode: 'Kod itu tidak berjaya. Semak dan cuba lagi.',
-      errSend: 'Kami tidak dapat menghantar kod. Sila cuba lagi sebentar lagi.',
+      writeTitle: 'Gantung hajat anda di pokok TP',
+      editTitle: 'Ubah hajat anda',
+      writeSub: 'Untuk semua rakan TP Malaysia dan Thailand, di pejabat atau bekerja dari rumah.',
+      privacy: 'Hanya nama pertama (atau nama panggilan), lokasi dan hajat anda dipaparkan. Nombor BMS dan telefon anda hanya untuk pasukan Pokok Hajat.',
       errGeneric: 'Ada masalah. Sila cuba lagi.',
       errSubmit: 'Kami tidak dapat menggantung hajat anda. Sila cuba lagi.',
-      errNotAllowed: 'Hanya akaun kerja TP boleh menggantung hajat.',
-      errLimit: 'Anda telah mencapai had hajat. Terima kasih!',
       errClosed: 'Hajat telah ditutup untuk tahun ini.',
+      errBmsTaken: 'BMS ini sudah mempunyai hajat di pokok. Setiap BMS boleh menggantung satu hajat, dan ia hanya boleh diubah daripada telefon atau pelayar yang menghantarnya. Jika itu anda pada peranti lain, buka halaman hajat di sana. Perlu bantuan? Hubungi pasukan Pokok Hajat.',
+      errUnknownBms: 'Kami tidak menemui BMS itu. Semak nombor dan cuba lagi.',
+      errSlow: 'Banyak hajat sedang dihantar dari sini. Sila cuba lagi dalam beberapa minit.',
       step1: 'LANGKAH 1 DARIPADA 2',
       step2: 'LANGKAH 2 DARIPADA 2',
-      writeTitle: 'Tulis hajat anda',
-      signedInAs: 'Log masuk sebagai {email}',
-      signOut: 'Log keluar',
+      mineTitle: 'Hajat anda',
+      mineText: 'Anda telah menggantung hajat dari telefon ini dengan BMS {bms}. Ubah di bawah: ia akan disemak semula sebelum dipaparkan di pokok.',
+      status_pending: 'Menunggu kelulusan',
+      status_approved: 'Di pokok',
+      status_rejected: 'Belum diluluskan',
+      mineRejected: 'Hajat ini belum diluluskan. Ubah di bawah dan hantar semula.',
+      otherBms: 'Gantung hajat untuk BMS lain',
+      forgetMe: 'Lupakan saya pada peranti ini',
+      forgetShared: 'Guna telefon atau komputer riba bersama? Lupakan saya pada peranti ini',
+      forgotten: 'Selesai. Peranti ini tidak lagi mengingati hajat atau BMS anda.',
+      aboutLegend: 'Tentang anda',
+      firstName: 'Nama pertama atau nama panggilan',
+      firstHelp: 'Dipaparkan pada tag anda bersama lokasi.',
+      bms: 'Nombor BMS',
+      bmsHelp: '4 hingga 7 digit. Hanya pasukan Pokok Hajat yang melihatnya. Satu hajat bagi setiap BMS.',
+      phone: 'Nombor telefon (pilihan)',
+      phoneHelp: 'Hanya digunakan untuk menghubungi anda jika hajat anda memenangi hadiah. Tidak dipaparkan.',
       colourLegend: 'Warna tag',
-      c_cream: 'Krim', c_red: 'Merah', c_gold: 'Emas',
+      c_cream: 'Krim', c_red: 'Merah', c_gold: 'Tembaga',
       charmLegend: 'Hiasan',
       ch_snow: 'Salji', ch_star: 'Bintang', ch_tree: 'Pokok', ch_gift: 'Hadiah',
       wishLabel: 'Hajat anda',
@@ -637,73 +600,78 @@ button,input,select,textarea{font-family:inherit}
       placeholder: 'Ucapan terima kasih, penghargaan atau harapan untuk 2027',
       contactWarn: 'Ini kelihatan seperti nombor telefon atau e-mel. Hajat yang mengandungi maklumat hubungan tidak akan diluluskan.',
       writtenIn: 'Ditulis dalam',
-      nameLegend: 'Paparkan nama saya sebagai',
-      modeName: 'Nama pertama dan lokasi',
-      modeAnon: 'Tanpa nama',
-      anonName: 'Rakan TP',
       yourName: 'Nama anda',
-      firstName: 'Nama pertama',
       site: 'Lokasi',
       sitePick: 'Pilih lokasi anda',
       rules: 'Tulis dengan baik dan ikhlas. Jangan sertakan nama klien atau akaun, nombor telefon atau maklumat sulit. Setiap hajat disemak sebelum dipaparkan.',
-      consent: 'Saya bersetuju hajat dan nama paparan saya dipaparkan di Pokok Hajat TP dan skrin di lokasi sepanjang kempen.',
+      consent: 'Saya bersetuju hajat, nama dan lokasi saya dipaparkan di Pokok Hajat TP dan skrin di lokasi sepanjang kempen, dan pasukan Pokok Hajat boleh menggunakan nombor BMS dan telefon saya untuk menyemak hajat dan menghubungi pemenang hadiah.',
       previewBtn: 'Pratonton hajat saya',
       needText: 'Tulis hajat anda untuk teruskan.',
-      needName: 'Masukkan nama pertama anda, atau pilih Tanpa nama.',
+      needName: 'Masukkan nama pertama atau nama panggilan anda.',
+      needBms: 'Masukkan nombor BMS anda: 4 hingga 7 digit, nombor sahaja.',
+      needPhone: 'Semak nombor telefon, atau biarkan kosong.',
       needSite: 'Pilih lokasi anda.',
       needConsent: 'Tandakan kotak persetujuan untuk teruskan.',
       tagPlaceholder: 'Hajat anda akan muncul di sini semasa anda menaip.',
       previewTitle: 'Semak hajat anda',
+      bmsChip: 'BMS {bms}',
       shownAfterReview: 'Dipaparkan selepas semakan',
       nextTitle: 'APA SETERUSNYA',
       next1: 'Pasukan Talent Engagement akan menyemak hajat anda, biasanya dalam masa sehari.',
       next2: 'Tag anda akan digantung di pokok bersama dan skrin di lokasi.',
-      next3: 'Cari tag anda di pokok selepas ia diluluskan.',
+      next3: 'Rakan sekerja boleh menyukainya: {n} hajat yang paling banyak disukai memenangi kad hadiah {amount}.',
+      next3plain: 'Cari tag anda di pokok selepas ia diluluskan.',
       hangBtn: 'Gantung di pokok',
+      saveBtn: 'Simpan perubahan',
       sending: 'Sedang menggantung hajat anda…',
       editBtn: 'Ubah hajat saya',
       doneTitle: 'Hajat anda dalam perjalanan ke pokok',
+      doneEditTitle: 'Perubahan anda sedang dihantar',
       doneText: 'Selepas diluluskan, hajat anda akan muncul di pokok. Pokok akan menyala untuk semua pada {reveal}.',
+      donePrize: '{n} hajat yang paling banyak disukai masing-masing memenangi kad hadiah {amount}. Kongsi pokok supaya rakan sekerja boleh menyukai hajat anda.',
       inviteTitle: 'Ajak pasukan anda',
       inviteSub: 'Lebih banyak hajat, lebih meriah pokoknya.',
       copyLink: 'Kongsi pautan',
       copied: 'Pautan disalin',
       seeTree: 'Lihat pokok',
-      another: 'Tulis hajat lain',
+      changeMine: 'Ubah hajat saya',
       closedTitle: 'Hajat telah ditutup untuk tahun ini',
       closedText: 'Terima kasih atas setiap hajat. Anda masih boleh melawat pokok.',
       shareText: 'Gantung hajat Krismas anda di Pokok Hajat TP'
     },
     th: {
       loading: 'กำลังเตรียมต้นไม้…',
-      signinTitle: 'แขวนคำอวยพรของคุณบนต้นไม้ TP',
-      signinSub: 'สำหรับเพื่อนร่วมงาน TP มาเลเซียและไทยทุกคน ทั้งที่ออฟฟิศและทำงานจากบ้าน',
-      googleBtn: 'ดำเนินการต่อด้วยบัญชี Google ของ TP',
-      googleHelp: 'ใช้บัญชีที่ทำงานของคุณ (@{domain}) เราใช้เพื่อยืนยันว่าคุณเป็นพนักงาน TP เท่านั้น และจะไม่แสดงอีเมลบนต้นไม้',
-      emailLabel: 'อีเมลที่ทำงาน TP ของคุณ',
-      emailHelp: 'เราจะส่งรหัส 6 หลักให้คุณทางอีเมล อีเมลของคุณจะไม่แสดงบนต้นไม้',
-      sendCode: 'ส่งรหัสให้ฉัน',
-      codeTitle: 'ตรวจสอบกล่องจดหมายของคุณ',
-      codeLabel: 'กรอกรหัส 6 หลักที่เราส่งไปที่ {email}',
-      verify: 'ดำเนินการต่อ',
-      resend: 'ส่งรหัสอีกครั้ง',
-      changeEmail: 'ใช้อีเมลอื่น',
-      privacy: 'จะแสดงเฉพาะชื่อที่คุณเลือกและคำอวยพรเท่านั้น อีเมลของคุณจะถูกเก็บเป็นความลับ',
-      errDomain: 'กรุณาใช้อีเมลที่ทำงาน TP ของคุณ (@{domain})',
-      errCode: 'รหัสไม่ถูกต้อง กรุณาตรวจสอบแล้วลองอีกครั้ง',
-      errSend: 'ไม่สามารถส่งรหัสได้ กรุณาลองใหม่อีกครั้งในอีกสักครู่',
+      writeTitle: 'แขวนคำอวยพรของคุณบนต้นไม้ TP',
+      editTitle: 'แก้ไขคำอวยพรของคุณ',
+      writeSub: 'สำหรับเพื่อนร่วมงาน TP มาเลเซียและไทยทุกคน ทั้งที่ออฟฟิศและทำงานจากบ้าน',
+      privacy: 'จะแสดงเฉพาะชื่อจริง (หรือชื่อเล่น) สาขา และคำอวยพรของคุณเท่านั้น หมายเลข BMS และเบอร์โทรศัพท์จะอยู่กับทีมต้นไม้แห่งคำอวยพรเท่านั้น',
       errGeneric: 'เกิดข้อผิดพลาด กรุณาลองอีกครั้ง',
       errSubmit: 'ไม่สามารถแขวนคำอวยพรได้ กรุณาลองอีกครั้ง',
-      errNotAllowed: 'เฉพาะบัญชีที่ทำงาน TP เท่านั้นที่สามารถแขวนคำอวยพรได้',
-      errLimit: 'คุณแขวนคำอวยพรครบจำนวนสูงสุดแล้ว ขอบคุณ',
       errClosed: 'ปิดรับคำอวยพรสำหรับปีนี้แล้ว',
+      errBmsTaken: 'BMS นี้มีคำอวยพรบนต้นไม้แล้ว แต่ละ BMS แขวนคำอวยพรได้หนึ่งรายการ และแก้ไขได้จากโทรศัพท์หรือเบราว์เซอร์ที่ใช้ส่งเท่านั้น หากคุณส่งจากอุปกรณ์อื่น กรุณาเปิดหน้าคำอวยพรบนอุปกรณ์นั้น ต้องการความช่วยเหลือ ติดต่อทีมต้นไม้แห่งคำอวยพร',
+      errUnknownBms: 'ไม่พบ BMS นี้ กรุณาตรวจสอบหมายเลขแล้วลองอีกครั้ง',
+      errSlow: 'มีคำอวยพรส่งมาจากที่นี่จำนวนมาก กรุณาลองอีกครั้งในอีกไม่กี่นาที',
       step1: 'ขั้นตอนที่ 1 จาก 2',
       step2: 'ขั้นตอนที่ 2 จาก 2',
-      writeTitle: 'เขียนคำอวยพรของคุณ',
-      signedInAs: 'เข้าสู่ระบบในชื่อ {email}',
-      signOut: 'ออกจากระบบ',
+      mineTitle: 'คำอวยพรของคุณ',
+      mineText: 'คุณแขวนคำอวยพรจากโทรศัพท์นี้ด้วย BMS {bms} แล้ว แก้ไขได้ด้านล่าง การแก้ไขจะได้รับการตรวจสอบอีกครั้งก่อนแสดงบนต้นไม้',
+      status_pending: 'รอการอนุมัติ',
+      status_approved: 'อยู่บนต้นไม้แล้ว',
+      status_rejected: 'ยังไม่ได้รับการอนุมัติ',
+      mineRejected: 'คำอวยพรนี้ยังไม่ได้รับการอนุมัติ กรุณาแก้ไขด้านล่างแล้วส่งอีกครั้ง',
+      otherBms: 'แขวนคำอวยพรสำหรับ BMS อื่น',
+      forgetMe: 'ลบข้อมูลของฉันออกจากอุปกรณ์นี้',
+      forgetShared: 'ใช้โทรศัพท์หรือแล็ปท็อปร่วมกับผู้อื่น? ลบข้อมูลของฉันออกจากอุปกรณ์นี้',
+      forgotten: 'เรียบร้อย อุปกรณ์นี้จะไม่จำคำอวยพรหรือ BMS ของคุณอีกต่อไป',
+      aboutLegend: 'เกี่ยวกับคุณ',
+      firstName: 'ชื่อจริงหรือชื่อเล่น',
+      firstHelp: 'จะแสดงบนป้ายของคุณพร้อมสาขา',
+      bms: 'หมายเลข BMS',
+      bmsHelp: 'ตัวเลข 4 ถึง 7 หลัก เฉพาะทีมต้นไม้แห่งคำอวยพรเท่านั้นที่เห็น หนึ่ง BMS ต่อหนึ่งคำอวยพร',
+      phone: 'เบอร์โทรศัพท์ (ไม่บังคับ)',
+      phoneHelp: 'ใช้เพื่อติดต่อคุณหากคำอวยพรของคุณได้รับรางวัลเท่านั้น และจะไม่แสดง',
       colourLegend: 'สีป้าย',
-      c_cream: 'ครีม', c_red: 'แดง', c_gold: 'ทอง',
+      c_cream: 'ครีม', c_red: 'แดง', c_gold: 'ทองเหลือง',
       charmLegend: 'สัญลักษณ์',
       ch_snow: 'เกล็ดหิมะ', ch_star: 'ดาว', ch_tree: 'ต้นไม้', ch_gift: 'ของขวัญ',
       wishLabel: 'คำอวยพรของคุณ',
@@ -712,39 +680,41 @@ button,input,select,textarea{font-family:inherit}
       placeholder: 'คำขอบคุณ คำชื่นชม หรือความหวังสำหรับปี 2027',
       contactWarn: 'ดูเหมือนจะมีเบอร์โทรศัพท์หรืออีเมล คำอวยพรที่มีข้อมูลติดต่อจะไม่ได้รับการอนุมัติ',
       writtenIn: 'ภาษาที่เขียน',
-      nameLegend: 'แสดงชื่อของฉันเป็น',
-      modeName: 'ชื่อจริงและสาขา',
-      modeAnon: 'ไม่ระบุชื่อ',
-      anonName: 'เพื่อนร่วมงาน TP',
       yourName: 'ชื่อของคุณ',
-      firstName: 'ชื่อจริง',
       site: 'สาขา',
       sitePick: 'เลือกสาขาของคุณ',
       rules: 'เขียนด้วยความสุภาพและจริงใจ ห้ามระบุชื่อลูกค้าหรือโปรเจกต์ เบอร์โทรศัพท์ หรือข้อมูลที่เป็นความลับ ทุกคำอวยพรจะได้รับการตรวจสอบก่อนแสดง',
-      consent: 'ฉันยินยอมให้แสดงคำอวยพรและชื่อที่เลือกบนต้นไม้แห่งคำอวยพร TP และหน้าจอในสาขาตลอดช่วงแคมเปญ',
+      consent: 'ฉันยินยอมให้แสดงคำอวยพร ชื่อ และสาขาของฉันบนต้นไม้แห่งคำอวยพร TP และหน้าจอในสาขาตลอดช่วงแคมเปญ และยินยอมให้ทีมต้นไม้แห่งคำอวยพรใช้หมายเลข BMS และเบอร์โทรศัพท์ของฉันเพื่อตรวจสอบคำอวยพรและติดต่อผู้ได้รับรางวัล',
       previewBtn: 'ดูตัวอย่างคำอวยพร',
       needText: 'กรุณาเขียนคำอวยพรเพื่อดำเนินการต่อ',
-      needName: 'กรุณาใส่ชื่อจริง หรือเลือกไม่ระบุชื่อ',
+      needName: 'กรุณาใส่ชื่อจริงหรือชื่อเล่น',
+      needBms: 'กรุณาใส่หมายเลข BMS: ตัวเลข 4 ถึง 7 หลักเท่านั้น',
+      needPhone: 'กรุณาตรวจสอบเบอร์โทรศัพท์ หรือเว้นว่างไว้',
       needSite: 'กรุณาเลือกสาขาของคุณ',
       needConsent: 'กรุณาทำเครื่องหมายยินยอมเพื่อดำเนินการต่อ',
       tagPlaceholder: 'คำอวยพรของคุณจะแสดงที่นี่ระหว่างที่พิมพ์',
       previewTitle: 'ตรวจสอบคำอวยพรของคุณ',
+      bmsChip: 'BMS {bms}',
       shownAfterReview: 'แสดงหลังการตรวจสอบ',
       nextTitle: 'ขั้นตอนถัดไป',
       next1: 'ทีม Talent Engagement จะตรวจสอบคำอวยพรของคุณ โดยปกติภายในหนึ่งวัน',
       next2: 'ป้ายของคุณจะถูกแขวนบนต้นไม้และหน้าจอในสาขา',
-      next3: 'มองหาป้ายของคุณบนต้นไม้เมื่อได้รับการอนุมัติ',
+      next3: 'เพื่อนร่วมงานกดถูกใจได้ คำอวยพร {n} อันดับที่ได้รับถูกใจมากที่สุดจะได้รับบัตรของขวัญ {amount}',
+      next3plain: 'มองหาป้ายของคุณบนต้นไม้เมื่อได้รับการอนุมัติ',
       hangBtn: 'แขวนบนต้นไม้',
+      saveBtn: 'บันทึกการแก้ไข',
       sending: 'กำลังแขวนคำอวยพรของคุณ…',
       editBtn: 'แก้ไขคำอวยพร',
       doneTitle: 'คำอวยพรของคุณกำลังเดินทางไปที่ต้นไม้',
+      doneEditTitle: 'การแก้ไขของคุณกำลังถูกส่ง',
       doneText: 'เมื่อได้รับการอนุมัติ คำอวยพรจะปรากฏบนต้นไม้ ต้นไม้จะเปิดไฟให้ทุกคนชมในวันที่ {reveal}',
+      donePrize: 'คำอวยพร {n} อันดับที่ได้รับถูกใจมากที่สุดจะได้รับบัตรของขวัญ {amount} แชร์ต้นไม้เพื่อให้เพื่อนร่วมงานกดถูกใจคำอวยพรของคุณ',
       inviteTitle: 'ชวนทีมของคุณ',
       inviteSub: 'ยิ่งมีคำอวยพรมาก ต้นไม้ก็ยิ่งสวย',
       copyLink: 'แชร์ลิงก์',
       copied: 'คัดลอกลิงก์แล้ว',
       seeTree: 'ดูต้นไม้',
-      another: 'เขียนคำอวยพรอีก',
+      changeMine: 'แก้ไขคำอวยพรของฉัน',
       closedTitle: 'ปิดรับคำอวยพรสำหรับปีนี้แล้ว',
       closedText: 'ขอบคุณสำหรับทุกคำอวยพร คุณยังสามารถเข้าชมต้นไม้ได้',
       shareText: 'แขวนคำอวยพรคริสต์มาสของคุณบนต้นไม้แห่งคำอวยพร TP'
@@ -757,19 +727,21 @@ button,input,select,textarea{font-family:inherit}
   var S = {
     view: 'loading',
     lang: T[stored] ? stored : 'en',
-    user: null,
-    email: '',
+    mine: null,          // the wish this browser already sent (edit mode), or null
     color: 'cream',
     charm: 'snow',
     text: '',
     wishLang: null,
     wishLangTouched: false,
-    mode: 'name',
     first: '',
+    bms: '',
+    phone: '',
     site: siteParam && C.siteById(siteParam) ? siteParam : (C.siteById(C.storageGet('wt-site')) ? C.storageGet('wt-site') : ''),
     consent: false,
     triedPreview: false,
-    busy: false
+    busy: false,
+    errKey: '',
+    lastWasEdit: false
   };
 
   var $ = function (id) { return document.getElementById(id); };
@@ -780,12 +752,19 @@ button,input,select,textarea{font-family:inherit}
     if (vars) Object.keys(vars).forEach(function (k) { s = s.split('{' + k + '}').join(vars[k]); });
     return s;
   }
+  function prizeVars() { return { n: PRIZE.winners || 5, amount: PRIZE.amount || 'RM 100' }; }
+  function prizeOn() { return PRIZE.enabled !== false; }
 
-  // "One Precinct" for display on the tag
   function siteLabel(id) {
     var s = C.siteById(id);
     return s ? s.label : '';
   }
+
+  /* ---------- Field rules ---------- */
+  function cleanName(v) { return String(v || '').replace(/[<>]/g, '').replace(/\s+/g, ' ').slice(0, 30); }
+  function phoneDigits(v) { return String(v || '').replace(/[\s().-]/g, ''); }
+  function phoneOk(v) { var p = phoneDigits(v); return p === '' || /^\+?[0-9]{8,15}$/.test(p); }
+  function editing() { return !!(S.mine && S.mine.bms === S.bms); }
 
   /* ---------- Views ---------- */
   function show(view) {
@@ -804,9 +783,6 @@ button,input,select,textarea{font-family:inherit}
     qsa('[data-i18n]').forEach(function (n) { n.textContent = t(n.getAttribute('data-i18n')); });
     qsa('[data-i18n-ph]').forEach(function (n) { n.setAttribute('placeholder', t(n.getAttribute('data-i18n-ph'))); });
     qsa('.langs button').forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-lang') === S.lang ? 'true' : 'false'); });
-    $('googleHelp').textContent = t('googleHelp', { domain: DOMAIN });
-    $('email').setAttribute('placeholder', 'name@' + DOMAIN);
-    $('codeLabel').textContent = t('codeLabel', { email: S.email || '' });
     qsa('.opt.charm').forEach(function (b) {
       var c = b.getAttribute('data-charm');
       b.innerHTML = C.iconSvg(c, 22) + '<span>' + C.esc(t('ch_' + c)) + '</span>';
@@ -816,7 +792,6 @@ button,input,select,textarea{font-family:inherit}
     if (S.view === 'write') renderWrite();
     if (S.view === 'preview') renderPreview();
     if (S.view === 'done') renderDone();
-    renderWho();
   }
 
   function renderSites() {
@@ -840,14 +815,10 @@ button,input,select,textarea{font-family:inherit}
     sel.value = S.site;
   }
 
-  function renderWho() {
-    $('whoText').textContent = S.user ? t('signedInAs', { email: S.user.email }) : '';
-  }
-
   /* ---------- Write ---------- */
   function signature() {
     var site = siteLabel(S.site);
-    var name = S.mode === 'anon' ? t('anonName') : (S.first.trim() || t('yourName'));
+    var name = S.first.trim() || t('yourName');
     return site ? name + ' · ' + site : name;
   }
 
@@ -866,9 +837,11 @@ button,input,select,textarea{font-family:inherit}
   }
 
   function blockerKey() {
-    if (!S.text.trim()) return 'needText';
-    if (S.mode === 'name' && !S.first.trim()) return 'needName';
+    if (!S.first.trim()) return 'needName';
+    if (!C.validBms(S.bms)) return 'needBms';
     if (!S.site) return 'needSite';
+    if (!phoneOk(S.phone)) return 'needPhone';
+    if (!S.text.trim()) return 'needText';
     if (!S.consent) return 'needConsent';
     return '';
   }
@@ -885,12 +858,25 @@ button,input,select,textarea{font-family:inherit}
     node.setAttribute('aria-label', (has ? S.text : t('tagPlaceholder')) + '. ' + signature());
   }
 
+  function renderMine() {
+    var box = $('mineBox');
+    var m = S.mine;
+    box.hidden = !m;
+    $('writeTitle').textContent = editing() ? t('editTitle') : t('writeTitle');
+    if (!m) return;
+    var st = m.status === 'approved' || m.status === 'rejected' ? m.status : 'pending';
+    $('mineStatus').setAttribute('data-s', st);
+    $('mineStatus').textContent = t('status_' + st);
+    $('mineText').textContent = st === 'rejected' ? t('mineRejected') : t('mineText', { bms: m.bms });
+    $('bms').readOnly = editing();
+  }
+
   function renderWrite() {
+    renderMine();
     qsa('.opt[data-color]').forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-color') === S.color ? 'true' : 'false'); });
     qsa('.opt[data-charm]').forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-charm') === S.charm ? 'true' : 'false'); });
     var wl = effectiveWishLang();
     qsa('.seg button').forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-wlang') === wl ? 'true' : 'false'); });
-    qsa('input[name="mode"]').forEach(function (r) { r.checked = r.value === S.mode; });
 
     var ta = $('wishText');
     if (ta.value !== S.text) ta.value = S.text;
@@ -898,28 +884,31 @@ button,input,select,textarea{font-family:inherit}
     $('counter').textContent = S.text.length + ' / ' + MAX;
     $('contactWarn').hidden = !hasContactDetails(S.text);
 
-    var fn = $('firstName');
-    if (fn.value !== S.first) fn.value = S.first;
-    $('firstWrap').hidden = S.mode !== 'name';
-    $('nameRow').classList.toggle('one', S.mode !== 'name');
+    if ($('firstName').value !== S.first) $('firstName').value = S.first;
+    if ($('bms').value !== S.bms) $('bms').value = S.bms;
+    if ($('phone').value !== S.phone) $('phone').value = S.phone;
     $('siteSel').value = S.site;
     $('consent').checked = S.consent;
 
-    var site = S.site ? ' · ' + siteLabel(S.site) : '';
-    $('exName').textContent = (S.first.trim() || t('yourName')) + site;
-    $('exAnon').textContent = t('anonName') + site;
+    var key = blockerKey();
+    var shown = S.triedPreview && key;
+    $('blocker').textContent = shown ? t(key) : '';
+    $('firstName').setAttribute('aria-invalid', shown && key === 'needName' ? 'true' : 'false');
+    $('bms').setAttribute('aria-invalid', shown && key === 'needBms' ? 'true' : 'false');
+    $('phone').setAttribute('aria-invalid', shown && key === 'needPhone' ? 'true' : 'false');
 
     paintTag($('liveTag'), false);
-    var key = blockerKey();
-    $('blocker').textContent = S.triedPreview && key ? t(key) : '';
   }
 
   /* ---------- Preview / done ---------- */
   function renderPreview() {
     paintTag($('bigTag'), true);
     $('previewLang').textContent = C.LANG_LABEL[effectiveWishLang()] || '';
-    $('hangLabel').textContent = S.busy ? t('sending') : t('hangBtn');
+    $('previewBms').textContent = t('bmsChip', { bms: S.bms });
+    $('next3').textContent = prizeOn() ? t('next3', prizeVars()) : t('next3plain');
+    $('hangLabel').textContent = S.busy ? t('sending') : (editing() ? t('saveBtn') : t('hangBtn'));
     $('hangBtn').disabled = S.busy;
+    $('submitErr').textContent = S.errKey ? t(S.errKey) : '';
   }
 
   var ICON_INNER = {
@@ -930,7 +919,10 @@ button,input,select,textarea{font-family:inherit}
   };
 
   function renderDone() {
+    $('doneTitle').textContent = S.lastWasEdit ? t('doneEditTitle') : t('doneTitle');
     $('doneText').textContent = t('doneText', { reveal: CFG.REVEAL_DATE || '' });
+    $('donePrize').hidden = !prizeOn();
+    $('donePrize').textContent = prizeOn() ? t('donePrize', prizeVars()) : '';
     $('seeTreeBtn').href = C.url('index.html') + (S.site ? '?site=' + encodeURIComponent(S.site) : '');
     var pal = C.PALETTE[S.color] || C.PALETTE.cream;
     $('doneTagRect').setAttribute('fill', pal.bg);
@@ -939,112 +931,20 @@ button,input,select,textarea{font-family:inherit}
     icon.innerHTML = ICON_INNER[S.charm] || ICON_INNER.snow;
   }
 
-  /* ---------- Auth ---------- */
-  var sb = null;
-
-  function handleSession(session) {
-    if (!session || !session.user) {
-      S.user = null;
-      if (S.view === 'loading' || S.view === 'write' || S.view === 'preview') show('signin');
-      return;
-    }
-    var email = session.user.email || '';
-    if (!C.allowedEmail(email)) {
-      S.user = null;
-      setTimeout(function () { sb.auth.signOut(); }, 0);
-      $('signinErr').textContent = t('errDomain', { domain: DOMAIN });
-      show('signin');
-      return;
-    }
-    var meta = session.user.user_metadata || {};
-    var first = meta.given_name || String(meta.full_name || meta.name || '').split(' ')[0] || '';
-    S.user = { email: email };
-    if (!S.first && first) S.first = first;
-    renderWho();
-    if (S.view === 'loading' || S.view === 'signin' || S.view === 'code') show('write');
-  }
-
-  function startGoogle() {
-    $('signinErr').textContent = '';
-    if (C.demo) {
-      handleDemoSignIn('you@' + DOMAIN, 'Aisyah');
-      return;
-    }
-    var btn = $('googleBtn');
-    btn.disabled = true;
-    sb.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: window.location.origin + window.location.pathname,
-        queryParams: { hd: DOMAIN, prompt: 'select_account' }
-      }
-    }).then(function (res) {
-      if (res.error) throw res.error;
-    }).catch(function (err) {
-      console.error(err);
-      btn.disabled = false;
-      $('signinErr').textContent = t('errGeneric');
-    });
-  }
-
-  function sendCode(e) {
-    if (e) e.preventDefault();
-    var email = $('email').value.trim().toLowerCase();
-    $('signinErr').textContent = '';
-    if (!C.allowedEmail(email)) {
-      $('signinErr').textContent = t('errDomain', { domain: DOMAIN });
-      $('email').focus();
-      return;
-    }
-    S.email = email;
-    $('codeLabel').textContent = t('codeLabel', { email: email });
-    if (C.demo) { $('code').value = ''; show('code'); return; }
-    var btn = $('sendCodeBtn');
-    btn.disabled = true;
-    sb.auth.signInWithOtp({ email: email, options: { shouldCreateUser: true } }).then(function (res) {
-      btn.disabled = false;
-      if (res.error) throw res.error;
-      $('code').value = '';
-      $('codeErr').textContent = '';
-      show('code');
-    }).catch(function (err) {
-      console.error(err);
-      btn.disabled = false;
-      $('signinErr').textContent = t('errSend');
-    });
-  }
-
-  function verifyCode(e) {
-    if (e) e.preventDefault();
-    var token = $('code').value.replace(/\D/g, '');
-    $('codeErr').textContent = '';
-    if (token.length !== 6) { $('codeErr').textContent = t('errCode'); $('code').focus(); return; }
-    if (C.demo) { handleDemoSignIn(S.email, ''); return; }
-    var btn = $('verifyBtn');
-    btn.disabled = true;
-    sb.auth.verifyOtp({ email: S.email, token: token, type: 'email' }).then(function (res) {
-      btn.disabled = false;
-      if (res.error) throw res.error;
-      handleSession(res.data && res.data.session);
-    }).catch(function (err) {
-      console.error(err);
-      btn.disabled = false;
-      $('codeErr').textContent = t('errCode');
-    });
-  }
-
-  function handleDemoSignIn(email, first) {
-    S.user = { email: email };
-    if (!S.first && first) S.first = first;
-    C.storageSet('wt-demo-user', email);
-    renderWho();
-    show('write');
-  }
-
-  function signOut() {
-    S.user = null;
-    if (C.demo) { C.storageSet('wt-demo-user', ''); show('signin'); return; }
-    sb.auth.signOut().finally(function () { show('signin'); });
+  /* ---------- Your wish, if this browser already sent one ---------- */
+  function fillFromMine(m) {
+    S.mine = m;
+    if (!m) return;
+    S.bms = m.bms;
+    S.first = m.first_name || '';
+    S.phone = m.phone || '';
+    S.site = C.siteById(m.site) ? m.site : S.site;
+    S.text = m.message || '';
+    S.color = C.PALETTE[m.tag_color] ? m.tag_color : 'cream';
+    S.charm = ICON_INNER[m.charm] ? m.charm : 'snow';
+    S.wishLang = C.LANG_LABEL[m.lang] ? m.lang : null;
+    S.wishLangTouched = !!S.wishLang;
+    S.consent = true;
   }
 
   /* ---------- Submit ---------- */
@@ -1052,61 +952,43 @@ button,input,select,textarea{font-family:inherit}
     if (S.busy) return;
     var key = blockerKey();
     if (key) { S.triedPreview = true; show('write'); return; }
-    if (CFG.SUBMISSIONS_OPEN === false) { $('submitErr').textContent = t('errClosed'); return; }
+    if (CFG.SUBMISSIONS_OPEN === false) { S.errKey = 'errClosed'; renderPreview(); return; }
 
     var row = {
+      bms: C.cleanBms(S.bms),
+      first_name: cleanName(S.first).trim(),
+      phone: phoneDigits(S.phone) || null,
       message: S.text.trim().slice(0, MAX),
-      display_mode: S.mode,
-      first_name: S.mode === 'name' ? S.first.trim().slice(0, 40) : null,
       site: S.site,
       lang: effectiveWishLang(),
       tag_color: S.color,
-      charm: S.charm,
-      consent: true
+      charm: S.charm
     };
+    var wasEdit = editing();
 
-    $('submitErr').textContent = '';
+    S.errKey = '';
     S.busy = true;
     renderPreview();
 
-    var done = function () {
+    C.submitWish(row).then(function (r) {
       S.busy = false;
-      C.track('wish_submit', { site: row.site, lang: row.lang, mode: row.display_mode });
-      show('done');
-    };
-    var fail = function (err) {
+      if (r.result === 'ok') {
+        S.lastWasEdit = wasEdit;
+        S.mine = Object.assign({}, S.mine || {}, { bms: row.bms, status: 'pending' }, row);
+        C.track(wasEdit ? 'wish_edit' : 'wish_submit', { site: row.site, lang: row.lang });
+        show('done');
+        return;
+      }
+      S.errKey = r.result === 'bms_taken' ? 'errBmsTaken' : r.result === 'unknown_bms' ? 'errUnknownBms' : r.result === 'slow_down' ? 'errSlow' : 'errSubmit';
+      renderPreview();
+    }).catch(function (err) {
       console.error(err);
       S.busy = false;
+      var m = String((err && (err.message || err.details)) || '').toLowerCase();
+      S.errKey = m.indexOf('wishes_closed') !== -1 ? 'errClosed' : m.indexOf('bad_bms') !== -1 ? 'needBms'
+        : m.indexOf('bad_phone') !== -1 ? 'needPhone' : m.indexOf('name_required') !== -1 ? 'needName' : 'errSubmit';
       renderPreview();
-      var msg = String((err && (err.message || err.details)) || '').toLowerCase();
-      if (err && err.code === '42501') $('submitErr').textContent = t('errNotAllowed');
-      else if (msg.indexOf('wish_limit') !== -1) $('submitErr').textContent = t('errLimit');
-      else if (msg.indexOf('wishes_closed') !== -1) $('submitErr').textContent = t('errClosed');
-      else $('submitErr').textContent = t('errSubmit');
-    };
-
-    if (C.demo) {
-      try {
-        var list = JSON.parse(C.storageGet('wt-demo-wishes') || '[]');
-        list.push(Object.assign({ created_at: new Date().toISOString(), status: 'pending' }, row));
-        C.storageSet('wt-demo-wishes', JSON.stringify(list));
-      } catch (e) { /* ignore */ }
-      setTimeout(done, 600);
-      return;
-    }
-
-    sb.from('wishes').insert(row).then(function (res) {
-      if (res.error) throw res.error;
-      done();
-    }).catch(fail);
-  }
-
-  function resetForAnother() {
-    S.text = '';
-    S.wishLangTouched = false;
-    S.wishLang = null;
-    S.triedPreview = false;
-    show('write');
+    });
   }
 
   function share() {
@@ -1135,18 +1017,6 @@ button,input,select,textarea{font-family:inherit}
       applyLang();
     });
   });
-
-  $('googleBtn').addEventListener('click', startGoogle);
-  $('emailForm').addEventListener('submit', sendCode);
-  $('codeForm').addEventListener('submit', verifyCode);
-  $('code').addEventListener('input', function () {
-    var v = $('code').value.replace(/\D/g, '').slice(0, 6);
-    if ($('code').value !== v) $('code').value = v;
-    if (v.length === 6) verifyCode();
-  });
-  $('resendBtn').addEventListener('click', function () { $('email').value = S.email; sendCode(); });
-  $('changeEmailBtn').addEventListener('click', function () { show('signin'); $('email').focus(); });
-  $('signOutBtn').addEventListener('click', signOut);
 
   qsa('.opt[data-color]').forEach(function (b) {
     b.addEventListener('click', function () { S.color = b.getAttribute('data-color'); renderWrite(); });
@@ -1179,36 +1049,85 @@ button,input,select,textarea{font-family:inherit}
     S.wishLangTouched = true;
     renderWrite();
   });
-  qsa('input[name="mode"]').forEach(function (r) {
-    r.addEventListener('change', function () { if (r.checked) { S.mode = r.value; renderWrite(); } });
+  $('firstName').addEventListener('input', function (e) {
+    var v = cleanName(e.target.value);
+    if (v !== e.target.value) e.target.value = v;
+    S.first = v;
+    renderWrite();
   });
-  $('firstName').addEventListener('input', function (e) { S.first = e.target.value; renderWrite(); });
+  $('bms').addEventListener('input', function (e) {
+    if (editing()) return;
+    var v = e.target.value.replace(/\D/g, '').slice(0, 7);
+    if (v !== e.target.value) e.target.value = v;
+    S.bms = v;
+    renderWrite();
+  });
+  $('phone').addEventListener('input', function (e) {
+    var v = e.target.value.replace(/[^\d+\s().-]/g, '').slice(0, 20);
+    if (v !== e.target.value) e.target.value = v;
+    S.phone = v;
+    renderWrite();
+  });
   $('siteSel').addEventListener('change', function (e) { S.site = e.target.value; C.storageSet('wt-site', S.site); renderWrite(); });
   $('consent').addEventListener('change', function (e) { S.consent = e.target.checked; renderWrite(); });
+  function freshForm() {
+    S.mine = null;
+    S.bms = '';
+    S.first = '';
+    S.phone = '';
+    S.text = '';
+    S.consent = false;
+    S.triedPreview = false;
+    S.wishLang = null;
+    S.wishLangTouched = false;
+    $('bms').readOnly = false;
+  }
+  function forget() {
+    C.forgetMe();
+    freshForm();
+    show('write');
+    $('blocker').textContent = t('forgotten');
+  }
+  $('forgetBtn').addEventListener('click', forget);
+  $('forgetDoneBtn').addEventListener('click', forget);
+  $('otherBmsBtn').addEventListener('click', function () {
+    // a colleague on the same phone: start a fresh wish with their own BMS (the first one stays as it is)
+    S.mine = null;
+    S.bms = '';
+    S.first = '';
+    S.phone = '';
+    S.text = '';
+    S.consent = false;
+    S.triedPreview = false;
+    S.wishLang = null;
+    S.wishLangTouched = false;
+    $('bms').readOnly = false;
+    renderWrite();
+    $('firstName').focus();
+  });
 
   $('toPreviewBtn').addEventListener('click', function () {
     var key = blockerKey();
     if (key) {
       S.triedPreview = true;
       renderWrite();
-      var focusMap = { needText: 'wishText', needName: 'firstName', needSite: 'siteSel', needConsent: 'consent' };
+      var focusMap = { needText: 'wishText', needName: 'firstName', needBms: 'bms', needPhone: 'phone', needSite: 'siteSel', needConsent: 'consent' };
       var f = $(focusMap[key]);
       if (f) f.focus();
       return;
     }
+    S.errKey = '';
     show('preview');
   });
   $('backToWrite').addEventListener('click', function () { show('write'); });
   $('editBtn').addEventListener('click', function () { show('write'); });
   $('hangBtn').addEventListener('click', submit);
   $('shareBtn').addEventListener('click', share);
-  $('anotherBtn').addEventListener('click', resetForAnother);
+  $('anotherBtn').addEventListener('click', function () { S.triedPreview = false; show('write'); });
 
   /* ---------- Start ---------- */
   C.initGA();
   C.setLogo($('logo'));
-  $('googleBlock').hidden = AUTH !== 'google';
-  $('emailForm').hidden = AUTH !== 'email';
   if (C.demo) $('demoBar').hidden = false;
   applyLang();
 
@@ -1217,20 +1136,29 @@ button,input,select,textarea{font-family:inherit}
     return;
   }
 
+  function start() {
+    C.getMyWish().then(function (m) {
+      fillFromMine(m);
+      show('write');
+    }).catch(function (err) {
+      console.error(err);
+      show('write');
+    });
+  }
+
   if (C.demo) {
     if (C.demoLoad('wt-demo-settings', {}).submissions_open === false) { show('closed'); return; }
-    var demoUser = C.storageGet('wt-demo-user');
-    if (demoUser) { S.user = { email: demoUser }; renderWho(); show('write'); }
-    else show('signin');
+    start();
     return;
   }
 
+  var sb;
   try {
     sb = C.client();
   } catch (err) {
     console.error(err);
-    show('signin');
-    $('signinErr').textContent = t('errGeneric');
+    show('write');
+    $('blocker').textContent = t('errGeneric');
     return;
   }
 
@@ -1240,18 +1168,7 @@ button,input,select,textarea{font-family:inherit}
     return !(st && st.submissions_open === false);
   }, function () { return true; }).then(function (open) {
     if (!open) { show('closed'); return; }
-    sb.auth.onAuthStateChange(function (event, session) {
-      if (event === 'SIGNED_OUT') { S.user = null; renderWho(); return; }
-      if (session) handleSession(session);
-    });
-    sb.auth.getSession().then(function (res) {
-      var session = res && res.data ? res.data.session : null;
-      if (session) handleSession(session);
-      else if (S.view === 'loading') show('signin');
-    }).catch(function (err) {
-      console.error(err);
-      show('signin');
-    });
+    start();
   });
 })();
 </script>

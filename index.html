@@ -2,10 +2,13 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<!-- Security: only this site, Supabase, Google Fonts and (if set) Google Analytics can be used by the page -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://*.supabase.co https://www.googletagmanager.com https://*.google-analytics.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>TP Wish Tree 2026</title>
 <meta name="description" content="One TP. Many Wishes. One Christmas Together. The shared Christmas wish tree for TP Malaysia and Thailand.">
-<meta name="theme-color" content="#0E2A1F">
+<meta name="theme-color" content="#CFC3B0">
 <link rel="icon" type="image/png" href="assets/tp-logo-white.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,11 +20,13 @@
 @font-face{font-family:'TP Sans';font-weight:700;font-display:swap;src:local('TP Sans Bold'),local('TPSans-Bold'),url('fonts/TPSans-Bold.ttf') format('truetype')}
 
 :root{
-  --bg:#0E2A1F; --bg-2:#11302A; --bg-3:#0B231A;
-  --cream:#F6EEDC; --cream-2:#DCD3BF; --cream-3:#B9B19E;
-  --gold:#E3B45A; --gold-2:#F2C766; --carmine:#AB2C37;
-  --ink:#183326; --slate:#4B4C6A; --focus:#00AF9B;
-  --line:rgba(246,238,220,.12);
+  /* Campaign colours: Spruce, Pine, Brass, Cranberry, Eggnog. Page is Eggnog, writing is Cranberry. */
+  --spruce:#343F37; --pine:#736E52; --brass:#B18854; --cran:#6C151E; --eggnog:#CFC3B0; --paper:#F4EEE3;
+  --bg:#CFC3B0; --bg-2:#C7BAA5; --bg-3:#BDB09A;
+  --cream:#6C151E; --cream-2:#5B3A33; --cream-3:#5E5045;
+  --gold:#674A20; --gold-2:#7E5B2B; --carmine:#6C151E;
+  --ink:#343F37; --slate:#5A5550; --focus:#0E6E63;
+  --line:rgba(108,21,30,.16);
   --font:'TP Sans','Noto Sans','Noto Sans Thai',Calibri,system-ui,sans-serif;
   --script:'Great Vibes',cursive;
 }
@@ -40,13 +45,13 @@ button{font-family:inherit}
 
 .skip{position:absolute;left:-999px;top:8px;z-index:20;padding:10px 16px;border-radius:8px;background:var(--cream);color:var(--bg)}
 .skip:focus{left:8px}
-.demo-bar{position:relative;z-index:2;padding:9px 16px;background:#F2C766;color:#0E2A1F;font-size:13px;font-weight:500;line-height:1.45;text-align:center}
-.demo-bar .pv{display:inline-block;margin-right:8px;padding:2px 9px;border-radius:999px;background:#0E2A1F;color:#F2C766;font-size:11px;font-weight:700;letter-spacing:.12em;vertical-align:1px}
+.demo-bar{position:relative;z-index:2;padding:9px 16px;background:#B18854;color:#241C14;font-size:13px;font-weight:500;line-height:1.45;text-align:center}
+.demo-bar .pv{display:inline-block;margin-right:8px;padding:2px 9px;border-radius:999px;background:#6C151E;color:#F4EEE3;font-size:11px;font-weight:700;letter-spacing:.12em;vertical-align:1px}
 
 .deco{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0}
 .arc{position:absolute;border-radius:50%}
 .arc.a1{right:-520px;top:-260px;width:1100px;height:1100px;background:var(--bg-2)}
-.arc.a2{right:-400px;top:-140px;width:860px;height:860px;border:1px solid rgba(227,180,90,.16)}
+.arc.a2{right:-400px;top:-140px;width:860px;height:860px;border:1px solid rgba(108,21,30,.12)}
 
 .wrap{position:relative;z-index:1;max-width:1680px;margin:0 auto;padding:20px 40px 40px}
 
@@ -55,10 +60,10 @@ button{font-family:inherit}
 .brand{display:flex;align-items:center;gap:14px;min-height:44px;color:var(--cream);text-decoration:none}
 .brand:hover{color:var(--cream)}
 .logo{height:38px;width:auto;display:block}
-.brand-divider{width:1px;height:26px;background:rgba(246,238,220,.25)}
+.brand-divider{width:1px;height:26px;background:rgba(108,21,30,.25)}
 .brand-name{font-size:18px;font-weight:500;letter-spacing:.01em;white-space:nowrap}
-.btn-gold{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:48px;padding:0 24px;border-radius:999px;background:var(--gold);color:var(--bg);font-size:16px;font-weight:700;text-decoration:none;border:0;cursor:pointer;white-space:nowrap}
-.btn-gold:hover{background:var(--gold-2);color:var(--bg)}
+.btn-gold{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:48px;padding:0 24px;border-radius:999px;background:var(--cran);color:var(--paper);font-size:16px;font-weight:700;text-decoration:none;border:0;cursor:pointer;white-space:nowrap}
+.btn-gold:hover{background:#85202A;color:var(--paper)}
 
 /* layout */
 .grid{display:grid;grid-template-columns:minmax(260px,320px) minmax(0,1fr) minmax(290px,350px);grid-template-areas:"intro tree side" "sites tree side";grid-template-rows:auto 1fr;gap:28px 32px;align-items:start;padding-top:24px}
@@ -73,7 +78,7 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
 .lede{margin:0;font-size:16px;line-height:1.55;font-weight:300;color:var(--cream-2)}
 .stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;padding:18px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
 .num{display:block;font-size:34px;font-weight:300;line-height:1;font-variant-numeric:tabular-nums}
-.lbl{display:block;margin-top:6px;font-size:13px;line-height:1.3;color:#CFC6B2}
+.lbl{display:block;margin-top:6px;font-size:13px;line-height:1.3;color:var(--cream-3)}
 .meta{display:flex;flex-direction:column;gap:10px;font-size:14px;color:var(--cream-2)}
 .meta-row{display:flex;align-items:center;gap:10px}
 .dot{flex:none;width:8px;height:8px;border-radius:50%;background:#00D769;animation:pulse 2s infinite}
@@ -84,14 +89,14 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
 .sites{grid-area:sites;display:flex;flex-direction:column;gap:10px;min-width:0}
 .sites-title{font-size:12px;font-weight:500;letter-spacing:.14em;color:var(--gold)}
 .site-rail{min-width:0;display:flex;flex-direction:column;gap:6px}
-.site-chip{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;min-height:44px;padding:0 14px;border:1px solid rgba(246,238,220,.18);border-radius:12px;background:rgba(246,238,220,.04);color:var(--cream);font-size:14px;font-weight:500;cursor:pointer;white-space:nowrap;text-align:left}
-.site-chip:hover{background:rgba(246,238,220,.1)}
-.site-chip .count{min-width:22px;padding:1px 7px;border-radius:999px;background:rgba(246,238,220,.12);font-size:12px;font-weight:700;text-align:center;font-variant-numeric:tabular-nums}
-.site-chip[aria-pressed="true"]{background:var(--cream);border-color:var(--cream);color:var(--bg)}
-.site-chip[aria-pressed="true"] .count{background:var(--bg);color:var(--cream)}
-.tour{flex:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border:1px solid rgba(227,180,90,.5);border-radius:999px;background:transparent;color:var(--gold);font-size:14px;font-weight:500;cursor:pointer;white-space:nowrap}
-.tour:hover{background:rgba(227,180,90,.1)}
-.tour[aria-pressed="true"]{background:var(--gold);color:var(--bg)}
+.site-chip{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;min-height:44px;padding:0 14px;border:1px solid rgba(108,21,30,.18);border-radius:12px;background:rgba(108,21,30,.04);color:var(--cream);font-size:14px;font-weight:500;cursor:pointer;white-space:nowrap;text-align:left}
+.site-chip:hover{background:rgba(108,21,30,.1)}
+.site-chip .count{min-width:22px;padding:1px 7px;border-radius:999px;background:rgba(108,21,30,.12);font-size:12px;font-weight:700;text-align:center;font-variant-numeric:tabular-nums}
+.site-chip[aria-pressed="true"]{background:var(--cran);border-color:var(--cran);color:var(--paper)}
+.site-chip[aria-pressed="true"] .count{background:var(--paper);color:var(--cran)}
+.tour{flex:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border:1px solid rgba(103,74,32,.45);border-radius:999px;background:transparent;color:var(--gold);font-size:14px;font-weight:500;cursor:pointer;white-space:nowrap}
+.tour:hover{background:rgba(103,74,32,.08)}
+.tour[aria-pressed="true"]{background:var(--gold);color:var(--paper)}
 
 .tree-col{position:relative}
 .tree-label{position:absolute;top:6px;left:0;z-index:2;display:flex;flex-direction:column;align-items:flex-start;gap:2px;max-width:34%;text-align:left;pointer-events:none}
@@ -117,58 +122,78 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
 .note-row .link-btn{min-height:32px;padding:0;text-align:left}
 .note-small{padding-top:10px;border-top:1px solid var(--line);font-size:12px;color:var(--cream-3)}
 
-.lg-leader{width:14px;height:14px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 3px rgba(242,199,102,.25)}
-.lg-tag{width:10px;height:14px;margin:0 2px;border-radius:2px 2px 3px 3px;background:var(--cream)}
+.lg-leader{width:14px;height:14px;border-radius:50%;background:var(--brass);box-shadow:0 0 0 3px rgba(177,136,84,.3)}
+.lg-tag{width:10px;height:14px;margin:0 2px;border-radius:2px 2px 3px 3px;background:var(--cran)}
 .link-btn{min-height:40px;padding:0 6px;border:0;background:transparent;color:var(--gold);font-size:14px;font-weight:500;text-decoration:underline;cursor:pointer}
 .link-btn:hover{color:var(--gold-2)}
 
 /* wish / leader card */
 .card-wrap{display:flex;flex-direction:column;align-items:center}
-.card-string{width:1px;height:26px;background:#D9C59A}
-.card-wrap[data-kind="leader"] .card-string{background:var(--gold-2)}
+.card-string{width:1px;height:26px;background:#8E8467}
+.card-wrap[data-kind="leader"] .card-string{background:var(--brass)}
 .wish-card{
-  --card-bg:#F6EEDC; --card-ink:#183326; --card-kicker:#AB2C37; --card-sub:#4B4C6A;
-  --card-pill:#ECE3CC; --card-line:rgba(24,51,38,.25); --card-avatar-bg:#0E2A1F; --card-avatar-fg:#E3B45A;
+  --card-bg:#F4EEE3; --card-ink:#343F37; --card-kicker:#6C151E; --card-sub:#5A5550;
+  --card-pill:#E6DCCB; --card-line:rgba(52,63,55,.25); --card-avatar-bg:#343F37; --card-avatar-fg:#D9B77E;
   position:relative;width:100%;padding:40px 26px 22px;border-radius:6px 6px 10px 10px;border:1.5px solid transparent;
-  background:var(--card-bg);color:var(--card-ink);box-shadow:0 18px 40px rgba(0,0,0,.35);
+  background:var(--card-bg);color:var(--card-ink);box-shadow:0 18px 40px rgba(59,47,34,.25);
   transition:background-color .3s ease,color .3s ease
 }
-.wish-card[data-color="red"]{--card-bg:#AB2C37;--card-ink:#F6EEDC;--card-kicker:#F2C766;--card-sub:#F6EEDC;--card-pill:rgba(246,238,220,.18);--card-line:rgba(246,238,220,.35)}
-.wish-card[data-color="gold"]{--card-bg:#E3B45A;--card-ink:#0E2A1F;--card-kicker:#0E2A1F;--card-sub:#183326;--card-pill:rgba(14,42,31,.12);--card-line:rgba(14,42,31,.3)}
-.wish-card[data-kind="leader"]{--card-bg:#0B231A;--card-ink:#F6EEDC;--card-kicker:#F2C766;--card-sub:#DCD3BF;--card-pill:rgba(246,238,220,.12);--card-line:rgba(242,199,102,.35);--card-avatar-bg:#E3B45A;--card-avatar-fg:#0E2A1F;border-color:#E3B45A;border-radius:14px;box-shadow:0 0 0 6px rgba(227,180,90,.12),0 18px 40px rgba(0,0,0,.45)}
-.wish-card[data-kind="leader"] .hole{background:var(--gold);opacity:.8}
-.leader-badge{display:none;position:absolute;top:-16px;left:22px;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;background:var(--gold);color:var(--bg);font-size:11px;font-weight:700;letter-spacing:.1em}
+.wish-card[data-color="red"]{--card-bg:#6C151E;--card-ink:#F4EEE3;--card-kicker:#E2BF85;--card-sub:#F4EEE3;--card-pill:rgba(244,238,227,.16);--card-line:rgba(244,238,227,.35);--card-avatar-bg:#B18854;--card-avatar-fg:#241C14}
+.wish-card[data-color="gold"]{--card-bg:#B18854;--card-ink:#241C14;--card-kicker:#3D0B10;--card-sub:#241C14;--card-pill:rgba(36,28,20,.12);--card-line:rgba(36,28,20,.3);--card-avatar-bg:#343F37;--card-avatar-fg:#D9B77E}
+.wish-card[data-kind="leader"]{--card-bg:#343F37;--card-ink:#F4EEE3;--card-kicker:#D9B77E;--card-sub:#CFC3B0;--card-pill:rgba(244,238,227,.12);--card-line:rgba(217,183,126,.35);--card-avatar-bg:#B18854;--card-avatar-fg:#241C14;border-color:#B18854;border-radius:14px;box-shadow:0 0 0 6px rgba(177,136,84,.18),0 18px 40px rgba(59,47,34,.3)}
+.wish-card[data-kind="leader"] .hole{background:var(--brass);opacity:.9}
+.leader-badge{display:none;position:absolute;top:-16px;left:22px;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;background:#B18854;color:#241C14;font-size:11px;font-weight:700;letter-spacing:.1em}
 .wish-card[data-kind="leader"] .leader-badge{display:inline-flex}
-.gift-badge{display:none;position:absolute;top:-16px;left:22px;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;background:#AB2C37;color:#F6EEDC;font-size:11px;font-weight:700;letter-spacing:.1em;box-shadow:0 0 0 2px #E3B45A}
-.wish-card[data-kind="secret"]{--card-bg:#5E1820;--card-ink:#F6EEDC;--card-kicker:#F2C766;--card-sub:#E9D9C9;--card-pill:rgba(246,238,220,.14);--card-line:rgba(242,199,102,.4);--card-avatar-bg:#E3B45A;--card-avatar-fg:#5E1820;border-color:#E3B45A;border-radius:14px;background-image:linear-gradient(90deg,transparent calc(50% - 7px),rgba(227,180,90,.22) calc(50% - 7px),rgba(227,180,90,.22) calc(50% + 7px),transparent calc(50% + 7px));box-shadow:0 0 0 6px rgba(171,44,55,.18),0 18px 40px rgba(0,0,0,.45);animation:giftIn .6s cubic-bezier(.2,.8,.3,1.2)}
+.gift-badge{display:none;position:absolute;top:-16px;left:22px;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;background:#6C151E;color:#F4EEE3;font-size:11px;font-weight:700;letter-spacing:.1em;box-shadow:0 0 0 2px #B18854}
+.wish-card[data-kind="secret"]{--card-bg:#6C151E;--card-ink:#F4EEE3;--card-kicker:#E2BF85;--card-sub:#E9DCCB;--card-pill:rgba(244,238,227,.14);--card-line:rgba(226,191,133,.4);--card-avatar-bg:#B18854;--card-avatar-fg:#6C151E;border-color:#B18854;border-radius:14px;background-image:linear-gradient(90deg,transparent calc(50% - 7px),rgba(177,136,84,.28) calc(50% - 7px),rgba(177,136,84,.28) calc(50% + 7px),transparent calc(50% + 7px));box-shadow:0 0 0 6px rgba(108,21,30,.14),0 18px 40px rgba(59,47,34,.3);animation:giftIn .6s cubic-bezier(.2,.8,.3,1.2)}
 .wish-card[data-kind="secret"] .gift-badge{display:inline-flex}
-.wish-card[data-kind="secret"] .hole{background:var(--gold);opacity:.8}
+.wish-card[data-kind="secret"] .hole{background:var(--brass);opacity:.9}
 .wish-card[data-kind="secret"] .card-text{font-size:19px;font-weight:300}
 .wish-card[data-kind="secret"] .like{display:none}
-.wish-card[data-kind="secret"][data-gift="gold"]{--card-bg:#E3B45A;--card-ink:#0E2A1F;--card-kicker:#7E1F28;--card-sub:#183326;--card-line:rgba(14,42,31,.3);--card-avatar-bg:#0E2A1F;--card-avatar-fg:#E3B45A;border-color:#F2C766;background-image:linear-gradient(90deg,transparent calc(50% - 7px),rgba(171,44,55,.16) calc(50% - 7px),rgba(171,44,55,.16) calc(50% + 7px),transparent calc(50% + 7px));box-shadow:0 0 0 6px rgba(227,180,90,.2),0 18px 40px rgba(0,0,0,.45)}
-.wish-card[data-kind="secret"][data-gift="gold"] .hole{background:#0E2A1F;opacity:.6}
-.card-wrap[data-kind="secret"] .card-string{background:var(--gold-2)}
-.ceo-badge{display:none;position:absolute;top:-16px;left:22px;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;background:#0E2A1F;color:#F2C766;font-size:11px;font-weight:700;letter-spacing:.1em;box-shadow:0 0 0 2px #E3B45A}
-.wish-card[data-ceo="true"]{--card-bg:#FBF6EA;--card-ink:#0E2A1F;--card-kicker:#AB2C37;--card-sub:#4B4C6A;--card-pill:rgba(14,42,31,.08);--card-line:rgba(171,44,55,.28);--card-avatar-bg:#E3B45A;--card-avatar-fg:#0E2A1F;border:2px solid #E3B45A;border-radius:16px;padding-top:44px;box-shadow:inset 0 0 0 7px #FBF6EA,inset 0 0 0 8px rgba(227,180,90,.75),0 0 0 7px rgba(227,180,90,.2),0 22px 44px rgba(0,0,0,.45)}
+.wish-card[data-kind="secret"][data-gift="gold"]{--card-bg:#B18854;--card-ink:#241C14;--card-kicker:#3D0B10;--card-sub:#241C14;--card-line:rgba(36,28,20,.3);--card-avatar-bg:#343F37;--card-avatar-fg:#D9B77E;border-color:#C99A55;background-image:linear-gradient(90deg,transparent calc(50% - 7px),rgba(108,21,30,.16) calc(50% - 7px),rgba(108,21,30,.16) calc(50% + 7px),transparent calc(50% + 7px));box-shadow:0 0 0 6px rgba(177,136,84,.22),0 18px 40px rgba(59,47,34,.3)}
+.wish-card[data-kind="secret"][data-gift="gold"] .hole{background:#343F37;opacity:.6}
+.card-wrap[data-kind="secret"] .card-string,.card-wrap[data-kind="prize"] .card-string{background:var(--brass)}
+.ceo-badge{display:none;position:absolute;top:-16px;left:22px;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;background:#343F37;color:#D9B77E;font-size:11px;font-weight:700;letter-spacing:.1em;box-shadow:0 0 0 2px #B18854}
+.wish-card[data-ceo="true"]{--card-bg:#F4EEE3;--card-ink:#343F37;--card-kicker:#6C151E;--card-sub:#5A5550;--card-pill:rgba(52,63,55,.08);--card-line:rgba(108,21,30,.28);--card-avatar-bg:#B18854;--card-avatar-fg:#241C14;border:2px solid #B18854;border-radius:16px;padding-top:44px;box-shadow:inset 0 0 0 7px #F4EEE3,inset 0 0 0 8px rgba(177,136,84,.75),0 0 0 7px rgba(177,136,84,.2),0 22px 44px rgba(59,47,34,.3)}
 .wish-card[data-ceo="true"] .leader-badge{display:none}
 .wish-card[data-ceo="true"] .ceo-badge{display:inline-flex}
-.wish-card[data-ceo="true"] .hole{background:#E3B45A;opacity:1}
+.wish-card[data-ceo="true"] .hole{background:#B18854;opacity:1}
 .wish-card[data-ceo="true"] .card-text{font-size:21px;font-weight:400;line-height:1.55}
-.wish-card[data-ceo="true"] .who{font-family:var(--script);font-size:32px;font-weight:400;line-height:1;color:#AB2C37}
-.wish-card[data-ceo="true"] .avatar.has-photo{box-shadow:0 0 0 2px #E3B45A,0 0 0 4px #FBF6EA,0 0 0 5px rgba(227,180,90,.7)}
-.wish-card[data-ceo="true"] .like{color:#0E2A1F}
-.card-wrap[data-ceo="true"] .card-string{background:#E3B45A;width:2px}
-.li.leader.ceo{grid-column:1/-1;background:#FBF6EA;border:2px solid #E3B45A;color:#0E2A1F;box-shadow:inset 0 0 0 5px #FBF6EA,inset 0 0 0 6px rgba(227,180,90,.7)}
-.li.leader.ceo .li-kicker{color:#AB2C37}
+.wish-card[data-ceo="true"] .who{font-family:var(--script);font-size:32px;font-weight:400;line-height:1;color:#6C151E}
+.wish-card[data-ceo="true"] .avatar.has-photo{box-shadow:0 0 0 2px #B18854,0 0 0 4px #F4EEE3,0 0 0 5px rgba(177,136,84,.7)}
+.wish-card[data-ceo="true"] .like{color:#343F37}
+.card-wrap[data-ceo="true"] .card-string{background:#B18854;width:2px}
+.li.leader.ceo{grid-column:1/-1;background:#F4EEE3;border:2px solid #B18854;color:#343F37;box-shadow:inset 0 0 0 5px #F4EEE3,inset 0 0 0 6px rgba(177,136,84,.7)}
+.li.leader.ceo .li-kicker{color:#6C151E}
 .li.leader.ceo .li-text{font-size:19px;font-weight:400}
-.li.leader.ceo .li-foot{border-top-color:rgba(171,44,55,.28)}
-.li.leader.ceo .li-who b{font-family:var(--script);font-size:28px;font-weight:400;line-height:1;color:#AB2C37}
-.li.leader.ceo .li-who span{color:#4B4C6A}
-.li.leader.ceo .li-find{color:#AB2C37}
-.li.leader.ceo .like{color:#0E2A1F;border-color:rgba(14,42,31,.25)}
+.li.leader.ceo .li-foot{border-top-color:rgba(108,21,30,.28)}
+.li.leader.ceo .li-who b{font-family:var(--script);font-size:28px;font-weight:400;line-height:1;color:#6C151E}
+.li.leader.ceo .li-who span{color:#5A5550}
+.li.leader.ceo .li-find{color:#6C151E}
+.li.leader.ceo .like{color:#343F37;border-color:rgba(52,63,55,.25)}
+/* the prize gift's card */
+.prize-badge{display:none;position:absolute;top:-16px;left:22px;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;background:#B18854;color:#241C14;font-size:11px;font-weight:700;letter-spacing:.1em;box-shadow:0 0 0 2px #6C151E}
+.wish-card[data-kind="prize"]{--card-bg:#6C151E;--card-ink:#F4EEE3;--card-kicker:#E2BF85;--card-sub:#E9DCCB;--card-pill:rgba(244,238,227,.14);--card-line:rgba(226,191,133,.4);border-color:#C99A55;border-radius:14px;box-shadow:0 0 0 6px rgba(177,136,84,.22),0 18px 40px rgba(59,47,34,.3);animation:giftIn .6s cubic-bezier(.2,.8,.3,1.2)}
+.wish-card[data-kind="prize"] .prize-badge{display:inline-flex}
+.wish-card[data-kind="prize"] .hole{background:var(--brass);opacity:.9}
+.wish-card[data-kind="prize"] .card-text{margin-bottom:10px;font-size:26px;font-weight:700;line-height:1.2}
+.prize-box{display:flex;flex-direction:column;gap:14px}
+.prize-text{margin:0;font-size:15px;line-height:1.5;color:var(--card-ink)}
+.prize-head{margin-top:2px;font-size:12px;font-weight:700;letter-spacing:.12em;color:var(--card-kicker)}
+.prize-list{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+.pz{display:flex;align-items:center;gap:10px;width:100%;min-height:46px;padding:6px 10px;border:0;border-radius:10px;background:rgba(244,238,227,.1);color:var(--card-ink);font-size:14px;text-align:left;cursor:pointer}
+.pz:hover{background:rgba(244,238,227,.18)}
+.pz-place{flex:none;display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:#C99A55;color:#241C14;font-size:13px;font-weight:700}
+.pz-who{flex:1;min-width:0}
+.pz-who b{display:block;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pz-who span{display:block;font-size:12px;color:var(--card-sub);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pz-likes{flex:none;display:inline-flex;align-items:center;gap:5px;font-weight:700;font-variant-numeric:tabular-nums}
+.pz-likes svg{fill:#F4EEE3}
+.prize-empty{padding:12px;border-radius:10px;border:1px dashed rgba(244,238,227,.35);font-size:14px;line-height:1.45;color:var(--card-sub)}
+.prize-rules{margin:0;font-size:12px;line-height:1.5;color:var(--card-sub)}
 @keyframes giftIn{from{transform:translateY(14px) scale(.97);opacity:0}to{transform:none;opacity:1}}
 @media (prefers-reduced-motion: reduce){.wish-card[data-kind="secret"]{animation:none}}
-.hole{position:absolute;top:14px;left:50%;width:10px;height:10px;margin-left:-5px;border-radius:50%;background:#0E2A1F;opacity:.55}
+.hole{position:absolute;top:14px;left:50%;width:10px;height:10px;margin-left:-5px;border-radius:50%;background:#343F37;opacity:.55}
 .card-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
 .card-kicker{font-size:12px;font-weight:500;letter-spacing:.12em;color:var(--card-kicker)}
 .pill{flex:none;padding:4px 10px;border-radius:999px;background:var(--card-pill);font-size:12px;font-weight:500;color:var(--card-sub)}
@@ -182,19 +207,19 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
 .like{margin-left:auto;flex:none;display:inline-flex;align-items:center;gap:6px;min-height:42px;min-width:64px;padding:0 12px;border:1px solid var(--card-line);border-radius:999px;background:transparent;color:var(--card-ink);font-size:15px;font-weight:700;cursor:pointer;font-variant-numeric:tabular-nums}
 .like:hover{background:rgba(127,127,127,.12)}
 .like .heart{fill:none;stroke:currentColor;stroke-width:1.8;transition:transform .2s ease}
-.like[aria-pressed="true"] .heart{fill:#E04C5C;stroke:#E04C5C}
-.wish-card[data-color="red"] .like[aria-pressed="true"] .heart{fill:#F6EEDC;stroke:#F6EEDC}
+.like[aria-pressed="true"] .heart{fill:#B3263A;stroke:#B3263A}
+.wish-card[data-color="red"] .like[aria-pressed="true"] .heart,.wish-card[data-kind="leader"] .like[aria-pressed="true"] .heart,.li.leader:not(.ceo) .like[aria-pressed="true"] .heart{fill:#F4EEE3;stroke:#F4EEE3}
 .like.pop .heart{animation:heartpop .45s ease}
 @keyframes heartpop{0%{transform:scale(1)}35%{transform:scale(1.45)}100%{transform:scale(1)}}
 
 .nav{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.btn-ghost{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;border:1px solid rgba(246,238,220,.35);border-radius:999px;background:transparent;color:var(--cream);font-size:15px;cursor:pointer}
-.btn-ghost:hover{background:rgba(246,238,220,.08)}
+.btn-ghost{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;border:1px solid rgba(108,21,30,.35);border-radius:999px;background:transparent;color:var(--cream);font-size:15px;cursor:pointer}
+.btn-ghost:hover{background:rgba(108,21,30,.08)}
 .btn-ghost:disabled{opacity:.4;cursor:default}
 
-.qr-card{display:flex;align-items:center;gap:18px;padding:18px;border-radius:12px;border:1px solid rgba(227,180,90,.35);background:rgba(246,238,220,.04);color:var(--cream);text-decoration:none}
-.qr-card:hover{background:rgba(246,238,220,.08);color:var(--cream)}
-.qr{flex:none;width:100px;height:100px;padding:6px;border-radius:8px;background:var(--cream)}
+.qr-card{display:flex;align-items:center;gap:18px;padding:18px;border-radius:12px;border:1px solid rgba(108,21,30,.22);background:rgba(255,255,255,.3);color:var(--cream);text-decoration:none}
+.qr-card:hover{background:rgba(255,255,255,.45);color:var(--cream)}
+.qr{flex:none;width:100px;height:100px;padding:6px;border-radius:8px;background:var(--paper)}
 .qr img,.qr canvas{display:block;width:88px !important;height:88px !important}
 .qr-title{font-size:17px;font-weight:700}
 .qr-sub{margin-top:6px;font-size:14px;line-height:1.45;color:var(--cream-2)}
@@ -203,20 +228,20 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
 
 /* language picker */
 .langs{position:relative}
-.lang-btn{display:flex;align-items:center;gap:10px;min-height:44px;padding:0 14px;border:1px solid rgba(246,238,220,.18);border-radius:12px;background:rgba(246,238,220,.04);color:var(--cream);font-size:14px;font-weight:500;cursor:pointer;list-style:none;white-space:nowrap}
+.lang-btn{display:flex;align-items:center;gap:10px;min-height:44px;padding:0 14px;border:1px solid rgba(108,21,30,.18);border-radius:12px;background:rgba(108,21,30,.04);color:var(--cream);font-size:14px;font-weight:500;cursor:pointer;list-style:none;white-space:nowrap}
 .lang-btn::-webkit-details-marker{display:none}
-.lang-btn:hover{background:rgba(246,238,220,.1)}
+.lang-btn:hover{background:rgba(108,21,30,.1)}
 .lang-btn .lb-text{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
 .lang-btn .chev{transition:transform .2s ease}
 .langs[open] .lang-btn .chev{transform:rotate(180deg)}
-.lang-panel{position:absolute;left:0;top:calc(100% + 6px);z-index:6;width:290px;max-width:calc(100vw - 32px);padding:14px;border-radius:14px;background:#123326;border:1px solid rgba(246,238,220,.18);box-shadow:0 18px 40px rgba(0,0,0,.45)}
+.lang-panel{position:absolute;left:0;top:calc(100% + 6px);z-index:6;width:290px;max-width:calc(100vw - 32px);padding:14px;border-radius:14px;background:var(--paper);border:1px solid rgba(108,21,30,.18);box-shadow:0 18px 40px rgba(59,47,34,.3)}
 .lang-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px;font-size:13px;color:var(--cream-2)}
 .lang-head .link-btn{min-height:32px;font-size:13px}
 .lang-opt{display:flex;align-items:center;gap:12px;min-height:42px;padding:0 6px;border-radius:8px;font-size:15px;cursor:pointer}
-.lang-opt:hover{background:rgba(246,238,220,.06)}
-.lang-opt input{width:18px;height:18px;margin:0;accent-color:#E3B45A;cursor:pointer}
+.lang-opt:hover{background:rgba(108,21,30,.06)}
+.lang-opt input{width:18px;height:18px;margin:0;accent-color:#6C151E;cursor:pointer}
 .lang-opt .ln{flex:1}
-.lang-opt .count{min-width:24px;padding:1px 7px;border-radius:999px;background:rgba(246,238,220,.12);font-size:12px;font-weight:700;text-align:center;font-variant-numeric:tabular-nums}
+.lang-opt .count{min-width:24px;padding:1px 7px;border-radius:999px;background:rgba(108,21,30,.12);font-size:12px;font-weight:700;text-align:center;font-variant-numeric:tabular-nums}
 .lang-opt.zero{color:var(--cream-3)}
 .lang-note{margin:8px 6px 0;font-size:12px;line-height:1.45;color:var(--cream-3)}
 
@@ -226,36 +251,56 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
 .all-head h2{margin:0;font-size:32px;font-weight:300}
 .all-sub{margin:6px 0 0;font-size:15px;color:var(--cream-2)}
 .all-tools{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
-.search{width:240px;height:44px;padding:0 16px;border:1px solid rgba(246,238,220,.25);border-radius:999px;background:rgba(246,238,220,.06);color:var(--cream);font-family:inherit;font-size:15px}
+.search{width:240px;height:44px;padding:0 16px;border:1px solid rgba(108,21,30,.25);border-radius:999px;background:rgba(255,255,255,.45);color:var(--cream);font-family:inherit;font-size:15px}
 .search::placeholder{color:var(--cream-3)}
-.sort{display:flex;gap:4px;padding:4px;border-radius:999px;background:rgba(246,238,220,.08)}
+.sort{display:flex;gap:4px;padding:4px;border-radius:999px;background:rgba(108,21,30,.08)}
 .sort button{min-height:36px;padding:0 14px;border:0;border-radius:999px;background:transparent;color:var(--cream);font-size:14px;font-weight:500;cursor:pointer}
-.sort button[aria-pressed="true"]{background:var(--cream);color:var(--bg)}
+.sort button[aria-pressed="true"]{background:var(--cran);color:var(--paper)}
 .leader-list{display:flex;flex-direction:column;gap:14px;margin-bottom:14px}
 .lead-line{display:grid;grid-template-columns:repeat(var(--n),minmax(0,1fr));gap:14px}
 @media (max-width:1100px){.lead-line{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:640px){.lead-line{grid-template-columns:minmax(0,1fr)}}
 .all-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
-.li{display:flex;flex-direction:column;gap:12px;padding:18px 18px 14px;border-radius:12px;background:rgba(246,238,220,.05);border:1px solid rgba(246,238,220,.12)}
-.li.leader{background:#0B231A;border-color:rgba(227,180,90,.55)}
+.li{display:flex;flex-direction:column;gap:12px;padding:18px 18px 14px;border-radius:12px;background:rgba(255,255,255,.32);border:1px solid rgba(108,21,30,.14)}
+.li.leader{background:#343F37;border-color:rgba(177,136,84,.6);color:#F4EEE3}
+.li.leader:not(.ceo) .li-kicker,.li.leader:not(.ceo) .li-find{color:#D9B77E}
+.li.leader:not(.ceo) .li-who span{color:#CFC3B0}
+.li.leader:not(.ceo) .li-foot{border-top-color:rgba(244,238,227,.2)}
+.li.leader:not(.ceo) .like{color:#F4EEE3;border-color:rgba(244,238,227,.3)}
 .li-top{display:flex;align-items:center;gap:8px;min-height:32px}
 .li-tag{flex:none;display:flex;align-items:center;justify-content:center;width:22px;height:28px;border-radius:3px 3px 5px 5px;background:var(--bg-tag);color:var(--fg-tag)}
 .li-kicker{font-size:11px;font-weight:700;letter-spacing:.12em;color:var(--gold)}
-.li-lang{padding:2px 9px;border-radius:999px;background:rgba(246,238,220,.1);font-size:12px;color:var(--cream-2)}
+.li-lang{padding:2px 9px;border-radius:999px;background:rgba(108,21,30,.1);font-size:12px;color:var(--cream-2)}
 .li-find{margin-left:auto;min-height:32px;padding:0 4px;border:0;background:transparent;color:var(--gold);font-size:13px;font-weight:500;text-decoration:underline;cursor:pointer}
 .li-text{margin:0;flex:1;font-size:16px;line-height:1.5;white-space:pre-line;overflow-wrap:anywhere}
 .li.leader .li-text{font-weight:300}
-.li-foot{display:flex;align-items:center;gap:12px;padding-top:12px;border-top:1px dashed rgba(246,238,220,.18)}
+.li-foot{display:flex;align-items:center;gap:12px;padding-top:12px;border-top:1px dashed rgba(108,21,30,.18)}
 .li-who{min-width:0;flex:1}
 .li-who b{display:block;font-size:14px}
 .li-who span{display:block;margin-top:2px;font-size:13px;color:var(--cream-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.li-photo{flex:none;width:40px;height:40px;border-radius:50%;object-fit:cover;background:var(--gold);box-shadow:0 0 0 2px var(--gold)}
-.li-init{flex:none;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;background:var(--gold);color:var(--bg);font-size:14px;font-weight:700}
-.li .like{min-height:38px;min-width:58px;padding:0 10px;font-size:14px;border-color:rgba(246,238,220,.25);color:var(--cream)}
-.all-empty{grid-column:1/-1;padding:40px 20px;border:1px dashed rgba(246,238,220,.2);border-radius:12px;text-align:center;color:var(--cream-3)}
+.li-photo{flex:none;width:40px;height:40px;border-radius:50%;object-fit:cover;background:var(--brass);box-shadow:0 0 0 2px var(--brass)}
+.li-init{flex:none;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;background:var(--brass);color:#241C14;font-size:14px;font-weight:700}
+.li .like{min-height:38px;min-width:58px;padding:0 10px;font-size:14px;border-color:rgba(108,21,30,.25);color:var(--cream)}
+.all-empty{grid-column:1/-1;padding:40px 20px;border:1px dashed rgba(108,21,30,.2);border-radius:12px;text-align:center;color:var(--cream-3)}
 .more-row{display:flex;justify-content:center;margin-top:20px}
 .avatar img{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block}
-.wish-card[data-kind="leader"] .avatar.has-photo{box-shadow:0 0 0 2px #E3B45A}
+.wish-card[data-kind="leader"] .avatar.has-photo{box-shadow:0 0 0 2px #B18854}
+/* asking for the BMS before a like, and short notes */
+.bms-dialog{width:min(420px,calc(100vw - 32px));padding:0;border:0;border-radius:18px;background:var(--paper);color:var(--ink);box-shadow:0 24px 60px rgba(36,28,20,.4)}
+.bms-dialog::backdrop{background:rgba(36,28,20,.45)}
+.bms-form{display:flex;flex-direction:column;gap:12px;padding:24px}
+.bms-form h2{margin:0;font-size:22px;font-weight:700;color:var(--cran)}
+.bms-form p{margin:0;font-size:14px;line-height:1.5;color:#5A5550}
+.bms-form label{font-size:14px;font-weight:700}
+.bms-input{height:52px;padding:0 16px;border:1.5px solid #B9AE99;border-radius:12px;background:#fff;color:var(--ink);font-family:inherit;font-size:20px;letter-spacing:.12em}
+.bms-input:focus{outline:none;border-color:var(--cran);box-shadow:0 0 0 3px rgba(108,21,30,.2)}
+.bms-err{margin:0;min-height:1em;font-size:13px;color:#8E1F2A}
+.bms-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:4px}
+.bms-actions .btn-ghost{color:var(--ink);border-color:rgba(52,63,55,.35)}
+.toast{position:fixed;left:50%;bottom:24px;z-index:30;max-width:calc(100vw - 32px);padding:12px 18px;border-radius:12px;background:#343F37;color:#F4EEE3;font-size:14px;line-height:1.45;box-shadow:0 12px 30px rgba(36,28,20,.35);transform:translateX(-50%)}
+.note-row .bms-show{font-weight:700;font-variant-numeric:tabular-nums}
+.prize-link{display:flex;align-items:center;gap:10px;min-height:40px;padding:0;border:0;background:transparent;color:var(--cream);font-size:14px;font-weight:500;text-align:left;cursor:pointer}
+.prize-link b{text-decoration:underline}
 
 /* laptop / tablet: intro on top, tree + card side by side */
 @media (max-width:1180px){
@@ -311,8 +356,8 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
 }
 @media (prefers-reduced-motion:reduce){.dot{animation:none}.wish-card{transition:none}.spin-out #treeMount,.spin-in #treeMount{animation:none}}
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="vendor/supabase.js"></script>
+<script src="vendor/qrcode.min.js"></script>
 <script src="config.js"></script>
 <script src="wishtree.js"></script>
 </head>
@@ -350,8 +395,12 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
       <div class="meta">
         <div class="meta-row"><span id="liveDot" class="dot" aria-hidden="true"></span><span id="liveText">Live · new wishes appear once approved</span></div>
         <div class="meta-row">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E3B45A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#674A20" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
           <span id="datesText"></span>
+        </div>
+        <div class="meta-row" id="prizeRow" hidden>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#674A20" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h16v10H4zM3 7h18v3H3zM12 7v13M12 7c-1.5-3-5-3.5-5-1.5S10 7 12 7zm0 0c1.5-3 5-3.5 5-1.5S14 7 12 7z"/></svg>
+          <button type="button" class="prize-link" id="prizeLink"><span><b id="prizeLinkText"></b> · open the big gift</span></button>
         </div>
       </div>
     </section>
@@ -365,7 +414,7 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
       </button>
       <details class="langs" id="langPick">
         <summary class="lang-btn" aria-label="Languages to read">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E3B45A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.4 2.4 3.6 5.2 3.6 8.5s-1.2 6.1-3.6 8.5c-2.4-2.4-3.6-5.2-3.6-8.5s1.2-6.1 3.6-8.5z"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#674A20" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.4 2.4 3.6 5.2 3.6 8.5s-1.2 6.1-3.6 8.5c-2.4-2.4-3.6-5.2-3.6-8.5s1.2-6.1 3.6-8.5z"/></svg>
           <span class="lb-text" id="langSummary">All languages</span>
           <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
         </summary>
@@ -400,6 +449,10 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
             <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg>
             FROM OUR CEO
           </span>
+          <span class="prize-badge">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h16v10H4zM3 7h18v3H3zM12 7v13M12 7c-1.5-3-5-3.5-5-1.5S10 7 12 7zm0 0c1.5-3 5-3.5 5-1.5S14 7 12 7z"/></svg>
+            THE WISH TREE PRIZE
+          </span>
           <span class="gift-badge">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h16v10H4zM3 7h18v3H3zM12 7v13M12 7c-1.5-3-5-3.5-5-1.5S10 7 12 7zm0 0c1.5-3 5-3.5 5-1.5S14 7 12 7z"/></svg>
             HIDDEN IN A GIFT
@@ -410,6 +463,12 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
             <span id="cardLang" class="pill"></span>
           </div>
           <p id="cardText" class="card-text">Lighting up the tree…</p>
+          <div id="prizeBox" class="prize-box" hidden>
+            <p id="prizeText" class="prize-text"></p>
+            <div class="prize-head">LEADING RIGHT NOW</div>
+            <ol id="prizeList" class="prize-list"></ol>
+            <p id="prizeRules" class="prize-rules"></p>
+          </div>
           <div id="cardFoot" class="card-foot" hidden>
             <div id="cardInitial" class="avatar" aria-hidden="true"></div>
             <div>
@@ -446,13 +505,17 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
       <div class="tree-notes">
         <div id="treeHint" class="note-row" hidden>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h16M8 8l-4 4 4 4M16 8l4 4-4 4"/></svg>
-          <span>Drag to turn the tree · tap a tag to read it</span>
+          <span>Drag to turn the tree · point at a tag or tap it to read it</span>
         </div>
         <div class="note-row"><i class="lg-leader" aria-hidden="true"></i><span>Leaders' messages, on every site's tree</span></div>
         <div class="note-row"><i class="lg-tag" aria-hidden="true"></i><span>Wishes from colleagues</span></div>
         <div class="note-row" id="allRow">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 7h14M5 12h14M5 17h9"/></svg>
           <span><span id="treeFull" hidden></span> <a href="#allWishes" id="allLink" class="link-btn" hidden>See every wish</a></span>
+        </div>
+        <div class="note-row" id="bmsRow" hidden>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c.9-3.8 3.6-5.8 7-5.8s6.1 2 7 5.8"/></svg>
+          <span>Liking as BMS <span class="bms-show" id="bmsShow"></span> · <button type="button" class="link-btn" id="bmsChange" style="min-height:32px;padding:0">Change</button></span>
         </div>
         <div class="note-small">Every wish is reviewed by the Talent Engagement team before it appears.</div>
       </div>
@@ -477,6 +540,21 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
     <div id="allList" class="all-list"></div>
     <div class="more-row"><button type="button" id="moreBtn" class="btn-ghost" hidden>Show more</button></div>
   </section>
+
+  <dialog id="bmsDialog" class="bms-dialog" aria-labelledby="bmsTitle">
+    <form id="bmsForm" class="bms-form" method="dialog" novalidate>
+      <h2 id="bmsTitle">Like with your BMS</h2>
+      <p>Each person can like a message once. Your BMS keeps the likes fair for the RM 100 prizes. It's never shown on the tree, and this device remembers it so you only type it once.</p>
+      <label for="bmsInput">Your BMS number</label>
+      <input id="bmsInput" class="bms-input" type="text" inputmode="numeric" autocomplete="off" maxlength="7" pattern="[0-9]{4,7}" aria-describedby="bmsErr">
+      <p id="bmsErr" class="bms-err" role="alert"></p>
+      <div class="bms-actions">
+        <button type="button" id="bmsCancel" class="btn-ghost">Cancel</button>
+        <button type="submit" id="bmsOk" class="btn-gold">Like</button>
+      </div>
+    </form>
+  </dialog>
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
   <footer class="foot">
     <span>One TP. Many Wishes. One Christmas Together.</span>
@@ -505,6 +583,10 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
       };
     });
   var SECRET_IDS = Object.keys(SECRETS);
+  // The prize for the most-liked wishes (PRIZE in config.js), in the big gift on the right
+  var PRIZE = C.PRIZE || {};
+  var PRIZE_ON = PRIZE.enabled !== false;
+  var PRIZE_ITEM = { id: 'prize' };
 
   var params = new URLSearchParams(window.location.search);
   var startSite = params.get('site');
@@ -527,6 +609,7 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
     loadedOnce: false,
     spinning: false,
     pendingSite: null,
+    prizeTop: [],      // the most-liked wishes right now
     sort: 'likes',     // list order: 'likes' or 'new'
     q: '',
     shown: LIST_PAGE
@@ -575,7 +658,7 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
     var box = el('qr');
     box.innerHTML = '';
     try {
-      new window.QRCode(box, { text: link, width: 176, height: 176, colorDark: '#0E2A1F', colorLight: '#F6EEDC', correctLevel: window.QRCode.CorrectLevel.M });
+      new window.QRCode(box, { text: link, width: 176, height: 176, colorDark: '#241C14', colorLight: '#F4EEE3', correctLevel: window.QRCode.CorrectLevel.M });
       box.removeAttribute('title');
     } catch (e) { /* QR is optional */ }
   }
@@ -615,6 +698,7 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
   function findItem(sel) {
     if (!sel) return null;
     if (sel.kind === 'secret') return SECRETS[sel.id] || null;
+    if (sel.kind === 'prize') return PRIZE_ON ? PRIZE_ITEM : null;
     var src = sel.kind === 'leader' ? state.leaders : state.wishes;
     for (var i = 0; i < src.length; i++) if (String(src[i].id) === String(sel.id)) return src[i];
     return null;
@@ -630,7 +714,7 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
   function ensureSelection() {
     var sel = state.selected;
     var ok = false;
-    if (sel && (sel.kind === 'leader' || sel.kind === 'secret')) ok = !!findItem(sel);
+    if (sel && (sel.kind === 'leader' || sel.kind === 'secret' || sel.kind === 'prize')) ok = !!findItem(sel);
     else if (sel) ok = siteWishes().some(function (w) { return String(w.id) === String(sel.id); });
     if (!ok) state.selected = defaultSelection();
   }
@@ -690,7 +774,7 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
       var n = counts[l.code] || 0;
       return '<label class="lang-opt' + (n ? '' : ' zero') + '"><input type="checkbox" value="' + C.esc(l.code) + '"' + (on ? ' checked' : '') + '>' +
         '<span class="ln" lang="' + C.esc(l.code) + '">' + C.esc(l.label) + '</span>' +
-        (l.english && l.english !== l.label ? '<span class="sr-en" style="font-size:12px;color:#B9B19E">' + C.esc(l.english) + '</span>' : '') +
+        (l.english && l.english !== l.label ? '<span class="sr-en" style="font-size:12px;color:var(--cream-3)">' + C.esc(l.english) + '</span>' : '') +
         '<span class="count">' + fmt(n) + '</span></label>';
     }).join('');
     el('langAll').hidden = !state.langs;
@@ -775,7 +859,8 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
     el('moreBtn').textContent = 'Show more (' + fmt(list.length - Math.min(list.length, state.shown)) + ' left)';
   }
 
-  function onTreeSelect(kind, id) { select({ kind: kind, id: id }, true); }
+  // how = { hover: true } when the mouse rested on it (then the tree doesn't turn)
+  function onTreeSelect(kind, id, how) { select({ kind: kind, id: id }, true, how); }
 
   function renderTree() {
     state.onTree = computeTreeSet();
@@ -795,9 +880,23 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
         selected: state.selected,
         onSelect: onTreeSelect,
         secrets: SECRET_IDS,
+        prize: PRIZE_ON,
+        prizeLabel: 'Prize: ' + (PRIZE.title || ''),
         leaderGifts: giftLeaders()
       });
     }
+  }
+
+  function renderPrize() {
+    var top = state.prizeTop || [];
+    el('prizeText').textContent = PRIZE.text || '';
+    el('prizeRules').textContent = PRIZE.rules || '';
+    el('prizeList').innerHTML = top.length ? top.map(function (w) {
+      return '<li><button type="button" class="pz" data-pz="' + C.esc(w.id) + '">' +
+        '<span class="pz-place">' + C.esc(w.place) + '</span>' +
+        '<span class="pz-who"><b>' + C.esc(w.display_name || 'A TP colleague') + '</b><span>' + C.esc(C.siteName(w.site) || '') + '</span></span>' +
+        '<span class="pz-likes">' + HEART + fmt(w.like_count || 0) + '</span></button></li>';
+    }).join('') : '<li class="prize-empty">No likes yet. Like the wishes you love: the 5 with the most likes win.</li>';
   }
 
   function renderCard() {
@@ -807,6 +906,7 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
     var list = browsable();
     el('prevBtn').disabled = list.length < 2;
     el('nextBtn').disabled = list.length < 2;
+    el('prizeBox').hidden = true;
 
     if (!item) {
       card.setAttribute('data-kind', 'wish');
@@ -820,6 +920,22 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
       el('cardText').textContent = state.site === 'all'
         ? 'No wishes on the tree yet. Be the first to hang one.'
         : 'No wishes from ' + C.siteById(state.site).label + ' yet. Be the first to hang one.';
+      return;
+    }
+
+    if (state.selected.kind === 'prize') {
+      card.setAttribute('data-kind', 'prize');
+      wrap.setAttribute('data-kind', 'prize');
+      card.setAttribute('data-color', 'cream');
+      card.removeAttribute('data-ceo');
+      wrap.removeAttribute('data-ceo');
+      card.setAttribute('lang', 'en');
+      el('cardKicker').textContent = 'THE MOST-LIKED WISHES WIN';
+      el('cardLang').textContent = C.demo ? 'Sample' : '';
+      el('cardText').textContent = PRIZE.title || '';
+      el('cardFoot').hidden = true;
+      el('prizeBox').hidden = false;
+      renderPrize();
       return;
     }
 
@@ -892,16 +1008,18 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
     renderQr();
   }
 
-  function select(sel, fromUser) {
+  function select(sel, fromUser, how) {
+    var hover = !!(how && how.hover);
     state.selected = sel;
     renderTree();
     renderCard();
+    if (hover) return;   // pointing at a tag shows its card without turning the tree
     if (fromUser && view3d) view3d.focus(sel);   // turn the 3D tree so the tag faces you
     if (fromUser) {
       stopTour();
-      C.track(sel.kind === 'secret' ? 'secret_wish_found' : sel.kind === 'leader' ? 'leader_open' : 'wish_open', { site: state.site });
+      C.track(sel.kind === 'secret' ? 'secret_wish_found' : sel.kind === 'prize' ? 'prize_open' : sel.kind === 'leader' ? 'leader_open' : 'wish_open', { site: state.site });
       // on phones the card sits under the tree: bring it into view once the gift has opened
-      if ((sel.kind === 'secret' || (sel.kind === 'leader' && isGiftLeader(sel.id))) && window.innerWidth <= 820) {
+      if ((sel.kind === 'secret' || sel.kind === 'prize' || (sel.kind === 'leader' && isGiftLeader(sel.id))) && window.innerWidth <= 820) {
         setTimeout(function () {
           try { el('cardWrap').scrollIntoView({ behavior: REDUCE ? 'auto' : 'smooth', block: 'center' }); } catch (e) { el('cardWrap').scrollIntoView(); }
         }, REDUCE ? 0 : 700);
@@ -935,7 +1053,8 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
     var apply = function () {
       state.site = id;
       state.shown = LIST_PAGE;
-      state.selected = null;
+      state.selected = state.pendingSelect || null;
+      state.pendingSelect = null;
       C.resetTreeMemory(treeMount);
       state.onTree = computeTreeSet();
       ensureSelection();
@@ -1014,7 +1133,15 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
   }
 
   /* ---------- Data ---------- */
+  function loadPrize() {
+    if (!PRIZE_ON) return Promise.resolve();
+    return C.fetchPrizeTop(PRIZE.winners || 5).then(function (top) {
+      state.prizeTop = top || [];
+      if (state.selected && state.selected.kind === 'prize') renderPrize();
+    }).catch(function (err) { console.warn('Wish Tree: prize standings not available', err); });
+  }
   function load() {
+    loadPrize();
     return Promise.all([C.fetchApproved(), C.fetchLeaders()]).then(function (res) {
       state.wishes = res[0] || [];
       state.leaders = res[1] || [];
@@ -1045,8 +1172,60 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
   el('tourBtn').addEventListener('click', function () {
     if (tourTimer) stopTour(); else startTour();
   });
-  // Like or unlike, from the card or the list (one like per device)
+  /* ---------- Likes: once per BMS ---------- */
+  var toastTimer = 0;
+  function toast(msg) {
+    var t = el('toast');
+    t.textContent = msg;
+    t.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.hidden = true; }, 4200);
+  }
+  function renderBmsRow() {
+    var b = C.myBms();
+    el('bmsRow').hidden = !b;
+    el('bmsShow').textContent = b;
+  }
+  // Ask for the BMS once (remembered on this device), then carry on with the like
+  var afterBms = null;
+  function askBms(then, msg) {
+    afterBms = then || null;
+    el('bmsInput').value = C.myBms();
+    el('bmsErr').textContent = msg || '';
+    el('bmsOk').textContent = then ? 'Like' : 'Save';
+    var d = el('bmsDialog');
+    if (typeof d.showModal === 'function') { if (!d.open) d.showModal(); }
+    else d.setAttribute('open', '');
+    setTimeout(function () { el('bmsInput').focus(); }, 30);
+  }
+  function closeBms() {
+    var d = el('bmsDialog');
+    if (typeof d.close === 'function' && d.open) d.close(); else d.removeAttribute('open');
+  }
+  el('bmsInput').addEventListener('input', function () {
+    var v = el('bmsInput').value.replace(/\D/g, '').slice(0, 7);
+    if (el('bmsInput').value !== v) el('bmsInput').value = v;
+    el('bmsErr').textContent = '';
+  });
+  el('bmsForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var v = C.cleanBms(el('bmsInput').value);
+    if (!C.validBms(v)) { el('bmsErr').textContent = 'Your BMS is 4 to 7 digits, numbers only.'; el('bmsInput').focus(); return; }
+    C.saveMyBms(v);
+    closeBms();
+    renderBmsRow();
+    renderCard();
+    renderList();
+    var next = afterBms;
+    afterBms = null;
+    if (next) next();
+  });
+  el('bmsCancel').addEventListener('click', function () { afterBms = null; closeBms(); });
+  el('bmsChange').addEventListener('click', function () { askBms(null); });
+
+  // Like or unlike, from the card or the list
   function toggleLike(kind, item, btn) {
+    if (!C.myBms()) { askBms(function () { toggleLike(kind, item, btn); }); return; }
     var on = !C.hasLiked(kind, item.id);
     var before = item.like_count || 0;
     item.like_count = Math.max(0, before + (on ? 1 : -1));
@@ -1055,17 +1234,27 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
       void btn.offsetWidth;
       if (on) btn.classList.add('pop');
     }
+    var undo = function () { item.like_count = before; renderCard(); renderList(); };
     var p = C.setLike(kind, item.id, on);
     renderCard();
     renderList();
-    p.then(function (count) {
-      if (typeof count === 'number') { item.like_count = count; renderCard(); renderList(); }
+    p.then(function (r) {
+      if (r.result === 'ok') {
+        if (typeof r.count === 'number') item.like_count = r.count;
+        renderCard();
+        renderList();
+        if (kind === 'wish') loadPrize();
+        return;
+      }
+      undo();
+      if (r.result === 'own_wish') toast("That's your own wish, so it can't take your like. Share the tree so others can like it.");
+      else if (r.result === 'unknown_bms') { C.saveMyBms(''); renderBmsRow(); askBms(function () { toggleLike(kind, item, btn); }, "We couldn't find that BMS. Check the number and try again."); }
+      else if (r.result === 'slow_down') toast('Lots of likes at once. Please try again in a minute.');
+      else if (r.result === 'need_bms') askBms(function () { toggleLike(kind, item, btn); });
     }).catch(function (err) {
       console.error('Wish Tree: like failed', err);
-      C.setLike(kind, item.id, !on).catch(function () {});
-      item.like_count = before;
-      renderCard();
-      renderList();
+      undo();
+      toast("That like didn't go through. Please try again.");
     });
     C.track(on ? 'wish_like' : 'wish_unlike', { kind: kind, site: state.site });
   }
@@ -1094,6 +1283,26 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
     }
   }
   el('allList').addEventListener('click', onListClick);
+  el('prizeList').addEventListener('click', function (e) {
+    var b = e.target.closest ? e.target.closest('[data-pz]') : null;
+    if (!b) return;
+    var id = b.getAttribute('data-pz');
+    var w = state.wishes.find(function (x) { return String(x.id) === id; });
+    if (!w) return;
+    // the wish may be on another site's tree or filtered out by language: show everything
+    if (!langOk(w)) setLangs(null);
+    if (state.site !== 'all' && w.site !== state.site) {
+      state.pendingSelect = { kind: 'wish', id: id };
+      changeSite('all', false);
+      return;
+    }
+    select({ kind: 'wish', id: id }, true);
+  });
+  el('prizeLink').addEventListener('click', function () {
+    select({ kind: 'prize', id: 'prize' }, true);
+    var target = window.innerWidth <= 820 ? el('cardWrap') : el('tree');
+    try { target.scrollIntoView({ behavior: REDUCE ? 'auto' : 'smooth', block: 'center' }); } catch (err) { target.scrollIntoView(); }
+  });
   el('leaderList').addEventListener('click', onListClick);
   el('allSearch').addEventListener('input', function (e) { state.q = e.target.value; state.shown = LIST_PAGE; renderList(); });
   Array.prototype.forEach.call(document.querySelectorAll('.sort button'), function (b) {
@@ -1149,7 +1358,7 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
         el('tree3d').hidden = false;
         treeMount.hidden = true;
         try {
-          view3d = mod.createTree3D(el('tree3d'), { onSelect: onTreeSelect, secrets: SECRET_IDS, headroom: 0.12 });
+          view3d = mod.createTree3D(el('tree3d'), { onSelect: onTreeSelect, secrets: SECRET_IDS, prize: PRIZE_ON, headroom: 0.12 });
         } catch (err) {
           console.warn('Wish Tree: 3D tree not available, using the flat tree', err);
           view3d = null;
@@ -1168,6 +1377,11 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
   }
 
   /* ---------- Start ---------- */
+  if (PRIZE_ON) {
+    el('prizeRow').hidden = false;
+    el('prizeLinkText').textContent = (PRIZE.winners || 5) + ' most-liked wishes win ' + (PRIZE.amount || '');
+  }
+  renderBmsRow();
   renderAll();
   load().then(function () { if (params.get('tour') === '1') startTour(); });
   var every = Math.max(15, Number(CFG.TREE_REFRESH_SECONDS) || 60) * 1000;
