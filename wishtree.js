@@ -68,10 +68,25 @@
   // Only https links (Supabase Storage) or images made in the browser (demo mode) are used as photos
   function safePhoto(u) {
     var v = String(u || '');
+    if (/^assets\/leaders\/[a-z0-9-]+\.(jpg|jpeg|png|webp)$/.test(v)) return url(v);
     if (/^https:\/\/[^\s"'<>()\\]+$/.test(v) && v.length < 600) return v;
     if (/^data:image\/(png|jpeg|webp|svg\+xml)[;,][^\s"<>\\]+$/.test(v) && v.length < 400000) return v;
     return '';
   }
+  // An <img> for a person's photo. If the file can't be loaded, it turns into their initials.
+  function photoHtml(src, initials, fallbackClass, imgClass) {
+    return '<img' + (imgClass ? ' class="' + esc(imgClass) + '"' : '') + ' src="' + esc(src) + '" alt="" data-initials="' + esc(initials || '') + '"' +
+      (fallbackClass ? ' data-fallback-class="' + esc(fallbackClass) + '"' : '') + '>';
+  }
+  document.addEventListener('error', function (e) {
+    var img = e.target;
+    if (!img || img.tagName !== 'IMG' || !img.hasAttribute('data-initials')) return;
+    var span = document.createElement('span');
+    span.className = img.getAttribute('data-fallback-class') || '';
+    span.textContent = img.getAttribute('data-initials');
+    if (img.parentNode && img.parentNode.classList) img.parentNode.classList.remove('has-photo', 'wt-photo');
+    img.replaceWith(span);
+  }, true);
   var COUNTRY_LABEL = { MY: 'Malaysia', TH: 'Thailand' };
 
   // Charm icons as SVG path data (24 x 24), shared by the 2D and 3D trees
@@ -279,28 +294,18 @@
     };
   });
 
-  // Placeholder "photos" for the demo leaders (a plain silhouette, not a real person)
-  function placeholderPhoto(bg1, bg2) {
-    var svg = "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><defs><linearGradient id='g' x1='0' y1='0' x2='0' y2='1'>" +
-      "<stop offset='0' stop-color='" + bg1 + "'/><stop offset='1' stop-color='" + bg2 + "'/></linearGradient></defs>" +
-      "<rect width='200' height='200' fill='url(#g)'/><circle cx='100' cy='84' r='38' fill='#F3EEE6'/>" +
-      "<path d='M28 200c4-50 34-76 72-76s68 26 72 76z' fill='#F3EEE6'/></svg>";
-    return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
-  }
-  var PLACEHOLDER_BG = [['#E7C77F', '#A9822F'], ['#9FB4CF', '#5F7396'], ['#C9A98B', '#8A6B52'], ['#9CC5B4', '#4E8270'],
-    ['#C7B3D6', '#7D6596'], ['#D9A5A5', '#9A5A5A'], ['#A9C7D9', '#5A7F9A'], ['#C9C49B', '#86804F']];
-
   // Demo leaders: the real names and roles, with sample text until each leader writes their own message.
-  // spot: 'ceo' = big ornament under the star, 'crown' = top of the tree, 'gift' = inside a gift under the tree.
+  // Photos come from assets/leaders/<file>.jpg (initials show until the file is there).
+  // spot: 'ceo' = big ornament under the star, 'crown' = the two lines below it (in this order, left to right).
   var SAMPLE_LEADERS = [
-    ['Andy', 'Chief Executive Officer', 'ceo', '[Sample] Thank you for every call, every chat and every customer you helped this year. You are the reason TP Malaysia and Thailand shine. Merry Christmas and a happy 2027!'],
-    ['DD', 'Chief Operating Officer', 'crown', '[Sample] This year we grew together across our sites in two countries. Rest well this holiday, and let us make 2027 our best year yet.'],
-    ['Himanshu', 'Chief Operating Officer', 'crown', '[Sample] To everyone working from home, on site, on nights and on weekends: we see you and we are grateful. Happy holidays to you and your families.'],
-    ['Viv', 'Vice President', 'crown', '[Sample] My wish for 2027: that each of you feels proud of the work you do and supported by the people around you. Merry Christmas!'],
-    ['Sudhar', 'Vice President', 'crown', '[Sample] Thank you for the care you bring to our customers and to each other. Enjoy the season with the people you love.'],
-    ['Chavis', 'Vice President', 'crown', '[Sample] From Bangkok to Penang, Kuala Lumpur and Johor: thank you for a remarkable year. Wishing you joy and good health.'],
-    ['Rachel', 'Human Resources', 'gift', '[Sample] Behind every wish on this tree is a person who makes TP a better place to work. Thank you, and happy holidays.'],
-    ['Sarah', 'Chief of Staff', 'gift', '[Sample] Thank you for showing up for each other all year long. May your holidays be restful and your 2027 bright.']
+    ['Andy', 'Chief Executive Officer', 'ceo', 'andy', '[Sample] Thank you for every call, every chat and every customer you helped this year. You are the reason TP Malaysia and Thailand shine. Merry Christmas and a happy 2027!'],
+    ['Divya Dutta', 'Chief Operating Officer', 'crown', 'divya-dutta', '[Sample] This year we grew together across our sites in two countries. Rest well this holiday, and let us make 2027 our best year yet.'],
+    ['Sarah', 'Chief of Staff', 'crown', 'sarah', '[Sample] Thank you for showing up for each other all year long. May your holidays be restful and your 2027 bright.'],
+    ['Rachel', 'Human Resources', 'crown', 'rachel', '[Sample] Behind every wish on this tree is a person who makes TP a better place to work. Thank you, and happy holidays.'],
+    ['Himanshu', 'Chief Operating Officer', 'crown', 'himanshu', '[Sample] To everyone working from home, on site, on nights and on weekends: we see you and we are grateful. Happy holidays to you and your families.'],
+    ['Vivienne', 'Vice President', 'crown', 'vivienne', '[Sample] My wish for 2027: that each of you feels proud of the work you do and supported by the people around you. Merry Christmas!'],
+    ['Chavis', 'Vice President', 'crown', 'chavis', '[Sample] From Bangkok to Penang, Kuala Lumpur and Johor: thank you for a remarkable year. Wishing you joy and good health.'],
+    ['Sudhar', 'Vice President', 'crown', 'sudhar', '[Sample] Thank you for the care you bring to our customers and to each other. Enjoy the season with the people you love.']
   ].map(function (r, i) {
     return {
       id: 'demo-leader-' + (i + 1),
@@ -308,9 +313,9 @@
       title: r[1],
       spot: r[2],
       sort_order: i + 1,
-      message: r[3],
+      message: r[4],
       lang: 'en',
-      photo_url: placeholderPhoto(PLACEHOLDER_BG[i][0], PLACEHOLDER_BG[i][1]),
+      photo_url: 'assets/leaders/' + r[3] + '.jpg',
       updated_at: new Date(Date.UTC(2026, 11, 1, 6, i)).toISOString(),
       like_count: (hash('leader-likes:' + i) % 60) + 12
     };
@@ -508,7 +513,7 @@
     return x < y ? 1 : x > y ? -1 : 0;
   }
   /* ---------- Where leaders' messages hang ---------- */
-  var CROWN_MAX = 6;        // the CEO's big ornament plus 5 around the top of the tree
+  var CROWN_MAX = 8;        // the CEO's big ornament plus two lines below it (4 and 3)
   var LEADER_GIFTS = 2;     // gift boxes under the tree that hold a leader's message
   function leaderOrder(a, b) {
     var ca = a.spot === 'ceo' ? 0 : 1, cb = b.spot === 'ceo' ? 0 : 1;
@@ -545,9 +550,20 @@
   // Tree outline in tree units (620 x 760): [apex y, base y, half width at base]
   var TIERS = [[70, 230, 110], [150, 360, 165], [250, 500, 220], [370, 650, 280]];
   // Crown of the tree is kept for leaders' messages
-  var LEADER_SLOTS = [[310, 92], [268, 148], [352, 148], [232, 210], [310, 214], [388, 210]];
-  // Which slots to use for 1-6 leaders, so the crown always looks balanced
-  var LEADER_LAYOUT = { 1: [0], 2: [1, 2], 3: [0, 1, 2], 4: [0, 1, 2, 4], 5: [0, 1, 2, 3, 5], 6: [0, 1, 2, 3, 4, 5] };
+  var CROWN_SIZE = 8;
+  // Where each leader hangs on the flat tree: the CEO under the star, then two lines, left to right
+  function crownPositions(leaders) {
+    var out = [];
+    var hasCeo = leaders.length && leaders[0].spot === 'ceo';
+    if (hasCeo) out.push([310, 84, 60]);
+    var n = leaders.length - (hasCeo ? 1 : 0);
+    var first = n > 3 ? Math.ceil(n / 2) : n;
+    [[first, 154], [n - first, 214]].forEach(function (line) {
+      var m = line[0];
+      for (var k = 0; k < m; k++) out.push([310 + (k - (m - 1) / 2) * 50, line[1] + (k % 2 ? 4 : 0), 44]);
+    });
+    return out;
+  }
   var TAGS_START_Y = 284;
 
   function halfWidthAt(y) {
@@ -677,7 +693,8 @@
     '.wt-lcap{display:block;width:calc(var(--d) * .26);height:calc(var(--d) * .14);margin-bottom:-1px;border-radius:2px 2px 0 0;background:#AB2C37}',
     '.wt-lball{position:relative;display:flex;align-items:center;justify-content:center;width:var(--d);height:var(--d);border-radius:50%;background:#E3B45A;color:#0E2A1F;font-weight:700;font-size:calc(var(--d) * .32);letter-spacing:.02em;line-height:1;box-shadow:inset 0 0 0 calc(var(--d) * .06) #F2C766,0 0 0 calc(var(--d) * .1) rgba(242,199,102,.22),0 4px 10px rgba(0,0,0,.4);transition:box-shadow .25s ease}',
     '.wt-lball::after{content:"";position:absolute;left:18%;top:16%;width:22%;height:22%;border-radius:50%;background:rgba(255,255,255,.45)}',
-    '.wt-lball.wt-photo{background-color:#E3B45A;background-size:cover;background-position:center}',
+    '.wt-lball.wt-photo{background-color:#E3B45A}',
+    '.wt-limg{position:absolute;inset:0;width:100%;height:100%;border-radius:50%;object-fit:cover}',
     '.wt-gift{position:absolute;left:62%;top:86.5%;width:9%;aspect-ratio:1/0.9;padding:0;border:0;background:transparent;cursor:pointer;z-index:2;-webkit-tap-highlight-color:transparent}',
     '.wt-gift-box{position:absolute;left:4%;right:4%;bottom:0;height:72%;border-radius:2px;background:linear-gradient(90deg,transparent 42%,#E3B45A 42%,#E3B45A 58%,transparent 58%),#AB2C37;box-shadow:0 4px 8px rgba(0,0,0,.4)}',
     '.wt-gift-lid{position:absolute;left:0;right:0;top:12%;height:20%;border-radius:2px;background:linear-gradient(90deg,transparent 42%,#E3B45A 42%,#E3B45A 58%,transparent 58%),#B9333F;transform-origin:10% 100%;transition:transform .5s cubic-bezier(.3,1.5,.5,1)}',
@@ -726,7 +743,7 @@
   function renderTree(container, opts) {
     var o = opts || {};
     var wishes = o.wishes || [];
-    var leaders = (o.leaders || []).slice(0, LEADER_SLOTS.length);
+    var leaders = (o.leaders || []).slice(0, CROWN_SIZE);
     var sel = o.selected || {};
     ensureCss();
 
@@ -798,21 +815,21 @@
 
     // Leaders' crown
     var crown = '';
-    var layout = LEADER_LAYOUT[leaders.length] || [];
+    var cspots = crownPositions(leaders);
     for (var li = 0; li < leaders.length; li++) {
       var L = leaders[li];
       var lid = String(L.id);
-      var pos = LEADER_SLOTS[layout[li]];
+      var pos = cspots[li];
       var lsel = sel.kind === 'leader' && String(sel.id) === lid;
       crown +=
         '<button type="button" class="wt-leader' + (L.spot === 'ceo' ? ' wt-ceo' : '') + '" data-kind="leader" data-id="' + esc(lid) + '"' +
         ' aria-pressed="' + (lsel ? 'true' : 'false') + '"' +
         ' aria-label="' + esc('Message from ' + (L.display_name || 'a TP leader')) + '"' +
         ' style="left:' + (pos[0] / 6.2).toFixed(2) + '%;top:' + (pos[1] / 7.6).toFixed(2) + '%;' +
-        '--d:' + u(L.spot === 'ceo' ? 64 : 50) + ';--lstr:' + u(10) + ';animation-delay:' + (li * -0.8) + 's">' +
+        '--d:' + u(pos[2]) + ';--lstr:' + u(10) + ';animation-delay:' + (li * -0.8) + 's">' +
         '<span class="wt-lstring"></span><span class="wt-lcap"></span>' +
         (safePhoto(L.photo_url)
-          ? '<span class="wt-lball wt-photo" style="background-image:url(&quot;' + esc(safePhoto(L.photo_url)) + '&quot;)">'
+          ? '<span class="wt-lball wt-photo">' + photoHtml(safePhoto(L.photo_url), initials(L.display_name), '', 'wt-limg')
           : '<span class="wt-lball">' + esc(initials(L.display_name))) +
         '<span class="wt-lstar"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="' + STAR_PATH + '"/></svg></span>' +
         '</span></button>';
@@ -880,7 +897,8 @@
     rankForTree: rankForTree,
     COUNTRY_LABEL: COUNTRY_LABEL,
     SITES: SITES,
-    LEADER_SLOTS: LEADER_SLOTS.length,
+    LEADER_SLOTS: CROWN_SIZE,
+    photoHtml: photoHtml,
     leaderPlaces: leaderPlaces,
     leaderOrder: leaderOrder,
     siteById: siteById,

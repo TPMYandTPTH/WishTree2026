@@ -80,7 +80,7 @@ window.WISH_CFG = {
   LEADER_MAX_LENGTH: 250,   // leader message length (keep in step with schema.sql)
   TREE_REFRESH_SECONDS: 60,
   MAX_TAGS_ON_TREE: 40,     // flat tree (fallback and leaders' preview)
-  MAX_TAGS_3D: 60,          // 3D tree: the most it holds without tags overlapping. With more wishes, the most-liked go on the tree and every wish stays in the list below it
+  MAX_TAGS_3D: 55,          // 3D tree: the most it holds without tags overlapping. With more wishes, the most-liked go on the tree and every wish stays in the list below it
   TREE_STYLE: 'light',      // 3D tree look: 'tiers' (smooth layers), 'cone' (one smooth cone) or 'light' (a tree made of light)
   TOUR_SECONDS: 10,         // "Tour sites" switches site every N seconds
 

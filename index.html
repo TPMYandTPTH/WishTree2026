@@ -538,7 +538,7 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
 
   // The tree view: the 3D tree when the device supports it, otherwise the flat tree
   var view3d = null;
-  function cap() { return view3d ? (Number(CFG.MAX_TAGS_3D) || 60) : CAP2D; }
+  function cap() { return view3d ? (Number(CFG.MAX_TAGS_3D) || 55) : CAP2D; }
 
   /* ---------- Static setup ---------- */
   C.initGA();
@@ -740,7 +740,7 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
           : '') + '</div>' +
         '<p class="li-text">' + C.esc(L.message) + '</p>' +
         '<div class="li-foot">' +
-        (photo ? '<img class="li-photo" src="' + C.esc(photo) + '" alt="" loading="lazy">' : '<span class="li-init" aria-hidden="true">' + C.esc(C.initials(L.display_name)) + '</span>') +
+        (photo ? C.photoHtml(photo, C.initials(L.display_name), 'li-init', 'li-photo') : '<span class="li-init" aria-hidden="true">' + C.esc(C.initials(L.display_name)) + '</span>') +
         '<div class="li-who"><b>' + C.esc(L.display_name || 'TP leadership') + '</b><span>' + C.esc(L.title || '') + '</span></div>' +
         likeBtnHtml('leader', L) + '</div></article>';
     }).join('');
@@ -855,7 +855,7 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
       el('cardWhere').textContent = item.title || '';
       var photo = C.safePhoto(item.photo_url);
       el('cardInitial').classList.toggle('has-photo', !!photo);
-      if (photo) el('cardInitial').innerHTML = '<img src="' + C.esc(photo) + '" alt="">';
+      if (photo) el('cardInitial').innerHTML = C.photoHtml(photo, C.initials(item.display_name));
       else el('cardInitial').textContent = C.initials(item.display_name);
     } else {
       var wishesOnly = list.filter(function (x) { return x.kind === 'wish'; });

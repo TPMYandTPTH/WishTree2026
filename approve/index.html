@@ -457,7 +457,7 @@ a{color:var(--slate)}
     h += '<div class="item-top"><div class="who">';
     if (!isW) {
       var ph = C.safePhoto(x.photo_url);
-      h += ph ? '<img class="ph" src="' + esc(ph) + '" alt="Photo of ' + esc(name) + '">' : '<span class="ph-none" title="No photo">' + esc(C.initials(name)) + '</span>';
+      h += ph ? C.photoHtml(ph, C.initials(name), 'ph-none', 'ph') : '<span class="ph-none" title="No photo">' + esc(C.initials(name)) + '</span>';
     }
     h += '<b>' + esc(name) + '</b>';
     if (where) h += '<span class="where">' + esc(where) + '</span>';

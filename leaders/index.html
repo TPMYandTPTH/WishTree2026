@@ -361,11 +361,11 @@ button,input,select,textarea{font-family:inherit}
     $('pvTitle').textContent = S.title.trim();
     var photo = C.safePhoto(S.photo);
     $('pvInitials').classList.toggle('has-photo', !!photo);
-    if (photo) $('pvInitials').innerHTML = '<img src="' + C.esc(photo) + '" alt="">';
+    if (photo) $('pvInitials').innerHTML = C.photoHtml(photo, C.initials(name));
     else $('pvInitials').textContent = C.initials(name);
-    $('photoPv').innerHTML = photo ? '<img src="' + C.esc(photo) + '" alt="">' : C.esc(C.initials(name));
+    $('photoPv').innerHTML = photo ? C.photoHtml(photo, C.initials(name)) : C.esc(C.initials(name));
     $('photoBtnText').textContent = photo ? 'Change photo' : 'Add a photo';
-    $('photoRemove').hidden = !photo;
+    $('photoRemove').hidden = !photo || (S.defaultPhoto && S.photo === S.defaultPhoto);
     var me = { id: 'preview', display_name: name, title: S.title, message: S.message, photo_url: photo };
     C.renderTree($('crownMount'), { wishes: [], leaders: [me], selected: { kind: 'leader', id: 'preview' } });
   }
@@ -418,6 +418,7 @@ button,input,select,textarea{font-family:inherit}
         return null;
       }
       if (!S.name && p.default_name) S.name = p.default_name;
+      if (p.default_photo) S.defaultPhoto = p.default_photo;
       // where this leader's message hangs (set by the Wish Tree team)
       $('pvKicker').textContent = p.spot === 'ceo' ? 'A MESSAGE FROM OUR CEO · UNDER THE STAR'
         : p.spot === 'gift' ? 'INSIDE A GIFT UNDER EVERY TREE' : 'ON EVERY SITE\'S TREE';
@@ -430,7 +431,9 @@ button,input,select,textarea{font-family:inherit}
           S.title = r.data.title || '';
           S.message = r.data.message || '';
           S.lang = r.data.lang || 'en';
-          S.photo = r.data.photo_url || '';
+          S.photo = r.data.photo_url || S.defaultPhoto || '';
+        } else if (S.defaultPhoto) {
+          S.photo = S.defaultPhoto;
         }
         show('edit');
       });
@@ -549,7 +552,7 @@ button,input,select,textarea{font-family:inherit}
       S.busy = false;
       S.photoBlob = null;
       S.photoChanged = false;
-      S.photo = saved && saved.photo_url ? saved.photo_url : '';
+      S.photo = saved && saved.photo_url ? saved.photo_url : (S.defaultPhoto || '');
       var wasNew = !S.existing;
       S.existing = saved;
       renderEdit();

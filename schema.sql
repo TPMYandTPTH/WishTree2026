@@ -31,6 +31,11 @@ alter table public.leaders add column if not exists spot text not null default '
 alter table public.leaders add column if not exists sort_order int not null default 100;
 alter table public.leaders drop constraint if exists leaders_spot_check;
 alter table public.leaders add constraint leaders_spot_check check (spot in ('ceo', 'crown', 'gift'));
+-- A photo kept with the site (assets/leaders/name.jpg), shown until the leader uploads their own
+alter table public.leaders add column if not exists default_photo text;
+alter table public.leaders drop constraint if exists leaders_default_photo_check;
+alter table public.leaders add constraint leaders_default_photo_check
+  check (default_photo is null or default_photo ~ '^assets/leaders/[a-z0-9-]+\.(jpg|jpeg|png|webp)$');
 
 create table if not exists public.moderators (
   email text primary key check (email = lower(btrim(email))),
@@ -357,7 +362,7 @@ create function public.get_leader_messages()
 returns table (id uuid, display_name text, title text, message text, lang text, photo_url text, updated_at timestamptz,
                like_count int, spot text, sort_order int)
 language sql stable security definer set search_path = '' as $$
-  select m.id, m.display_name, m.title, m.message, m.lang, m.photo_url, m.updated_at,
+  select m.id, m.display_name, m.title, m.message, m.lang, coalesce(m.photo_url, ld.default_photo), m.updated_at,
          (select count(*) from public.likes l where l.kind = 'leader' and l.target_id = m.id)::int,
          coalesce(ld.spot, 'crown'),
          coalesce(ld.sort_order, m.sort_order)
@@ -395,9 +400,9 @@ $$;
 -- Leaders page: access check
 drop function if exists public.leader_profile();
 create function public.leader_profile()
-returns table (is_leader boolean, default_name text, default_title text, spot text)
+returns table (is_leader boolean, default_name text, default_title text, spot text, default_photo text)
 language sql stable security definer set search_path = '' as $$
-  select public.is_leader(), l.default_name, l.default_title, coalesce(l.spot, 'crown')
+  select public.is_leader(), l.default_name, l.default_title, coalesce(l.spot, 'crown'), l.default_photo
   from (select 1) as x
   left join public.leaders l on l.email = public.current_email()
 $$;
@@ -469,20 +474,21 @@ create policy "leaders delete own photo" on storage.objects
 -- 10. Add your leaders and moderators ------------------------
 -- Replace the emails, remove the leading "--", and run just these lines.
 -- (Or add rows in Table Editor > leaders / moderators.)
--- spot: 'ceo' = the big ornament under the star (one person), 'crown' = top of the tree (room for 5 more),
---       'gift' = inside a gift box under the tree (room for 2). sort_order: lower comes first.
+-- spot: 'ceo' = the big ornament under the star (one person); 'crown' = the two lines below it
+--       (first line 4, second line 3, left to right in sort_order); 'gift' = inside a gift box under the tree.
+-- default_photo: the photo file in assets/leaders/ on the site, used until the leader uploads their own.
 --
--- insert into public.leaders (email, default_name, default_title, spot, sort_order) values
---   ('andy@tp.com',     'Andy',     'Chief Executive Officer', 'ceo',   1),
---   ('dd@tp.com',       'DD',       'Chief Operating Officer', 'crown', 2),
---   ('himanshu@tp.com', 'Himanshu', 'Chief Operating Officer', 'crown', 3),
---   ('viv@tp.com',      'Viv',      'Vice President',          'crown', 4),
---   ('sudhar@tp.com',   'Sudhar',   'Vice President',          'crown', 5),
---   ('chavis@tp.com',   'Chavis',   'Vice President',          'crown', 6),
---   ('rachel@tp.com',   'Rachel',   'Human Resources',         'gift',  7),
---   ('sarah@tp.com',    'Sarah',    'Chief of Staff',          'gift',  8)
+-- insert into public.leaders (email, default_name, default_title, spot, sort_order, default_photo) values
+--   ('andy@tp.com',        'Andy',        'Chief Executive Officer', 'ceo',   1, 'assets/leaders/andy.jpg'),
+--   ('divya.dutta@tp.com', 'Divya Dutta', 'Chief Operating Officer', 'crown', 2, 'assets/leaders/divya-dutta.jpg'),
+--   ('sarah@tp.com',       'Sarah',       'Chief of Staff',          'crown', 3, 'assets/leaders/sarah.jpg'),
+--   ('rachel@tp.com',      'Rachel',      'Human Resources',         'crown', 4, 'assets/leaders/rachel.jpg'),
+--   ('himanshu@tp.com',    'Himanshu',    'Chief Operating Officer', 'crown', 5, 'assets/leaders/himanshu.jpg'),
+--   ('vivienne@tp.com',    'Vivienne',    'Vice President',          'crown', 6, 'assets/leaders/vivienne.jpg'),
+--   ('chavis@tp.com',      'Chavis',      'Vice President',          'crown', 7, 'assets/leaders/chavis.jpg'),
+--   ('sudhar@tp.com',      'Sudhar',      'Vice President',          'crown', 8, 'assets/leaders/sudhar.jpg')
 -- on conflict (email) do update set default_name = excluded.default_name, default_title = excluded.default_title,
---   spot = excluded.spot, sort_order = excluded.sort_order;
+--   spot = excluded.spot, sort_order = excluded.sort_order, default_photo = excluded.default_photo;
 --
 -- insert into public.moderators (email) values
 --   ('firstname.lastname@tp.com');

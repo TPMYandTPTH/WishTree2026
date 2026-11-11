@@ -275,7 +275,7 @@ body.pointer .fs{opacity:1;pointer-events:auto}
   };
   var view3d = null;
   var CAP2D = Math.max(6, Math.min(Number(CFG.MAX_TAGS_ON_TREE) || 40, C.treeCapacity(0.58)));
-  function cap() { return view3d ? (Number(CFG.MAX_TAGS_3D) || 60) : CAP2D; }
+  function cap() { return view3d ? (Number(CFG.MAX_TAGS_3D) || 55) : CAP2D; }
 
   /* ---------- Screen size (16:9 canvas, or 9:16 on a portrait TV) ---------- */
   function fit() {
@@ -528,7 +528,7 @@ body.pointer .fs{opacity:1;pointer-events:auto}
     $('where').textContent = isLeader ? (item.title || 'TP Malaysia & Thailand') : C.displayWhere(item);
     var photo = isLeader ? C.safePhoto(item.photo_url) : '';
     $('avatar').classList.toggle('has-photo', !!photo);
-    $('avatar').innerHTML = photo ? '<img src="' + C.esc(photo) + '" alt="">'
+    $('avatar').innerHTML = photo ? C.photoHtml(photo, C.initials(item.display_name))
       : isLeader ? C.esc(C.initials(item.display_name)) : C.iconSvg(item.charm || 'snow', 28);
     var likes = item.like_count || 0;
     $('likes').hidden = isLeader || likes < 1;   // leaders' like counts aren't shown
