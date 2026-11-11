@@ -474,8 +474,9 @@ create policy "leaders delete own photo" on storage.objects
 -- 10. Add your leaders and moderators ------------------------
 -- Replace the emails, remove the leading "--", and run just these lines.
 -- (Or add rows in Table Editor > leaders / moderators.)
--- spot: 'ceo' = the big ornament under the star (one person); 'crown' = the two lines below it
---       (first line 4, second line 3, left to right in sort_order); 'gift' = inside a gift box under the tree.
+-- spot: 'ceo' = the big ornament under the star (one person); 'crown' = around the top of the tree
+--       (room for 7, mixed order); 'gift' = inside a gift box under the tree.
+-- sort_order: the order in the list under the tree and on the TVs (after the CEO: two lines, 4 then 3).
 -- default_photo: the photo file in assets/leaders/ on the site, used until the leader uploads their own.
 --
 -- insert into public.leaders (email, default_name, default_title, spot, sort_order, default_photo) values

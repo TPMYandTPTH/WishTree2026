@@ -231,7 +231,10 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
 .sort{display:flex;gap:4px;padding:4px;border-radius:999px;background:rgba(246,238,220,.08)}
 .sort button{min-height:36px;padding:0 14px;border:0;border-radius:999px;background:transparent;color:var(--cream);font-size:14px;font-weight:500;cursor:pointer}
 .sort button[aria-pressed="true"]{background:var(--cream);color:var(--bg)}
-.leader-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;margin-bottom:14px}
+.leader-list{display:flex;flex-direction:column;gap:14px;margin-bottom:14px}
+.lead-line{display:grid;grid-template-columns:repeat(var(--n),minmax(0,1fr));gap:14px}
+@media (max-width:1100px){.lead-line{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:640px){.lead-line{grid-template-columns:minmax(0,1fr)}}
 .all-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
 .li{display:flex;flex-direction:column;gap:12px;padding:18px 18px 14px;border-radius:12px;background:rgba(246,238,220,.05);border:1px solid rgba(246,238,220,.12)}
 .li.leader{background:#0B231A;border-color:rgba(227,180,90,.55)}
@@ -538,7 +541,7 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
 
   // The tree view: the 3D tree when the device supports it, otherwise the flat tree
   var view3d = null;
-  function cap() { return view3d ? (Number(CFG.MAX_TAGS_3D) || 55) : CAP2D; }
+  function cap() { return view3d ? (Number(CFG.MAX_TAGS_3D) || 60) : CAP2D; }
 
   /* ---------- Static setup ---------- */
   C.initGA();
@@ -730,7 +733,8 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
       b.setAttribute('aria-pressed', b.getAttribute('data-sort') === state.sort ? 'true' : 'false');
     });
 
-    el('leaderList').innerHTML = places().all.map(function (L) {
+    // Leaders' cards: the CEO's letter on top, then the others in two lines in their set order
+    var leaderCards = places().all.map(function (L) {
       var photo = C.safePhoto(L.photo_url);
       var ceo = L.spot === 'ceo';
       return '<article class="li leader' + (ceo ? ' ceo' : '') + '" lang="' + C.esc(L.lang || 'en') + '">' +
@@ -743,6 +747,14 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
         (photo ? C.photoHtml(photo, C.initials(L.display_name), 'li-init', 'li-photo') : '<span class="li-init" aria-hidden="true">' + C.esc(C.initials(L.display_name)) + '</span>') +
         '<div class="li-who"><b>' + C.esc(L.display_name || 'TP leadership') + '</b><span>' + C.esc(L.title || '') + '</span></div>' +
         likeBtnHtml('leader', L) + '</div></article>';
+    });
+    var lead = places().all;
+    var ceoCard = lead.length && lead[0].spot === 'ceo' ? leaderCards.shift() : '';
+    var nRest = leaderCards.length;
+    var firstLine = nRest > 3 ? Math.ceil(nRest / 2) : nRest;
+    var lines = [leaderCards.slice(0, firstLine), leaderCards.slice(firstLine)].filter(function (x) { return x.length; });
+    el('leaderList').innerHTML = ceoCard + lines.map(function (cards) {
+      return '<div class="lead-line" style="--n:' + cards.length + '">' + cards.join('') + '</div>';
     }).join('');
     el('leaderList').hidden = !state.leaders.length;
 
@@ -1110,7 +1122,7 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
   el('ctaTop').addEventListener('click', function () { C.track('wish_cta', { place: 'header', site: state.site }); });
   el('qrCard').addEventListener('click', function () { C.track('wish_cta', { place: 'qr_card', site: state.site }); });
 
-  /* ---------- 3D tree (falls back to the flat tree if the device can't do WebGL) ---------- */
+  /* ---------- 3D tree (the flat tree is used if the device can't do WebGL or the 3D files can't be downloaded) ---------- */
   function hasWebGL() {
     try {
       var c = document.createElement('canvas');
@@ -1128,18 +1140,30 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
   if (want3d) {
     el('tree3d').hidden = false;
     treeMount.hidden = true;
-    import(C.url('tree3d.js')).then(function (mod) {
-      view3d = mod.createTree3D(el('tree3d'), { onSelect: onTreeSelect, secrets: SECRET_IDS, headroom: 0.12 });
-      el('tree3dLoading').hidden = true;
-      el('treeHint').hidden = false;
-      ensureSelection();
-      renderTree();
-      renderCard();
-      renderList();
-    }).catch(function (err) {
-      console.warn('Wish Tree: 3D tree not available, using the flat tree', err);
-      view3d = null;
-      useFlatTree();
+    // On a weak connection the flat tree shows after a few seconds while the 3D tree keeps
+    // downloading in the background; the 3D tree takes its place as soon as it arrives.
+    C.load3dTree({
+      slowMs: 6000,
+      onSlow: function () { if (!view3d) useFlatTree(); },
+      onReady: function (mod) {
+        el('tree3d').hidden = false;
+        treeMount.hidden = true;
+        try {
+          view3d = mod.createTree3D(el('tree3d'), { onSelect: onTreeSelect, secrets: SECRET_IDS, headroom: 0.12 });
+        } catch (err) {
+          console.warn('Wish Tree: 3D tree not available, using the flat tree', err);
+          view3d = null;
+          useFlatTree();
+          return;
+        }
+        el('tree3dLoading').hidden = true;
+        el('treeHint').hidden = false;
+        ensureSelection();
+        renderTree();
+        renderCard();
+        renderList();
+      },
+      onGiveUp: function () { if (!view3d) useFlatTree(); }
     });
   }
 

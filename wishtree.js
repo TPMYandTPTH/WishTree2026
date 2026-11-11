@@ -87,6 +87,42 @@
     if (img.parentNode && img.parentNode.classList) img.parentNode.classList.remove('has-photo', 'wt-photo');
     img.replaceWith(span);
   }, true);
+  // Loads the 3D tree. On a weak connection its files can arrive slowly or not at all, so:
+  // after opts.slowMs (or straight away if a download fails) the page shows the flat tree (opts.onSlow),
+  // keeps trying in the background (4 tries, and again as soon as the connection comes back),
+  // then swaps the 3D tree in (opts.onReady(module)). opts.onGiveUp runs if every try fails.
+  function load3dTree(opts) {
+    var tries = 0, finished = false, slowShown = false;
+    function slow() { if (!slowShown && !finished) { slowShown = true; if (opts.onSlow) opts.onSlow(); } }
+    var slowTimer = setTimeout(slow, opts.slowMs || 6000);
+    function attempt() {
+      var n = tries++;
+      import(url('tree3d.js') + (n ? '?retry=' + n : '')).then(function (mod) {
+        return (typeof mod.load === 'function' ? mod.load(n) : Promise.resolve()).then(function () { return mod; });
+      }).then(function (mod) {
+        finished = true;
+        clearTimeout(slowTimer);
+        opts.onReady(mod);
+      }, function (err) {
+        console.warn('Wish Tree: 3D tree download failed (try ' + tries + ')', err);
+        slow();
+        if (tries >= 4) {
+          finished = true;
+          clearTimeout(slowTimer);
+          if (opts.onGiveUp) opts.onGiveUp(err);
+          return;
+        }
+        var timer = setTimeout(again, [4000, 12000, 30000][tries - 1] || 30000);
+        function again() {
+          clearTimeout(timer);
+          window.removeEventListener('online', again);
+          attempt();
+        }
+        window.addEventListener('online', again);
+      });
+    }
+    attempt();
+  }
   var COUNTRY_LABEL = { MY: 'Malaysia', TH: 'Thailand' };
 
   // Charm icons as SVG path data (24 x 24), shared by the 2D and 3D trees
@@ -513,7 +549,7 @@
     return x < y ? 1 : x > y ? -1 : 0;
   }
   /* ---------- Where leaders' messages hang ---------- */
-  var CROWN_MAX = 8;        // the CEO's big ornament plus two lines below it (4 and 3)
+  var CROWN_MAX = 8;        // the CEO's big ornament plus 7 around the top of the tree
   var LEADER_GIFTS = 2;     // gift boxes under the tree that hold a leader's message
   function leaderOrder(a, b) {
     var ca = a.spot === 'ceo' ? 0 : 1, cb = b.spot === 'ceo' ? 0 : 1;
@@ -551,16 +587,23 @@
   var TIERS = [[70, 230, 110], [150, 360, 165], [250, 500, 220], [370, 650, 280]];
   // Crown of the tree is kept for leaders' messages
   var CROWN_SIZE = 8;
-  // Where each leader hangs on the flat tree: the CEO under the star, then two lines, left to right
+  // Flat tree: the CEO right under the star, the other leaders scattered over the top in a mixed order
+  // (the same every visit). Spots are [x, y, size] on the 620 x 760 tree.
+  var FLAT_CROWN = [[262, 142], [358, 142], [232, 196], [310, 196], [388, 196], [268, 238], [352, 238]];
+  var FLAT_CROWN_USE = { 1: [3], 2: [0, 1], 3: [0, 1, 3], 4: [0, 1, 2, 4], 5: [0, 1, 2, 3, 4], 6: [0, 1, 2, 4, 5, 6], 7: [0, 1, 2, 3, 4, 5, 6] };
   function crownPositions(leaders) {
-    var out = [];
+    var out = new Array(leaders.length);
     var hasCeo = leaders.length && leaders[0].spot === 'ceo';
-    if (hasCeo) out.push([310, 84, 60]);
-    var n = leaders.length - (hasCeo ? 1 : 0);
-    var first = n > 3 ? Math.ceil(n / 2) : n;
-    [[first, 154], [n - first, 214]].forEach(function (line) {
-      var m = line[0];
-      for (var k = 0; k < m; k++) out.push([310 + (k - (m - 1) / 2) * 50, line[1] + (k % 2 ? 4 : 0), 44]);
+    if (hasCeo) out[0] = [310, 84, 60];
+    var rest = [];
+    for (var i = hasCeo ? 1 : 0; i < leaders.length; i++) rest.push(i);
+    rest.sort(function (a, b) { return hash('crown:' + leaders[a].id) - hash('crown:' + leaders[b].id); });
+    var use = FLAT_CROWN_USE[Math.min(rest.length, 7)] || [];
+    rest.forEach(function (li, k) {
+      var slot = FLAT_CROWN[use[k]];
+      if (!slot) return;
+      var h = hash('crown-jitter:' + leaders[li].id);
+      out[li] = [slot[0] + (h % 7) - 3, slot[1] + ((h >>> 8) % 7) - 3, 44];
     });
     return out;
   }
@@ -820,6 +863,7 @@
       var L = leaders[li];
       var lid = String(L.id);
       var pos = cspots[li];
+      if (!pos) continue;
       var lsel = sel.kind === 'leader' && String(sel.id) === lid;
       crown +=
         '<button type="button" class="wt-leader' + (L.spot === 'ceo' ? ' wt-ceo' : '') + '" data-kind="leader" data-id="' + esc(lid) + '"' +
@@ -899,6 +943,7 @@
     SITES: SITES,
     LEADER_SLOTS: CROWN_SIZE,
     photoHtml: photoHtml,
+    load3dTree: load3dTree,
     leaderPlaces: leaderPlaces,
     leaderOrder: leaderOrder,
     siteById: siteById,

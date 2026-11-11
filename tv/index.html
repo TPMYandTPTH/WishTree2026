@@ -275,7 +275,7 @@ body.pointer .fs{opacity:1;pointer-events:auto}
   };
   var view3d = null;
   var CAP2D = Math.max(6, Math.min(Number(CFG.MAX_TAGS_ON_TREE) || 40, C.treeCapacity(0.58)));
-  function cap() { return view3d ? (Number(CFG.MAX_TAGS_3D) || 55) : CAP2D; }
+  function cap() { return view3d ? (Number(CFG.MAX_TAGS_3D) || 60) : CAP2D; }
 
   /* ---------- Screen size (16:9 canvas, or 9:16 on a portrait TV) ---------- */
   function fit() {
@@ -732,13 +732,24 @@ body.pointer .fs{opacity:1;pointer-events:auto}
   function startTree() {
     if (params.get('view') === 'flat' || !hasWebGL()) { useFlat(); return; }
     $('tree3d').hidden = false;
-    import(C.url('tree3d.js')).then(function (mod) {
-      view3d = mod.createTree3D($('tree3d'), { idleDelay: SECONDS + 4, headroom: 0.1 });
-      refreshTree();
-      if (S.current) view3d.focus(S.current);
-    }).catch(function (err) {
-      console.warn('Wish Tree TV: 3D tree not available, using the flat tree', err);
-      useFlat();
+    // On a weak connection the flat tree shows while the 3D tree keeps downloading, then the 3D tree takes over
+    C.load3dTree({
+      slowMs: 8000,
+      onSlow: function () { if (!view3d) useFlat(); },
+      onReady: function (mod) {
+        $('tree3d').hidden = false;
+        $('treeFlat').hidden = true;
+        try {
+          view3d = mod.createTree3D($('tree3d'), { idleDelay: SECONDS + 4, headroom: 0.1 });
+        } catch (err) {
+          console.warn('Wish Tree TV: 3D tree not available, using the flat tree', err);
+          useFlat();
+          return;
+        }
+        refreshTree();
+        if (S.current) view3d.focus(S.current);
+      },
+      onGiveUp: function () { if (!view3d) useFlat(); }
     });
   }
 

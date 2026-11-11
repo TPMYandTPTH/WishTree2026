@@ -1,10 +1,18 @@
 /* =========================================================
    TP Wish Tree 2026 - the 3D tree (three.js / WebGL).
-   Loaded by index.html. If WebGL isn't available the page
-   keeps the 2D tree from wishtree.js instead.
+   Loaded by index.html and tv/. If WebGL isn't available, or
+   the download keeps failing, the page keeps the flat tree
+   from wishtree.js instead.
    No need to edit this file.
    ========================================================= */
-import * as THREE from './vendor/three.module.min.js';
+
+// three.js is fetched by load() instead of a fixed import, so a download that breaks on a weak
+// connection can be tried again (each try asks for a fresh copy).
+let THREE = null;
+export function load(attempt) {
+  if (THREE) return Promise.resolve();
+  return import('./vendor/three.module.min.js' + (attempt ? '?retry=' + attempt : '')).then((m) => { THREE = m; });
+}
 
 const C = window.WishCore;
 const TAU = Math.PI * 2;
@@ -23,7 +31,7 @@ const TIERS = [
 ];
 const CONE = { y0: 1.0, top: 8.15, r: 2.85 };
 const TAG = { w: 0.42, h: 0.56, d: 0.02, string: 0.12, tilt: 0.5 };
-const TAG_Y = [1.75, 5.15];         // where employee tags can hang (the leaders' two lines are above)
+const TAG_Y = [1.75, 5.7];          // where employee tags can hang (the leaders are above)
 const MAX_LEADERS = 8;
 const BG = { cream: '#F6EEDC', red: '#AB2C37', gold: '#E3B45A' };
 const FG = { cream: '#AB2C37', red: '#F6EEDC', gold: '#0E2A1F' };
@@ -259,6 +267,7 @@ function makeStarGeometry() {
    createTree3D(container, { onSelect(kind, id) })
    ========================================================= */
 export function createTree3D(container, opts = {}) {
+  if (!THREE) throw new Error('Wish Tree: call load() before createTree3D()');
   let want = opts.style || '';
   try { want = new URLSearchParams(window.location.search).get('style') || want; } catch (e) { /* ignore */ }
   want = want || (C.cfg && C.cfg.TREE_STYLE) || 'tiers';
@@ -694,27 +703,24 @@ export function createTree3D(container, opts = {}) {
   const leaderCapMat = new THREE.MeshStandardMaterial({ color: 0xab2c37, metalness: 0.4, roughness: 0.35 });
   const leaderCapGeo = new THREE.CylinderGeometry(0.06, 0.06, 0.07, 14);
 
-  // The CEO's ornament hangs at the front, right under the star. The others hang in two lines below it,
-  // across the front of the tree, in their order from left to right.
+  // The CEO's ornament hangs at the front, right under the star and higher than everyone else. The other
+  // leaders hang around the top of the tree on every side, in a mixed order that stays the same each visit.
   function leaderSpots(ls) {
     const hasCeo = ls.length > 0 && ls[0].spot === 'ceo';
-    const n = hasCeo ? ls.length - 1 : ls.length;
-    const out = [];
+    const out = new Array(ls.length);
     if (hasCeo) {
       const y = topY() - 0.72;
-      out.push({ th: Math.PI / 2, y, R: surfaceR(y), ceo: true });
+      out[0] = { th: Math.PI / 2, y, R: surfaceR(y), ceo: true };
     }
-    const first = n > 3 ? Math.ceil(n / 2) : n;
-    const gap = 0.6;                                     // space between ornaments in a line
-    [[first, 6.2], [n - first, 5.45]].forEach(([m, y]) => {
-      const D = surfaceR(y) + 0.3;                       // just in front of the branches
-      for (let k = 0; k < m; k++) {
-        const x = (k - (m - 1) / 2) * gap;               // left to right as you face the tree
-        const z = Math.sqrt(Math.max(D * D - x * x, 0.35 * 0.35));
-        const th = Math.atan2(z, x);
-        // face mostly forward, turned a little with the curve so the line reads as one row
-        out.push({ th, y, x, z, face: Math.PI / 2 + (th - Math.PI / 2) * 0.35, small: true });
-      }
+    const rest = [];
+    for (let i = hasCeo ? 1 : 0; i < ls.length; i++) rest.push(i);
+    rest.sort((a, b) => C.hash('crown:' + ls[a].id) - C.hash('crown:' + ls[b].id));
+    const n = rest.length;
+    rest.forEach((i, k) => {
+      const h = C.hash('crown-jitter:' + ls[i].id);
+      const th = Math.PI / 2 + ((k + (hasCeo ? 0.5 : 0)) * TAU) / n + ((h % 100) / 100 - 0.5) * 0.12;
+      const y = (hasCeo ? (k % 2 ? 5.95 : 6.32) : n > 3 ? (k % 2 ? 6.25 : 6.95) : 6.7) + (((h >>> 8) % 100) / 100 - 0.5) * 0.1;
+      out[i] = { th, y, R: surfaceR(y) };
     });
     return out;
   }
@@ -722,21 +728,16 @@ export function createTree3D(container, opts = {}) {
   function makeLeader(L, spot) {
     const id = String(L.id);
     const pivot = new THREE.Group();
-    if (spot.x != null) {
-      pivot.position.set(spot.x, spot.y + 0.42, spot.z);
-      pivot.rotation.set(-0.12, Math.PI / 2 - spot.face, 0, 'YXZ');
-    } else {
-      const R = spot.R + 0.16;
-      pivot.position.set(Math.cos(spot.th) * R, spot.y + 0.42, Math.sin(spot.th) * R);
-      pivot.rotation.set(-0.12, Math.PI / 2 - spot.th, 0, 'YXZ');
-    }
+    const R = spot.R + 0.16;
+    pivot.position.set(Math.cos(spot.th) * R, spot.y + 0.42, Math.sin(spot.th) * R);
+    pivot.rotation.set(-0.12, Math.PI / 2 - spot.th, 0, 'YXZ');
     const swing = new THREE.Group();
     pivot.add(swing);
     addString(swing, 0.14, goldStringMat);
     const cap = new THREE.Mesh(leaderCapGeo, leaderCapMat);
     cap.position.y = -0.17;
     swing.add(cap);
-    const big = spot.ceo ? 1.45 : spot.small ? 0.82 : 1;
+    const big = spot.ceo ? 1.45 : 0.92;
     const card = new THREE.Group();
     card.position.y = -0.2 - 0.3 * big;
     card.scale.setScalar(big);
