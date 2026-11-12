@@ -672,9 +672,7 @@ button,input,select,textarea{font-family:inherit}
       S.nameLocked = true;
       if (C.demo) C.storageSet('wt-demo-leader-name', S.name);
       renderEdit();
-      $('editOk').textContent = saved && saved.status === 'approved'
-        ? 'Saved. Your message is live on every site\'s tree page.'
-        : 'Sent. The Wish Tree team will approve it, then it shows on every site\'s tree page.';
+      $('editOk').textContent = 'Sent. The Wish Tree team will approve it, then it shows on every site\'s tree page.';
       C.track('leader_publish', { is_new: wasNew });
     };
     var fail = function (err) {

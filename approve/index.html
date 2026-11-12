@@ -327,9 +327,9 @@ a{color:var(--slate)}
         </div>
 
         <div class="box">
-          <h2>Campaign switches</h2>
+          <h2>Campaign switch</h2>
           <label class="switch"><span>Accept new wishes</span><input type="checkbox" id="swOpen"></label>
-          <label class="switch"><span>Leaders' messages need approval</span><input type="checkbox" id="swLeaders"></label>
+          <p class="small">Every wish and every leader message waits here for approval, new or edited. The database enforces this, so it can't be switched off. Only emails in Table Editor &gt; leaders can use the leaders' page.</p>
           <p id="settingsMsg" class="small" role="status"></p>
         </div>
 
@@ -467,7 +467,6 @@ a{color:var(--slate)}
     $('openPill').className = 'pill ' + (S.settings.submissions_open ? 'on' : 'off');
     $('openText').textContent = S.settings.submissions_open ? 'Accepting new wishes' : 'New wishes closed';
     $('swOpen').checked = !!S.settings.submissions_open;
-    $('swLeaders').checked = !!S.settings.leaders_need_approval;
 
     renderBulk();
     renderList();
@@ -812,7 +811,7 @@ a{color:var(--slate)}
   }
 
   function saveSettings() {
-    var next = { submissions_open: $('swOpen').checked, leaders_need_approval: $('swLeaders').checked };
+    var next = { submissions_open: $('swOpen').checked, leaders_need_approval: true };
     $('settingsMsg').textContent = 'Saving…';
     var done = function () {
       S.settings = next;
@@ -820,7 +819,7 @@ a{color:var(--slate)}
       render();
     };
     if (C.demo) { C.demoSave('wt-demo-settings', next); done(); return; }
-    sb.rpc('update_settings', { p_submissions_open: next.submissions_open, p_leaders_need_approval: next.leaders_need_approval }).then(function (res) {
+    sb.rpc('update_settings', { p_submissions_open: next.submissions_open, p_leaders_need_approval: true }).then(function (res) {
       if (res.error) throw res.error;
       done();
     }).catch(function (err) {
@@ -922,7 +921,6 @@ a{color:var(--slate)}
   $('moreBtn').addEventListener('click', function () { S.shown += PAGE; renderList(); });
   $('bulkBtn').addEventListener('click', bulkApprove);
   $('swOpen').addEventListener('change', saveSettings);
-  $('swLeaders').addEventListener('change', saveSettings);
   $('list').addEventListener('click', function (e) {
     var btn = e.target.closest ? e.target.closest('button[data-act]') : null;
     if (!btn) return;

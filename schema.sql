@@ -334,12 +334,10 @@ alter table public.leader_messages add constraint leader_messages_message_check
 create or replace function public.leader_messages_before_write() returns trigger
 language plpgsql security definer set search_path = '' as $$
 declare
-  needs_ok boolean;
   is_mod boolean;
   v_name text;
 begin
-  select coalesce(s.leaders_need_approval, true) into needs_ok from public.app_settings s where s.id = 1;
-  needs_ok := coalesce(needs_ok, true);
+  -- Every leader message waits for the Wish Tree team, new or edited. There is no switch to turn this off.
   is_mod := auth.uid() is not null and public.is_moderator();
   -- a leader's name comes from the leaders list (Table Editor > leaders > default_name) and can't be changed by them
   select nullif(btrim(l.default_name), '') into v_name from public.leaders l where l.email = public.current_email();
@@ -357,7 +355,7 @@ begin
       new.email      := public.current_email();
       new.hidden     := false;
       new.sort_order := 100;
-      new.status     := case when needs_ok then 'pending' else 'approved' end;
+      new.status     := 'pending';
       new.reviewed_at := null;
       new.reviewed_by := null;
     end if;
@@ -380,7 +378,7 @@ begin
          or new.title is distinct from old.title
          or new.lang is distinct from old.lang
          or new.photo_url is distinct from old.photo_url then
-        new.status      := case when needs_ok then 'pending' else 'approved' end;
+        new.status      := 'pending';
         new.reviewed_at := null;
         new.reviewed_by := null;
       end if;
@@ -742,6 +740,7 @@ language sql stable security definer set search_path = '' as $$
   from public.app_settings s where s.id = 1
 $$;
 
+-- p_leaders_need_approval is ignored: approval is always on (the parameter stays so older pages keep working)
 create or replace function public.update_settings(p_submissions_open boolean, p_leaders_need_approval boolean)
 returns void language plpgsql security definer set search_path = '' as $$
 begin
@@ -750,10 +749,11 @@ begin
   end if;
   update public.app_settings
      set submissions_open = coalesce(p_submissions_open, submissions_open),
-         leaders_need_approval = coalesce(p_leaders_need_approval, leaders_need_approval)
+         leaders_need_approval = true
    where id = 1;
 end
 $$;
+update public.app_settings set leaders_need_approval = true where id = 1;
 
 -- Function rights. Supabase lets everyone run new functions by default, so the internal ones are locked first.
 revoke execute on function public.rate_hit(text, text, int, interval) from public, anon, authenticated;
