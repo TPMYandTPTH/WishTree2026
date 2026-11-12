@@ -346,11 +346,11 @@
     ['Chavis', '[Sample] From Bangkok to Penang, Kuala Lumpur and Johor: thank you for a remarkable year. Wishing you joy and good health.'],
     ['Sudhar', '[Sample] Thank you for the care you bring to our customers and to each other. Enjoy the season with the people you love.']
   ];
-  // The preview shows Andy's message only: the tree launches once Andy's is in, and every other leader appears
-  // only after they post. Add ?samples=all to a preview link to see every card type with sample messages.
-  var ALL_SAMPLES = /[?&]samples=all(&|$)/.test(window.location.search);
+  // Preview (sample) mode shows every card type for review. Add ?samples=launch to a preview link to see launch day:
+  // Andy's message only (the tree goes out once Andy's is in; every other leader appears only after they post).
+  var ALL_SAMPLES = !/[?&]samples=launch(&|$)/.test(window.location.search);
   if (!ALL_SAMPLES) SAMPLE_LEADERS = SAMPLE_LEADERS.slice(0, 1);
-  // ?samples=all: every other C-level and VP leader gets a placeholder (not words in their name),
+  // Every other C-level and VP leader gets a placeholder (not words in their name),
   // plus a row of examples for Directors and for managers
   var exampleTitles = {}, examples = { director: 0, manager: 0 }, EXAMPLES_MAX = { director: 5, manager: 6 };
   if (ALL_SAMPLES) leaderList().forEach(function (l) {
