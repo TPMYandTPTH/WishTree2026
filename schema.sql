@@ -825,7 +825,7 @@ create policy "leaders delete own photo" on storage.objects
 --   ('himanshu@tp.com',                 'Himanshu',                'Chief Operating Officer',     'crown', 3,  'assets/leaders/himanshu.jpg'),
 --   ('alex.ma@tp.com',                  'Alex Ma',                 'Chief Financial Officer',     'crown', 4,  'assets/leaders/alex-ma.jpg'),
 --   ('sarah@tp.com',                    'Sarah',                   'Chief of Staff',              'crown', 5,  'assets/leaders/sarah.jpg'),
---   ('rachel@tp.com',                   'Rachel',                  'Human Resources',             'crown', 6,  'assets/leaders/rachel.jpg'),
+--   ('rachel@tp.com',                   'Rachel',                  'Director of Human Resources', 'crown', 6,  'assets/leaders/rachel.jpg'),
 --   ('vivienne@tp.com',                 'Vivienne',                'Vice President',              'list',  7,  'assets/leaders/vivienne.jpg'),
 --   ('chavis@tp.com',                   'Chavis',                  'Vice President',              'list',  8,  'assets/leaders/chavis.jpg'),
 --   ('sudhar@tp.com',                   'Sudhar',                  'Vice President',              'list',  9,  'assets/leaders/sudhar.jpg'),

@@ -347,12 +347,16 @@
     ['Sudhar', '[Sample] Thank you for the care you bring to our customers and to each other. Enjoy the season with the people you love.']
   ];
   // Every other C-level and VP leader in config.js LEADERS gets a placeholder (not words in their name), so the
-  // preview shows them all, plus one example for Directors and below (who otherwise only show once they post).
-  var exampleShown = false;
+  // preview shows them all, plus a few examples for Directors and below (who otherwise only show once they post).
+  var exampleTitles = {}, examples = 0;
   leaderList().forEach(function (l) {
-    // one example of a Director-and-below card (behind "Show more")
-    if (!l.senior) { if (exampleShown) return; exampleShown = true; }
+    // Directors and below: a few examples, one for each title (up to 9), behind "Show more"
+    if (!l.senior) {
+      if (examples >= 9 || exampleTitles[l.title]) return;
+      exampleTitles[l.title] = true;
+    }
     var have = SAMPLE_LEADERS.some(function (r) { return r[0].toLowerCase() === l.name.toLowerCase(); });
+    if (!have && !l.senior) examples++;
     if (!have) SAMPLE_LEADERS.push([l.name, '[Sample] ' + l.name.split(' ')[0] + '\'s Christmas message will show here once it\'s written on the leaders\' page and approved.']);
   });
   SAMPLE_LEADERS = SAMPLE_LEADERS.map(function (r, i) {
