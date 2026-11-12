@@ -58,23 +58,26 @@ window.WISH_CFG = {
   // The leaders, in the order they show in the list under the tree and on the TVs.
   // The leaders' page offers these names in a list: a leader picks theirs once and can't change it.
   // spot: 'ceo' = the big ornament under the star, 'crown' = around the top of the tree, 'list' = the list only.
+  // senior: true = C-level and VP: ornament-shaped cards, 4 per row, always shown in the list under the tree.
+  // Everyone else shows only once they post on the leaders' page, behind "Show more", 5 per row.
   // Photo: assets/leaders/<name in lower case with dashes>.jpg, e.g. alex-ma.jpg (initials show until it's there).
   // Add photo: 'assets/leaders/other-file.jpg' to a line to use a different file.
   LEADERS: [
     // On the tree: the CEO under the star ('ceo'), then around the top ('crown', room for 7)
-    { name: 'Andy',                     title: 'Chief Executive Officer',      spot: 'ceo' },
-    { name: 'Divya Dutta',              title: 'Chief Operating Officer',      spot: 'crown' },
-    { name: 'Himanshu',                 title: 'Chief Operating Officer',      spot: 'crown' },
-    { name: 'Alex Ma',                  title: 'Chief Financial Officer',      spot: 'crown' },
-    { name: 'Sarah',                    title: 'Chief of Staff',               spot: 'crown' },
-    { name: 'Rachel',                   title: 'Human Resources',              spot: 'crown' },
-    // In the list under the tree only ('list'), behind "Show more"
-    { name: 'Vivienne',                 title: 'Vice President',               spot: 'list' },
-    { name: 'Chavis',                   title: 'Vice President',               spot: 'list' },
-    { name: 'Sudhar',                   title: 'Vice President',               spot: 'list' },
-    { name: 'Noppawan Krynetr',         title: 'VP of Business Development',   spot: 'list' },
-    { name: 'Alen Celebic',             title: 'VP of Business Development',   spot: 'list' },
-    { name: 'Michael Costevec',         title: 'VP of Transformations',        spot: 'list' },
+    { name: 'Andy',                     title: 'Chief Executive Officer',      spot: 'ceo', senior: true },
+    { name: 'Divya Dutta',              title: 'Chief Operating Officer',      spot: 'crown', senior: true },
+    { name: 'Himanshu',                 title: 'Chief Operating Officer',      spot: 'crown', senior: true },
+    { name: 'Alex Ma',                  title: 'Chief Financial Officer',      spot: 'crown', senior: true },
+    { name: 'Sarah',                    title: 'Chief of Staff',               spot: 'crown', senior: true },
+    { name: 'Rachel',                   title: 'Human Resources',              spot: 'crown', senior: true },
+    // In the list under the tree only ('list')
+    { name: 'Vivienne',                 title: 'Vice President',               spot: 'list', senior: true },
+    { name: 'Chavis',                   title: 'Vice President',               spot: 'list', senior: true },
+    { name: 'Sudhar',                   title: 'Vice President',               spot: 'list', senior: true },
+    { name: 'Noppawan Krynetr',         title: 'VP of Business Development',   spot: 'list', senior: true },
+    { name: 'Alen Celebic',             title: 'VP of Business Development',   spot: 'list', senior: true },
+    { name: 'Michael Costevec',         title: 'VP of Transformations',        spot: 'list', senior: true },
+    // Directors and below: in the list only once they post, behind "Show more"
     { name: 'Pranav Pillai',            title: 'Director of Operations',       spot: 'list' },
     { name: 'Jamunah Maniram',          title: 'Director of Operations',       spot: 'list' },
     { name: 'Ken Yong',                 title: 'Director of Operations',       spot: 'list' },

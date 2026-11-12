@@ -254,14 +254,32 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
 .sort button{min-height:36px;padding:0 14px;border:0;border-radius:999px;background:transparent;color:var(--cream);font-size:14px;font-weight:500;cursor:pointer}
 .sort button[aria-pressed="true"]{background:var(--cran);color:var(--paper)}
 .leader-list{display:flex;flex-direction:column;gap:14px;margin-bottom:14px}
-.lead-line{display:grid;grid-template-columns:repeat(var(--n),minmax(0,1fr));gap:14px}
-@media (min-width:1101px) and (max-width:1240px){.lead-line[style*="--n:5"],.lead-line[style*="--n:4"]{grid-template-columns:repeat(3,minmax(0,1fr))}}
-@media (max-width:1100px){.lead-line{grid-template-columns:repeat(2,minmax(0,1fr))}}
-/* phones: the leaders on the tree sit in one row you swipe, so the wishes come sooner */
-@media (max-width:640px){.lead-line{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:6px;scrollbar-width:thin}.lead-line>.li{flex:0 0 84%;scroll-snap-align:start}}
+.lead-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;padding-top:20px}
+@media (max-width:1100px){.lead-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:820px){.lead-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+/* phones: the C-level and VP cards sit in one row you swipe, so the wishes come sooner */
+@media (max-width:640px){.lead-grid{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:20px 2px 8px;scrollbar-width:thin}.lead-grid>.li{flex:0 0 78%;scroll-snap-align:start}}
+/* C-level and VP: ornament-shaped cards (arched top, brass cap and ring, photo in the middle) */
+.li.leader.arch{position:relative;align-items:center;gap:10px;padding:30px 20px 16px;text-align:center;border:1px solid rgba(177,136,84,.75);border-radius:50% 50% 16px 16px / 110px 110px 16px 16px;background:radial-gradient(120% 70% at 50% 0%,#425046 0%,#343F37 62%);box-shadow:inset 0 0 0 4px #343F37,inset 0 0 0 5px rgba(177,136,84,.35)}
+.li.leader.arch::before{content:"";position:absolute;left:50%;top:-8px;width:30px;height:11px;margin-left:-15px;border-radius:4px 4px 2px 2px;background:linear-gradient(#E2BF85,#B18854)}
+.li.leader.arch::after{content:"";position:absolute;left:50%;top:-19px;width:12px;height:12px;margin-left:-8px;border:2px solid #B18854;border-radius:50%}
+.arch-img,.arch-init{flex:none;width:84px;height:84px;border-radius:50%;box-shadow:0 0 0 3px #B18854,0 0 0 7px #343F37,0 0 0 8px rgba(177,136,84,.55)}
+.arch-img{object-fit:cover;background:#B18854}
+.arch-init{display:flex;align-items:center;justify-content:center;background:#B18854;color:#241C14;font-size:26px;font-weight:700}
+.arch-who{margin-top:6px}
+.arch-who b{display:block;font-size:17px;line-height:1.3;color:#F4EEE3}
+.arch-who span{display:block;margin-top:3px;font-size:13px;line-height:1.35;color:#D9B77E}
+.li.leader.arch .li-text{width:100%;padding-top:12px;border-top:1px dashed rgba(244,238,227,.22);font-size:15px;line-height:1.55;color:#F4EEE3}
+.arch-foot{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px 14px;width:100%;padding-top:4px}
+.arch-foot .like.thank{margin-left:0}
+.li.leader.arch .li-find{color:#D9B77E}
 .li.leader:not(.ceo) .li-foot{flex-wrap:wrap;row-gap:10px}
 .li.leader:not(.ceo) .li-who{flex:1 1 130px}
-.lead-more{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.lead-more{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px;margin-top:4px}
+@media (max-width:1240px){.lead-more{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media (max-width:1100px){.lead-more{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:820px){.lead-more{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:640px){.lead-more{grid-template-columns:minmax(0,1fr)}}
 .lead-toggle{display:flex;justify-content:center;margin:2px 0 10px}
 .all-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
 .li{display:flex;flex-direction:column;gap:12px;padding:18px 18px 14px;border-radius:12px;background:rgba(255,255,255,.32);border:1px solid rgba(108,21,30,.14)}
@@ -825,37 +843,48 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
       b.setAttribute('aria-pressed', b.getAttribute('data-sort') === state.sort ? 'true' : 'false');
     });
 
-    // Leaders' cards: the CEO's letter on top, then the others in two lines in their set order
-    var leaderCards = places().all.map(function (L) {
+    // Leaders: the CEO's letter on top; C-level and VP as ornament cards, 4 per row, always shown;
+    // Directors and below (only once they post) behind "Show more", 5 per row
+    var onTreeIds = {};
+    crown().forEach(function (c) { onTreeIds[String(c.id)] = true; });
+    function findBtn(L) {
+      if (!isGiftLeader(L.id) && !onTreeIds[String(L.id)]) return '';
+      return '<button type="button" class="li-find" data-find-kind="leader" data-find-id="' + C.esc(L.id) + '">' + (isGiftLeader(L.id) ? 'Open the gift' : 'Read on the tree') + '</button>';
+    }
+    function cardHtml(L) {
       var photo = C.safePhoto(L.photo_url);
       var ceo = L.spot === 'ceo';
       return '<article class="li leader' + (ceo ? ' ceo' : '') + '" lang="' + C.esc(L.lang || 'en') + '">' +
-        '<div class="li-top"><span class="li-kicker">' + (ceo ? 'A MESSAGE FROM OUR CEO' : 'FROM OUR LEADERS') + '</span>' +
-        (isGiftLeader(L.id) || crown().some(function (c) { return String(c.id) === String(L.id); })
-          ? '<button type="button" class="li-find" data-find-kind="leader" data-find-id="' + C.esc(L.id) + '">' + (isGiftLeader(L.id) ? 'Open the gift' : 'Read on the tree') + '</button>'
-          : '') + '</div>' +
+        '<div class="li-top"><span class="li-kicker">' + (ceo ? 'A MESSAGE FROM OUR CEO' : 'FROM OUR LEADERS') + '</span>' + findBtn(L) + '</div>' +
         '<p class="li-text">' + C.esc(L.message) + '</p>' +
         '<div class="li-foot">' +
         (photo ? C.photoHtml(photo, C.initials(L.display_name), 'li-init', 'li-photo') : '<span class="li-init" aria-hidden="true">' + C.esc(C.initials(L.display_name)) + '</span>') +
         '<div class="li-who"><b>' + C.esc(L.display_name || 'TP leadership') + '</b><span>' + C.esc(L.title || '') + '</span></div>' +
         likeBtnHtml('leader', L) + '</div></article>';
-    });
-    // The CEO's letter, then the leaders on the tree in one line (two if there are more than 5),
-    // then the leaders who are in the list only, behind "Show more"
+    }
+    function archHtml(L) {
+      var photo = C.safePhoto(L.photo_url);
+      return '<article class="li leader arch" lang="' + C.esc(L.lang || 'en') + '">' +
+        (photo ? C.photoHtml(photo, C.initials(L.display_name), 'arch-init', 'arch-img') : '<span class="arch-init" aria-hidden="true">' + C.esc(C.initials(L.display_name)) + '</span>') +
+        '<div class="arch-who"><b>' + C.esc(L.display_name || 'TP leadership') + '</b><span>' + C.esc(L.title || '') + '</span></div>' +
+        '<p class="li-text">' + C.esc(L.message) + '</p>' +
+        '<div class="arch-foot">' + findBtn(L) + likeBtnHtml('leader', L) + '</div></article>';
+    }
+    // C-level and VP: marked senior in config.js LEADERS (leaders not on that list count as senior when they're on the tree)
+    function isSenior(L) { return L.senior === true || (L.senior == null && (L.spot === 'crown' || L.spot === 'gift')); }
     var lead = places().all;
-    var ceoCard = lead.length && lead[0].spot === 'ceo' ? leaderCards.shift() : '';
-    var nMore = places().extra.length;
-    var moreCards = leaderCards.splice(leaderCards.length - nMore, nMore);
-    var nRest = leaderCards.length;
-    var firstLine = nRest > 5 ? Math.ceil(nRest / 2) : nRest;
-    var lines = [leaderCards.slice(0, firstLine), leaderCards.slice(firstLine)].filter(function (x) { return x.length; });
-    el('leaderList').innerHTML = ceoCard + lines.map(function (cards) {
-      return '<div class="lead-line" style="--n:' + cards.length + '">' + cards.join('') + '</div>';
-    }).join('') + (nMore
-      ? (state.leadersOpen ? '<div class="lead-more" id="leadMore">' + moreCards.join('') + '</div>' : '') +
-        '<div class="lead-toggle"><button type="button" class="btn-ghost" data-lead-toggle aria-expanded="' + (state.leadersOpen ? 'true' : 'false') + '"' + (state.leadersOpen ? ' aria-controls="leadMore"' : '') + '>' +
-        (state.leadersOpen ? 'Show fewer leaders\' messages' : 'Show ' + nMore + ' more leaders\' message' + (nMore === 1 ? '' : 's')) + '</button></div>'
-      : '');
+    var ceoL = lead.length && lead[0].spot === 'ceo' ? lead[0] : null;
+    var rest = lead.filter(function (L) { return L !== ceoL; });
+    var senior = rest.filter(isSenior);
+    var others = rest.filter(function (L) { return !isSenior(L); });
+    var nMore = others.length;
+    el('leaderList').innerHTML = (ceoL ? cardHtml(ceoL) : '') +
+      (senior.length ? '<div class="lead-grid">' + senior.map(archHtml).join('') + '</div>' : '') +
+      (nMore
+        ? (state.leadersOpen ? '<div class="lead-more" id="leadMore">' + others.map(cardHtml).join('') + '</div>' : '') +
+          '<div class="lead-toggle"><button type="button" class="btn-ghost" data-lead-toggle aria-expanded="' + (state.leadersOpen ? 'true' : 'false') + '"' + (state.leadersOpen ? ' aria-controls="leadMore"' : '') + '>' +
+          (state.leadersOpen ? 'Show fewer leaders\' messages' : 'Show ' + nMore + ' more leaders\' message' + (nMore === 1 ? '' : 's')) + '</button></div>'
+        : '');
     el('leaderList').hidden = !state.leaders.length;
 
     var list = listWishes();
