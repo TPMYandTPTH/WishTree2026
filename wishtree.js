@@ -758,7 +758,8 @@
   function track(name, params) {
     try {
       if (CFG.GTM_ID && window.dataLayer) window.dataLayer.push(Object.assign({ event: name }, params || {}));
-      if (CFG.GA4_ID && window.gtag) window.gtag('event', name, params || {});
+      // GA4: straight from the page (GA4_ID), or through the GA4 tag that Tag Manager loads (GA4_EVENTS_VIA_GTM)
+      if (window.gtag && (CFG.GA4_ID || (CFG.GTM_ID && CFG.GA4_EVENTS_VIA_GTM !== false))) window.gtag('event', name, params || {});
     } catch (e) { /* ignore */ }
   }
 

@@ -67,7 +67,8 @@ The **Accept new wishes** switch on the Approvals page closes or reopens the cam
 ## Analytics (Google Tag Manager)
 
 - `GTM_ID` in `config.js` (`GTM-P4TRBDVQ`) loads Tag Manager on the tree, the wish page, the TVs and the leaders' page. Set up GA4 inside Tag Manager (a Google tag with your G- ID, trigger: All Pages).
-- The pages also send these as **Custom Events** to use as triggers: `wish_open`, `leader_open`, `prize_open`, `secret_wish_found`, `wish_like`, `wish_unlike`, `leader_thanks`, `leader_unthanks`, `team_thanks`, `team_unthanks`, `leaders_more`, `wish_cta`, `wish_submit`, `wish_edit`, `leader_publish`. They never include a name, BMS or message.
+- GA4 (G-G5Q9FDEKEZ) is set up inside the container. The pages send their events to it through that GA4 tag (`GA4_EVENTS_VIA_GTM` in `config.js`), so they show in GA4 without any Tag Manager change. To report on the details (site, kind, who, place, method, langs), add them in GA4 > Admin > Custom definitions as event-scoped custom dimensions.
+- The pages also push these to the dataLayer as **Custom Events**, to use as triggers: `wish_open`, `leader_open`, `prize_open`, `secret_wish_found`, `wish_like`, `wish_unlike`, `leader_thanks`, `leader_unthanks`, `team_thanks`, `team_unthanks`, `leaders_more`, `wish_cta`, `wish_submit`, `wish_edit`, `leader_publish`. They never include a name, BMS or message.
 - If you add a tag that loads from another domain, add that domain to the Content Security Policy line at the top of each page.
 
 ## TV screens

@@ -151,6 +151,9 @@ window.WISH_CFG = {
   // Google Tag Manager container (set up GA4 and other tags inside GTM). Page events go to the dataLayer as
   // custom events: wish_open, leader_open, prize_open, secret_wish_found, wish_like, wish_unlike, wish_submit, ...
   GTM_ID: 'GTM-P4TRBDVQ',
+  // Send those events to GA4 (G-G5Q9FDEKEZ) through the GA4 tag already in the Tag Manager container. Set false only if
+  // you add a GA4 Event tag for these events inside Tag Manager, or they'd be counted twice.
+  GA4_EVENTS_VIA_GTM: true,
   // Optional GA4 measurement ID if you ever want GA4 without GTM, e.g. 'G-XXXXXXXXXX' (leave blank when using GTM)
   GA4_ID: ''
 };
