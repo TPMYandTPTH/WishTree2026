@@ -76,8 +76,15 @@ button,input,select,textarea{font-family:inherit}
 
 .input,.textarea{width:100%;min-width:0;border:1.5px solid var(--field);border-radius:12px;background:#fff;color:var(--ink);font-size:16px}
 .input{height:50px;padding:0 14px}
-select.input{padding-right:40px;-webkit-appearance:none;appearance:none;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%236C151E' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 14px center;cursor:pointer}
-select.input:disabled{opacity:1;background-color:#F4EEE3;background-image:none;color:var(--ink);font-weight:700;cursor:default}
+.combo{position:relative}
+.input[readonly]{background:#F4EEE3;font-weight:700;cursor:default}
+.combo-list{position:absolute;z-index:20;left:0;right:0;top:calc(100% + 6px);max-height:288px;margin:0;padding:6px;overflow-y:auto;list-style:none;border:1px solid rgba(108,21,30,.22);border-radius:12px;background:#fff;box-shadow:0 14px 34px rgba(36,28,20,.18)}
+.combo-list li{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:10px 12px;border-radius:8px;cursor:pointer}
+.combo-list li b{font-weight:700;color:var(--ink)}
+.combo-list li span{flex:none;max-width:55%;font-size:13px;color:#6B6157;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.combo-list li[aria-selected="true"],.combo-list li:hover{background:#F4EEE3}
+.combo-list li mark{background:rgba(177,136,84,.3);color:inherit;border-radius:2px}
+.combo-empty{padding:10px 12px;font-size:14px;color:#6B6157}
 .textarea{padding:14px 16px;line-height:1.5;resize:vertical;min-height:150px}
 .input:focus,.textarea:focus{border-color:var(--cran);outline:none;box-shadow:0 0 0 3px rgba(108,21,30,.18)}
 .code-input{height:62px;text-align:center;font-size:26px;font-weight:500;letter-spacing:.5em}
@@ -277,7 +284,7 @@ select.input:disabled{opacity:1;background-color:#F4EEE3;background-image:none;c
         <div>
           <h1 tabindex="-1" id="editTitle">Your message</h1>
         </div>
-        <p class="sub">One message per leader, up to <span id="maxNote">250</span> characters. The Wish Tree team approves it, then it hangs at the top of every site's tree and shows on the site TVs. You can edit or remove it any time; edits are approved again.</p>
+        <p class="sub">One message per leader, up to <span id="maxNote">250</span> characters. The Wish Tree team approves it, then it shows on every site's tree page and the site TVs. You can edit or remove it any time; edits are approved again.</p>
         <div id="statusLive" class="status" hidden><span class="dot" aria-hidden="true"></span><span id="statusText">Live on every site's tree</span></div>
 
         <div class="field">
@@ -297,7 +304,11 @@ select.input:disabled{opacity:1;background-color:#F4EEE3;background-image:none;c
         </div>
         <div class="field">
           <label for="lName">Your name</label>
-          <select id="lName" class="input" required aria-describedby="nameHelp"></select>
+          <div class="combo">
+            <input id="lName" class="input" type="text" maxlength="60" autocomplete="off" spellcheck="false" placeholder="Start typing your name"
+              role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="nameList" aria-describedby="nameHelp">
+            <ul id="nameList" class="combo-list" role="listbox" aria-label="Leaders' names" hidden></ul>
+          </div>
           <div class="help" id="nameHelp"></div>
         </div>
         <div class="field">
@@ -385,10 +396,11 @@ select.input:disabled{opacity:1;background-color:#F4EEE3;background-image:none;c
     $('photoRemove').hidden = !S.photo;
     $('photoRemove').textContent = defaultPhoto() ? 'Use the default photo' : 'Remove photo';
     // leaders whose spot in config.js LEADERS is 'list' are in the list under the tree, not on it
-    var cfg = (LEADERS.filter(function (l) { return l.name === S.name; })[0] || {});
-    var onTree = cfg.spot !== 'list';
+    var cfg = findLeader(S.name) || {};
+    var onTree = cfg.spot === 'ceo' || cfg.spot === 'crown' || cfg.spot === 'gift';
     $('pvWhere').textContent = onTree ? 'HOW IT WILL LOOK ON EVERY SITE\'S TREE' : 'HOW IT WILL LOOK IN THE LIST UNDER EVERY SITE\'S TREE';
     $('crownWindow').hidden = !onTree;
+    $('pvKicker').textContent = cfg.spot === 'ceo' ? 'A MESSAGE FROM OUR CEO · UNDER THE STAR' : onTree ? 'ON EVERY SITE\'S TREE' : 'IN THE LIST UNDER EVERY SITE\'S TREE';
     if (onTree) {
       var me = { id: 'preview', display_name: name, title: S.title, message: S.message, photo_url: photo, spot: cfg.spot === 'ceo' ? 'ceo' : 'crown' };
       C.renderTree($('crownMount'), { wishes: [], leaders: [me], selected: { kind: 'leader', id: 'preview' } });
@@ -420,27 +432,68 @@ select.input:disabled{opacity:1;background-color:#F4EEE3;background-image:none;c
     renderPreview();
   }
 
-  /* ---------- Name: picked from the leaders list, once ---------- */
+  /* ---------- Name: typed, with suggestions from the leaders list; fixed after the first send ---------- */
+  function findLeader(n) {
+    var f = String(n || '').trim().toLowerCase();
+    return f ? LEADERS.filter(function (l) { return l.name.toLowerCase() === f; })[0] || null : null;
+  }
   function renderNames() {
-    // A to Z, so each leader finds their name quickly
-    var names = LEADERS.map(function (l) { return l.name; }).sort(function (a, b) { return a.localeCompare(b); });
-    if (S.name && names.indexOf(S.name) === -1) names.unshift(S.name);
-    var html = (S.nameLocked ? '' : '<option value="">Choose your name</option>') +
-      names.filter(function (n) { return !S.nameLocked || n === S.name; }).map(function (n) {
-        return '<option value="' + C.esc(n) + '">' + C.esc(n) + '</option>';
-      }).join('');
-    if ($('lName').innerHTML !== html) $('lName').innerHTML = html;
-    $('lName').value = S.name;
-    $('lName').disabled = S.nameLocked;
+    var inp = $('lName');
+    if (document.activeElement !== inp && inp.value !== S.name) inp.value = S.name;
+    inp.readOnly = S.nameLocked;
+    if (S.nameLocked) closeNames();
     $('nameHelp').textContent = S.nameLocked
       ? 'Your name is set and can\'t be changed. If it\'s wrong, ask the Wish Tree team.'
-      : 'Pick your name from the list. It can\'t be changed after you send your message.';
+      : 'Type your name or pick it from the suggestions. It can\'t be changed after you send your message.';
   }
-  function pickName(n) {
+  var nameActive = -1, nameHits = [];
+  // Suggestions: names that start with what's typed first, then names with a word that starts with it, then any match
+  function nameMatches(q) {
+    q = String(q || '').trim().toLowerCase();
+    var all = LEADERS.slice().sort(function (a, b) { return a.name.localeCompare(b.name); });
+    if (!q) return all;
+    var rank = function (l) {
+      var n = l.name.toLowerCase();
+      if (n.indexOf(q) === 0) return 0;
+      if (n.split(/\s+/).some(function (w) { return w.indexOf(q) === 0; })) return 1;
+      return n.indexOf(q) !== -1 ? 2 : 9;
+    };
+    return all.filter(function (l) { return rank(l) < 9; }).sort(function (a, b) { return rank(a) - rank(b); });
+  }
+  function markHit(name, q) {
+    q = String(q || '').trim();
+    var i = q ? name.toLowerCase().indexOf(q.toLowerCase()) : -1;
+    if (i === -1) return C.esc(name);
+    return C.esc(name.slice(0, i)) + '<mark>' + C.esc(name.slice(i, i + q.length)) + '</mark>' + C.esc(name.slice(i + q.length));
+  }
+  function openNames() {
     if (S.nameLocked) return;
-    S.name = n;
-    var hit = LEADERS.filter(function (l) { return l.name === n; })[0];
+    var q = $('lName').value;
+    nameHits = nameMatches(q);
+    if (nameActive >= nameHits.length) nameActive = nameHits.length - 1;
+    $('nameList').innerHTML = nameHits.length ? nameHits.map(function (l, i) {
+      return '<li role="option" id="nameOpt' + i + '" data-name="' + C.esc(l.name) + '" aria-selected="' + (i === nameActive ? 'true' : 'false') + '">' +
+        '<b>' + markHit(l.name, q) + '</b><span>' + C.esc(l.title) + '</span></li>';
+    }).join('') : '<li class="combo-empty" role="presentation">Not on the list. That\'s fine: keep typing your name as it should appear.</li>';
+    $('nameList').hidden = false;
+    $('lName').setAttribute('aria-expanded', 'true');
+    if (nameActive >= 0) $('lName').setAttribute('aria-activedescendant', 'nameOpt' + nameActive);
+    else $('lName').removeAttribute('aria-activedescendant');
+    var act = $('nameOpt' + nameActive);
+    if (act && act.scrollIntoView) act.scrollIntoView({ block: 'nearest' });
+  }
+  function closeNames() {
+    $('nameList').hidden = true;
+    $('lName').setAttribute('aria-expanded', 'false');
+    $('lName').removeAttribute('aria-activedescendant');
+    nameActive = -1;
+  }
+  function setName(n, picked) {
+    if (S.nameLocked) return;
+    var hit = findLeader(n);
+    S.name = hit && picked !== false ? hit.name : n;
     if (hit && hit.title && !S.titleTouched) S.title = hit.title;
+    if (picked) { $('lName').value = S.name; closeNames(); }
     renderEdit();
   }
   // The name from the sign-in (e.g. Google), if it matches a name on the list
@@ -598,7 +651,7 @@ select.input:disabled{opacity:1;background-color:#F4EEE3;background-image:none;c
     if (e) e.preventDefault();
     $('editErr').textContent = '';
     $('editOk').textContent = '';
-    if (!S.name.trim()) { $('editErr').textContent = 'Pick your name from the list first.'; $('lName').focus(); return; }
+    if (!S.name.trim()) { $('editErr').textContent = 'Type your name first.'; $('lName').focus(); return; }
     if (!S.message.trim()) { $('editErr').textContent = 'Write your message first.'; $('lMessage').focus(); return; }
     var row = {
       display_name: S.name.trim().slice(0, 60),
@@ -620,8 +673,8 @@ select.input:disabled{opacity:1;background-color:#F4EEE3;background-image:none;c
       if (C.demo) C.storageSet('wt-demo-leader-name', S.name);
       renderEdit();
       $('editOk').textContent = saved && saved.status === 'approved'
-        ? 'Saved. Your message is live at the top of every site\'s tree.'
-        : 'Sent. The Wish Tree team will approve it, then it hangs at the top of every site\'s tree.';
+        ? 'Saved. Your message is live on every site\'s tree page.'
+        : 'Sent. The Wish Tree team will approve it, then it shows on every site\'s tree page.';
       C.track('leader_publish', { is_new: wasNew });
     };
     var fail = function (err) {
@@ -729,7 +782,39 @@ select.input:disabled{opacity:1;background-color:#F4EEE3;background-image:none;c
   $('backToEmail').addEventListener('click', function () { show('signin'); });
   $('deniedSignOut').addEventListener('click', signOut);
   $('signOutBtn').addEventListener('click', signOut);
-  $('lName').addEventListener('change', function (e) { pickName(e.target.value); });
+  $('lName').addEventListener('input', function (e) { nameActive = -1; setName(e.target.value.replace(/\s+/g, ' ').replace(/^\s/, ''), false); openNames(); });
+  $('lName').addEventListener('focus', function () { if (!S.nameLocked) openNames(); });
+  $('lName').addEventListener('blur', function () {
+    setTimeout(function () {
+      closeNames();
+      // a name typed in a different case becomes the list's spelling
+      var hit = findLeader(S.name);
+      if (hit && hit.name !== S.name) setName(hit.name, true);
+      else if (S.name !== S.name.trim()) setName(S.name.trim(), false);
+    }, 150);
+  });
+  $('lName').addEventListener('keydown', function (e) {
+    if (S.nameLocked) return;
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      if ($('nameList').hidden) { openNames(); return; }
+      var n = nameHits.length;
+      if (!n) return;
+      nameActive = e.key === 'ArrowDown' ? (nameActive + 1) % n : (nameActive <= 0 ? n - 1 : nameActive - 1);
+      openNames();
+    } else if (e.key === 'Enter') {
+      if (!$('nameList').hidden && nameActive >= 0 && nameHits[nameActive]) { e.preventDefault(); setName(nameHits[nameActive].name, true); }
+    } else if (e.key === 'Escape') {
+      if (!$('nameList').hidden) { e.preventDefault(); closeNames(); }
+    }
+  });
+  // mousedown (not click) so the choice lands before the field loses focus
+  $('nameList').addEventListener('mousedown', function (e) {
+    var li = e.target.closest ? e.target.closest('[data-name]') : null;
+    if (!li) return;
+    e.preventDefault();
+    setName(li.getAttribute('data-name'), true);
+  });
   $('lTitle').addEventListener('input', function (e) { S.title = e.target.value; S.titleTouched = true; renderPreview(); });
   $('lMessage').addEventListener('input', function (e) {
     S.message = e.target.value.slice(0, MAX);

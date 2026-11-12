@@ -347,9 +347,11 @@
     ['Sudhar', '[Sample] Thank you for the care you bring to our customers and to each other. Enjoy the season with the people you love.']
   ];
   // Every other C-level and VP leader in config.js LEADERS gets a placeholder (not words in their name), so the
-  // preview shows them all. Directors and below only show once they post.
+  // preview shows them all, plus one example for Directors and below (who otherwise only show once they post).
+  var exampleShown = false;
   leaderList().forEach(function (l) {
-    if (!l.senior) return;
+    // one example of a Director-and-below card (behind "Show more")
+    if (!l.senior) { if (exampleShown) return; exampleShown = true; }
     var have = SAMPLE_LEADERS.some(function (r) { return r[0].toLowerCase() === l.name.toLowerCase(); });
     if (!have) SAMPLE_LEADERS.push([l.name, '[Sample] ' + l.name.split(' ')[0] + '\'s Christmas message will show here once it\'s written on the leaders\' page and approved.']);
   });
@@ -360,7 +362,7 @@
       display_name: r[0],
       title: c.title || '',
       spot: c.spot || 'crown',
-      senior: c.senior !== false,
+      senior: c.senior === true,
       sort_order: c.order || i + 1,
       message: r[1],
       lang: 'en',
@@ -680,7 +682,8 @@
   // A leader on the config.js list hangs where the list says, in its order; no photo yet = the default photo
   function withLeaderConfig(l) {
     var c = leaderConfig(l.display_name);
-    if (!c) return l;
+    // a name that isn't on the list (typed on the leaders' page) goes in the list only, with the regular card
+    if (!c) return CFG.LEADERS && CFG.LEADERS.length ? Object.assign({}, l, { spot: 'list', senior: false }) : l;
     return Object.assign({}, l, { spot: c.spot, senior: c.senior, sort_order: c.order, photo_url: l.photo_url || leaderPhoto(l.display_name) || null });
   }
 
