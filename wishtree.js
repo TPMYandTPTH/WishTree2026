@@ -333,28 +333,29 @@
     };
   });
 
-  // Demo leaders: the real names and roles, with sample text until each leader writes their own message.
-  // Photos come from assets/leaders/<file>.jpg (initials show until the file is there).
-  // spot: 'ceo' = big ornament under the star, 'crown' = the two lines below it (in this order, left to right).
+  // Demo leaders: the real names, with sample text until each leader writes their own message.
+  // Title, spot (on the tree or the list only), order and photo come from LEADERS in config.js.
   var SAMPLE_LEADERS = [
-    ['Andy', 'Chief Executive Officer', 'ceo', 'andy', '[Sample] Thank you for every call, every chat and every customer you helped this year. You are the reason TP Malaysia and Thailand shine. Merry Christmas and a happy 2027!'],
-    ['Divya Dutta', 'Chief Operating Officer', 'crown', 'divya-dutta', '[Sample] This year we grew together across our sites in two countries. Rest well this holiday, and let us make 2027 our best year yet.'],
-    ['Sarah', 'Chief of Staff', 'crown', 'sarah', '[Sample] Thank you for showing up for each other all year long. May your holidays be restful and your 2027 bright.'],
-    ['Rachel', 'Human Resources', 'crown', 'rachel', '[Sample] Behind every wish on this tree is a person who makes TP a better place to work. Thank you, and happy holidays.'],
-    ['Himanshu', 'Chief Operating Officer', 'crown', 'himanshu', '[Sample] To everyone working from home, on site, on nights and on weekends: we see you and we are grateful. Happy holidays to you and your families.'],
-    ['Vivienne', 'Vice President', 'crown', 'vivienne', '[Sample] My wish for 2027: that each of you feels proud of the work you do and supported by the people around you. Merry Christmas!'],
-    ['Chavis', 'Vice President', 'crown', 'chavis', '[Sample] From Bangkok to Penang, Kuala Lumpur and Johor: thank you for a remarkable year. Wishing you joy and good health.'],
-    ['Sudhar', 'Vice President', 'crown', 'sudhar', '[Sample] Thank you for the care you bring to our customers and to each other. Enjoy the season with the people you love.']
+    ['Andy', '[Sample] Thank you for every call, every chat and every customer you helped this year. You are the reason TP Malaysia and Thailand shine. Merry Christmas and a happy 2027!'],
+    ['Divya Dutta', '[Sample] This year we grew together across our sites in two countries. Rest well this holiday, and let us make 2027 our best year yet.'],
+    ['Himanshu', '[Sample] To everyone working from home, on site, on nights and on weekends: we see you and we are grateful. Happy holidays to you and your families.'],
+    ['Alex Ma', '[Sample] Every result this year came from the work you put in, one customer at a time. Thank you, and a joyful holiday season to you and your loved ones.'],
+    ['Sarah', '[Sample] Thank you for showing up for each other all year long. May your holidays be restful and your 2027 bright.'],
+    ['Rachel', '[Sample] Behind every wish on this tree is a person who makes TP a better place to work. Thank you, and happy holidays.'],
+    ['Vivienne', '[Sample] My wish for 2027: that each of you feels proud of the work you do and supported by the people around you. Merry Christmas!'],
+    ['Chavis', '[Sample] From Bangkok to Penang, Kuala Lumpur and Johor: thank you for a remarkable year. Wishing you joy and good health.'],
+    ['Sudhar', '[Sample] Thank you for the care you bring to our customers and to each other. Enjoy the season with the people you love.']
   ].map(function (r, i) {
+    var c = leaderConfig(r[0]) || {};
     return {
       id: 'demo-leader-' + (i + 1),
       display_name: r[0],
-      title: r[1],
-      spot: r[2],
-      sort_order: i + 1,
-      message: r[4],
+      title: c.title || '',
+      spot: c.spot || 'crown',
+      sort_order: c.order || i + 1,
+      message: r[1],
       lang: 'en',
-      photo_url: 'assets/leaders/' + r[3] + '.jpg',
+      photo_url: c.photo || null,
       updated_at: new Date(Date.UTC(2026, 11, 1, 6, i)).toISOString(),
       like_count: (hash('leader-likes:' + i) % 60) + 12
     };
@@ -633,28 +634,44 @@
   function fetchLeaders() {
     if (DEMO) {
       var list = demoQueue().leaders.filter(function (l) { return l.status === 'approved'; }).map(function (l) {
-        return Object.assign({}, l, { like_count: (l.like_count || 0) + demoLikeBonus('leader', l.id), photo_url: l.photo_url || leaderPhoto(l.display_name) || null });
+        return withLeaderConfig(Object.assign({}, l, { like_count: (l.like_count || 0) + demoLikeBonus('leader', l.id) }));
       });
       return Promise.resolve(list.sort(leaderOrder));
     }
     return getClient().rpc('get_leader_messages').then(function (res) {
       if (res.error) throw res.error;
-      // no photo yet: use the default photo from config.js LEADERS for that name
-      return (res.data || []).map(function (l) {
-        return l.photo_url ? l : Object.assign({}, l, { photo_url: leaderPhoto(l.display_name) || null });
-      });
+      return (res.data || []).map(withLeaderConfig).sort(leaderOrder);
     });
   }
-  // config.js LEADERS: the names a leader can pick on the leaders' page, with their default photos
+  // config.js LEADERS: the names a leader can pick on the leaders' page, where each one hangs, and their default photos
+  function leaderSlug(name) {
+    return String(name || '').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  }
   function leaderList() {
-    return (CFG.LEADERS || []).filter(function (l) { return l && l.name; }).map(function (l) {
-      return { name: String(l.name).trim(), title: String(l.title || '').trim(), photo: String(l.photo || '') };
+    return (CFG.LEADERS || []).filter(function (l) { return l && l.name; }).map(function (l, i) {
+      var name = String(l.name).trim();
+      return {
+        name: name,
+        title: String(l.title || '').trim(),
+        spot: ['ceo', 'crown', 'gift', 'list'].indexOf(l.spot) !== -1 ? l.spot : 'list',
+        order: i + 1,
+        photo: String(l.photo || ('assets/leaders/' + leaderSlug(name) + '.jpg'))
+      };
     });
+  }
+  function leaderConfig(name) {
+    var n = String(name || '').trim().toLowerCase();
+    return n ? leaderList().filter(function (l) { return l.name.toLowerCase() === n; })[0] || null : null;
   }
   function leaderPhoto(name) {
-    var n = String(name || '').trim().toLowerCase();
-    var hit = leaderList().filter(function (l) { return l.name.toLowerCase() === n; })[0];
+    var hit = leaderConfig(name);
     return hit && safePhoto(hit.photo) ? hit.photo : '';
+  }
+  // A leader on the config.js list hangs where the list says, in its order; no photo yet = the default photo
+  function withLeaderConfig(l) {
+    var c = leaderConfig(l.display_name);
+    if (!c) return l;
+    return Object.assign({}, l, { spot: c.spot, sort_order: c.order, photo_url: l.photo_url || leaderPhoto(l.display_name) || null });
   }
 
   /* ---------- Small helpers ---------- */
@@ -752,6 +769,7 @@
     var crown = [], gifts = [], extra = [];
     var ceoTaken = false;
     all.forEach(function (L) {
+      if (L.spot === 'list') { extra.push(L); return; }
       if (L.spot === 'gift') { (gifts.length < LEADER_GIFTS ? gifts : extra).push(L); return; }
       if (L.spot === 'ceo' && !ceoTaken) { ceoTaken = true; crown.unshift(L); return; }
       if (crown.length < CROWN_MAX) crown.push(L);

@@ -55,18 +55,45 @@ window.WISH_CFG = {
     { code: 'ta', label: 'தமிழ்', english: 'Tamil' }
   ],
 
-  // The leaders. The leaders' page offers these names in a list: a leader picks theirs once and can't change it.
-  // photo: the default photo in assets/leaders/ (see the README there), shown until the leader uploads their own.
-  // With Supabase live, a leader whose email has a default_name in Table Editor > leaders gets that name, already picked.
+  // The leaders, in the order they show in the list under the tree and on the TVs.
+  // The leaders' page offers these names in a list: a leader picks theirs once and can't change it.
+  // spot: 'ceo' = the big ornament under the star, 'crown' = around the top of the tree, 'list' = the list only.
+  // Photo: assets/leaders/<name in lower case with dashes>.jpg, e.g. alex-ma.jpg (initials show until it's there).
+  // Add photo: 'assets/leaders/other-file.jpg' to a line to use a different file.
   LEADERS: [
-    { name: 'Andy', title: 'Chief Executive Officer', photo: 'assets/leaders/andy.jpg' },
-    { name: 'Divya Dutta', title: 'Chief Operating Officer', photo: 'assets/leaders/divya-dutta.jpg' },
-    { name: 'Sarah', title: 'Chief of Staff', photo: 'assets/leaders/sarah.jpg' },
-    { name: 'Rachel', title: 'Human Resources', photo: 'assets/leaders/rachel.jpg' },
-    { name: 'Himanshu', title: 'Chief Operating Officer', photo: 'assets/leaders/himanshu.jpg' },
-    { name: 'Vivienne', title: 'Vice President', photo: 'assets/leaders/vivienne.jpg' },
-    { name: 'Chavis', title: 'Vice President', photo: 'assets/leaders/chavis.jpg' },
-    { name: 'Sudhar', title: 'Vice President', photo: 'assets/leaders/sudhar.jpg' }
+    // On the tree: the CEO under the star ('ceo'), then around the top ('crown', room for 7)
+    { name: 'Andy',                     title: 'Chief Executive Officer',      spot: 'ceo' },
+    { name: 'Divya Dutta',              title: 'Chief Operating Officer',      spot: 'crown' },
+    { name: 'Himanshu',                 title: 'Chief Operating Officer',      spot: 'crown' },
+    { name: 'Alex Ma',                  title: 'Chief Financial Officer',      spot: 'crown' },
+    { name: 'Sarah',                    title: 'Chief of Staff',               spot: 'crown' },
+    { name: 'Rachel',                   title: 'Human Resources',              spot: 'crown' },
+    // In the list under the tree only ('list'), behind "Show more"
+    { name: 'Vivienne',                 title: 'Vice President',               spot: 'list' },
+    { name: 'Chavis',                   title: 'Vice President',               spot: 'list' },
+    { name: 'Sudhar',                   title: 'Vice President',               spot: 'list' },
+    { name: 'Noppawan Krynetr',         title: 'VP of Business Development',   spot: 'list' },
+    { name: 'Alen Celebic',             title: 'VP of Business Development',   spot: 'list' },
+    { name: 'Michael Costevec',         title: 'VP of Transformations',        spot: 'list' },
+    { name: 'Pranav Pillai',            title: 'Director of Operations',       spot: 'list' },
+    { name: 'Jamunah Maniram',          title: 'Director of Operations',       spot: 'list' },
+    { name: 'Ken Yong',                 title: 'Director of Operations',       spot: 'list' },
+    { name: 'Irshad Gori',              title: 'Director of Operations',       spot: 'list' },
+    { name: 'Syed Suleiman',            title: 'Director of Operations',       spot: 'list' },
+    { name: 'Aloke Dutta',              title: 'Director of Quality',          spot: 'list' },
+    { name: 'Eric Ooi',                 title: 'Director of Finance',          spot: 'list' },
+    { name: 'Prabitha Preymachandran',  title: 'Director of Operations',       spot: 'list' },
+    { name: 'Chun Wei Chin',            title: 'Director of Operations',       spot: 'list' },
+    { name: 'Michael Sanchez',          title: 'Director of Operations',       spot: 'list' },
+    { name: 'Hanisha Reza',             title: 'Director of Operations',       spot: 'list' },
+    { name: 'Amit Mittal',              title: 'Director of WFM',              spot: 'list' },
+    { name: 'Partiban Periannan',       title: 'Manager of Transformations',   spot: 'list' },
+    { name: 'Parvathy Ramar',           title: 'Sr. Manager of GTM',           spot: 'list' },
+    { name: 'Choon Haw',                title: 'Sr. Manager of IT',            spot: 'list' },
+    { name: 'Chris Tsu',                title: 'Sr. Manager of Operations',    spot: 'list' },
+    { name: 'Aquil Sugui',              title: 'Sr. Manager of L&D',           spot: 'list' },
+    { name: 'Liew Kin Wai',             title: 'Compliance Manager',           spot: 'list' },
+    { name: 'Zhiyuan Kerk',             title: 'L&D Officer',                  spot: 'list' }
   ],
 
   // Hidden wishes inside two small gifts on the left under the tree. A gift opens when the mouse rests on it

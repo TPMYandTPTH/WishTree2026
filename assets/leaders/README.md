@@ -1,19 +1,41 @@
 # Leader photos
 
-Put one photo per leader in this folder with exactly these names (lower case):
+Put each leader's photo here as a JPG named after their name in `LEADERS` in `config.js`: lower case, spaces become dashes.
+A square head-and-shoulders photo works best (it's cropped to a circle). Until a file is here, the leader's initials show.
+Leaders can also upload their own photo on the leaders' page.
+
+Upload any photo with any name and ask for it to be cropped and renamed if that's easier.
 
 | Leader | File |
 |---|---|
-| Andy (CEO, under the star) | `andy.jpg` |
-| Divya Dutta | `divya-dutta.jpg` |
-| Sarah | `sarah.jpg` |
-| Rachel | `rachel.jpg` |
+| Andy | `andy.jpg` (in) |
+| Divya Dutta | `divya-dutta.jpg` (in) |
 | Himanshu | `himanshu.jpg` |
+| Alex Ma | `alex-ma.jpg` |
+| Sarah | `sarah.jpg` (in) |
+| Rachel | `rachel.jpg` |
 | Vivienne | `vivienne.jpg` |
 | Chavis | `chavis.jpg` |
 | Sudhar | `sudhar.jpg` |
-
-- Square head-and-shoulders photo, face in the middle, about 400 x 400 px (anything from 300 to 800 is fine). JPG keeps the site fast.
-- The tree crops it to a circle, so leave a little space around the head.
-- Until a file is here, the leader's initials show instead. Nothing breaks if a photo is missing.
-- With Supabase live, the same file names go in `default_photo` in Table Editor > leaders (section 10 of `schema.sql` has them). A leader who uploads their own photo on the leaders' page replaces this one after approval.
+| Noppawan Krynetr | `noppawan-krynetr.jpg` |
+| Alen Celebic | `alen-celebic.jpg` |
+| Michael Costevec | `michael-costevec.jpg` |
+| Pranav Pillai | `pranav-pillai.jpg` |
+| Jamunah Maniram | `jamunah-maniram.jpg` |
+| Ken Yong | `ken-yong.jpg` |
+| Irshad Gori | `irshad-gori.jpg` |
+| Syed Suleiman | `syed-suleiman.jpg` |
+| Aloke Dutta | `aloke-dutta.jpg` |
+| Eric Ooi | `eric-ooi.jpg` |
+| Prabitha Preymachandran | `prabitha-preymachandran.jpg` |
+| Chun Wei Chin | `chun-wei-chin.jpg` |
+| Michael Sanchez | `michael-sanchez.jpg` |
+| Hanisha Reza | `hanisha-reza.jpg` |
+| Amit Mittal | `amit-mittal.jpg` |
+| Partiban Periannan | `partiban-periannan.jpg` |
+| Parvathy Ramar | `parvathy-ramar.jpg` |
+| Choon Haw | `choon-haw.jpg` |
+| Chris Tsu | `chris-tsu.jpg` |
+| Aquil Sugui | `aquil-sugui.jpg` |
+| Liew Kin Wai | `liew-kin-wai.jpg` |
+| Zhiyuan Kerk | `zhiyuan-kerk.jpg` |

@@ -201,6 +201,12 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
 .like[aria-pressed="true"] .heart{fill:#B3263A;stroke:#B3263A}
 .wish-card[data-color="red"] .like[aria-pressed="true"] .heart,.wish-card[data-kind="leader"] .like[aria-pressed="true"] .heart,.li.leader:not(.ceo) .like[aria-pressed="true"] .heart{fill:#F4EEE3;stroke:#F4EEE3}
 .like.pop .heart{animation:heartpop .45s ease}
+/* leaders: a "Thank you" button instead of a counted like */
+.like.thank,.li .like.thank,.li.leader:not(.ceo) .like.thank,.wish-card .like.thank{min-width:0;gap:7px;padding:0 14px 0 12px;border-color:#B18854;background:rgba(177,136,84,.16);color:#E2BF85;font-size:14px;font-weight:700;white-space:nowrap}
+.like.thank:hover,.li .like.thank:hover{background:rgba(177,136,84,.3)}
+.wish-card[data-ceo="true"] .like.thank,.li.leader.ceo .like.thank{color:#6C151E;background:rgba(177,136,84,.14)}
+.like.thank[aria-pressed="true"],.li .like.thank[aria-pressed="true"],.li.leader:not(.ceo) .like.thank[aria-pressed="true"],.wish-card .like.thank[aria-pressed="true"],.wish-card[data-ceo="true"] .like.thank[aria-pressed="true"],.li.leader.ceo .like.thank[aria-pressed="true"]{background:#B18854;border-color:#B18854;color:#241C14}
+.like.thank[aria-pressed="true"] .heart,.wish-card[data-kind="leader"] .like.thank[aria-pressed="true"] .heart,.li.leader:not(.ceo) .like.thank[aria-pressed="true"] .heart{fill:#241C14;stroke:#241C14}
 @keyframes heartpop{0%{transform:scale(1)}35%{transform:scale(1.45)}100%{transform:scale(1)}}
 
 .nav{display:flex;align-items:center;justify-content:space-between;gap:12px}
@@ -249,8 +255,14 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
 .sort button[aria-pressed="true"]{background:var(--cran);color:var(--paper)}
 .leader-list{display:flex;flex-direction:column;gap:14px;margin-bottom:14px}
 .lead-line{display:grid;grid-template-columns:repeat(var(--n),minmax(0,1fr));gap:14px}
+@media (min-width:1101px) and (max-width:1240px){.lead-line[style*="--n:5"],.lead-line[style*="--n:4"]{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media (max-width:1100px){.lead-line{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media (max-width:640px){.lead-line{grid-template-columns:minmax(0,1fr)}}
+/* phones: the leaders on the tree sit in one row you swipe, so the wishes come sooner */
+@media (max-width:640px){.lead-line{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:6px;scrollbar-width:thin}.lead-line>.li{flex:0 0 84%;scroll-snap-align:start}}
+.li.leader:not(.ceo) .li-foot{flex-wrap:wrap;row-gap:10px}
+.li.leader:not(.ceo) .li-who{flex:1 1 130px}
+.lead-more{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.lead-toggle{display:flex;justify-content:center;margin:2px 0 10px}
 .all-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
 .li{display:flex;flex-direction:column;gap:12px;padding:18px 18px 14px;border-radius:12px;background:rgba(255,255,255,.32);border:1px solid rgba(108,21,30,.14)}
 .li.leader{background:#343F37;border-color:rgba(177,136,84,.6);color:#F4EEE3}
@@ -592,6 +604,7 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
   var state = {
     wishes: [],        // approved wishes, newest first
     leaders: [],       // leaders' messages
+    leadersOpen: false, // "Show more" opened for the leaders who are in the list only
     site: startSite && C.siteById(startSite) ? startSite : 'all',
     langs: params.get('lang') ? langsFromParam() : C.readLangs(),
     selected: null,    // { kind: 'wish' | 'leader', id }
@@ -782,7 +795,13 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
   var HEART = '<svg class="heart" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.3s-7.4-4.3-9.2-9C1.5 7.9 3.7 4.6 7 4.6c2 0 3.6 1.1 5 3 1.4-1.9 3-3 5-3 3.3 0 5.5 3.3 4.2 6.7-1.8 4.7-9.2 9-9.2 9z"/></svg>';
   function likeBtnHtml(kind, item) {
     var liked = C.hasLiked(kind, item.id);
-    var showCount = kind !== 'leader';
+    // leaders' messages get a "Thank you" button instead of a counted like (they're not part of the prize)
+    if (kind === 'leader') {
+      return '<button type="button" class="like thank" data-like-kind="leader" data-like-id="' + C.esc(item.id) + '" aria-pressed="' + (liked ? 'true' : 'false') + '"' +
+        ' aria-label="' + (liked ? 'Thanked ' : 'Say thank you to ') + C.esc(item.display_name || 'this leader') + '">' +
+        HEART + '<span>' + (liked ? 'Thanked' : 'Thank you') + '</span></button>';
+    }
+    var showCount = true;
     return '<button type="button" class="like" data-like-kind="' + kind + '" data-like-id="' + C.esc(item.id) + '" aria-pressed="' + (liked ? 'true' : 'false') + '"' +
       ' aria-label="' + (liked ? 'Unlike' : 'Like') + ' this message' + (showCount ? ', ' + C.likeCount(kind, item) + ' likes' : '') + '">' +
       HEART + (showCount ? '<span>' + fmt(C.likeCount(kind, item)) + '</span>' : '') + '</button>';
@@ -821,14 +840,22 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
         '<div class="li-who"><b>' + C.esc(L.display_name || 'TP leadership') + '</b><span>' + C.esc(L.title || '') + '</span></div>' +
         likeBtnHtml('leader', L) + '</div></article>';
     });
+    // The CEO's letter, then the leaders on the tree in one line (two if there are more than 5),
+    // then the leaders who are in the list only, behind "Show more"
     var lead = places().all;
     var ceoCard = lead.length && lead[0].spot === 'ceo' ? leaderCards.shift() : '';
+    var nMore = places().extra.length;
+    var moreCards = leaderCards.splice(leaderCards.length - nMore, nMore);
     var nRest = leaderCards.length;
-    var firstLine = nRest > 3 ? Math.ceil(nRest / 2) : nRest;
+    var firstLine = nRest > 5 ? Math.ceil(nRest / 2) : nRest;
     var lines = [leaderCards.slice(0, firstLine), leaderCards.slice(firstLine)].filter(function (x) { return x.length; });
     el('leaderList').innerHTML = ceoCard + lines.map(function (cards) {
       return '<div class="lead-line" style="--n:' + cards.length + '">' + cards.join('') + '</div>';
-    }).join('');
+    }).join('') + (nMore
+      ? (state.leadersOpen ? '<div class="lead-more" id="leadMore">' + moreCards.join('') + '</div>' : '') +
+        '<div class="lead-toggle"><button type="button" class="btn-ghost" data-lead-toggle aria-expanded="' + (state.leadersOpen ? 'true' : 'false') + '"' + (state.leadersOpen ? ' aria-controls="leadMore"' : '') + '>' +
+        (state.leadersOpen ? 'Show fewer leaders\' messages' : 'Show ' + nMore + ' more leaders\' message' + (nMore === 1 ? '' : 's')) + '</button></div>'
+      : '');
     el('leaderList').hidden = !state.leaders.length;
 
     var list = listWishes();
@@ -944,10 +971,13 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
     var isLeader = state.selected.kind === 'leader';
     var liked = C.hasLiked(state.selected.kind, item.id);
     el('likeBtn').setAttribute('aria-pressed', liked ? 'true' : 'false');
-    // leaders' messages can be liked, but their like count isn't shown
-    el('likeBtn').setAttribute('aria-label', (liked ? 'Unlike' : 'Like') + ' this message' + (isLeader ? '' : ', ' + C.likeCount(state.selected.kind, item) + ' likes'));
-    el('likeCount').textContent = fmt(C.likeCount(state.selected.kind, item));
-    el('likeCount').hidden = isLeader;
+    // leaders' messages get a "Thank you" button with no count; wishes get a counted like
+    el('likeBtn').classList.toggle('thank', isLeader);
+    el('likeBtn').setAttribute('aria-label', isLeader
+      ? (liked ? 'Thanked ' : 'Say thank you to ') + (item.display_name || 'this leader')
+      : (liked ? 'Unlike' : 'Like') + ' this message, ' + C.likeCount(state.selected.kind, item) + ' likes');
+    el('likeCount').textContent = isLeader ? (liked ? 'Thanked' : 'Thank you') : fmt(C.likeCount(state.selected.kind, item));
+    el('likeCount').hidden = false;
     card.setAttribute('data-kind', isLeader ? 'leader' : 'wish');
     wrap.setAttribute('data-kind', isLeader ? 'leader' : 'wish');
     var isCeo = isLeader && item.spot === 'ceo';
@@ -1219,13 +1249,24 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
       renderList();
       toast("That like didn't go through. Please try again.");
     });
-    C.track(on ? 'wish_like' : 'wish_unlike', { kind: kind, site: state.site });
+    if (kind === 'leader') C.track(on ? 'leader_thanks' : 'leader_unthanks', { site: state.site });
+    else C.track(on ? 'wish_like' : 'wish_unlike', { kind: kind, site: state.site });
   }
   el('likeBtn').addEventListener('click', function () {
     var item = findItem(state.selected);
     if (item) toggleLike(state.selected.kind, item, el('likeBtn'));
   });
   function onListClick(e) {
+    var tog = e.target.closest ? e.target.closest('[data-lead-toggle]') : null;
+    if (tog) {
+      state.leadersOpen = !state.leadersOpen;
+      renderList();
+      var again = el('leaderList').querySelector('[data-lead-toggle]');
+      if (again) again.focus({ preventScroll: !state.leadersOpen });
+      if (!state.leadersOpen) { try { el('leaderList').scrollIntoView({ block: 'start', behavior: REDUCE ? 'auto' : 'smooth' }); } catch (err) { /* old browsers */ } }
+      C.track(state.leadersOpen ? 'leaders_more' : 'leaders_less', {});
+      return;
+    }
     var likeB = e.target.closest ? e.target.closest('[data-like-kind]') : null;
     if (likeB) {
       var sel = { kind: likeB.getAttribute('data-like-kind'), id: likeB.getAttribute('data-like-id') };

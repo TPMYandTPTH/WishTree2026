@@ -41,7 +41,7 @@ create table if not exists public.leaders (
 alter table public.leaders add column if not exists spot text not null default 'crown';
 alter table public.leaders add column if not exists sort_order int not null default 100;
 alter table public.leaders drop constraint if exists leaders_spot_check;
-alter table public.leaders add constraint leaders_spot_check check (spot in ('ceo', 'crown', 'gift'));
+alter table public.leaders add constraint leaders_spot_check check (spot in ('ceo', 'crown', 'gift', 'list'));
 -- A photo kept with the site (assets/leaders/name.jpg), shown until the leader uploads their own
 alter table public.leaders add column if not exists default_photo text;
 alter table public.leaders drop constraint if exists leaders_default_photo_check;
@@ -813,19 +813,44 @@ create policy "leaders delete own photo" on storage.objects
 -- Replace the emails, remove the leading "--", and run just these lines.
 -- (Or add rows in Table Editor > leaders / moderators.)
 -- spot: 'ceo' = the big ornament under the star (one person); 'crown' = around the top of the tree
---       (room for 7, mixed order); 'gift' = inside a gift box under the tree.
--- sort_order: the order in the list under the tree and on the TVs (after the CEO: two lines, 4 then 3).
+--       (room for 7, mixed order); 'gift' = inside a gift box under the tree; 'list' = the list under the tree only.
+-- sort_order: the order in the list under the tree and on the TVs.
+-- For names in LEADERS in config.js, the spot and order there win (so you can move leaders without SQL).
+-- The emails below are guesses: replace each with the leader's real TP email before running.
 -- default_photo: the photo file in assets/leaders/ on the site, used until the leader uploads their own.
 --
 -- insert into public.leaders (email, default_name, default_title, spot, sort_order, default_photo) values
---   ('andy@tp.com',        'Andy',        'Chief Executive Officer', 'ceo',   1, 'assets/leaders/andy.jpg'),
---   ('divya.dutta@tp.com', 'Divya Dutta', 'Chief Operating Officer', 'crown', 2, 'assets/leaders/divya-dutta.jpg'),
---   ('sarah@tp.com',       'Sarah',       'Chief of Staff',          'crown', 3, 'assets/leaders/sarah.jpg'),
---   ('rachel@tp.com',      'Rachel',      'Human Resources',         'crown', 4, 'assets/leaders/rachel.jpg'),
---   ('himanshu@tp.com',    'Himanshu',    'Chief Operating Officer', 'crown', 5, 'assets/leaders/himanshu.jpg'),
---   ('vivienne@tp.com',    'Vivienne',    'Vice President',          'crown', 6, 'assets/leaders/vivienne.jpg'),
---   ('chavis@tp.com',      'Chavis',      'Vice President',          'crown', 7, 'assets/leaders/chavis.jpg'),
---   ('sudhar@tp.com',      'Sudhar',      'Vice President',          'crown', 8, 'assets/leaders/sudhar.jpg')
+--   ('andy@tp.com',                     'Andy',                    'Chief Executive Officer',     'ceo',   1,  'assets/leaders/andy.jpg'),
+--   ('divya.dutta@tp.com',              'Divya Dutta',             'Chief Operating Officer',     'crown', 2,  'assets/leaders/divya-dutta.jpg'),
+--   ('himanshu@tp.com',                 'Himanshu',                'Chief Operating Officer',     'crown', 3,  'assets/leaders/himanshu.jpg'),
+--   ('alex.ma@tp.com',                  'Alex Ma',                 'Chief Financial Officer',     'crown', 4,  'assets/leaders/alex-ma.jpg'),
+--   ('sarah@tp.com',                    'Sarah',                   'Chief of Staff',              'crown', 5,  'assets/leaders/sarah.jpg'),
+--   ('rachel@tp.com',                   'Rachel',                  'Human Resources',             'crown', 6,  'assets/leaders/rachel.jpg'),
+--   ('vivienne@tp.com',                 'Vivienne',                'Vice President',              'list',  7,  'assets/leaders/vivienne.jpg'),
+--   ('chavis@tp.com',                   'Chavis',                  'Vice President',              'list',  8,  'assets/leaders/chavis.jpg'),
+--   ('sudhar@tp.com',                   'Sudhar',                  'Vice President',              'list',  9,  'assets/leaders/sudhar.jpg'),
+--   ('noppawan.krynetr@tp.com',         'Noppawan Krynetr',        'VP of Business Development',  'list',  10, 'assets/leaders/noppawan-krynetr.jpg'),
+--   ('alen.celebic@tp.com',             'Alen Celebic',            'VP of Business Development',  'list',  11, 'assets/leaders/alen-celebic.jpg'),
+--   ('michael.costevec@tp.com',         'Michael Costevec',        'VP of Transformations',       'list',  12, 'assets/leaders/michael-costevec.jpg'),
+--   ('pranav.pillai@tp.com',            'Pranav Pillai',           'Director of Operations',      'list',  13, 'assets/leaders/pranav-pillai.jpg'),
+--   ('jamunah.maniram@tp.com',          'Jamunah Maniram',         'Director of Operations',      'list',  14, 'assets/leaders/jamunah-maniram.jpg'),
+--   ('ken.yong@tp.com',                 'Ken Yong',                'Director of Operations',      'list',  15, 'assets/leaders/ken-yong.jpg'),
+--   ('irshad.gori@tp.com',              'Irshad Gori',             'Director of Operations',      'list',  16, 'assets/leaders/irshad-gori.jpg'),
+--   ('syed.suleiman@tp.com',            'Syed Suleiman',           'Director of Operations',      'list',  17, 'assets/leaders/syed-suleiman.jpg'),
+--   ('aloke.dutta@tp.com',              'Aloke Dutta',             'Director of Quality',         'list',  18, 'assets/leaders/aloke-dutta.jpg'),
+--   ('eric.ooi@tp.com',                 'Eric Ooi',                'Director of Finance',         'list',  19, 'assets/leaders/eric-ooi.jpg'),
+--   ('prabitha.preymachandran@tp.com',  'Prabitha Preymachandran', 'Director of Operations',      'list',  20, 'assets/leaders/prabitha-preymachandran.jpg'),
+--   ('chun.chin@tp.com',                'Chun Wei Chin',           'Director of Operations',      'list',  21, 'assets/leaders/chun-wei-chin.jpg'),
+--   ('michael.sanchez@tp.com',          'Michael Sanchez',         'Director of Operations',      'list',  22, 'assets/leaders/michael-sanchez.jpg'),
+--   ('hanisha.reza@tp.com',             'Hanisha Reza',            'Director of Operations',      'list',  23, 'assets/leaders/hanisha-reza.jpg'),
+--   ('amit.mittal@tp.com',              'Amit Mittal',             'Director of WFM',             'list',  24, 'assets/leaders/amit-mittal.jpg'),
+--   ('partiban.periannan@tp.com',       'Partiban Periannan',      'Manager of Transformations',  'list',  25, 'assets/leaders/partiban-periannan.jpg'),
+--   ('parvathy.ramar@tp.com',           'Parvathy Ramar',          'Sr. Manager of GTM',          'list',  26, 'assets/leaders/parvathy-ramar.jpg'),
+--   ('choon.haw@tp.com',                'Choon Haw',               'Sr. Manager of IT',           'list',  27, 'assets/leaders/choon-haw.jpg'),
+--   ('chris.tsu@tp.com',                'Chris Tsu',               'Sr. Manager of Operations',   'list',  28, 'assets/leaders/chris-tsu.jpg'),
+--   ('aquil.sugui@tp.com',              'Aquil Sugui',             'Sr. Manager of L&D',          'list',  29, 'assets/leaders/aquil-sugui.jpg'),
+--   ('liew.wai@tp.com',                 'Liew Kin Wai',            'Compliance Manager',          'list',  30, 'assets/leaders/liew-kin-wai.jpg'),
+--   ('zhiyuan.kerk@tp.com',             'Zhiyuan Kerk',            'L&D Officer',                 'list',  31, 'assets/leaders/zhiyuan-kerk.jpg')
 -- on conflict (email) do update set default_name = excluded.default_name, default_title = excluded.default_title,
 --   spot = excluded.spot, sort_order = excluded.sort_order, default_photo = excluded.default_photo;
 --

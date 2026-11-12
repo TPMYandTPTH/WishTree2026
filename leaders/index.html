@@ -254,8 +254,8 @@ select.input:disabled{opacity:1;background-color:#F4EEE3;background-image:none;c
   <section id="view-edit" class="view" hidden>
     <div class="editor">
       <div class="preview">
-        <div class="preview-title">HOW IT WILL LOOK ON EVERY SITE'S TREE</div>
-        <div class="crown-window" aria-hidden="true"><div id="crownMount"></div></div>
+        <div class="preview-title" id="pvWhere">HOW IT WILL LOOK ON EVERY SITE'S TREE</div>
+        <div class="crown-window" id="crownWindow" aria-hidden="true"><div id="crownMount"></div></div>
         <article class="leader-card" aria-label="Preview of your message">
           <span class="lc-badge">
             <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg>
@@ -384,8 +384,15 @@ select.input:disabled{opacity:1;background-color:#F4EEE3;background-image:none;c
     $('photoBtnText').textContent = photo ? 'Change photo' : 'Add a photo';
     $('photoRemove').hidden = !S.photo;
     $('photoRemove').textContent = defaultPhoto() ? 'Use the default photo' : 'Remove photo';
-    var me = { id: 'preview', display_name: name, title: S.title, message: S.message, photo_url: photo };
-    C.renderTree($('crownMount'), { wishes: [], leaders: [me], selected: { kind: 'leader', id: 'preview' } });
+    // leaders whose spot in config.js LEADERS is 'list' are in the list under the tree, not on it
+    var cfg = (LEADERS.filter(function (l) { return l.name === S.name; })[0] || {});
+    var onTree = cfg.spot !== 'list';
+    $('pvWhere').textContent = onTree ? 'HOW IT WILL LOOK ON EVERY SITE\'S TREE' : 'HOW IT WILL LOOK IN THE LIST UNDER EVERY SITE\'S TREE';
+    $('crownWindow').hidden = !onTree;
+    if (onTree) {
+      var me = { id: 'preview', display_name: name, title: S.title, message: S.message, photo_url: photo, spot: cfg.spot === 'ceo' ? 'ceo' : 'crown' };
+      C.renderTree($('crownMount'), { wishes: [], leaders: [me], selected: { kind: 'leader', id: 'preview' } });
+    }
   }
 
   function renderEdit() {
@@ -415,7 +422,8 @@ select.input:disabled{opacity:1;background-color:#F4EEE3;background-image:none;c
 
   /* ---------- Name: picked from the leaders list, once ---------- */
   function renderNames() {
-    var names = LEADERS.map(function (l) { return l.name; });
+    // A to Z, so each leader finds their name quickly
+    var names = LEADERS.map(function (l) { return l.name; }).sort(function (a, b) { return a.localeCompare(b); });
     if (S.name && names.indexOf(S.name) === -1) names.unshift(S.name);
     var html = (S.nameLocked ? '' : '<option value="">Choose your name</option>') +
       names.filter(function (n) { return !S.nameLocked || n === S.name; }).map(function (n) {
