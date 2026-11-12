@@ -75,9 +75,8 @@ window.WISH_CFG = {
     { name: 'Chavis',                   title: 'Vice President',               spot: 'list',  level: 'exec' },
     { name: 'Sudhar',                   title: 'Vice President',               spot: 'list',  level: 'exec' },
     { name: 'Noppawan Krynetr',         title: 'VP of Business Development',   spot: 'list',  level: 'exec' },
-    { name: 'Alen Celebic',             title: 'VP of Business Development',   spot: 'list',  level: 'exec' },
+    { name: 'Rachel',                   title: 'Director of Human Resources',  spot: 'crown', level: 'exec' },
     // Directors
-    { name: 'Rachel',                   title: 'Director of Human Resources',  spot: 'crown', level: 'director' },
     { name: 'Pranav Pillai',            title: 'Director of Operations',       spot: 'list',  level: 'director' },
     { name: 'Jamunah Maniram',          title: 'Director of Operations',       spot: 'list',  level: 'director' },
     { name: 'Ken Yong',                 title: 'Director of Operations',       spot: 'list',  level: 'director' },
@@ -91,6 +90,7 @@ window.WISH_CFG = {
     { name: 'Hanisha Reza',             title: 'Director of Operations',       spot: 'list',  level: 'director' },
     { name: 'Amit Mittal',              title: 'Director of WFM',              spot: 'list',  level: 'director' },
     // Managers and below
+    { name: 'Sol Catherine Marticio',   title: 'Executive Asst. to the CEO, MY & TH', spot: 'list', level: 'manager' },
     { name: 'Partiban Periannan',       title: 'Manager of Transformations',   spot: 'list',  level: 'manager' },
     { name: 'Parvathy Ramar',           title: 'Sr. Manager of GTM',           spot: 'list',  level: 'manager' },
     { name: 'Choon Haw',                title: 'Sr. Manager of IT',            spot: 'list',  level: 'manager' },

@@ -13,13 +13,12 @@ Upload any photo with any name and ask for it to be cropped and renamed if that'
 | Himanshu | `himanshu.jpg` |
 | Alex Ma | `alex-ma.jpg` |
 | Sarah | `sarah.jpg` (in) |
-| Rachel | `rachel.jpg` |
+| Michael Costevec | `michael-costevec.jpg` |
 | Vivienne | `vivienne.jpg` |
 | Chavis | `chavis.jpg` |
 | Sudhar | `sudhar.jpg` |
 | Noppawan Krynetr | `noppawan-krynetr.jpg` |
-| Alen Celebic | `alen-celebic.jpg` |
-| Michael Costevec | `michael-costevec.jpg` |
+| Rachel | `rachel.jpg` |
 | Pranav Pillai | `pranav-pillai.jpg` |
 | Jamunah Maniram | `jamunah-maniram.jpg` |
 | Ken Yong | `ken-yong.jpg` |
@@ -32,6 +31,7 @@ Upload any photo with any name and ask for it to be cropped and renamed if that'
 | Michael Sanchez | `michael-sanchez.jpg` |
 | Hanisha Reza | `hanisha-reza.jpg` |
 | Amit Mittal | `amit-mittal.jpg` |
+| Sol Catherine Marticio | `sol-catherine-marticio.jpg` |
 | Partiban Periannan | `partiban-periannan.jpg` |
 | Parvathy Ramar | `parvathy-ramar.jpg` |
 | Choon Haw | `choon-haw.jpg` |

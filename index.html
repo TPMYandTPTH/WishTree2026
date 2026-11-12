@@ -922,8 +922,10 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
     var lead = places().all;
     var ceoL = lead.length && lead[0].spot === 'ceo' ? lead[0] : null;
     var rest = lead.filter(function (L) { return L !== ceoL; });
-    var senior = rest.filter(isSenior);
-    var others = rest.filter(function (L) { return !isSenior(L); });
+    // in the order of config.js LEADERS (on the tree or not)
+    var byOrder = function (a, b) { return (a.sort_order || 999) - (b.sort_order || 999); };
+    var senior = rest.filter(isSenior).sort(byOrder);
+    var others = rest.filter(function (L) { return !isSenior(L); }).sort(byOrder);
     // behind "Show more": Directors (medium cards, 5 per row), then managers and below (small cards, 6 per row)
     var directors = others.filter(function (L) { return L.level === 'director'; });
     var managers = others.filter(function (L) { return L.level !== 'director'; });

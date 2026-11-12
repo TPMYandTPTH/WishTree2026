@@ -350,17 +350,9 @@
   // Andy's message only (the tree goes out once Andy's is in; every other leader appears only after they post).
   var ALL_SAMPLES = !/[?&]samples=launch(&|$)/.test(window.location.search);
   if (!ALL_SAMPLES) SAMPLE_LEADERS = SAMPLE_LEADERS.slice(0, 1);
-  // Every other C-level and VP leader gets a placeholder (not words in their name),
-  // plus a row of examples for Directors and for managers
-  var exampleTitles = {}, examples = { director: 0, manager: 0 }, EXAMPLES_MAX = { director: 5, manager: 6 };
+  // Every other leader in config.js LEADERS gets a placeholder (not words in their name), so the preview shows them all
   if (ALL_SAMPLES) leaderList().forEach(function (l) {
-    // Directors and managers: a few examples behind "Show more", one for each title (a row of each)
-    if (!l.senior) {
-      if (examples[l.level] >= EXAMPLES_MAX[l.level] || exampleTitles[l.title]) return;
-      exampleTitles[l.title] = true;
-    }
     var have = SAMPLE_LEADERS.some(function (r) { return r[0].toLowerCase() === l.name.toLowerCase(); });
-    if (!have && !l.senior) examples[l.level]++;
     if (!have) SAMPLE_LEADERS.push([l.name, '[Sample] ' + l.name.split(' ')[0] + '\'s Christmas message will show here once it\'s written on the leaders\' page and approved.']);
   });
   SAMPLE_LEADERS = SAMPLE_LEADERS.map(function (r, i) {
