@@ -66,6 +66,10 @@ button,input,select,textarea{font-family:inherit}
 .center .script{font-size:44px}
 .center h1{font-size:36px}
 .center p{margin:0;font-size:16px;line-height:1.55;font-weight:300;color:var(--cream-2)}
+.not-leader{display:flex;align-items:flex-start;gap:10px;max-width:520px;margin:4px auto 0;padding:12px 16px;border-radius:12px;border:1px solid rgba(108,21,30,.25);background:rgba(244,238,227,.75);color:#3D0B10;font-size:14px;line-height:1.5;text-align:left}
+.not-leader svg{flex:none;margin-top:2px;color:#6C151E}
+.not-leader b{color:#6C151E}
+.not-leader a{color:#6C151E;font-weight:700;text-decoration:underline;overflow-wrap:anywhere}
 .panel{display:flex;flex-direction:column;gap:16px;padding:24px;border-radius:18px;background:#F4EEE3;color:var(--ink)}
 .panel label{font-size:15px;font-weight:700}
 .help{font-size:13px;line-height:1.45;color:var(--slate)}
@@ -211,7 +215,11 @@ button,input,select,textarea{font-family:inherit}
       </div>
       <div class="script">Lead with light,</div>
       <h1 tabindex="-1">Hang a message for every TP site</h1>
-      <p>This page is only for TP Malaysia and Thailand leaders. Your message hangs in gold at the top of the tree, on every site's tree and on the site screens.</p>
+      <p>This page is only for TP Malaysia and Thailand leaders. Your message shows on every site's tree page and on the site screens.</p>
+      <div class="not-leader" role="note">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg>
+        <span><b>Not a senior leader?</b> This page is only for TP senior leaders. You can hang your own wish on the tree here: <a class="wish-link" href="../wish.html">tpmyandtpth.github.io/WishTree2026/wish.html</a></span>
+      </div>
       <div class="panel">
         <div id="googleBlock" hidden>
           <button type="button" id="googleBtn" class="btn btn-google">
@@ -284,6 +292,10 @@ button,input,select,textarea{font-family:inherit}
         <div>
           <h1 tabindex="-1" id="editTitle">Your message</h1>
         </div>
+        <div class="not-leader" role="note" style="margin:0 0 4px">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg>
+        <span><b>Not a senior leader?</b> This page is only for TP senior leaders. You can hang your own wish on the tree here: <a class="wish-link" href="../wish.html">tpmyandtpth.github.io/WishTree2026/wish.html</a></span>
+      </div>
         <p class="sub">One message per leader, up to <span id="maxNote">250</span> characters. The Wish Tree team approves it, then it shows on every site's tree page and the site TVs. You can edit or remove it any time; edits are approved again.</p>
         <div id="statusLive" class="status" hidden><span class="dot" aria-hidden="true"></span><span id="statusText">Live on every site's tree</span></div>
 
@@ -358,6 +370,14 @@ button,input,select,textarea{font-family:inherit}
     photoBlob: null,    // a new photo waiting to be uploaded
     photoChanged: false };
   var LEADERS = C.leaderList();
+  // "Not a senior leader?" note: link to the wish page, shown as its address
+  (function () {
+    var href = (C.cfg && C.cfg.WISH_PAGE_URL) || new URL('../wish.html', window.location.href).href;
+    Array.prototype.forEach.call(document.querySelectorAll('.wish-link'), function (a) {
+      a.href = href;
+      a.textContent = href.replace(/^https?:\/\//, '');
+    });
+  })();
   // Scripts that aren't English: Thai, Chinese, Japanese, Korean, Tamil, Devanagari, Arabic and others
   var NOT_ENGLISH = /[\u0590-\u08FF\u0900-\u0DFF\u0E00-\u0EFF\u1000-\u109F\u1100-\u11FF\u3040-\u30FF\u3100-\u31FF\u3400-\u4DBF\u4E00-\u9FFF\uAC00-\uD7AF\uF900-\uFAFF]/;
   // The default photo: the one the Wish Tree team set, or the one in config.js LEADERS for the picked name

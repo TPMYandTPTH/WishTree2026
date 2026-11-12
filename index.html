@@ -149,7 +149,9 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
 .wish-card[data-kind="secret"] .gift-badge{display:inline-flex}
 .wish-card[data-kind="secret"] .hole{background:var(--brass);opacity:.9}
 .wish-card[data-kind="secret"] .card-text{font-size:19px;font-weight:300}
-.wish-card[data-kind="secret"] .like{display:none}
+.wish-card[data-gift="gold"] .like.thank{color:#241C14;border-color:rgba(36,28,20,.55);background:rgba(36,28,20,.08)}
+.wish-card[data-gift="gold"] .like.thank[aria-pressed="true"]{background:#343F37;border-color:#343F37;color:#F4EEE3}
+.wish-card[data-gift="gold"] .like.thank[aria-pressed="true"] .heart{fill:#F4EEE3;stroke:#F4EEE3}
 .wish-card[data-kind="secret"][data-gift="gold"]{--card-bg:#B18854;--card-ink:#241C14;--card-kicker:#3D0B10;--card-sub:#241C14;--card-line:rgba(36,28,20,.3);--card-avatar-bg:#343F37;--card-avatar-fg:#D9B77E;border-color:#C99A55;background-image:linear-gradient(90deg,transparent calc(50% - 7px),rgba(108,21,30,.16) calc(50% - 7px),rgba(108,21,30,.16) calc(50% + 7px),transparent calc(50% + 7px));box-shadow:0 0 0 6px rgba(177,136,84,.22),0 18px 40px rgba(59,47,34,.3)}
 .wish-card[data-kind="secret"][data-gift="gold"] .hole{background:#343F37;opacity:.6}
 .card-wrap[data-kind="secret"] .card-string,.card-wrap[data-kind="prize"] .card-string{background:var(--brass)}
@@ -314,6 +316,8 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
 .li.team .li-text{font-size:15px;color:#343F37}
 .li.team .li-foot{border-top-color:rgba(108,21,30,.22)}
 .li.team .li-who span{color:#5A5550}
+.li.team .like.thank{color:#6C151E;background:rgba(177,136,84,.14)}
+.li.team .like.thank[aria-pressed="true"]{background:#B18854;border-color:#B18854;color:#241C14}
 .li.team.team-red .li-init{background:#6C151E;color:#F4EEE3}
 .li.team.team-gold .li-init{background:#B18854;color:#241C14}
 @media (max-width:1240px){.lead-more{grid-template-columns:repeat(4,minmax(0,1fr))}}
@@ -923,7 +927,6 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
     // behind "Show more": Directors (medium cards, 5 per row), then managers and below (small cards, 6 per row)
     var directors = others.filter(function (L) { return L.level === 'director'; });
     var managers = others.filter(function (L) { return L.level !== 'director'; });
-    var nMore = others.length;
     // at the very end: Amr's and Maszy's cards (the wishes in the two small gifts, HIDDEN_WISHES in config.js)
     var team = SECRET_IDS.map(function (id) {
       var h = SECRETS[id];
@@ -931,18 +934,22 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
         '<div class="li-top"><span class="li-kicker">' + C.iconSvg('gift', 14) + ' THE WISH TREE TEAM</span></div>' +
         '<p class="li-text">' + C.esc(h.message) + '</p>' +
         '<div class="li-foot"><span class="li-init" aria-hidden="true">' + C.esc(C.initials(h.display_name)) + '</span>' +
-        '<div class="li-who"><b>' + C.esc(h.display_name) + '</b><span>' + C.esc(h.title) + '</span></div></div></article>';
+        '<div class="li-who"><b>' + C.esc(h.display_name) + '</b><span>' + C.esc(h.title) + '</span></div>' +
+        '<button type="button" class="like thank" data-team-thank="' + C.esc(id) + '" aria-pressed="' + (teamThanked(id) ? 'true' : 'false') + '"' +
+        ' aria-label="' + (teamThanked(id) ? 'Thanked ' : 'Say thank you to ') + C.esc(h.display_name) + '">' + HEART +
+        '<span>' + (teamThanked(id) ? 'Thanked' : 'Thank you') + '</span></button></div></article>';
     });
+    var nMore = others.length + team.length;
     el('leaderList').innerHTML = (ceoL ? cardHtml(ceoL) : '') +
       (senior.length ? '<div class="lead-grid">' + senior.map(archHtml).join('') + '</div>' : '') +
       (nMore
         ? (state.leadersOpen ? '<div class="lead-more" id="leadMore">' +
             (directors.length ? '<div class="lead-dir">' + directors.map(cardHtml).join('') + '</div>' : '') +
-            (managers.length ? '<div class="lead-mgr">' + managers.map(cardHtml).join('') + '</div>' : '') + '</div>' : '') +
+            (managers.length ? '<div class="lead-mgr">' + managers.map(cardHtml).join('') + '</div>' : '') +
+            (team.length ? '<div class="team-row">' + team.join('') + '</div>' : '') + '</div>' : '') +
           '<div class="lead-toggle"><button type="button" class="btn-ghost" data-lead-toggle aria-expanded="' + (state.leadersOpen ? 'true' : 'false') + '"' + (state.leadersOpen ? ' aria-controls="leadMore"' : '') + '>' +
-          (state.leadersOpen ? 'Show fewer leaders\' messages' : 'Show ' + nMore + ' more leaders\' message' + (nMore === 1 ? '' : 's')) + '</button></div>'
-        : '') +
-      (team.length ? '<div class="team-row">' + team.join('') + '</div>' : '');
+          (state.leadersOpen ? 'See less' : 'See more (' + nMore + ')') + '</button></div>'
+        : '');
     el('leaderList').hidden = !state.leaders.length && !team.length;
 
     var list = listWishes();
@@ -1052,6 +1059,13 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
       el('cardWhere').textContent = item.title;
       el('cardInitial').classList.remove('has-photo');
       el('cardInitial').innerHTML = C.iconSvg('gift', 20);
+      // Amr's and Maszy's wishes can be thanked too (remembered on this device, no count)
+      var thanked = teamThanked(item.id);
+      el('likeBtn').classList.add('thank');
+      el('likeBtn').setAttribute('aria-pressed', thanked ? 'true' : 'false');
+      el('likeBtn').setAttribute('aria-label', (thanked ? 'Thanked ' : 'Say thank you to ') + (item.display_name || 'the Wish Tree team'));
+      el('likeCount').textContent = thanked ? 'Thanked' : 'Thank you';
+      el('likeCount').hidden = false;
       return;
     }
 
@@ -1341,9 +1355,34 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
   }
   el('likeBtn').addEventListener('click', function () {
     var item = findItem(state.selected);
-    if (item) toggleLike(state.selected.kind, item, el('likeBtn'));
+    if (!item) return;
+    if (state.selected.kind === 'secret') { toggleTeam(item.id, el('likeBtn')); return; }
+    toggleLike(state.selected.kind, item, el('likeBtn'));
   });
+  // "Thank you" for Amr's and Maszy's wishes: kept on this device only (no BMS, no count); counted in Tag Manager as team_thanks
+  function teamThanks() {
+    try { return JSON.parse(C.storageGet('wt-team-thanks') || '{}') || {}; } catch (err) { return {}; }
+  }
+  function teamThanked(id) { return !!teamThanks()[id]; }
+  function toggleTeam(id, btn) {
+    var m = teamThanks();
+    var on = !m[id];
+    if (on) m[id] = 1; else delete m[id];
+    C.storageSet('wt-team-thanks', JSON.stringify(m));
+    if (btn && on) { btn.classList.remove('pop'); void btn.offsetWidth; btn.classList.add('pop'); }
+    renderCard();
+    renderList();
+    C.track(on ? 'team_thanks' : 'team_unthanks', { who: id === 'red' ? 'amr' : 'maszy' });
+  }
   function onListClick(e) {
+    var tb = e.target.closest ? e.target.closest('[data-team-thank]') : null;
+    if (tb) {
+      var tid = tb.getAttribute('data-team-thank');
+      toggleTeam(tid, null);
+      var again2 = el('leaderList').querySelector('[data-team-thank="' + tid + '"]');
+      if (again2) { if (teamThanked(tid)) again2.classList.add('pop'); again2.focus({ preventScroll: true }); }
+      return;
+    }
     var tog = e.target.closest ? e.target.closest('[data-lead-toggle]') : null;
     if (tog) {
       state.leadersOpen = !state.leadersOpen;

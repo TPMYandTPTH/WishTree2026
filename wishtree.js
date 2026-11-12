@@ -346,10 +346,14 @@
     ['Chavis', '[Sample] From Bangkok to Penang, Kuala Lumpur and Johor: thank you for a remarkable year. Wishing you joy and good health.'],
     ['Sudhar', '[Sample] Thank you for the care you bring to our customers and to each other. Enjoy the season with the people you love.']
   ];
-  // Every other C-level and VP leader in config.js LEADERS gets a placeholder (not words in their name), so the
-  // preview shows them all, plus a few examples for Directors and below (who otherwise only show once they post).
+  // The preview shows Andy's message only: the tree launches once Andy's is in, and every other leader appears
+  // only after they post. Add ?samples=all to a preview link to see every card type with sample messages.
+  var ALL_SAMPLES = /[?&]samples=all(&|$)/.test(window.location.search);
+  if (!ALL_SAMPLES) SAMPLE_LEADERS = SAMPLE_LEADERS.slice(0, 1);
+  // ?samples=all: every other C-level and VP leader gets a placeholder (not words in their name),
+  // plus a row of examples for Directors and for managers
   var exampleTitles = {}, examples = { director: 0, manager: 0 }, EXAMPLES_MAX = { director: 5, manager: 6 };
-  leaderList().forEach(function (l) {
+  if (ALL_SAMPLES) leaderList().forEach(function (l) {
     // Directors and managers: a few examples behind "Show more", one for each title (a row of each)
     if (!l.senior) {
       if (examples[l.level] >= EXAMPLES_MAX[l.level] || exampleTitles[l.title]) return;
