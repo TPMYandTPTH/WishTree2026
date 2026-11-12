@@ -348,15 +348,15 @@
   ];
   // Every other C-level and VP leader in config.js LEADERS gets a placeholder (not words in their name), so the
   // preview shows them all, plus a few examples for Directors and below (who otherwise only show once they post).
-  var exampleTitles = {}, examples = 0;
+  var exampleTitles = {}, examples = { director: 0, manager: 0 }, EXAMPLES_MAX = { director: 5, manager: 6 };
   leaderList().forEach(function (l) {
-    // Directors and below: a few examples, one for each title (up to 9), behind "Show more"
+    // Directors and managers: a few examples behind "Show more", one for each title (a row of each)
     if (!l.senior) {
-      if (examples >= 9 || exampleTitles[l.title]) return;
+      if (examples[l.level] >= EXAMPLES_MAX[l.level] || exampleTitles[l.title]) return;
       exampleTitles[l.title] = true;
     }
     var have = SAMPLE_LEADERS.some(function (r) { return r[0].toLowerCase() === l.name.toLowerCase(); });
-    if (!have && !l.senior) examples++;
+    if (!have && !l.senior) examples[l.level]++;
     if (!have) SAMPLE_LEADERS.push([l.name, '[Sample] ' + l.name.split(' ')[0] + '\'s Christmas message will show here once it\'s written on the leaders\' page and approved.']);
   });
   SAMPLE_LEADERS = SAMPLE_LEADERS.map(function (r, i) {
@@ -367,6 +367,7 @@
       title: c.title || '',
       spot: c.spot || 'crown',
       senior: c.senior === true,
+      level: c.level || 'manager',
       sort_order: c.order || i + 1,
       message: r[1],
       lang: 'en',
@@ -665,11 +666,14 @@
   function leaderList() {
     return (CFG.LEADERS || []).filter(function (l) { return l && l.name; }).map(function (l, i) {
       var name = String(l.name).trim();
+      // level: 'exec' (C-level and VP), 'director', or 'manager' (managers and below); senior: true is the old way to say 'exec'
+      var level = ['exec', 'director', 'manager'].indexOf(l.level) !== -1 ? l.level : (l.senior === true || l.spot === 'ceo' ? 'exec' : 'manager');
       return {
         name: name,
         title: String(l.title || '').trim(),
         spot: ['ceo', 'crown', 'gift', 'list'].indexOf(l.spot) !== -1 ? l.spot : 'list',
-        senior: l.senior === true || l.spot === 'ceo',
+        level: level,
+        senior: level === 'exec',
         order: i + 1,
         photo: String(l.photo || ('assets/leaders/' + leaderSlug(name) + '.jpg'))
       };
@@ -687,8 +691,8 @@
   function withLeaderConfig(l) {
     var c = leaderConfig(l.display_name);
     // a name that isn't on the list (typed on the leaders' page) goes in the list only, with the regular card
-    if (!c) return CFG.LEADERS && CFG.LEADERS.length ? Object.assign({}, l, { spot: 'list', senior: false }) : l;
-    return Object.assign({}, l, { spot: c.spot, senior: c.senior, sort_order: c.order, photo_url: l.photo_url || leaderPhoto(l.display_name) || null });
+    if (!c) return CFG.LEADERS && CFG.LEADERS.length ? Object.assign({}, l, { spot: 'list', senior: false, level: 'manager' }) : l;
+    return Object.assign({}, l, { spot: c.spot, senior: c.senior, level: c.level, sort_order: c.order, photo_url: l.photo_url || leaderPhoto(l.display_name) || null });
   }
 
   /* ---------- Small helpers ---------- */

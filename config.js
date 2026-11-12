@@ -56,47 +56,48 @@ window.WISH_CFG = {
   ],
 
   // The leaders, in the order they show in the list under the tree and on the TVs.
-  // The leaders' page offers these names in a list: a leader picks theirs once and can't change it.
-  // spot: 'ceo' = the big ornament under the star, 'crown' = around the top of the tree, 'list' = the list only.
-  // senior: true = C-level and VP: ornament-shaped cards, 5 per row, always shown in the list under the tree.
-  // Everyone else (Directors and below) has a smaller card, 5 per row, behind "Show more", once they post.
+  // Leaders type their name on the leaders' page with these as suggestions; the name can't change after the first send.
+  // spot:  'ceo' = the big ornament under the star, 'crown' = around the top of the tree, 'list' = the list only.
+  // level: 'exec' = C-level and VP: ornament-shaped cards, 5 per row, always shown in the list under the tree.
+  //        'director' = Directors: medium cards, 5 per row, behind "Show more", once they post.
+  //        'manager' = Managers and below: small cards, 6 per row, behind "Show more", once they post.
   // Photo: assets/leaders/<name in lower case with dashes>.jpg, e.g. alex-ma.jpg (initials show until it's there).
   // Add photo: 'assets/leaders/other-file.jpg' to a line to use a different file.
   LEADERS: [
-    // On the tree: the CEO under the star ('ceo'), then around the top ('crown', room for 7)
-    { name: 'Andy',                     title: 'Chief Executive Officer',      spot: 'ceo', senior: true },
-    { name: 'Divya Dutta',              title: 'Chief Operating Officer',      spot: 'crown', senior: true },
-    { name: 'Himanshu',                 title: 'Chief Operating Officer',      spot: 'crown', senior: true },
-    { name: 'Alex Ma',                  title: 'Chief Financial Officer',      spot: 'crown', senior: true },
-    { name: 'Sarah',                    title: 'Chief of Staff',               spot: 'crown', senior: true },
-    { name: 'Rachel',                   title: 'Director of Human Resources',  spot: 'crown' },
-    // In the list under the tree only ('list')
-    { name: 'Vivienne',                 title: 'Vice President',               spot: 'list', senior: true },
-    { name: 'Chavis',                   title: 'Vice President',               spot: 'list', senior: true },
-    { name: 'Sudhar',                   title: 'Vice President',               spot: 'list', senior: true },
-    { name: 'Noppawan Krynetr',         title: 'VP of Business Development',   spot: 'list', senior: true },
-    { name: 'Alen Celebic',             title: 'VP of Business Development',   spot: 'list', senior: true },
-    { name: 'Michael Costevec',         title: 'VP of Transformations',        spot: 'list', senior: true },
-    // Directors and below: in the list only once they post, behind "Show more"
-    { name: 'Pranav Pillai',            title: 'Director of Operations',       spot: 'list' },
-    { name: 'Jamunah Maniram',          title: 'Director of Operations',       spot: 'list' },
-    { name: 'Ken Yong',                 title: 'Director of Operations',       spot: 'list' },
-    { name: 'Irshad Gori',              title: 'Director of Operations',       spot: 'list' },
-    { name: 'Syed Suleiman',            title: 'Director of Operations',       spot: 'list' },
-    { name: 'Aloke Dutta',              title: 'Director of Quality',          spot: 'list' },
-    { name: 'Eric Ooi',                 title: 'Director of Finance',          spot: 'list' },
-    { name: 'Prabitha Preymachandran',  title: 'Director of Operations',       spot: 'list' },
-    { name: 'Chun Wei Chin',            title: 'Director of Operations',       spot: 'list' },
-    { name: 'Michael Sanchez',          title: 'Director of Operations',       spot: 'list' },
-    { name: 'Hanisha Reza',             title: 'Director of Operations',       spot: 'list' },
-    { name: 'Amit Mittal',              title: 'Director of WFM',              spot: 'list' },
-    { name: 'Partiban Periannan',       title: 'Manager of Transformations',   spot: 'list' },
-    { name: 'Parvathy Ramar',           title: 'Sr. Manager of GTM',           spot: 'list' },
-    { name: 'Choon Haw',                title: 'Sr. Manager of IT',            spot: 'list' },
-    { name: 'Chris Tsu',                title: 'Sr. Manager of Operations',    spot: 'list' },
-    { name: 'Aquil Sugui',              title: 'Sr. Manager of L&D',           spot: 'list' },
-    { name: 'Liew Kin Wai',             title: 'Compliance Manager',           spot: 'list' },
-    { name: 'Zhiyuan Kerk',             title: 'L&D Officer',                  spot: 'list' }
+    // C-level and VP
+    { name: 'Andy',                     title: 'Chief Executive Officer',      spot: 'ceo',   level: 'exec' },
+    { name: 'Divya Dutta',              title: 'Chief Operating Officer',      spot: 'crown', level: 'exec' },
+    { name: 'Himanshu',                 title: 'Chief Operating Officer',      spot: 'crown', level: 'exec' },
+    { name: 'Alex Ma',                  title: 'Chief Financial Officer',      spot: 'crown', level: 'exec' },
+    { name: 'Sarah',                    title: 'Chief of Staff',               spot: 'crown', level: 'exec' },
+    { name: 'Michael Costevec',         title: 'VP of Transformations',        spot: 'list',  level: 'exec' },
+    { name: 'Vivienne',                 title: 'Vice President',               spot: 'list',  level: 'exec' },
+    { name: 'Chavis',                   title: 'Vice President',               spot: 'list',  level: 'exec' },
+    { name: 'Sudhar',                   title: 'Vice President',               spot: 'list',  level: 'exec' },
+    { name: 'Noppawan Krynetr',         title: 'VP of Business Development',   spot: 'list',  level: 'exec' },
+    { name: 'Alen Celebic',             title: 'VP of Business Development',   spot: 'list',  level: 'exec' },
+    // Directors
+    { name: 'Rachel',                   title: 'Director of Human Resources',  spot: 'crown', level: 'director' },
+    { name: 'Pranav Pillai',            title: 'Director of Operations',       spot: 'list',  level: 'director' },
+    { name: 'Jamunah Maniram',          title: 'Director of Operations',       spot: 'list',  level: 'director' },
+    { name: 'Ken Yong',                 title: 'Director of Operations',       spot: 'list',  level: 'director' },
+    { name: 'Irshad Gori',              title: 'Director of Operations',       spot: 'list',  level: 'director' },
+    { name: 'Syed Suleiman',            title: 'Director of Operations',       spot: 'list',  level: 'director' },
+    { name: 'Aloke Dutta',              title: 'Director of Quality',          spot: 'list',  level: 'director' },
+    { name: 'Eric Ooi',                 title: 'Director of Finance',          spot: 'list',  level: 'director' },
+    { name: 'Prabitha Preymachandran',  title: 'Director of Operations',       spot: 'list',  level: 'director' },
+    { name: 'Chun Wei Chin',            title: 'Director of Operations',       spot: 'list',  level: 'director' },
+    { name: 'Michael Sanchez',          title: 'Director of Operations',       spot: 'list',  level: 'director' },
+    { name: 'Hanisha Reza',             title: 'Director of Operations',       spot: 'list',  level: 'director' },
+    { name: 'Amit Mittal',              title: 'Director of WFM',              spot: 'list',  level: 'director' },
+    // Managers and below
+    { name: 'Partiban Periannan',       title: 'Manager of Transformations',   spot: 'list',  level: 'manager' },
+    { name: 'Parvathy Ramar',           title: 'Sr. Manager of GTM',           spot: 'list',  level: 'manager' },
+    { name: 'Choon Haw',                title: 'Sr. Manager of IT',            spot: 'list',  level: 'manager' },
+    { name: 'Chris Tsu',                title: 'Sr. Manager of Operations',    spot: 'list',  level: 'manager' },
+    { name: 'Aquil Sugui',              title: 'Sr. Manager of L&D',           spot: 'list',  level: 'manager' },
+    { name: 'Liew Kin Wai',             title: 'Compliance Manager',           spot: 'list',  level: 'manager' },
+    { name: 'Zhiyuan Kerk',             title: 'L&D Officer',                  spot: 'list',  level: 'manager' }
   ],
 
   // Hidden wishes inside two small gifts on the left under the tree. A gift opens when the mouse rests on it

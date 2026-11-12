@@ -280,19 +280,42 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
 .li.leader.arch .li-find{color:#D9B77E}
 .li.leader:not(.ceo) .li-foot{flex-wrap:wrap;row-gap:10px}
 .li.leader:not(.ceo) .li-who{flex:1 1 130px}
-.lead-more{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px 14px;margin-top:4px}
-/* Directors and below: smaller cards */
-.lead-more .li.leader{gap:9px;padding:14px 14px 12px;border-radius:10px}
-.lead-more .li.leader .li-top{min-height:0}
-.lead-more .li.leader .li-kicker{font-size:10px}
-.lead-more .li.leader .li-text{font-size:13.5px;line-height:1.45}
-.lead-more .li.leader .li-foot{gap:8px;row-gap:8px;padding-top:9px}
-.lead-more .li.leader .li-photo,.lead-more .li.leader .li-init{width:32px;height:32px;font-size:12px}
-.lead-more .li.leader .li-who{flex:1 1 100px}
-.lead-more .li.leader .li-who b{font-size:13px}
-.lead-more .li.leader .li-who span{font-size:11.5px}
-.lead-more .li.leader .like.thank{min-height:32px;padding:0 10px 0 9px;gap:5px;font-size:12.5px}
-.lead-more .li.leader .like .heart{width:15px;height:15px}
+.lead-more{display:flex;flex-direction:column;gap:14px;margin-top:4px}
+/* Directors: medium cards, 5 per row */
+.lead-dir{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px}
+@media (max-width:1240px){.lead-dir{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media (max-width:1100px){.lead-dir{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:820px){.lead-dir{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:640px){.lead-dir{grid-template-columns:minmax(0,1fr)}}
+.lead-dir .li.leader{padding:16px 16px 14px}
+.lead-dir .li.leader .li-text{font-size:15px;line-height:1.5}
+/* Managers and below: small cards, 6 per row */
+.lead-mgr{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}
+@media (max-width:1240px){.lead-mgr{grid-template-columns:repeat(5,minmax(0,1fr))}}
+@media (max-width:1100px){.lead-mgr{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media (max-width:820px){.lead-mgr{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:640px){.lead-mgr{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.lead-mgr .li.leader{gap:8px;padding:12px 12px 10px;border-radius:10px}
+.lead-mgr .li.leader .li-top{min-height:0}
+.lead-mgr .li.leader .li-kicker{font-size:9.5px}
+.lead-mgr .li.leader .li-text{font-size:13px;line-height:1.45}
+.lead-mgr .li.leader .li-foot{gap:7px;row-gap:7px;padding-top:8px}
+.lead-mgr .li.leader .li-photo,.lead-mgr .li.leader .li-init{width:28px;height:28px;font-size:11px}
+.lead-mgr .li.leader .li-who{flex:1 1 90px}
+.lead-mgr .li.leader .li-who b{font-size:12.5px}
+.lead-mgr .li.leader .li-who span{font-size:11px}
+.lead-mgr .li.leader .like.thank{min-height:30px;padding:0 9px 0 8px;gap:4px;font-size:12px}
+.lead-mgr .li.leader .like .heart{width:14px;height:14px}
+/* Amr's and Maszy's cards at the end of the leaders' list */
+.team-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+@media (max-width:640px){.team-row{grid-template-columns:minmax(0,1fr)}}
+.li.team{background:#F4EEE3;border:1px solid #B18854;color:#343F37;box-shadow:inset 0 0 0 4px #F4EEE3,inset 0 0 0 5px rgba(177,136,84,.45)}
+.li.team .li-kicker{display:inline-flex;align-items:center;gap:6px;color:#6C151E}
+.li.team .li-text{font-size:15px;color:#343F37}
+.li.team .li-foot{border-top-color:rgba(108,21,30,.22)}
+.li.team .li-who span{color:#5A5550}
+.li.team.team-red .li-init{background:#6C151E;color:#F4EEE3}
+.li.team.team-gold .li-init{background:#B18854;color:#241C14}
 @media (max-width:1240px){.lead-more{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media (max-width:1100px){.lead-more{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media (max-width:820px){.lead-more{grid-template-columns:repeat(2,minmax(0,1fr))}}
@@ -806,15 +829,24 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
     state.wishes.forEach(function (w) {
       if (state.site === 'all' || w.site === state.site) counts[w.lang] = (counts[w.lang] || 0) + 1;
     });
-    el('langList').innerHTML = C.LANGUAGES.map(function (l) {
+    // only languages someone has written a wish in (on this site) are offered
+    var avail = availableLangs();
+    el('langList').innerHTML = avail.length ? avail.map(function (l) {
       var on = !state.langs || state.langs.indexOf(l.code) !== -1;
       var n = counts[l.code] || 0;
-      return '<label class="lang-opt' + (n ? '' : ' zero') + '"><input type="checkbox" value="' + C.esc(l.code) + '"' + (on ? ' checked' : '') + '>' +
+      return '<label class="lang-opt"><input type="checkbox" value="' + C.esc(l.code) + '"' + (on ? ' checked' : '') + '>' +
         '<span class="ln" lang="' + C.esc(l.code) + '">' + C.esc(l.label) + '</span>' +
         (l.english && l.english !== l.label ? '<span class="sr-en" style="font-size:12px;color:var(--cream-3)">' + C.esc(l.english) + '</span>' : '') +
         '<span class="count">' + fmt(n) + '</span></label>';
-    }).join('');
+    }).join('') : '<p class="lang-note">Languages show here once wishes are written in them.</p>';
     el('langAll').hidden = !state.langs;
+    // nothing to choose between: hide the button (unless a choice is active, so it can be undone)
+    el('langPick').hidden = avail.length < 2 && !state.langs;
+  }
+  function availableLangs() {
+    var has = {};
+    state.wishes.forEach(function (w) { if (state.site === 'all' || w.site === state.site) has[w.lang] = true; });
+    return C.LANGUAGES.filter(function (l) { return has[l.code]; });
   }
   function setLangs(list) {
     state.langs = list && list.length && list.length < C.LANGUAGES.length ? list : null;
@@ -888,15 +920,30 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
     var rest = lead.filter(function (L) { return L !== ceoL; });
     var senior = rest.filter(isSenior);
     var others = rest.filter(function (L) { return !isSenior(L); });
+    // behind "Show more": Directors (medium cards, 5 per row), then managers and below (small cards, 6 per row)
+    var directors = others.filter(function (L) { return L.level === 'director'; });
+    var managers = others.filter(function (L) { return L.level !== 'director'; });
     var nMore = others.length;
+    // at the very end: Amr's and Maszy's cards (the wishes in the two small gifts, HIDDEN_WISHES in config.js)
+    var team = SECRET_IDS.map(function (id) {
+      var h = SECRETS[id];
+      return '<article class="li team team-' + C.esc(id) + '" lang="' + C.esc(h.lang) + '">' +
+        '<div class="li-top"><span class="li-kicker">' + C.iconSvg('gift', 14) + ' THE WISH TREE TEAM</span></div>' +
+        '<p class="li-text">' + C.esc(h.message) + '</p>' +
+        '<div class="li-foot"><span class="li-init" aria-hidden="true">' + C.esc(C.initials(h.display_name)) + '</span>' +
+        '<div class="li-who"><b>' + C.esc(h.display_name) + '</b><span>' + C.esc(h.title) + '</span></div></div></article>';
+    });
     el('leaderList').innerHTML = (ceoL ? cardHtml(ceoL) : '') +
       (senior.length ? '<div class="lead-grid">' + senior.map(archHtml).join('') + '</div>' : '') +
       (nMore
-        ? (state.leadersOpen ? '<div class="lead-more" id="leadMore">' + others.map(cardHtml).join('') + '</div>' : '') +
+        ? (state.leadersOpen ? '<div class="lead-more" id="leadMore">' +
+            (directors.length ? '<div class="lead-dir">' + directors.map(cardHtml).join('') + '</div>' : '') +
+            (managers.length ? '<div class="lead-mgr">' + managers.map(cardHtml).join('') + '</div>' : '') + '</div>' : '') +
           '<div class="lead-toggle"><button type="button" class="btn-ghost" data-lead-toggle aria-expanded="' + (state.leadersOpen ? 'true' : 'false') + '"' + (state.leadersOpen ? ' aria-controls="leadMore"' : '') + '>' +
           (state.leadersOpen ? 'Show fewer leaders\' messages' : 'Show ' + nMore + ' more leaders\' message' + (nMore === 1 ? '' : 's')) + '</button></div>'
-        : '');
-    el('leaderList').hidden = !state.leaders.length;
+        : '') +
+      (team.length ? '<div class="team-row">' + team.join('') + '</div>' : '');
+    el('leaderList').hidden = !state.leaders.length && !team.length;
 
     var list = listWishes();
     var shown = list.slice(0, state.shown);
@@ -1345,7 +1392,8 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
       renderLangs();
       return;
     }
-    setLangs(picked);
+    // every language on offer ticked = all languages
+    setLangs(picked.length >= availableLangs().length ? null : picked);
   });
   el('langAll').addEventListener('click', function () { setLangs(null); });
   document.addEventListener('click', function (e) {

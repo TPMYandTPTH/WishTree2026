@@ -345,6 +345,12 @@ begin
   new.display_name := btrim(new.display_name);
   new.title        := nullif(btrim(coalesce(new.title, '')), '');
   new.message      := btrim(new.message);
+  -- Leaders' messages are in English only: no Thai, Chinese, Japanese, Korean, Tamil, Arabic and other non-Latin scripts
+  new.lang := 'en';
+  if (coalesce(new.message, '') || ' ' || coalesce(new.title, '') || ' ' || coalesce(new.display_name, ''))
+     ~ '[\u0590-\u08FF\u0900-\u0DFF\u0E00-\u0EFF\u1000-\u109F\u1100-\u11FF\u3040-\u30FF\u3100-\u31FF\u3400-\u4DBF\u4E00-\u9FFF\uAC00-\uD7AF\uF900-\uFAFF]' then
+    raise exception 'english_only';
+  end if;
 
   if tg_op = 'INSERT' then
     if auth.uid() is not null then

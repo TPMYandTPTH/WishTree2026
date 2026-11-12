@@ -319,11 +319,7 @@ button,input,select,textarea{font-family:inherit}
         <div class="field">
           <label for="lMessage">Your message to everyone</label>
           <textarea id="lMessage" class="textarea" rows="6"></textarea>
-          <div class="field-foot"><span>Shown to every site in Malaysia and Thailand.</span><span class="counter" id="lCounter"></span></div>
-        </div>
-        <div class="field">
-          <span class="label" id="langLabel">Written in</span>
-          <div class="seg" id="langSeg" role="group" aria-labelledby="langLabel"></div>
+          <div class="field-foot"><span>Shown to every site in Malaysia and Thailand. Please write it in English.</span><span class="counter" id="lCounter"></span></div>
         </div>
 
         <p id="editErr" class="err" role="alert"></p>
@@ -362,6 +358,8 @@ button,input,select,textarea{font-family:inherit}
     photoBlob: null,    // a new photo waiting to be uploaded
     photoChanged: false };
   var LEADERS = C.leaderList();
+  // Scripts that aren't English: Thai, Chinese, Japanese, Korean, Tamil, Devanagari, Arabic and others
+  var NOT_ENGLISH = /[\u0590-\u08FF\u0900-\u0DFF\u0E00-\u0EFF\u1000-\u109F\u1100-\u11FF\u3040-\u30FF\u3100-\u31FF\u3400-\u4DBF\u4E00-\u9FFF\uAC00-\uD7AF\uF900-\uFAFF]/;
   // The default photo: the one the Wish Tree team set, or the one in config.js LEADERS for the picked name
   function defaultPhoto() { return S.dbPhoto || C.leaderPhoto(S.name) || ''; }
   function shownPhoto() { return C.safePhoto(S.photo || defaultPhoto()); }
@@ -414,7 +412,6 @@ button,input,select,textarea{font-family:inherit}
     f('lMessage', S.message);
     $('lMessage').setAttribute('maxlength', String(MAX));
     $('lCounter').textContent = S.message.length + ' / ' + MAX;
-    qsa('.seg button').forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-lang') === S.lang ? 'true' : 'false'); });
     $('statusLive').hidden = !S.existing;
     if (S.existing) {
       var st = S.existing.status || 'pending';
@@ -517,7 +514,7 @@ button,input,select,textarea{font-family:inherit}
       S.nameLocked = !!(S.existing || fixed);
       S.title = S.existing ? (S.existing.title || '') : S.title;
       S.message = S.existing ? S.existing.message : S.message;
-      S.lang = S.existing ? (S.existing.lang || 'en') : S.lang;
+      S.lang = 'en';
       S.photo = S.existing ? (S.existing.photo_url || '') : S.photo;
       show('edit');
       return Promise.resolve();
@@ -545,7 +542,7 @@ button,input,select,textarea{font-family:inherit}
           S.nameLocked = true;
           S.title = r.data.title || '';
           S.message = r.data.message || '';
-          S.lang = r.data.lang || 'en';
+          S.lang = 'en';
           S.photo = r.data.photo_url || '';
         }
         show('edit');
@@ -653,11 +650,13 @@ button,input,select,textarea{font-family:inherit}
     $('editOk').textContent = '';
     if (!S.name.trim()) { $('editErr').textContent = 'Type your name first.'; $('lName').focus(); return; }
     if (!S.message.trim()) { $('editErr').textContent = 'Write your message first.'; $('lMessage').focus(); return; }
+    // leaders' messages are in English only (the database checks this too)
+    if (NOT_ENGLISH.test(S.message)) { $('editErr').textContent = 'Please write your message in English. Leaders\' messages are shown in English on every site.'; $('lMessage').focus(); return; }
     var row = {
       display_name: S.name.trim().slice(0, 60),
       title: S.title.trim().slice(0, 80) || null,
       message: S.message.trim().slice(0, MAX),
-      lang: S.lang
+      lang: 'en'
     };
     if (S.photoChanged && !S.photoBlob) row.photo_url = null;   // own photo removed: the default photo shows
     S.busy = true;
@@ -683,7 +682,9 @@ button,input,select,textarea{font-family:inherit}
         ? 'Your account is not on the leaders list, so the message was not saved.'
         : err && err.photo
           ? 'We could not upload your photo. Try a smaller JPG or PNG, or send without a photo.'
-          : 'We could not save your message. Please try again.';
+          : err && /english_only/.test(String(err.message || ''))
+            ? 'Please write your message, name and title in English. Leaders\' messages are shown in English on every site.'
+            : 'We could not save your message. Please try again.';
     };
 
     if (C.demo) {
@@ -818,14 +819,6 @@ button,input,select,textarea{font-family:inherit}
     S.message = e.target.value.slice(0, MAX);
     $('lCounter').textContent = S.message.length + ' / ' + MAX;
     renderPreview();
-  });
-  $('langSeg').innerHTML = C.LANGUAGES.map(function (l) {
-    return '<button type="button" data-lang="' + C.esc(l.code) + '" lang="' + C.esc(l.code) + '"' +
-      (l.english && l.english !== l.label ? ' title="' + C.esc(l.english) + '"' : '') + '>' + C.esc(l.label) + '</button>';
-  }).join('');
-  $('langSeg').addEventListener('click', function (e) {
-    var b = e.target.closest ? e.target.closest('button[data-lang]') : null;
-    if (b) { S.lang = b.getAttribute('data-lang'); renderEdit(); }
   });
   $('photoBtn').addEventListener('click', function () { $('photoFile').click(); });
   $('photoFile').addEventListener('change', function (e) {
