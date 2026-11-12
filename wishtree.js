@@ -345,7 +345,13 @@
     ['Vivienne', '[Sample] My wish for 2027: that each of you feels proud of the work you do and supported by the people around you. Merry Christmas!'],
     ['Chavis', '[Sample] From Bangkok to Penang, Kuala Lumpur and Johor: thank you for a remarkable year. Wishing you joy and good health.'],
     ['Sudhar', '[Sample] Thank you for the care you bring to our customers and to each other. Enjoy the season with the people you love.']
-  ].map(function (r, i) {
+  ];
+  // Every other leader in config.js LEADERS gets a placeholder (not words in their name) so the preview lists them all
+  leaderList().forEach(function (l) {
+    var have = SAMPLE_LEADERS.some(function (r) { return r[0].toLowerCase() === l.name.toLowerCase(); });
+    if (!have) SAMPLE_LEADERS.push([l.name, '[Sample] ' + l.name.split(' ')[0] + '\'s Christmas message will show here once it\'s written on the leaders\' page and approved.']);
+  });
+  SAMPLE_LEADERS = SAMPLE_LEADERS.map(function (r, i) {
     var c = leaderConfig(r[0]) || {};
     return {
       id: 'demo-leader-' + (i + 1),
