@@ -81,6 +81,10 @@
     return '<img' + (imgClass ? ' class="' + esc(imgClass) + '"' : '') + ' src="' + esc(src) + '" alt="" data-initials="' + esc(initials || '') + '"' +
       (fallbackClass ? ' data-fallback-class="' + esc(fallbackClass) + '"' : '') + '>';
   }
+  // The TP logo, the picture on every employee wish: black on light circles, white on dark ones
+  function tpMarkHtml(black) {
+    return '<img class="tp-mark" src="' + esc(url(black ? 'assets/tp-logo-black.png' : 'assets/tp-logo-white.png')) + '" alt="">';
+  }
   document.addEventListener('error', function (e) {
     var img = e.target;
     if (!img || img.tagName !== 'IMG' || !img.hasAttribute('data-initials')) return;
@@ -1260,6 +1264,7 @@
     hash: hash,
     random: mulberry32,
     initials: initials,
+    tpMarkHtml: tpMarkHtml,
     client: getClient,
     fetchApproved: fetchApproved,
     fetchLeaders: fetchLeaders,

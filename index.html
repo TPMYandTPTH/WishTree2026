@@ -349,6 +349,9 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
 .all-empty{grid-column:1/-1;padding:40px 20px;border:1px dashed rgba(108,21,30,.2);border-radius:12px;text-align:center;color:var(--cream-3)}
 .more-row{display:flex;justify-content:center;margin-top:20px}
 .avatar img{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block}
+.avatar img.tp-mark,.li-mark img.tp-mark{width:auto;height:50%;border-radius:0;object-fit:contain}
+.li-mark{flex:none;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;background:var(--bg-mark);box-shadow:0 0 0 1px rgba(108,21,30,.2)}
+.li-mark img.tp-mark{display:block}
 .wish-card[data-kind="leader"] .avatar.has-photo{box-shadow:0 0 0 2px #B18854}
 /* asking for the BMS before a like, and short notes */
 .bms-dialog{width:min(420px,calc(100vw - 32px));padding:0;border:0;border-radius:18px;background:var(--paper);color:var(--ink);box-shadow:0 24px 60px rgba(36,28,20,.4)}
@@ -964,7 +967,8 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
         '<span class="li-lang" lang="' + C.esc(w.lang || 'en') + '">' + C.esc(C.langLabel(w.lang)) + '</span>' +
         (on ? '<button type="button" class="li-find" data-find-kind="wish" data-find-id="' + C.esc(w.id) + '">On the tree</button>' : '') + '</div>' +
         '<p class="li-text">' + C.esc(w.message) + '</p>' +
-        '<div class="li-foot"><div class="li-who" lang="en"><b>' + C.esc(C.displayName(w)) + '</b><span>' + C.esc(C.displayWhere(w)) + '</span></div>' +
+        '<div class="li-foot"><span class="li-mark" style="--bg-mark:' + pal.bg + '" aria-hidden="true">' + C.tpMarkHtml(w.tag_color !== 'red') + '</span>' +
+        '<div class="li-who" lang="en"><b>' + C.esc(C.displayName(w)) + '</b><span>' + C.esc(C.displayWhere(w)) + '</span></div>' +
         likeBtnHtml('wish', w) + '</div></article>';
     }).join('') : '<div class="all-empty">' + (state.q ? 'No wishes match your search.' : 'No wishes here yet in the languages you picked.') + '</div>';
     el('moreBtn').hidden = list.length <= state.shown;
@@ -1109,7 +1113,8 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
       el('cardName').textContent = name;
       el('cardWhere').textContent = C.displayWhere(item);
       el('cardInitial').classList.remove('has-photo');
-      el('cardInitial').textContent = item.display_name ? name.charAt(0).toUpperCase() : '?';
+      // the TP logo: black on the Brass circle (Cranberry cards), white on the Spruce one
+      el('cardInitial').innerHTML = C.tpMarkHtml(item.tag_color === 'red');
     }
   }
 

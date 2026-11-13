@@ -136,6 +136,7 @@ html.portrait .prize-tv{gap:.8rem;padding-top:.6rem}
 .avatar{flex:none;display:flex;align-items:center;justify-content:center;width:4.8rem;height:4.8rem;border-radius:50%;background:var(--card-avatar-bg);color:var(--card-avatar-fg);font-size:1.9rem;font-weight:700}
 .avatar svg{width:2.8rem;height:2.8rem}
 .avatar img{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block}
+.avatar img.tp-mark{width:auto;height:50%;border-radius:0;object-fit:contain}
 .avatar.has-photo{box-shadow:0 0 0 .25rem #B18854}
 .who-box{min-width:0}
 .who{font-size:2.1rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -589,7 +590,7 @@ body.pointer .fs{opacity:1;pointer-events:auto}
     var photo = isLeader ? C.safePhoto(item.photo_url) : '';
     $('avatar').classList.toggle('has-photo', !!photo);
     $('avatar').innerHTML = photo ? C.photoHtml(photo, C.initials(item.display_name))
-      : isLeader ? C.esc(C.initials(item.display_name)) : C.iconSvg(item.charm || 'snow', 28);
+      : isLeader ? C.esc(C.initials(item.display_name)) : C.tpMarkHtml(item.tag_color === 'red');
     var likes = item.like_count || 0;
     $('likes').hidden = isLeader || likes < 1;   // leaders' like counts aren't shown
     $('likeCount').textContent = fmt(likes);
