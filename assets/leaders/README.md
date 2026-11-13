@@ -10,15 +10,15 @@ Upload any photo with any name and ask for it to be cropped and renamed if that'
 |---|---|
 | Andy | `andy.jpg` (in) |
 | Divya Dutta | `divya-dutta.jpg` (in) |
-| Himanshu | `himanshu.jpg` |
-| Alex Ma | `alex-ma.jpg` |
+| Himanshu | `himanshu.jpg` (in) |
+| Alex Ma | `alex-ma.jpg` (in) |
 | Sarah | `sarah.jpg` (in) |
-| Michael Costevec | `michael-costevec.jpg` |
-| Vivienne | `vivienne.jpg` |
-| Chavis | `chavis.jpg` |
-| Sudhar | `sudhar.jpg` |
+| Michael Costevec | `michael-costevec.jpg` (in) |
+| Vivienne | `vivienne.jpg` (in) |
+| Chavis | `chavis.jpg` (in) |
+| Sudhar | `sudhar.jpg` (in) |
 | Noppawan Krynetr | `noppawan-krynetr.jpg` |
-| Rachel | `rachel.jpg` |
+| Rachel | `rachel.jpg` (in) |
 | Pranav Pillai | `pranav-pillai.jpg` |
 | Jamunah Maniram | `jamunah-maniram.jpg` |
 | Ken Yong | `ken-yong.jpg` |
