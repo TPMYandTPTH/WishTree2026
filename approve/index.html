@@ -193,7 +193,7 @@ a{color:var(--slate)}
 <script src="../wishtree.js"></script>
 </head>
 <body>
-<div id="demoBar" class="demo-bar" role="status" hidden><span class="pv">PREVIEW</span>Sample messages only; your decisions stay on this device. Once the Wish Tree opens, only the Wish Tree team can use this page.</div>
+<div id="demoBar" class="demo-bar" role="status" hidden><span class="pv">PREVIEW</span>Sample messages only; your decisions stay on this device. Any password opens it here. Once the Wish Tree opens, only the Approvals password does.</div>
 <header class="top">
   <div class="top-in">
     <div class="brand">
@@ -202,7 +202,7 @@ a{color:var(--slate)}
       <span class="brand-name">Wish Tree · Approvals</span>
     </div>
     <div class="me" id="meBox" hidden>
-      <span id="meEmail"></span>
+      <span id="meEmail">Signed in on this browser</span>
       <button type="button" id="signOutBtn">Sign out</button>
     </div>
   </div>
@@ -214,43 +214,16 @@ a{color:var(--slate)}
   <section id="view-signin" class="view" hidden>
     <div class="center">
       <h1 tabindex="-1">Approvals</h1>
-      <p>For the Wish Tree team. Sign in with your TP work account to approve wishes and leaders' messages before they go on the tree and the site TVs.</p>
+      <p>For the Wish Tree team. Enter the Approvals password to approve wishes and leaders' messages before they go on the tree and the site TVs.</p>
       <div class="panel">
-        <button type="button" id="googleBtn" class="btn btn-google btn-block" hidden>
-          <svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>
-          Continue with your TP Google account
-        </button>
-        <form id="emailForm" novalidate hidden style="display:flex;flex-direction:column;gap:10px">
-          <label for="email">Your TP work email</label>
-          <input id="email" class="input" type="email" autocomplete="email" autocapitalize="off" spellcheck="false">
-          <button type="submit" id="sendCodeBtn" class="btn btn-slate btn-block">Send my code</button>
+        <form id="passForm" novalidate style="display:flex;flex-direction:column;gap:10px">
+          <label for="pass">Approvals password</label>
+          <input id="pass" class="input" type="password" autocomplete="current-password" spellcheck="false">
+          <button type="submit" id="passBtn" class="btn btn-slate btn-block">Open Approvals</button>
         </form>
+        <p class="small" style="margin:0">You stay in on this browser for 12 hours. Five wrong tries lock the page for 15 minutes.</p>
         <p id="signinErr" class="err" role="alert"></p>
       </div>
-    </div>
-  </section>
-
-  <section id="view-code" class="view" hidden>
-    <div class="center">
-      <h1 tabindex="-1">Check your inbox</h1>
-      <div class="panel">
-        <form id="codeForm" novalidate style="display:flex;flex-direction:column;gap:10px">
-          <label for="code" id="codeLabel">Enter the 6-digit code we sent you</label>
-          <input id="code" class="input code-input" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6">
-          <button type="submit" id="verifyBtn" class="btn btn-slate btn-block">Continue</button>
-        </form>
-        <p id="codeErr" class="err" role="alert"></p>
-        <button type="button" id="backToEmail" class="link" style="align-self:flex-start">Use a different email</button>
-      </div>
-    </div>
-  </section>
-
-  <section id="view-denied" class="view" hidden>
-    <div class="center">
-      <h1 tabindex="-1">This page is for the Wish Tree team</h1>
-      <p id="deniedText"></p>
-      <p>If you should approve messages, ask the Wish Tree owner to add your work email to the approvers list.</p>
-      <button type="button" class="btn btn-ghost btn-block" id="deniedSignOut">Sign out</button>
     </div>
   </section>
 
@@ -329,7 +302,7 @@ a{color:var(--slate)}
         <div class="box">
           <h2>Campaign switch</h2>
           <label class="switch"><span>Accept new wishes</span><input type="checkbox" id="swOpen"></label>
-          <p class="small">Every wish and every leader message waits here for approval, new or edited. The database enforces this, so it can't be switched off. Only emails in Table Editor &gt; leaders can use the leaders' page.</p>
+          <p class="small">Every wish and every leader message waits here for approval, new or edited. The database enforces this, so it can't be switched off. Leaders open their page with the leaders' password; to change either password, see section 10 of schema.sql.</p>
           <p id="settingsMsg" class="small" role="status"></p>
         </div>
 
@@ -350,16 +323,14 @@ a{color:var(--slate)}
   'use strict';
   var C = window.WishCore;
   var CFG = C.cfg;
-  var DOMAIN = (CFG.ALLOWED_EMAIL_DOMAINS && CFG.ALLOWED_EMAIL_DOMAINS[0]) || 'tp.com';
-  var AUTH = CFG.AUTH_MODE === 'email' ? 'email' : 'google';
   var MAX = { wish: Number(CFG.MAX_LENGTH) || 150, leader: Number(CFG.LEADER_MAX_LENGTH) || 250 };
   var PAGE = 40;
 
   var S = {
-    view: 'loading', user: null, email: '',
+    view: 'loading', token: '',
     kind: 'wish', status: 'pending', site: 'all', q: '',
     wishes: [], leaders: [], likes: {},
-    settings: { submissions_open: true, leaders_need_approval: true },
+    settings: { submissions_open: true },
     editing: null, draft: '', busy: {}, shown: PAGE, bulkArmed: false
   };
   var sb = null;
@@ -370,7 +341,7 @@ a{color:var(--slate)}
   function show(view) {
     S.view = view;
     qsa('.view').forEach(function (v) { v.hidden = v.id !== 'view-' + view; });
-    $('meBox').hidden = !(S.user && view === 'main');
+    $('meBox').hidden = !(S.token && view === 'main');
     var h = document.querySelector('#view-' + view + ' h1');
     if (h) setTimeout(function () { h.focus({ preventScroll: true }); }, 0);
   }
@@ -402,23 +373,22 @@ a{color:var(--slate)}
         render();
       });
     }
-    return Promise.all([
-      sb.from('wishes').select('id,created_at,email,message,display_mode,first_name,site,lang,tag_color,charm,status,flags,reviewed_at,reviewed_by,approved_at,bms,updated_at,edit_count').order('created_at', { ascending: false }).limit(5000),
-      sb.from('leader_messages').select('id,created_at,updated_at,email,display_name,title,message,lang,photo_url,status,hidden,reviewed_at,reviewed_by').order('updated_at', { ascending: false }),
-      sb.rpc('get_approved_wishes'),
-      sb.rpc('get_leader_messages'),
-      sb.rpc('get_settings')
-    ]).then(function (r) {
-      for (var i = 0; i < r.length; i++) if (r[i].error) throw r[i].error;
-      S.wishes = r[0].data || [];
-      S.leaders = r[1].data || [];
+    return adminRpc('admin_queue', {}).then(function (q) {
+      q = q || {};
+      S.wishes = q.wishes || [];
       S.likes = {};
-      (r[2].data || []).forEach(function (w) { S.likes['wish:' + w.id] = w.like_count || 0; });
-      (r[3].data || []).forEach(function (l) { S.likes['leader:' + l.id] = l.like_count || 0; });
-      var st = Array.isArray(r[4].data) ? r[4].data[0] : r[4].data;
-      if (st) S.settings = st;
-      render();
+      S.wishes.forEach(function (w) { S.likes['wish:' + w.id] = w.like_count || 0; });
+      if (q.settings) S.settings = q.settings;
+      // photos of approved leaders' messages come from the public cache; the others came with the queue
+      return C.attachLeaderPhotos((q.leaders || []).map(function (l) {
+        return Object.assign({}, l, { photo_url: l.photo || null });
+      })).then(function (leaders) {
+        S.leaders = leaders;
+        S.leaders.forEach(function (l) { S.likes['leader:' + l.id] = l.like_count || 0; });
+        render();
+      });
     }).catch(function (err) {
+      if (signedOut(err)) return;
       console.error(err);
       $('mainErr').textContent = 'Could not load the messages. Check your connection and refresh.';
     });
@@ -433,7 +403,7 @@ a{color:var(--slate)}
       if ((x.status || 'pending') !== S.status) return false;
       if (S.kind === 'wish' && S.site !== 'all' && x.site !== S.site) return false;
       if (q) {
-        var hay = [x.message, x.first_name, x.display_name, x.title, x.email, x.bms, x.phone].join(' ').toLowerCase();
+        var hay = [x.message, x.first_name, x.display_name, x.title, x.bms].join(' ').toLowerCase();
         if (hay.indexOf(q) === -1) return false;
       }
       return true;
@@ -521,8 +491,6 @@ a{color:var(--slate)}
     var metaBits = [];
     if (isW && x.bms) metaBits.push('BMS ' + x.bms);
     if (isW && x.edit_count) metaBits.push('Edited by the sender ' + x.edit_count + (x.edit_count === 1 ? ' time' : ' times'));
-    if (x.email) metaBits.push('From ' + x.email);
-    if (status !== 'pending' && x.reviewed_by) metaBits.push((status === 'approved' ? 'Approved by ' : 'Not approved by ') + x.reviewed_by);
     if (metaBits.length) h += '<div class="meta">' + esc(metaBits.join(' · ')) + '</div>';
 
     h += '<div class="actions">';
@@ -547,6 +515,10 @@ a{color:var(--slate)}
     if (isW && status !== 'approved' && x.bms) {
       h += '<button type="button" class="btn btn-reject" data-act="delete"' + dis + ' title="Removes the wish for good so this BMS can hang a new one">' +
         (deleteArmed === key ? 'Click again to delete' : 'Delete (frees the BMS)') + '</button>';
+    }
+    if (!isW && status !== 'approved') {
+      h += '<button type="button" class="btn btn-reject" data-act="delete"' + dis + ' title="Removes the message for good so this name can be used again">' +
+        (deleteArmed === key ? 'Click again to delete' : 'Delete (frees the name)') + '</button>';
     }
     h += '</div></article>';
     return h;
@@ -583,16 +555,16 @@ a{color:var(--slate)}
     if (C.demo) {
       return C.fetchPrizeTop(30).then(function (top) {
         prize.rows = top.map(function (w) {
-          return { id: w.id, first_name: w.display_name, bms: w.bms || 'sample', site: w.site, message: w.message, like_count: w.like_count, distinct_ips: null, most_from_one_ip: null, excluded: false, bms_ok: w.bms ? C.bmsLooksReal(w.bms) : true };
+          return { id: w.id, first_name: w.display_name, bms: w.bms || 'sample', site: w.site, message: w.message, like_count: w.like_count, connections: null, most_from_one_connection: null, excluded: false, bms_ok: w.bms ? C.bmsLooksReal(w.bms) : true };
         });
         renderPrize();
       });
     }
-    return sb.rpc('get_prize_check', { p_limit: 30 }).then(function (res) {
-      if (res.error) throw res.error;
-      prize.rows = res.data || [];
+    return adminRpc('get_prize_check', { p_limit: 30 }).then(function (rows) {
+      prize.rows = rows || [];
       renderPrize();
     }).catch(function (err) {
+      if (signedOut(err)) return;
       console.error(err);
       $('prizeMsg').textContent = 'Could not load the prize standings.';
     });
@@ -601,7 +573,7 @@ a{color:var(--slate)}
   function eligible(r) { return !r.excluded && r.bms_ok !== false; }
   function whyOut(r) { return r.excluded ? 'not eligible: Wish Tree team' : 'not eligible: BMS looks made up'; }
   function suspicious(r) {
-    return r.most_from_one_ip != null && r.like_count >= 5 && r.most_from_one_ip / r.like_count > 0.5;
+    return r.most_from_one_connection != null && r.like_count >= 5 && r.most_from_one_connection / r.like_count > 0.5;
   }
   function renderPrize() {
     var place = 0;
@@ -613,7 +585,7 @@ a{color:var(--slate)}
       var sub = [];
       sub.push('BMS <span class="bms">' + esc(r.bms || '') + '</span>');
       sub.push(esc(C.siteName(r.site) || ''));
-      if (r.distinct_ips != null) sub.push('from ' + fmt(r.distinct_ips) + (r.distinct_ips === 1 ? ' connection' : ' connections') + ', up to ' + fmt(r.most_from_one_ip) + ' from one');
+      if (r.connections != null) sub.push('from ' + fmt(r.connections) + (r.connections === 1 ? ' connection' : ' connections') + ', up to ' + fmt(r.most_from_one_connection) + ' from one');
       var detail = prize.open[r.id] ? '<div class="pz-detail">' + (prize.likes[r.id] || 'Loading…') + '</div>' : '';
       return '<li class="' + cls + '"><div class="pz-main"><span class="pz-n">' + (out ? '-' : place) + '</span>' +
         '<span class="pz-who"><b>' + esc(r.first_name || 'Anonymous') + (out ? ' (' + whyOut(r) + ')' : place <= winners ? ' (winning)' : '') + '</b></span>' +
@@ -624,14 +596,14 @@ a{color:var(--slate)}
     }).join('') : '<li class="small">No likes yet.</li>';
   }
   function loadLikes(id) {
-    sb.rpc('get_wish_likes', { p_id: id }).then(function (res) {
-      if (res.error) throw res.error;
-      var rows = res.data || [];
+    adminRpc('get_wish_likes', { p_id: id }).then(function (rows) {
+      rows = rows || [];
+      // connection: a scrambled code for the connection the like came from (the same code = the same connection)
       prize.likes[id] = rows.length ? rows.map(function (l) {
-        return esc(l.bms) + ' · ' + esc(l.ip || '') + ' · ' + esc(new Date(l.created_at).toLocaleString('en-GB'));
+        return 'BMS ' + esc(l.bms) + ' · connection ' + esc(String(l.connection || '').slice(0, 6)) + ' · ' + esc(new Date(l.created_at).toLocaleString('en-GB'));
       }).join('<br>') : 'No likes.';
       renderPrize();
-    }).catch(function (err) { console.error(err); prize.likes[id] = 'Could not load the likes.'; renderPrize(); });
+    }).catch(function (err) { if (signedOut(err)) return; console.error(err); prize.likes[id] = 'Could not load the likes.'; renderPrize(); });
   }
   // CSV for the Wish Tree team (cells that start like a formula are quoted so spreadsheets don't run them)
   function csvCell(v) {
@@ -654,7 +626,7 @@ a{color:var(--slate)}
     prize.rows.forEach(function (r) {
       var ok = eligible(r);
       if (ok) place++;
-      lines.push([ok ? place : '', r.first_name, r.bms, C.siteName(r.site), r.like_count, r.distinct_ips, r.most_from_one_ip, ok ? 'yes' : 'no', ok ? '' : whyOut(r).replace('not eligible: ', ''), r.message].map(csvCell).join(','));
+      lines.push([ok ? place : '', r.first_name, r.bms, C.siteName(r.site), r.like_count, r.connections, r.most_from_one_connection, ok ? 'yes' : 'no', ok ? '' : whyOut(r).replace('not eligible: ', ''), r.message].map(csvCell).join(','));
     });
     saveCsv(lines, 'wish-tree-prize-standings.csv');
   }
@@ -694,13 +666,12 @@ a{color:var(--slate)}
     prize.rmArmed = '';
     $('rmBtn').textContent = 'Remove likes';
     if (C.demo) { $('prizeMsg').textContent = 'Preview: nothing to remove.'; return; }
-    sb.rpc('remove_likes_by_bms', { p_bms: b }).then(function (res) {
-      if (res.error) throw res.error;
-      $('prizeMsg').textContent = 'Removed ' + fmt(res.data) + ' likes made with BMS ' + b + '.';
+    adminRpc('remove_likes_by_bms', { p_bms: b }).then(function (n) {
+      $('prizeMsg').textContent = 'Removed ' + fmt(n) + ' likes made with BMS ' + b + '.';
       $('rmBms').value = '';
       load();
       loadPrize();
-    }).catch(function (err) { console.error(err); $('prizeMsg').textContent = 'Could not remove the likes.'; });
+    }).catch(function (err) { if (signedOut(err)) return; console.error(err); $('prizeMsg').textContent = 'Could not remove the likes.'; });
   });
 
   /* ---------- Actions ---------- */
@@ -717,37 +688,42 @@ a{color:var(--slate)}
       ids.forEach(function (id) { C.demoReview(kind, id, changes); });
       return Promise.resolve();
     }
-    var table = kind === 'leader' ? 'leader_messages' : 'wishes';
+    // fix the words and approve in one step
+    if (changes.message != null) {
+      return adminRpc('admin_edit_message', { p_kind: kind, p_id: ids[0], p_message: changes.message }).then(function (ok) {
+        if (!ok) throw new Error('That message is no longer there. Refresh to see the latest.');
+      });
+    }
     var chunks = [];
-    for (var i = 0; i < ids.length; i += 100) chunks.push(ids.slice(i, i + 100));
+    for (var i = 0; i < ids.length; i += 200) chunks.push(ids.slice(i, i + 200));
     return chunks.reduce(function (p, chunk) {
       return p.then(function () {
-        return sb.from(table).update(changes).in('id', chunk).select('id').then(function (res) {
-          if (res.error) throw res.error;
-          if ((res.data || []).length !== chunk.length) throw new Error('Not all rows were updated. You may not be on the approvers list.');
+        return adminRpc('admin_set_status', { p_kind: kind, p_ids: chunk, p_status: changes.status }).then(function (n) {
+          if (n !== chunk.length) throw new Error('Some messages were not updated. Refresh to see the latest.');
         });
       });
     }, Promise.resolve());
   }
 
-  // Delete a wish for good, so its BMS can hang a new one (two clicks)
+  // Delete for good (two clicks): a wish, so its BMS can hang a new one, or a leader message, so its name is free
   var deleteArmed = '';
   function removeWish(key, f) {
     if (deleteArmed !== key) { deleteArmed = key; renderList(); return; }
     deleteArmed = '';
     S.busy[key] = true;
     renderList();
-    var p = C.demo ? Promise.resolve(C.demoReview('wish', f.id, { status: 'deleted' }))
-      : sb.from('wishes').delete().eq('id', f.id).select('id').then(function (res) {
-        if (res.error) throw res.error;
-        if (!(res.data || []).length) throw new Error('Nothing was deleted. You may not be on the approvers list.');
+    var p = C.demo ? Promise.resolve(C.demoReview(f.kind, f.id, { status: 'deleted' }))
+      : adminRpc('admin_delete', { p_kind: f.kind, p_id: f.id }).then(function (ok) {
+        if (!ok) throw new Error('Nothing was deleted. Refresh to see the latest.');
       });
     p.then(function () {
       S.busy[key] = false;
-      S.wishes = S.wishes.filter(function (w) { return String(w.id) !== String(f.id); });
+      if (f.kind === 'leader') S.leaders = S.leaders.filter(function (l) { return String(l.id) !== String(f.id); });
+      else S.wishes = S.wishes.filter(function (w) { return String(w.id) !== String(f.id); });
       render();
       if (!C.demo) load();
     }).catch(function (err) {
+      if (signedOut(err)) return;
       console.error(err);
       S.busy[key] = false;
       renderList();
@@ -776,7 +752,7 @@ a{color:var(--slate)}
     update(f.kind, [f.id], changes).then(function () {
       S.busy[key] = false;
       if (S.editing === key) S.editing = null;
-      Object.assign(f.item, changes, { reviewed_by: S.user ? S.user.email : '', reviewed_at: new Date().toISOString() });
+      Object.assign(f.item, changes, { reviewed_at: new Date().toISOString() });
       C.track('approval_' + action, { kind: f.kind });
       render();
       load();
@@ -784,6 +760,7 @@ a{color:var(--slate)}
       console.error(err);
       S.busy[key] = false;
       renderList();
+      if (signedOut(err)) return;
       $('mainErr').textContent = 'That didn\'t save. ' + (err && err.message ? err.message : 'Please try again.');
     });
   }
@@ -811,7 +788,7 @@ a{color:var(--slate)}
   }
 
   function saveSettings() {
-    var next = { submissions_open: $('swOpen').checked, leaders_need_approval: true };
+    var next = { submissions_open: $('swOpen').checked, likes_close_at: S.settings.likes_close_at };
     $('settingsMsg').textContent = 'Saving…';
     var done = function () {
       S.settings = next;
@@ -819,95 +796,63 @@ a{color:var(--slate)}
       render();
     };
     if (C.demo) { C.demoSave('wt-demo-settings', next); done(); return; }
-    sb.rpc('update_settings', { p_submissions_open: next.submissions_open, p_leaders_need_approval: true }).then(function (res) {
-      if (res.error) throw res.error;
+    adminRpc('update_settings', { p_submissions_open: next.submissions_open }).then(function () {
       done();
     }).catch(function (err) {
+      if (signedOut(err)) return;
       console.error(err);
       $('settingsMsg').textContent = 'Could not save the switch. Please try again.';
       render();
     });
   }
 
-  /* ---------- Sign-in ---------- */
-  function checkAccess() {
-    if (C.demo) { show('main'); renderSites(); load(); loadPrize(); return; }
-    sb.rpc('am_i_moderator').then(function (res) {
+  /* ---------- Password ---------- */
+  // Every call carries this browser's token; the database checks it (12 hours after the password was entered)
+  function adminRpc(name, args) {
+    return sb.rpc(name, Object.assign({ p_token: S.token }, args || {})).then(function (res) {
       if (res.error) throw res.error;
-      if (!res.data) {
-        $('deniedText').textContent = 'You are signed in as ' + S.user.email + ', which is not on the approvers list.';
-        show('denied');
-        return;
-      }
-      $('meEmail').textContent = S.user.email;
-      show('main');
-      renderSites();
-      load();
-      loadPrize();
-    }).catch(function (err) {
-      console.error(err);
-      $('signinErr').textContent = 'We could not check your access. Please try again.';
-      show('signin');
+      return res.data;
     });
   }
-
-  function handleSession(session) {
-    if (!session || !session.user) { S.user = null; if (S.view !== 'code') show('signin'); return; }
-    var email = session.user.email || '';
-    if (!C.allowedEmail(email)) {
-      setTimeout(function () { sb.auth.signOut(); }, 0);
-      $('signinErr').textContent = 'Please use your TP work account (@' + DOMAIN + ').';
-      show('signin');
-      return;
-    }
-    if (S.user && S.user.id === session.user.id && S.view === 'main') return;
-    S.user = { id: session.user.id, email: email };
-    checkAccess();
+  // The token ended (12 hours passed, or the password was changed): ask for the password again
+  function signedOut(err) {
+    if (!err || !/not_allowed/.test(String(err.message || ''))) return false;
+    C.accessLogout('admin');
+    S.token = '';
+    $('signinErr').textContent = 'Your time on this browser ended. Enter the Approvals password again.';
+    show('signin');
+    return true;
   }
-
-  $('googleBtn').addEventListener('click', function () {
-    $('signinErr').textContent = '';
-    if (C.demo) { S.user = { id: 'demo', email: 'approver@' + DOMAIN }; $('meEmail').textContent = S.user.email; C.storageSet('wt-demo-approver', '1'); checkAccess(); return; }
-    $('googleBtn').disabled = true;
-    sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin + window.location.pathname, queryParams: { hd: DOMAIN, prompt: 'select_account' } } })
-      .then(function (res) { if (res.error) throw res.error; })
-      .catch(function (err) { console.error(err); $('googleBtn').disabled = false; $('signinErr').textContent = 'Something went wrong. Please try again.'; });
-  });
-  $('emailForm').addEventListener('submit', function (e) {
+  function enter() {
+    show('main');
+    renderSites();
+    load();
+    loadPrize();
+  }
+  $('passForm').addEventListener('submit', function (e) {
     e.preventDefault();
-    var email = $('email').value.trim().toLowerCase();
+    var pw = $('pass').value;
     $('signinErr').textContent = '';
-    if (!C.allowedEmail(email)) { $('signinErr').textContent = 'Please use your TP work email (@' + DOMAIN + ').'; return; }
-    S.email = email;
-    $('codeLabel').textContent = 'Enter the 6-digit code we sent to ' + email;
-    if (C.demo) { show('code'); return; }
-    $('sendCodeBtn').disabled = true;
-    sb.auth.signInWithOtp({ email: email, options: { shouldCreateUser: true } }).then(function (res) {
-      $('sendCodeBtn').disabled = false;
-      if (res.error) throw res.error;
-      show('code');
-    }).catch(function (err) { console.error(err); $('sendCodeBtn').disabled = false; $('signinErr').textContent = 'We could not send the code. Please try again in a minute.'; });
+    if (!pw) { $('signinErr').textContent = 'Enter the password.'; $('pass').focus(); return; }
+    $('passBtn').disabled = true;
+    C.accessLogin('admin', pw).then(function (r) {
+      $('passBtn').disabled = false;
+      if (r.result === 'ok') { $('pass').value = ''; S.token = r.token; enter(); return; }
+      $('signinErr').textContent = r.result === 'slow_down' ? 'Too many wrong tries. Wait 15 minutes, then try again.'
+        : r.result === 'not_set' ? 'The Approvals password hasn\'t been set yet (schema.sql, section 10).'
+        : 'That password isn\'t right.';
+      $('pass').select();
+    }).catch(function (err) {
+      console.error(err);
+      $('passBtn').disabled = false;
+      $('signinErr').textContent = 'We could not check the password. Check your connection and try again.';
+    });
   });
-  $('codeForm').addEventListener('submit', function (e) {
-    e.preventDefault();
-    var token = $('code').value.replace(/\D/g, '');
-    if (token.length !== 6) { $('codeErr').textContent = 'Enter all 6 digits.'; return; }
-    if (C.demo) { S.user = { id: 'demo', email: S.email }; $('meEmail').textContent = S.email; checkAccess(); return; }
-    $('verifyBtn').disabled = true;
-    sb.auth.verifyOtp({ email: S.email, token: token, type: 'email' }).then(function (res) {
-      $('verifyBtn').disabled = false;
-      if (res.error) throw res.error;
-      handleSession(res.data && res.data.session);
-    }).catch(function (err) { console.error(err); $('verifyBtn').disabled = false; $('codeErr').textContent = "That code didn't work. Check it and try again."; });
-  });
-  $('backToEmail').addEventListener('click', function () { show('signin'); });
   function signOut() {
-    S.user = null;
-    if (C.demo) { C.storageSet('wt-demo-approver', ''); show('signin'); return; }
-    sb.auth.signOut().finally(function () { show('signin'); });
+    S.token = '';
+    C.accessLogout('admin').then(function () { show('signin'); });
   }
   $('signOutBtn').addEventListener('click', signOut);
-  $('deniedSignOut').addEventListener('click', signOut);
 
   /* ---------- Page events ---------- */
   qsa('.kind').forEach(function (b) {
@@ -940,32 +885,22 @@ a{color:var(--slate)}
     var map = { lnTree: 'index.html', lnWish: 'wish.html', lnLeaders: 'leaders/', lnTv: 'tv/' };
     $(id).href = C.url(map[id]);
   });
-  $('googleBtn').hidden = AUTH !== 'google';
-  $('emailForm').hidden = AUTH !== 'email';
-  $('email').setAttribute('placeholder', 'name@' + DOMAIN);
   if (C.demo) $('demoBar').hidden = false;
 
   // keep the queue fresh while the page is open
   setInterval(function () { if (S.view === 'main' && !S.editing && !document.hidden) { load(); loadPrize(); } }, 30000);
 
-  if (C.demo) {
-    if (C.storageGet('wt-demo-approver')) { S.user = { id: 'demo', email: 'approver@' + DOMAIN }; $('meEmail').textContent = S.user.email; checkAccess(); }
-    else show('signin');
-    return;
+  if (!C.demo) {
+    try { sb = C.client(); } catch (err) {
+      console.error(err);
+      $('signinErr').textContent = 'Something went wrong loading the page. Please refresh.';
+      show('signin');
+      return;
+    }
   }
-  try { sb = C.client(); } catch (err) {
-    console.error(err);
-    $('signinErr').textContent = 'Something went wrong loading the page. Please refresh.';
-    show('signin');
-    return;
-  }
-  sb.auth.onAuthStateChange(function (event, session) {
-    if (event === 'SIGNED_OUT') return;
-    if (session) handleSession(session);
-  });
-  sb.auth.getSession().then(function (res) {
-    var session = res && res.data ? res.data.session : null;
-    if (session) handleSession(session); else show('signin');
+  // Still in from earlier on this browser?
+  C.accessCheck('admin').then(function (t) {
+    if (t) { S.token = t; enter(); } else show('signin');
   }).catch(function () { show('signin'); });
 })();
 </script>

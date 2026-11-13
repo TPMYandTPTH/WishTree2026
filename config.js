@@ -10,11 +10,8 @@ window.WISH_CFG = {
   SUPABASE_ANON_KEY: '',
 
   // Employees don't sign in: they give a first name (or nickname) and their BMS number.
-  // Sign-in is only for the leaders' page and the Approvals page:
-  //   'google' = "Continue with your TP Google account" (no email setup needed)
-  //   'email'  = 6-digit code sent by email (needs custom SMTP in Supabase)
-  AUTH_MODE: 'google',
-  ALLOWED_EMAIL_DOMAINS: ['tp.com'],
+  // Nobody signs in. The leaders' page and the Approvals page each ask for a password, set in Supabase
+  // (schema.sql, section 10) and checked there. No emails are collected anywhere.
 
   // Campaign details shown on the pages
   OPEN_DATE: '[start date]',

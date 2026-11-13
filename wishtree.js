@@ -385,8 +385,9 @@
       if (!window.supabase || typeof window.supabase.createClient !== 'function') {
         throw new Error('The Supabase library did not load. Check your connection and try again.');
       }
+      // Nobody signs in to Supabase: the leaders' page and the Approvals page use a password token instead
       client = window.supabase.createClient(CFG.SUPABASE_URL, CFG.SUPABASE_ANON_KEY, {
-        auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+        auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false }
       });
     }
     return client;
@@ -652,8 +653,79 @@
     }
     return getClient().rpc('get_leader_messages').then(function (res) {
       if (res.error) throw res.error;
-      return (res.data || []).map(withLeaderConfig).sort(leaderOrder);
+      return attachLeaderPhotos(res.data || []);
+    }).then(function (list) {
+      return list.map(withLeaderConfig).sort(leaderOrder);
     });
+  }
+  // Leaders' own photos are kept with their message in the database. They're fetched only when one is new or
+  // changed (photo_version), so the tree and the TVs don't download every photo each minute.
+  var photoCache = {};
+  function attachLeaderPhotos(list) {
+    // a photo that came with the list (the Approvals queue) needs no second download
+    list.forEach(function (l) { if (l.photo && l.photo_version > 0) photoCache[l.id] = { v: l.photo_version, url: l.photo }; });
+    var need = list.filter(function (l) {
+      var c = photoCache[l.id];
+      return l.photo_version > 0 && !(c && c.v === l.photo_version);
+    }).map(function (l) { return l.id; });
+    var p = need.length ? getClient().rpc('get_leader_photos', { p_ids: need.slice(0, 60) }).then(function (res) {
+      if (res.error) throw res.error;
+      (res.data || []).forEach(function (r) { photoCache[r.id] = { v: r.photo_version, url: r.photo }; });
+    }) : Promise.resolve();
+    return p.catch(function (err) { console.warn('Wish Tree: leader photos not available', err); }).then(function () {
+      return list.map(function (l) {
+        var c = photoCache[l.id];
+        var own = l.photo_version > 0 && c && c.v === l.photo_version ? c.url : null;
+        return Object.assign({}, l, { photo_url: own || l.photo_url || null });
+      });
+    });
+  }
+
+  /* ---------- Passwords for the leaders' page and the Approvals page ---------- */
+  // The password is checked in the database, which hands back a token for this browser (leaders: 30 days,
+  // Approvals: 12 hours). The token is kept here; the password never is.
+  function sessionKey(role) { return 'wt-session-' + role; }
+  function sessionGet(role) {
+    try {
+      var s = JSON.parse(storageGet(sessionKey(role)) || 'null');
+      if (s && s.t && s.e && new Date(s.e).getTime() > Date.now()) return s.t;
+    } catch (e) { /* ignore */ }
+    return '';
+  }
+  function sessionSet(role, token, ends) {
+    storageSet(sessionKey(role), token ? JSON.stringify({ t: token, e: ends }) : '');
+  }
+  // Answers { result: 'ok' | 'wrong' | 'slow_down' | 'not_set', token }
+  function accessLogin(role, password) {
+    if (DEMO) {
+      var ok = String(password || '').length > 0;
+      if (ok) sessionSet(role, 'demo', new Date(Date.now() + 864e5).toISOString());
+      return Promise.resolve({ result: ok ? 'ok' : 'wrong', token: ok ? 'demo' : '' });
+    }
+    return getClient().rpc('access_login', { p_role: role, p_password: String(password || '') }).then(function (res) {
+      if (res.error) throw res.error;
+      var row = Array.isArray(res.data) ? res.data[0] : res.data;
+      if (row && row.result === 'ok') sessionSet(role, row.session_token, row.session_ends);
+      return { result: row ? row.result : 'wrong', token: row && row.session_token || '' };
+    });
+  }
+  // Is this browser still in? Answers the token, or '' (and forgets an ended one)
+  function accessCheck(role) {
+    var t = sessionGet(role);
+    if (!t) return Promise.resolve('');
+    if (DEMO) return Promise.resolve(t);
+    return getClient().rpc('access_check', { p_token: t }).then(function (res) {
+      if (res.error) throw res.error;
+      if (res.data === role) return t;
+      sessionSet(role, '');
+      return '';
+    });
+  }
+  function accessLogout(role) {
+    var t = sessionGet(role);
+    sessionSet(role, '');
+    if (DEMO || !t) return Promise.resolve();
+    return getClient().rpc('access_logout', { p_token: t }).then(function () {}, function () {});
   }
   // config.js LEADERS: the names a leader can pick on the leaders' page, where each one hangs, and their default photos
   function leaderSlug(name) {
@@ -692,15 +764,6 @@
   }
 
   /* ---------- Small helpers ---------- */
-  function allowedEmail(email) {
-    var e = String(email || '').trim().toLowerCase();
-    var at = e.lastIndexOf('@');
-    if (at < 1) return false;
-    var domain = e.slice(at + 1);
-    return (CFG.ALLOWED_EMAIL_DOMAINS || []).some(function (d) {
-      return domain === String(d).toLowerCase();
-    });
-  }
 
   function displayName(w) {
     return w.display_name && String(w.display_name).trim() ? w.display_name : 'A TP colleague';
@@ -1222,7 +1285,11 @@
     demoReview: demoReview,
     demoLoad: demoLoad,
     demoSave: demoSave,
-    allowedEmail: allowedEmail,
+    attachLeaderPhotos: attachLeaderPhotos,
+    sessionGet: sessionGet,
+    accessLogin: accessLogin,
+    accessCheck: accessCheck,
+    accessLogout: accessLogout,
     displayName: displayName,
     displayWhere: displayWhere,
     wishPageUrl: wishPageUrl,

@@ -181,7 +181,7 @@ button,input,select,textarea{font-family:inherit}
 <script src="../wishtree.js"></script>
 </head>
 <body>
-<div id="demoBar" class="demo-bar" role="status" hidden><span class="pv">PREVIEW</span>Try it out: nothing is saved. Once the Wish Tree opens, only leaders on the list can post here.</div>
+<div id="demoBar" class="demo-bar" role="status" hidden><span class="pv">PREVIEW</span>Try it out: nothing is saved, and any password opens it here. Once the Wish Tree opens, only the leaders' password does.</div>
 <div class="deco" aria-hidden="true"><span class="d1"></span><span class="d2"></span></div>
 
 <div class="wrap">
@@ -221,47 +221,14 @@ button,input,select,textarea{font-family:inherit}
         <span><b>Not a senior leader?</b> This page is only for TP senior leaders. You can hang your own wish on the tree here: <a class="wish-link" href="../wish.html">tpmyandtpth.github.io/WishTree2026/wish.html</a></span>
       </div>
       <div class="panel">
-        <div id="googleBlock" hidden>
-          <button type="button" id="googleBtn" class="btn btn-google">
-            <svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>
-            Continue with your TP Google account
-          </button>
-        </div>
-        <form id="emailForm" novalidate hidden style="display:flex;flex-direction:column;gap:10px">
-          <label for="email">Your TP work email</label>
-          <input id="email" class="input" type="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" required>
-          <button type="submit" id="sendCodeBtn" class="btn btn-dark" style="margin-top:6px">Send my code</button>
+        <form id="passForm" novalidate style="display:flex;flex-direction:column;gap:10px">
+          <label for="pass">Leaders' password</label>
+          <input id="pass" class="input" type="password" autocomplete="current-password" spellcheck="false" required>
+          <button type="submit" id="passBtn" class="btn btn-dark" style="margin-top:6px">Open the leaders' page</button>
         </form>
-        <div class="help" id="signinHelp"></div>
+        <div class="help">The Wish Tree team shared this password with you. You stay in on this browser for 30 days.</div>
         <p id="signinErr" class="err" role="alert"></p>
       </div>
-    </div>
-  </section>
-
-  <!-- Email code -->
-  <section id="view-code" class="view" hidden>
-    <div class="center">
-      <h1 tabindex="-1">Check your inbox</h1>
-      <div class="panel">
-        <form id="codeForm" novalidate style="display:flex;flex-direction:column;gap:10px">
-          <label for="code" id="codeLabel">Enter the 6-digit code we sent you</label>
-          <input id="code" class="input code-input" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" required>
-          <button type="submit" id="verifyBtn" class="btn btn-dark" style="margin-top:6px">Continue</button>
-        </form>
-        <p id="codeErr" class="err" role="alert"></p>
-        <button type="button" id="backToEmail" class="link" style="align-self:flex-start">Use a different email</button>
-      </div>
-    </div>
-  </section>
-
-  <!-- Not a leader -->
-  <section id="view-denied" class="view" hidden>
-    <div class="center">
-      <h1 tabindex="-1">This page is for TP leaders</h1>
-      <p id="deniedText"></p>
-      <p>If you lead a team or site and should be here, ask the Wish Tree team to add your work email to the leaders list.</p>
-      <a class="btn btn-gold" id="toWishPage" href="../wish.html">Hang an employee wish instead</a>
-      <button type="button" class="btn btn-line" id="deniedSignOut">Sign out</button>
     </div>
   </section>
 
@@ -296,7 +263,7 @@ button,input,select,textarea{font-family:inherit}
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg>
         <span><b>Not a senior leader?</b> This page is only for TP senior leaders. You can hang your own wish on the tree here: <a class="wish-link" href="../wish.html">tpmyandtpth.github.io/WishTree2026/wish.html</a></span>
       </div>
-        <p class="sub">One message per leader, up to <span id="maxNote">250</span> characters. The Wish Tree team approves it, then it shows on every site's tree page and the site TVs. You can edit or remove it any time; edits are approved again.</p>
+        <p class="sub">One message per leader, up to <span id="maxNote">250</span> characters. The Wish Tree team approves it, then it shows on every site's tree page and the site TVs. You can edit or remove it any time from this browser; edits are approved again.</p>
         <div id="statusLive" class="status" hidden><span class="dot" aria-hidden="true"></span><span id="statusText">Live on every site's tree</span></div>
 
         <div class="field">
@@ -359,16 +326,15 @@ button,input,select,textarea{font-family:inherit}
   var C = window.WishCore;
   var CFG = C.cfg;
   var MAX = Number(CFG.LEADER_MAX_LENGTH) || 400;
-  var DOMAIN = (CFG.ALLOWED_EMAIL_DOMAINS && CFG.ALLOWED_EMAIL_DOMAINS[0]) || 'tp.com';
-  var AUTH = CFG.AUTH_MODE === 'email' ? 'email' : 'google';
-
-  var S = { view: 'loading', user: null, email: '', existing: null, name: '', title: '', message: '', lang: 'en', busy: false,
-    nameLocked: false,  // the name is picked once (or set by the Wish Tree team) and can't be changed
+  var S = { view: 'loading', token: '', existing: null, name: '', title: '', message: '', lang: 'en', busy: false,
+    nameLocked: false,  // the name is set with the first message and can't be changed
     titleTouched: false,
-    dbPhoto: '',        // default photo set by the Wish Tree team (Table Editor > leaders > default_photo)
-    photo: '',          // the leader's own photo: saved link, or a preview of a new one ('' = use the default photo)
-    photoBlob: null,    // a new photo waiting to be uploaded
+    dbPhoto: '',
+    photo: '',          // the leader's own photo, a small JPEG ('' = use the default photo)
     photoChanged: false };
+  // The key that lets this browser edit or remove the message it sent (the database keeps only a scrambled copy)
+  var KEY_STORE = 'wt-leader-key';
+  function editKey() { return C.storageGet(KEY_STORE) || ''; }
   var LEADERS = C.leaderList();
   // "Not a senior leader?" note: link to the wish page, shown as its address
   (function () {
@@ -445,7 +411,7 @@ button,input,select,textarea{font-family:inherit}
     $('publishLabel').textContent = S.busy ? 'Sending…' : (S.existing ? 'Send my update for approval' : 'Send for approval');
     $('publishBtn').disabled = S.busy;
     $('removeBtn').hidden = !S.existing;
-    $('whoText').textContent = S.user ? 'Signed in as ' + S.user.email : '';
+    $('whoText').textContent = S.token ? 'Leaders\' page open on this browser' : '';
     renderPreview();
   }
 
@@ -513,16 +479,16 @@ button,input,select,textarea{font-family:inherit}
     if (picked) { $('lName').value = S.name; closeNames(); }
     renderEdit();
   }
-  // The name from the sign-in (e.g. Google), if it matches a name on the list
-  function matchName(full) {
-    var f = String(full || '').trim().toLowerCase();
-    if (!f) return '';
-    var hit = LEADERS.filter(function (l) { return l.name.toLowerCase() === f; })[0] ||
-      LEADERS.filter(function (l) { return l.name.toLowerCase() === f.split(/\s+/)[0]; })[0];
-    return hit ? hit.name : '';
-  }
-
   /* ---------- Access ---------- */
+  function fillFrom(m) {
+    S.existing = m;
+    S.name = m.display_name || S.name;
+    S.nameLocked = true;
+    S.title = m.title || '';
+    S.message = m.message || '';
+    S.lang = 'en';
+    S.photo = m.photo || '';
+  }
   function loadLeader() {
     if (C.demo) {
       var mine = null;
@@ -539,128 +505,55 @@ button,input,select,textarea{font-family:inherit}
       show('edit');
       return Promise.resolve();
     }
-    return sb.rpc('leader_profile').then(function (res) {
+    var key = editKey();
+    if (!key) { show('edit'); return Promise.resolve(); }
+    return sb.rpc('leader_get_mine', { p_token: S.token, p_edit_key: key }).then(function (res) {
       if (res.error) throw res.error;
-      var p = Array.isArray(res.data) ? res.data[0] : res.data;
-      if (!p || !p.is_leader) {
-        $('deniedText').textContent = 'You are signed in as ' + S.user.email + ', which is not on the leaders list.';
-        show('denied');
-        return null;
-      }
-      // the Wish Tree team set this leader's name: it's picked already and can't be changed
-      if (p.default_name) { S.name = p.default_name; S.nameLocked = true; }
-      if (p.default_photo) S.dbPhoto = p.default_photo;
-      // where this leader's message hangs (set by the Wish Tree team)
-      $('pvKicker').textContent = p.spot === 'ceo' ? 'A MESSAGE FROM OUR CEO · UNDER THE STAR'
-        : p.spot === 'gift' ? 'INSIDE A GIFT UNDER EVERY TREE' : 'ON EVERY SITE\'S TREE';
-      if (!S.title && p.default_title) S.title = p.default_title;
-      return sb.from('leader_messages').select('id,display_name,title,message,lang,photo_url,updated_at,status').eq('user_id', S.user.id).maybeSingle().then(function (r) {
-        if (r.error) throw r.error;
-        if (r.data) {
-          S.existing = r.data;
-          S.name = r.data.display_name || S.name;
-          S.nameLocked = true;
-          S.title = r.data.title || '';
-          S.message = r.data.message || '';
-          S.lang = 'en';
-          S.photo = r.data.photo_url || '';
-        }
-        show('edit');
-      });
+      var m = Array.isArray(res.data) ? res.data[0] : res.data;
+      if (m) fillFrom(m);
+      else C.storageSet(KEY_STORE, '');   // the message was removed: this browser can send a new one
+      show('edit');
     }).catch(function (err) {
       console.error(err);
-      $('signinErr').textContent = 'We could not check your access. Please try again.';
+      $('signinErr').textContent = 'We could not load your message. Check your connection and try again.';
       show('signin');
     });
   }
 
-  function handleSession(session) {
-    if (!session || !session.user) {
-      S.user = null;
-      if (S.view !== 'code') show('signin');
-      return;
-    }
-    var email = session.user.email || '';
-    if (!C.allowedEmail(email)) {
-      setTimeout(function () { sb.auth.signOut(); }, 0);
-      $('signinErr').textContent = 'Please use your TP work account (@' + DOMAIN + ').';
-      show('signin');
-      return;
-    }
-    if (S.user && S.user.id === session.user.id && S.view !== 'loading' && S.view !== 'signin' && S.view !== 'code') return;
-    var meta = session.user.user_metadata || {};
-    S.user = { id: session.user.id, email: email };
-    if (!S.name) S.name = matchName(meta.full_name || meta.name);
-    loadLeader();
+  function passwordOut(msg) {
+    C.accessLogout('leader');
+    S.token = '';
+    $('signinErr').textContent = msg || '';
+    show('signin');
   }
 
-  function startGoogle() {
-    $('signinErr').textContent = '';
-    if (C.demo) { demoSignIn('leader@' + DOMAIN); return; }
-    $('googleBtn').disabled = true;
-    sb.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: window.location.origin + window.location.pathname, queryParams: { hd: DOMAIN, prompt: 'select_account' } }
-    }).then(function (res) { if (res.error) throw res.error; }).catch(function (err) {
-      console.error(err);
-      $('googleBtn').disabled = false;
-      $('signinErr').textContent = 'Something went wrong. Please try again.';
-    });
-  }
-
-  function sendCode(e) {
+  function enterPassword(e) {
     if (e) e.preventDefault();
-    var email = $('email').value.trim().toLowerCase();
+    var pw = $('pass').value;
     $('signinErr').textContent = '';
-    if (!C.allowedEmail(email)) { $('signinErr').textContent = 'Please use your TP work email (@' + DOMAIN + ').'; return; }
-    S.email = email;
-    $('codeLabel').textContent = 'Enter the 6-digit code we sent to ' + email;
-    if (C.demo) { show('code'); return; }
-    $('sendCodeBtn').disabled = true;
-    sb.auth.signInWithOtp({ email: email, options: { shouldCreateUser: true } }).then(function (res) {
-      $('sendCodeBtn').disabled = false;
-      if (res.error) throw res.error;
-      $('code').value = '';
-      show('code');
+    if (!pw) { $('signinErr').textContent = 'Enter the leaders\' password.'; $('pass').focus(); return; }
+    $('passBtn').disabled = true;
+    C.accessLogin('leader', pw).then(function (r) {
+      $('passBtn').disabled = false;
+      if (r.result === 'ok') { $('pass').value = ''; S.token = r.token; loadLeader(); return; }
+      $('signinErr').textContent = r.result === 'slow_down' ? 'Too many wrong tries. Wait 15 minutes, then try again.'
+        : r.result === 'not_set' ? 'The leaders\' page isn\'t open yet. Please try again later.'
+        : 'That password isn\'t right. Check the message from the Wish Tree team.';
+      $('pass').select();
     }).catch(function (err) {
       console.error(err);
-      $('sendCodeBtn').disabled = false;
-      $('signinErr').textContent = 'We could not send the code. Please try again in a minute.';
+      $('passBtn').disabled = false;
+      $('signinErr').textContent = 'We could not check the password. Check your connection and try again.';
     });
-  }
-
-  function verifyCode(e) {
-    if (e) e.preventDefault();
-    var token = $('code').value.replace(/\D/g, '');
-    $('codeErr').textContent = '';
-    if (token.length !== 6) { $('codeErr').textContent = 'Enter all 6 digits.'; return; }
-    if (C.demo) { demoSignIn(S.email); return; }
-    $('verifyBtn').disabled = true;
-    sb.auth.verifyOtp({ email: S.email, token: token, type: 'email' }).then(function (res) {
-      $('verifyBtn').disabled = false;
-      if (res.error) throw res.error;
-      handleSession(res.data && res.data.session);
-    }).catch(function (err) {
-      console.error(err);
-      $('verifyBtn').disabled = false;
-      $('codeErr').textContent = "That code didn't work. Check it and try again.";
-    });
-  }
-
-  function demoSignIn(email) {
-    S.user = { id: 'demo', email: email };
-    C.storageSet('wt-demo-leader-user', email);
-    loadLeader();
   }
 
   function signOut() {
-    S.user = null;
+    S.token = '';
     S.existing = null;
     S.name = ''; S.title = ''; S.message = ''; S.lang = 'en';
-    S.nameLocked = false; S.titleTouched = false; S.dbPhoto = '';
-    S.photo = ''; S.photoBlob = null; S.photoChanged = false;
-    if (C.demo) { C.storageSet('wt-demo-leader-user', ''); show('signin'); return; }
-    sb.auth.signOut().finally(function () { show('signin'); });
+    S.nameLocked = false; S.titleTouched = false;
+    S.photo = ''; S.photoChanged = false;
+    C.accessLogout('leader').then(function () { show('signin'); });
   }
 
   /* ---------- Save / remove ---------- */
@@ -671,21 +564,18 @@ button,input,select,textarea{font-family:inherit}
     if (!S.name.trim()) { $('editErr').textContent = 'Type your name first.'; $('lName').focus(); return; }
     if (!S.message.trim()) { $('editErr').textContent = 'Write your message first.'; $('lMessage').focus(); return; }
     // leaders' messages are in English only (the database checks this too)
-    if (NOT_ENGLISH.test(S.message)) { $('editErr').textContent = 'Please write your message in English. Leaders\' messages are shown in English on every site.'; $('lMessage').focus(); return; }
+    if (NOT_ENGLISH.test(S.message + ' ' + S.title + ' ' + S.name)) { $('editErr').textContent = 'Please write your message, name and title in English. Leaders\' messages are shown in English on every site.'; $('lMessage').focus(); return; }
     var row = {
       display_name: S.name.trim().slice(0, 60),
       title: S.title.trim().slice(0, 80) || null,
       message: S.message.trim().slice(0, MAX),
       lang: 'en'
     };
-    if (S.photoChanged && !S.photoBlob) row.photo_url = null;   // own photo removed: the default photo shows
     S.busy = true;
     renderEdit();
     var done = function (saved) {
       S.busy = false;
-      S.photoBlob = null;
       S.photoChanged = false;
-      S.photo = saved && saved.photo_url ? saved.photo_url : '';
       var wasNew = !S.existing;
       S.existing = saved;
       S.nameLocked = true;
@@ -694,52 +584,54 @@ button,input,select,textarea{font-family:inherit}
       $('editOk').textContent = 'Sent. The Wish Tree team will approve it, then it shows on every site\'s tree page.';
       C.track('leader_publish', { is_new: wasNew });
     };
-    var fail = function (err) {
-      console.error(err);
+    var fail = function (msg) {
       S.busy = false;
       renderEdit();
-      $('editErr').textContent = err && err.code === '42501'
-        ? 'Your account is not on the leaders list, so the message was not saved.'
-        : err && err.photo
-          ? 'We could not upload your photo. Try a smaller JPG or PNG, or send without a photo.'
-          : err && /english_only/.test(String(err.message || ''))
-            ? 'Please write your message, name and title in English. Leaders\' messages are shown in English on every site.'
-            : 'We could not save your message. Please try again.';
+      $('editErr').textContent = msg;
     };
 
     if (C.demo) {
-      // demo: the photo stays in this browser as a small picture
-      if (S.photoChanged) row.photo_url = S.photoBlob ? S.photo : null;
-      else row.photo_url = S.existing ? (S.existing.photo_url || null) : null;
+      // preview: the message and photo stay in this browser
+      row.photo_url = S.photo || null;
       var saved = Object.assign({ updated_at: new Date().toISOString(), status: 'pending' }, row);
       C.storageSet('wt-demo-leader', JSON.stringify(saved));
       setTimeout(function () { done(saved); }, 500);
       return;
     }
-    uploadPhoto().then(function (link) {
-      if (link) row.photo_url = link;
-      return sb.from('leader_messages')
-        .upsert(Object.assign({ user_id: S.user.id }, row), { onConflict: 'user_id' })
-        .select('id,display_name,title,message,lang,photo_url,updated_at,status')
-        .single();
-    }).then(function (res) { if (res.error) throw res.error; done(res.data); })
-      .catch(fail);
+    sb.rpc('leader_save', {
+      p_token: S.token,
+      p_name: row.display_name,
+      p_title: row.title,
+      p_message: row.message,
+      p_photo: S.photoChanged ? (S.photo || null) : null,
+      p_photo_change: S.photoChanged,
+      p_edit_key: editKey() || null
+    }).then(function (res) {
+      if (res.error) throw res.error;
+      var r = Array.isArray(res.data) ? res.data[0] : res.data;
+      if (!r) throw new Error('no answer');
+      if (r.result === 'ok') {
+        if (r.edit_key) C.storageSet(KEY_STORE, r.edit_key);
+        done(Object.assign({ status: 'pending', updated_at: new Date().toISOString(), photo: S.photo || null }, row));
+        return;
+      }
+      if (r.result === 'signed_out') { passwordOut('Your time on this browser ended. Enter the leaders\' password again, then send your message.'); S.busy = false; return; }
+      if (r.result === 'name_taken') {
+        fail('A message from ' + row.display_name + ' is already in. It can only be changed from the browser it was sent from. If that was you on another device, ask the Wish Tree team to remove the old one.');
+        return;
+      }
+      fail(r.result === 'slow_down' ? 'Too many changes in a short time. Please try again in a few minutes.' : 'We could not save your message. Please try again.');
+    }).catch(function (err) {
+      console.error(err);
+      var m = String(err && err.message || '');
+      fail(/english_only/.test(m) ? 'Please write your message, name and title in English. Leaders\' messages are shown in English on every site.'
+        : /bad_photo/.test(m) ? 'That photo could not be used. Please choose another JPG or PNG, or send without a photo.'
+        : 'We could not save your message. Please try again.');
+    });
   }
 
   /* ---------- Photo ---------- */
-  var PHOTO_BUCKET = 'leader-photos';
-  // Upload a new photo to Supabase Storage (leader-photos/<your id>/...) and return its public link
-  function uploadPhoto() {
-    if (!S.photoBlob) return Promise.resolve('');
-    var path = S.user.id + '/photo-' + Date.now() + '.jpg';
-    return sb.storage.from(PHOTO_BUCKET).upload(path, S.photoBlob, { contentType: 'image/jpeg', cacheControl: '31536000', upsert: false })
-      .then(function (res) {
-        if (res.error) { var e = new Error(res.error.message || 'upload failed'); e.photo = true; throw e; }
-        return sb.storage.from(PHOTO_BUCKET).getPublicUrl(path).data.publicUrl;
-      });
-  }
-
-  // Crop to a centred square and shrink, so uploads are small and quick
+  // Crop to a centred square and shrink to 160 x 160, so it's small enough to keep with the message
   function preparePhoto(file) {
     return new Promise(function (resolve, reject) {
       if (!file || !/^image\//.test(file.type)) { reject(new Error('type')); return; }
@@ -751,19 +643,18 @@ button,input,select,textarea{font-family:inherit}
         // keep a little more of the top: faces are usually in the upper part of a photo
         var sx = (img.naturalWidth - side) / 2;
         var sy = Math.max(0, (img.naturalHeight - side) * 0.3);
-        var out = C.demo ? 256 : 512;
+        var out = 160;
         var cv = document.createElement('canvas');
         cv.width = out; cv.height = out;
         var x = cv.getContext('2d');
         x.fillStyle = '#B18854';
         x.fillRect(0, 0, out, out);
+        x.imageSmoothingQuality = 'high';
         x.drawImage(img, sx, sy, side, side, 0, 0, out, out);
         URL.revokeObjectURL(url);
-        var dataUrl = cv.toDataURL('image/jpeg', 0.85);
-        cv.toBlob(function (blob) {
-          if (!blob) { reject(new Error('encode')); return; }
-          resolve({ blob: blob, dataUrl: dataUrl });
-        }, 'image/jpeg', 0.85);
+        var q = 0.85, dataUrl = cv.toDataURL('image/jpeg', q);
+        while (dataUrl.length > 58000 && q > 0.4) { q -= 0.1; dataUrl = cv.toDataURL('image/jpeg', q); }
+        resolve(dataUrl);
       };
       img.onerror = function () { URL.revokeObjectURL(url); reject(new Error('decode')); };
       img.src = url;
@@ -776,12 +667,15 @@ button,input,select,textarea{font-family:inherit}
     $('editOk').textContent = '';
     var after = function () {
       S.existing = null;
+      if (!C.demo) { S.nameLocked = false; S.photo = ''; S.photoChanged = false; }
       renderEdit();
-      $('editOk').textContent = 'Removed from the tree. You can publish a new message any time.';
+      $('editOk').textContent = 'Removed from the tree. You can send a new message any time.';
     };
     if (C.demo) { C.storageSet('wt-demo-leader', ''); after(); return; }
-    sb.from('leader_messages').delete().eq('user_id', S.user.id).then(function (res) {
+    sb.rpc('leader_delete_mine', { p_token: S.token, p_edit_key: editKey() }).then(function (res) {
       if (res.error) throw res.error;
+      if (!res.data) throw new Error('not removed');
+      C.storageSet(KEY_STORE, '');
       after();
     }).catch(function (err) {
       console.error(err);
@@ -790,16 +684,7 @@ button,input,select,textarea{font-family:inherit}
   }
 
   /* ---------- Events ---------- */
-  $('googleBtn').addEventListener('click', startGoogle);
-  $('emailForm').addEventListener('submit', sendCode);
-  $('codeForm').addEventListener('submit', verifyCode);
-  $('code').addEventListener('input', function () {
-    var v = $('code').value.replace(/\D/g, '').slice(0, 6);
-    if ($('code').value !== v) $('code').value = v;
-    if (v.length === 6) verifyCode();
-  });
-  $('backToEmail').addEventListener('click', function () { show('signin'); });
-  $('deniedSignOut').addEventListener('click', signOut);
+  $('passForm').addEventListener('submit', enterPassword);
   $('signOutBtn').addEventListener('click', signOut);
   $('lName').addEventListener('input', function (e) { nameActive = -1; setName(e.target.value.replace(/\s+/g, ' ').replace(/^\s/, ''), false); openNames(); });
   $('lName').addEventListener('focus', function () { if (!S.nameLocked) openNames(); });
@@ -846,9 +731,8 @@ button,input,select,textarea{font-family:inherit}
     e.target.value = '';
     if (!file) return;
     $('editErr').textContent = '';
-    preparePhoto(file).then(function (p) {
-      S.photoBlob = p.blob;
-      S.photo = p.dataUrl;
+    preparePhoto(file).then(function (dataUrl) {
+      S.photo = dataUrl;
       S.photoChanged = true;
       renderEdit();
     }).catch(function () {
@@ -857,7 +741,6 @@ button,input,select,textarea{font-family:inherit}
   });
   $('photoRemove').addEventListener('click', function () {
     // back to the default photo (or initials when there is none)
-    S.photoBlob = null;
     S.photo = '';
     S.photoChanged = true;
     renderEdit();
@@ -869,33 +752,20 @@ button,input,select,textarea{font-family:inherit}
   /* ---------- Start ---------- */
   C.initGA();
   C.setLogo($('logo'));
-  $('toWishPage').href = C.url('wish.html');
   $('seeTree').href = C.url('index.html');
-  $('googleBlock').hidden = AUTH !== 'google';
-  $('emailForm').hidden = AUTH !== 'email';
-  $('email').setAttribute('placeholder', 'name@' + DOMAIN);
-  $('signinHelp').textContent = 'Use your TP work account (@' + DOMAIN + '). Access is checked against the leaders list.';
   if (C.demo) $('demoBar').hidden = false;
 
-  if (C.demo) {
-    var u = C.storageGet('wt-demo-leader-user');
-    if (u) demoSignIn(u); else show('signin');
-    return;
+  if (!C.demo) {
+    try { sb = C.client(); } catch (err) {
+      console.error(err);
+      $('signinErr').textContent = 'Something went wrong loading the page. Please refresh.';
+      show('signin');
+      return;
+    }
   }
-
-  try { sb = C.client(); } catch (err) {
-    console.error(err);
-    $('signinErr').textContent = 'Something went wrong loading the page. Please refresh.';
-    show('signin');
-    return;
-  }
-  sb.auth.onAuthStateChange(function (event, session) {
-    if (event === 'SIGNED_OUT') return;
-    if (session) handleSession(session);
-  });
-  sb.auth.getSession().then(function (res) {
-    var session = res && res.data ? res.data.session : null;
-    if (session) handleSession(session); else show('signin');
+  // Still in from earlier on this browser?
+  C.accessCheck('leader').then(function (t) {
+    if (t) { S.token = t; loadLeader(); } else show('signin');
   }).catch(function () { show('signin'); });
 })();
 </script>
