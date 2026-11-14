@@ -1,0 +1,523 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Gift Exchange · Big screen</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0E2A1F">
+<link rel="icon" type="image/png" href="../assets/tp-logo-white.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Noto+Sans:wght@300;400;500;700&family=Noto+Sans+Thai:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="gift.css">
+<style>
+/* Everything is sized in rem, and 1rem follows the screen size, so it fits a laptop or a big TV. */
+html{font-size:clamp(9px, min(1.55vh, .9vw), 30px)}
+body{height:100vh;height:100dvh;overflow:hidden}
+.screen{position:relative;z-index:2;height:100vh;height:100dvh;display:flex;flex-direction:column;padding:1.8rem 3rem 1.4rem}
+.s-top{display:flex;align-items:center;justify-content:space-between;gap:1rem;min-height:3rem}
+.brand{display:flex;align-items:center;gap:1rem;font-size:1.3rem;color:var(--cream-2)}
+.brand img{height:2.4rem;width:auto;display:block}
+.brand b{color:var(--gold);font-weight:500}
+.top-btn{min-height:40px;padding:0 1.2rem;border:1px solid rgba(246,238,220,.3);border-radius:999px;background:transparent;color:var(--cream-2);font-size:max(13px,1rem);cursor:pointer;opacity:.6}
+.top-btn:hover,.top-btn:focus-visible{opacity:1}
+
+/* join phase */
+.s-open{flex:1;min-height:0;display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-rows:minmax(0,1fr);gap:4rem;align-items:stretch}
+.qr-card{align-self:center;display:flex;flex-direction:column;align-items:center;gap:1.1rem;padding:2.2rem 2.4rem 1.8rem;border-radius:2rem;background:var(--cream);color:var(--ink);box-shadow:0 2rem 4rem rgba(0,0,0,.4);text-align:center}
+.qr-card .k{font-size:1.5rem;font-weight:700;letter-spacing:.2em;color:var(--carmine)}
+#qr{width:27rem;height:27rem}
+#qr img,#qr canvas{display:block;width:100% !important;height:100% !important;image-rendering:pixelated}
+.qr-card .url{font-size:1.15rem;color:var(--slate);max-width:27rem;overflow-wrap:anywhere}
+.steps{display:flex;gap:1.4rem;margin-top:.3rem}
+.steps span{display:flex;align-items:center;gap:.5rem;font-size:1.25rem;font-weight:500;color:var(--ink)}
+.steps i{display:inline-flex;align-items:center;justify-content:center;width:2rem;height:2rem;border-radius:50%;background:var(--bg);color:var(--cream);font-style:normal;font-size:1.05rem;font-weight:700}
+
+.s-right{min-width:0;min-height:0;display:flex;flex-direction:column;gap:1.1rem;padding:1.4rem 0 .4rem}
+.s-right .script{font-family:var(--script);font-size:5rem;line-height:.9;color:var(--gold)}
+.s-right h1{margin:0;font-size:3.6rem;font-weight:300;line-height:1.1;overflow-wrap:anywhere}
+.team{margin:0;font-size:1.5rem;font-weight:500;letter-spacing:.08em;color:var(--cream-2)}
+.big-chips .chip{min-height:2.8rem;padding:.4rem 1.3rem;font-size:1.35rem}
+.big-chips .chip svg{width:1.4rem;height:1.4rem}
+.meta-row{display:flex;align-items:flex-end;justify-content:space-between;gap:1rem 2rem;flex-wrap:wrap}
+.s-count{display:flex;align-items:baseline;gap:.8rem}
+.s-count b{font-size:5.4rem;line-height:.9;font-weight:700;font-variant-numeric:tabular-nums}
+.s-count span{font-size:1.7rem;color:var(--cream-2)}
+.s-right.compact{gap:.7rem}
+.s-right.compact .script{font-size:3.4rem}
+.s-right.compact h1{font-size:2.6rem}
+.s-right.compact .team{font-size:1.2rem}
+.s-right.compact .s-count b{font-size:4rem}
+
+.tiles{--tw:20rem;--th:4.6rem;--tf:1.9rem;flex:1;min-height:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--tw),1fr));grid-auto-rows:var(--th);gap:.8rem;align-content:start;overflow:hidden;padding:.3rem}
+.tiles.sz1{--tw:15.5rem;--th:3.9rem;--tf:1.6rem}
+.tiles.sz2{--tw:12.5rem;--th:3.2rem;--tf:1.3rem}
+.tiles.sz3{--tw:10.5rem;--th:2.7rem;--tf:1.1rem;gap:.55rem}
+.tiles.sz4{--tw:9rem;--th:2.3rem;--tf:.95rem;gap:.45rem}
+.tiles.sz5{--tw:7.6rem;--th:1.95rem;--tf:.82rem;gap:.35rem}
+.tiles.sz6{--tw:6.6rem;--th:1.7rem;--tf:.72rem;gap:.3rem}
+.tiles.sz3 .tile:not(.armed) .x,.tiles.sz4 .tile:not(.armed) .x,.tiles.sz5 .tile:not(.armed) .x,.tiles.sz6 .tile:not(.armed) .x{display:none}
+.tiles.sz3 .tile,.tiles.sz4 .tile,.tiles.sz5 .tile,.tiles.sz6 .tile{gap:.5rem;padding-right:.6rem}
+.tile{position:relative;display:flex;align-items:center;gap:.8rem;min-width:0;height:var(--th);padding:0 1rem 0 .45rem;border:0;border-radius:.9rem;background:rgba(246,238,220,.1);color:var(--cream);font-size:var(--tf);font-family:inherit;text-align:left}
+.tile .n{flex:none;display:inline-flex;align-items:center;justify-content:center;min-width:calc(var(--th) - .9rem);height:calc(var(--th) - .9rem);padding:0 .45em;border-radius:.6rem;background:var(--gold);color:var(--bg);font-weight:700;font-variant-numeric:tabular-nums}
+.tile .nm{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
+.tile.new{animation:pop .8s cubic-bezier(.2,.9,.3,1.4)}
+@keyframes pop{0%{transform:scale(.3);opacity:0;background:var(--gold)}60%{background:rgba(227,180,90,.6)}100%{transform:scale(1);opacity:1}}
+button.tile{cursor:pointer}
+button.tile:hover{background:rgba(246,238,220,.18)}
+button.tile .x{margin-left:auto;flex:none;font-size:.8em;color:var(--cream-3)}
+button.tile.armed{background:var(--carmine)}
+button.tile.armed .x{color:var(--cream)}
+.empty{grid-column:1/-1;display:flex;align-items:center;gap:1.2rem;font-size:1.8rem;font-weight:300;color:var(--cream-3)}
+.empty .giftbox{width:6rem}
+.tiles.shuffling .tile{animation:jumble .42s ease-in-out infinite alternate;animation-delay:var(--jd)}
+@keyframes jumble{0%{transform:translate(0,0) rotate(0)}100%{transform:translate(var(--jx),var(--jy)) rotate(var(--jr))}}
+
+/* matching overlay */
+.shuffle{position:fixed;inset:0;z-index:30;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2rem;background:rgba(10,32,24,.72)}
+.shuffle .boxes{display:flex;gap:3rem}
+.shuffle .giftbox{width:11rem}
+.shuffle .giftbox svg{animation:shake .6s ease-in-out infinite}
+.shuffle .giftbox:nth-child(2) svg{animation-delay:.15s}
+.shuffle .giftbox:nth-child(3) svg{animation-delay:.3s}
+.shuffle .t{font-family:var(--script);font-size:8rem;line-height:1;color:var(--gold)}
+
+/* matches */
+.s-match{flex:1;min-height:0;display:flex;flex-direction:column;gap:1.4rem;padding-top:1rem}
+.mhead{display:flex;align-items:flex-end;justify-content:space-between;gap:2rem;flex-wrap:wrap}
+.mhead .script{font-family:var(--script);font-size:5rem;line-height:.9;color:var(--gold)}
+.mhead h1{margin:.2rem 0 0;font-size:3.2rem;font-weight:300;line-height:1.1}
+.mhead .sum{font-size:1.6rem;color:var(--cream-2);padding-bottom:.4rem}
+.toast{top:24px;bottom:auto;transform:translate(-50%,-20px)}
+.cards{--cw:44rem;--cf:2.2rem;flex:1;min-height:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--cw),1fr));gap:1rem;align-content:start;overflow:hidden;padding:.3rem}
+.cards.sz1{--cw:27rem;--cf:1.75rem}
+.cards.sz2{--cw:22rem;--cf:1.42rem}
+.cards.sz3{--cw:18rem;--cf:1.15rem}
+.cards.sz4{--cw:15rem;--cf:.98rem}
+.cards.sz5{--cw:12.5rem;--cf:.85rem;gap:.6rem}
+.cards.sz6{--cw:11rem;--cf:.75rem;gap:.5rem}
+.mcard{display:flex;align-items:center;gap:.7em;min-width:0;padding:.75em .9em;border-radius:.7em;background:var(--cream);color:var(--ink);font-size:var(--cf);box-shadow:0 1rem 2rem rgba(0,0,0,.3)}
+.mcard.anim{opacity:0;animation:cardin .6s cubic-bezier(.2,.9,.3,1.3) forwards;animation-delay:var(--d)}
+@keyframes cardin{0%{opacity:0;transform:translateY(1.5rem) scale(.85)}100%{opacity:1;transform:none}}
+.mcard .p{flex:1;display:flex;align-items:center;gap:.45em;min-width:0}
+.mcard .n{flex:none;font-weight:700;color:var(--carmine);font-variant-numeric:tabular-nums}
+.mcard .nm{min-width:0;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-height:1.15;overflow-wrap:anywhere;font-weight:500}
+.mcard .sw{flex:none;display:inline-flex;align-items:center;justify-content:center;width:1.7em;height:1.7em;border-radius:50%;background:var(--bg);color:var(--gold)}
+.mcard .sw svg{width:1em;height:1em}
+.mcard.trio{grid-column:1/-1;flex-wrap:wrap;background:#FFF3D6}
+.mcard.trio .p{flex:0 1 auto}
+.mcard.trio .ar{flex:none;color:var(--carmine);display:inline-flex}
+.mcard.trio .ar svg{width:1em;height:1em}
+.mcard.trio .note{flex-basis:100%;font-size:.7em;font-weight:500;color:var(--slate)}
+
+/* organiser bar */
+.admin{position:relative;z-index:20;display:flex;align-items:center;justify-content:flex-end;gap:.7rem;flex-wrap:wrap;min-height:48px;margin-top:1rem}
+.ab{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;min-height:44px;padding:0 1.3rem;border:1px solid rgba(246,238,220,.35);border-radius:999px;background:rgba(14,42,31,.6);color:var(--cream);font-size:max(14px,1.1rem);font-weight:500;cursor:pointer}
+.ab:hover{background:rgba(246,238,220,.1)}
+.ab.gold{border-color:var(--gold);background:var(--gold);color:var(--bg);font-weight:700}
+.ab.gold:hover{background:var(--gold-2)}
+.ab.armed{border-color:var(--carmine);background:var(--carmine);color:var(--cream)}
+.ab[disabled]{opacity:.5;cursor:not-allowed}
+.ab.faint{opacity:.45}
+.ab.faint:hover,.ab.faint:focus-visible{opacity:1}
+.ain{height:44px;width:15rem;min-width:150px;padding:0 1rem;border:1px solid rgba(246,238,220,.35);border-radius:999px;background:rgba(246,238,220,.08);color:var(--cream);font-size:max(14px,1.1rem)}
+.ain::placeholder{color:var(--cream-3)}
+.ain:focus{outline:none;border-color:var(--focus)}
+.ainfo{margin-right:auto;font-size:max(13px,1.05rem);color:var(--cream-2)}
+.group{display:flex;align-items:center;gap:.6rem}
+.sep{width:1px;height:28px;background:rgba(246,238,220,.2)}
+
+.loading{flex:1;display:flex;align-items:center;justify-content:center}
+
+/* portrait screens */
+@media (max-aspect-ratio:1/1){
+  html{font-size:clamp(9px, min(1.15vh, 1.6vw), 30px)}
+  .s-open{grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);gap:2rem;align-items:start;justify-items:center}
+  .s-right{width:100%;padding-top:0}
+}
+@media (prefers-reduced-motion:reduce){
+  .tile.new,.mcard.anim,.tiles.shuffling .tile,.shuffle .giftbox svg{animation:none;opacity:1}
+}
+</style>
+</head>
+<body>
+<div class="arcs" aria-hidden="true"><span class="a1"></span><span class="a2"></span><span class="a3"></span></div>
+
+<div class="screen">
+  <header class="s-top">
+    <div class="brand"><img src="../assets/tp-logo-white.png" alt="TP"><span>Gift <b>Exchange</b></span></div>
+    <button class="top-btn" type="button" id="fsBtn">Full screen (F)</button>
+  </header>
+  <div id="demo" class="demo-bar" hidden style="margin:.6rem 0 0">Demo mode - saved in this browser only. Organiser PIN is 1234.</div>
+
+  <div class="loading" id="v-loading"><div class="spinner" aria-hidden="true"></div></div>
+
+  <!-- people join -->
+  <section class="s-open" id="v-open" hidden>
+    <div class="qr-card">
+      <span class="k">SCAN TO JOIN</span>
+      <div id="qr" role="img" aria-label="QR code to join the gift exchange"></div>
+      <div class="steps"><span><i>1</i>Scan</span><span><i>2</i>Type your name</span><span><i>3</i>Get your number</span></div>
+      <span class="url" id="qrUrl"></span>
+    </div>
+    <div class="s-right" id="sRight">
+      <span class="script">Merry Christmas</span>
+      <h1 class="ev-title">Christmas Gift Exchange</h1>
+      <p class="team ev-team"></p>
+      <div class="meta-row">
+        <div class="chips big-chips ev-chips"></div>
+        <div class="s-count" aria-live="polite"><b id="count">0</b><span id="countLbl">people in</span></div>
+      </div>
+      <div class="tiles" id="tiles"></div>
+    </div>
+  </section>
+
+  <!-- matches -->
+  <section class="s-match" id="v-match" hidden>
+    <div class="mhead">
+      <div><span class="script">The matches</span><h1>Find your match and swap gifts!</h1></div>
+      <span class="sum" id="sum"></span>
+    </div>
+    <div class="cards" id="cards"></div>
+  </section>
+
+  <!-- organiser -->
+  <div class="admin" id="admin"></div>
+</div>
+
+<div class="shuffle" id="shuffle" hidden aria-hidden="true">
+  <div class="boxes"><span class="giftbox gift-art"></span><span class="giftbox gift-art"></span><span class="giftbox gift-art"></span></div>
+  <span class="t">Matching...</span>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="gift-config.js"></script>
+<script src="gift.js"></script>
+<script>
+(function () {
+  'use strict';
+  var G = window.GIFT, api = G.api, $ = G.$, E = G.EVENT, ICON = G.ICON;
+  var REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var board = null, view = null, timer = null, busy = false, animating = false;
+  var lastStatus = null, lastRound = null, seen = {}, firstRender = true;
+  var pin = G.device.pin(), unlocked = false, pinOpen = false;
+  var armedTile = null, armedUntil = 0, lastTilesKey = '', lastCardsKey = '', lastAdminHtml = '';
+
+  if (!G.LIVE) $('#demo').hidden = false;
+  G.snow(30);
+  G.$all('.gift-art').forEach(function (el) { el.innerHTML = G.GIFT_SVG; });
+  G.$all('.ev-title').forEach(function (el) { el.textContent = E.title; });
+  G.$all('.ev-team').forEach(function (el) { el.textContent = E.team; el.hidden = !E.team; });
+  G.$all('.ev-chips').forEach(function (el) { el.innerHTML = G.chipsHTML(); });
+
+  /* ---------- QR ---------- */
+  var link = G.joinUrl();
+  $('#qrUrl').textContent = link.replace(/^https?:\/\//, '').replace(/\/$/, '');
+  if (window.QRCode) {
+    new window.QRCode($('#qr'), { text: link, width: 512, height: 512, colorDark: '#0E2A1F', colorLight: '#F6EEDC', correctLevel: window.QRCode.CorrectLevel.M });
+  } else {
+    $('#qr').textContent = link;
+  }
+
+  /* ---------- helpers ---------- */
+  var toastT = null;
+  function toast(msg) {
+    var t = $('#toast'); t.textContent = msg; t.classList.add('on');
+    clearTimeout(toastT); toastT = setTimeout(function () { t.classList.remove('on'); }, 3600);
+  }
+  function showView(id) {
+    ['v-loading', 'v-open', 'v-match'].forEach(function (v) { $('#' + v).hidden = v !== id; });
+    view = id;
+  }
+  function plan(n) {
+    if (n < 2) return n === 1 ? '1 person so far' : 'Nobody yet';
+    var trio = n % 2 === 1, pairs = trio ? (n - 3) / 2 : n / 2;
+    var parts = [];
+    if (pairs) parts.push(pairs + (pairs === 1 ? ' pair' : ' pairs'));
+    if (trio) parts.push('1 group of 3');
+    return n + ' people: ' + parts.join(' + ');
+  }
+  // Lower number first in each pair, a group of 3 starts at its lowest number, groups in number order.
+  function tidy(groups) {
+    return (groups || []).map(function (g) {
+      var min = 0;
+      g.forEach(function (p, i) { if (p.num < g[min].num) min = i; });
+      return g.slice(min).concat(g.slice(0, min));
+    }).sort(function (a, b) { return (a.length === 3) - (b.length === 3) || a[0].num - b[0].num; });
+  }
+  // Shrink the tiles or cards until they all fit on the screen.
+  function fit(el, startSize) {
+    for (var s = 0; s <= 6; s++) el.classList.remove('sz' + s);
+    var size = startSize;
+    if (size) el.classList.add('sz' + size);
+    while (el.scrollHeight > el.clientHeight + 2 && size < 6) {
+      if (size) el.classList.remove('sz' + size);
+      size++; el.classList.add('sz' + size);
+    }
+  }
+
+  /* ---------- load + poll ---------- */
+  function load() {
+    return api.board().then(render, function () {
+      if (view === 'v-loading') { $('#v-loading').innerHTML = '<p style="font-size:1.8rem;color:var(--cream-2)">Can\'t reach the server. Retrying...</p>'; }
+    });
+  }
+  function schedule() {
+    clearTimeout(timer);
+    var ms = board && board.status === 'matched' ? 6000 : 2500;
+    timer = setTimeout(function () { load().then(schedule, schedule); }, ms);
+  }
+
+  function render(b) {
+    var prevStatus = lastStatus, prevRound = lastRound;
+    board = b;
+    lastStatus = b.status; lastRound = b.round;
+    if (b.status === 'matched') {
+      var fresh = prevStatus === 'open' || (prevRound !== null && prevRound !== b.round);
+      if (fresh && !firstRender) { playMatch(b); }
+      else if (!animating) { renderMatch(b, firstRender); }
+    } else {
+      if (prevRound !== null && prevRound !== b.round) seen = {};
+      if (!animating) renderOpen(b);
+    }
+    firstRender = false;
+    renderAdmin();
+  }
+
+  /* ---------- join phase ---------- */
+  function renderOpen(b, force) {
+    showView('v-open');
+    var people = b.people || [];
+    var editable = unlocked && b.status === 'open';
+    var armedNum = Date.now() < armedUntil ? armedTile : null;
+    var key = JSON.stringify([people, editable, armedNum]);
+    if (key === lastTilesKey && !force) return;
+    lastTilesKey = key; lastCardsKey = '';
+    $('#count').textContent = people.length;
+    $('#countLbl').textContent = people.length === 1 ? 'person in' : 'people in';
+    $('#sRight').classList.toggle('compact', people.length > 16);
+    var tiles = $('#tiles');
+    if (!people.length) {
+      tiles.innerHTML = '<div class="empty"><span class="giftbox idle gift-art">' + G.GIFT_SVG + '</span>Waiting for the first name...</div>';
+      fit(tiles, 0);
+      return;
+    }
+    tiles.innerHTML = people.map(function (p) {
+      var isNew = !seen[p.num] && !firstRender;
+      seen[p.num] = true;
+      var on = p.num === armedNum;
+      var cls = 'tile' + (isNew ? ' new' : '') + (on ? ' armed' : '');
+      var inner = '<span class="n">' + p.num + '</span><span class="nm">' + G.esc(p.name) + '</span>';
+      if (editable) {
+        return '<button type="button" class="' + cls + '" data-num="' + p.num + '" aria-label="Remove #' + p.num + ' ' + G.esc(p.name) + '">' + inner +
+          '<span class="x">' + (on ? 'Remove?' : '&times;') + '</span></button>';
+      }
+      return '<div class="' + cls + '">' + inner + '</div>';
+    }).join('');
+    var n = people.length;
+    fit(tiles, n <= 12 ? 0 : n <= 24 ? 1 : n <= 40 ? 2 : 3);
+  }
+
+  $('#tiles').addEventListener('click', function (e) {
+    var t = e.target.closest('button.tile');
+    if (!t || busy) return;
+    var num = parseInt(t.dataset.num, 10);
+    if (armedTile !== num || Date.now() >= armedUntil) {
+      armedTile = num; armedUntil = Date.now() + 4000;
+      renderOpen(board);
+      setTimeout(function () { if (board && board.status === 'open' && !animating) renderOpen(board); }, 4100);
+      return;
+    }
+    armedTile = null; armedUntil = 0;
+    act(api.remove(pin, num), 'Removed #' + num + '.');
+  });
+
+  /* ---------- the big moment ---------- */
+  function playMatch(b) {
+    if (REDUCED) { renderMatch(b, true); return; }
+    animating = true;
+    if (view !== 'v-open') renderOpen({ status: 'open', people: b.people, round: b.round });
+    G.$all('#tiles .tile').forEach(function (t) {
+      t.style.setProperty('--jx', ((Math.random() - 0.5) * 60).toFixed(0) + 'px');
+      t.style.setProperty('--jy', ((Math.random() - 0.5) * 40).toFixed(0) + 'px');
+      t.style.setProperty('--jr', ((Math.random() - 0.5) * 16).toFixed(0) + 'deg');
+      t.style.setProperty('--jd', (-Math.random() * 0.4).toFixed(2) + 's');
+    });
+    $('#tiles').classList.add('shuffling');
+    $('#shuffle').hidden = false;
+    setTimeout(function () {
+      $('#shuffle').hidden = true;
+      $('#tiles').classList.remove('shuffling');
+      animating = false;
+      renderMatch(board && board.status === 'matched' ? board : b, true);
+      G.burst(document.body, 40);
+    }, 2600);
+  }
+
+  function renderMatch(b, animate, force) {
+    showView('v-match');
+    var key = JSON.stringify(b.groups || []);
+    if (key === lastCardsKey && !animate && !force) return;
+    lastCardsKey = key; lastTilesKey = '';
+    var groups = tidy(b.groups);
+    var n = (b.people || []).length;
+    $('#sum').textContent = plan(n);
+    var step = Math.min(260, 4200 / Math.max(groups.length, 1));
+    var cards = $('#cards');
+    cards.innerHTML = groups.map(function (g, i) {
+      var cls = 'mcard' + (g.length === 3 ? ' trio' : '') + (animate && !REDUCED ? ' anim' : '');
+      var style = animate ? ' style="--d:' + Math.round(i * step) + 'ms"' : '';
+      function person(p) { return '<span class="p"><span class="n">#' + p.num + '</span><span class="nm">' + G.esc(p.name) + '</span></span>'; }
+      if (g.length === 2) {
+        return '<div class="' + cls + '"' + style + '>' + person(g[0]) + '<span class="sw">' + ICON.swap + '</span>' + person(g[1]) + '</div>';
+      }
+      var arrow = '<span class="ar">' + ICON.arrow + '</span>';
+      return '<div class="' + cls + '"' + style + '>' + g.map(person).join(arrow) + arrow +
+        '<span class="p"><span class="n">#' + g[0].num + '</span></span>' +
+        '<span class="note">Group of 3: each person gives to the next one</span></div>';
+    }).join('');
+    var c = groups.length;
+    fit(cards, c <= 6 ? 0 : c <= 12 ? 1 : c <= 20 ? 2 : 3);
+  }
+
+  /* ---------- organiser ---------- */
+  function setAdmin(html) {
+    if (html === lastAdminHtml) return false;
+    lastAdminHtml = html;
+    $('#admin').innerHTML = html;
+    return true;
+  }
+  function renderAdmin() {
+    var a = $('#admin');
+    if (document.activeElement && a.contains(document.activeElement) && document.activeElement.tagName === 'INPUT') return;
+    if (!unlocked) {
+      if (pinOpen) {
+        if (setAdmin('<form class="group" id="pinForm"><input class="ain" id="pinIn" type="password" inputmode="numeric" autocomplete="off" placeholder="Organiser PIN" aria-label="Organiser PIN">' +
+          '<button class="ab gold" type="submit">Unlock</button><button class="ab" type="button" id="pinCancel">Cancel</button></form>')) $('#pinIn').focus();
+      } else {
+        setAdmin('<button class="ab faint" type="button" id="orgBtn">Organiser</button>');
+      }
+      return;
+    }
+    var b = board || { status: 'open', people: [] };
+    var n = (b.people || []).length;
+    var html = '<span class="ainfo">' + G.esc(plan(n)) + (b.status === 'open' ? ' · tap a name to remove it' : '') + '</span>';
+    if (b.status === 'open') {
+      html += '<form class="group" id="addForm"><input class="ain" id="addIn" maxlength="40" placeholder="Add a name (no phone)" aria-label="Add a name"><button class="ab" type="submit">Add</button></form>';
+      if (G.demo) html += '<button class="ab" type="button" id="samplesBtn">+6 sample names</button>';
+      html += '<span class="sep"></span>';
+      html += '<button class="ab gold" type="button" id="matchBtn"' + (n < 2 ? ' disabled' : '') + '>Match everyone (' + n + ')</button>';
+    } else {
+      html += '<button class="ab" type="button" id="reopenBtn">Undo matches</button>';
+    }
+    html += '<button class="ab" type="button" id="resetBtn">Start fresh</button>';
+    html += '<button class="ab faint" type="button" id="lockBtn">Lock</button>';
+    setAdmin(html);
+  }
+
+  function twoTap(btn, label) {
+    if (btn.classList.contains('armed')) return true;
+    var old = btn.textContent;
+    btn.classList.add('armed'); btn.textContent = label;
+    setTimeout(function () { if (btn.isConnected && btn.classList.contains('armed')) { btn.classList.remove('armed'); btn.textContent = old; } }, 4500);
+    return false;
+  }
+
+  function act(promise, okMsg) {
+    busy = true;
+    return promise.then(function (r) {
+      busy = false;
+      if (okMsg) toast(typeof okMsg === 'function' ? okMsg(r) : okMsg);
+      return load();
+    }, function (err) {
+      busy = false;
+      var c = G.codeOf(err);
+      if (c === 'bad_pin' || c === 'no_pin') { unlocked = false; pin = null; G.device.forgetPin(); }
+      toast(G.messageOf(err));
+      renderAdmin();
+      return load();
+    });
+  }
+
+  $('#admin').addEventListener('click', function (e) {
+    var t = e.target.closest('button');
+    if (!t || busy) return;
+    if (t.id === 'orgBtn') { pinOpen = true; renderAdmin(); }
+    else if (t.id === 'pinCancel') { pinOpen = false; renderAdmin(); }
+    else if (t.id === 'lockBtn') { unlocked = false; pinOpen = false; pin = null; G.device.forgetPin(); renderAdmin(); if (board && board.status === 'open') renderOpen(board); toast('Locked on this screen.'); }
+    else if (t.id === 'samplesBtn') { G.demo.samples(6).then(load); }
+    else if (t.id === 'matchBtn') {
+      var n = board.people.length;
+      if (!twoTap(t, 'Tap again to match ' + n + ' people')) return;
+      t.disabled = true; t.textContent = 'Matching...';
+      act(api.match(pin));
+    }
+    else if (t.id === 'reopenBtn') {
+      if (!twoTap(t, 'Tap again: names stay, matches are cleared')) return;
+      act(api.reopen(pin), 'Matches undone. People can join again.');
+    }
+    else if (t.id === 'resetBtn') {
+      if (!twoTap(t, 'Tap again: clears every name')) return;
+      seen = {};
+      act(api.reset(pin), 'All clear. Numbers start from #1 again.');
+    }
+  });
+
+  $('#admin').addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (busy) return;
+    if (e.target.id === 'pinForm') {
+      var p = $('#pinIn').value.trim();
+      if (!p) return;
+      busy = true;
+      api.check(p).then(function () {
+        busy = false; pin = p; unlocked = true; pinOpen = false; G.device.savePin(p);
+        document.activeElement.blur();
+        renderAdmin(); if (board && board.status === 'open') renderOpen(board);
+        toast('Organiser controls unlocked on this screen.');
+      }, function (err) {
+        busy = false; toast(G.messageOf(err));
+        $('#pinIn').value = ''; $('#pinIn').focus();
+      });
+    } else if (e.target.id === 'addForm') {
+      var name = $('#addIn').value.trim();
+      if (!name) { $('#addIn').focus(); return; }
+      $('#addIn').value = '';
+      document.activeElement.blur();
+      act(api.add(pin, name), function (r) { return 'Added #' + r.num + ' ' + name + '.'; });
+    }
+  });
+
+  /* ---------- full screen + keep the screen awake ---------- */
+  function toggleFs() {
+    if (document.fullscreenElement) { if (document.exitFullscreen) document.exitFullscreen().catch(function () {}); }
+    else if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(function () {});
+  }
+  $('#fsBtn').addEventListener('click', toggleFs);
+  document.addEventListener('keydown', function (e) {
+    if ((e.key === 'f' || e.key === 'F') && !/INPUT|TEXTAREA/.test((document.activeElement || {}).tagName || '')) toggleFs();
+  });
+  var lock = null;
+  function wake() { try { if (navigator.wakeLock && document.visibilityState === 'visible') navigator.wakeLock.request('screen').then(function (l) { lock = l; }, function () {}); } catch (e) { /* fine */ } }
+  document.addEventListener('visibilitychange', wake);
+  wake();
+  window.addEventListener('resize', function () {
+    if (!board) return;
+    if (view === 'v-open') renderOpen(board, true); else if (view === 'v-match') renderMatch(board, false, true);
+  });
+
+  /* ---------- go ---------- */
+  function begin() { load().then(schedule, schedule); }
+  if (pin) {
+    api.check(pin).then(function () { unlocked = true; begin(); }, function () { pin = null; G.device.forgetPin(); begin(); });
+  } else {
+    begin();
+  }
+})();
+</script>
+</body>
+</html>
