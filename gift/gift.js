@@ -73,7 +73,7 @@
     switch (c) {
       case 'name_taken':
         var n = takenNum(err);
-        return 'That name is already on the list' + (n ? ' as #' + n : '') + '. If that\'s not you, add your last initial, for example "Amr M".';
+        return 'That name is already on the list' + (n ? ' as #' + n : '') + '. If that\'s not you, add your last initial, for example "Siti A".';
       case 'closed': return 'Matching is done, so the list is closed. Ask the organiser to add you.';
       case 'full': return 'The list is full.';
       case 'already_matched': return 'Everyone is already matched. Undo the matching first.';
