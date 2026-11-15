@@ -72,8 +72,7 @@
     var c = codeOf(err);
     switch (c) {
       case 'name_taken':
-        var n = takenNum(err);
-        return 'That name is already on the list' + (n ? ' as #' + n : '') + '. If that\'s not you, add your last initial, for example "Siti A".';
+        return 'That name is already on the list. If that\'s not you, add your last initial, for example "Siti A".';
       case 'closed': return 'Matching is done, so the list is closed. Ask the organiser to add you.';
       case 'full': return 'The list is full.';
       case 'already_matched': return 'Everyone is already matched. Undo the matching first.';
@@ -101,10 +100,6 @@
     me: function (token) { return rpc('gx_me', { p_token: token }); },
     leave: function (token) { return rpc('gx_leave', { p_token: token }); },
     check: function (pin) { return rpc('gx_admin_check', { p_pin: pin }); },
-    people: function (pin) { return rpc('gx_admin_people', { p_pin: pin }); },
-    setTeam: function (pin, num, team) { return rpc('gx_admin_set_team', { p_pin: pin, p_num: num, p_team: team || null }); },
-    rosterAdd: function (pin, name, team) { return rpc('gx_admin_roster_add', { p_pin: pin, p_name: name, p_team: team }); },
-    rosterRemove: function (pin, name) { return rpc('gx_admin_roster_remove', { p_pin: pin, p_name: name }); },
     add: function (pin, name) { return rpc('gx_admin_add', { p_pin: pin, p_name: name }); },
     remove: function (pin, num) { return rpc('gx_admin_remove', { p_pin: pin, p_num: num }); },
     match: function (pin) { return rpc('gx_admin_match', { p_pin: pin }); },
@@ -113,86 +108,54 @@
   };
 
   /* ---------- demo backend (same rules, this browser only) ---------- */
-  var DB_KEY = 'tpgx-demo2';
-  function load() {
-    var db = store.get(DB_KEY, null) || { status: 'open', round: 0, matched_at: null, people: [], roster: [] };
-    if (!db.roster) db.roster = [];
-    return db;
-  }
+  var DB_KEY = 'tpgx-demo3';
+  function load() { return store.get(DB_KEY, null) || { status: 'open', round: 0, matched_at: null, people: [] }; }
   function save(db) { store.set(DB_KEY, db); }
   function ok(v) { return new Promise(function (r) { setTimeout(function () { r(v); }, 160); }); }
   function no(code) { return new Promise(function (_, j) { setTimeout(function () { j(new Error(code)); }, 160); }); }
   function pinOk(pin) { return String(pin || '').trim() === '1234'; }
-  function key(t) { return (clean(t) || '').toLowerCase(); }
   function shuffle(list) {
     for (var i = list.length - 1; i > 0; i--) { var j = randInt(i + 1); var x = list[i]; list[i] = list[j]; list[j] = x; }
     return list;
   }
-  function teamFor(db, name) {
-    var k = key(name), best = null;
-    db.roster.forEach(function (r) {
-      var rk = key(r.name);
-      if ((k === rk || k.indexOf(rk + ' ') === 0) && (!best || rk.length > key(best.name).length)) best = r;
-    });
-    return best ? best.team : null;
+  // Same as gx_place in the database. The demo list lives in this browser only (tpgx-demo-order).
+  function placeOf(name) {
+    var list = store.get('tpgx-demo-order', []);
+    var k = String(name || '').replace(/[^A-Za-z ]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
+    if (!k) return null;
+    var hits = list.filter(function (o) {
+      return k === o.alias || k.indexOf(o.alias + ' ') === 0 || k.split(' ')[0] === o.alias.replace(/ /g, '');
+    }).map(function (o) { return o.place; });
+    if (hits.indexOf('last') !== -1) return 'last';
+    if (hits.indexOf('bridge') !== -1) return 'bridge';
+    return hits.length ? 'end' : null;
   }
-  function minClashes(n, r, s) { return Math.max(0, 2 * r - n) + Math.max(0, 2 * s - n); }
-  function person(p) { return { num: p.num, name: p.name }; }
   function byId(db, id) { return db.people.filter(function (p) { return p.id === id; })[0]; }
   function boardOf(db) {
     var people = db.people.slice().sort(function (a, b) { return a.num - b.num; });
-    var gives = [];
+    var line = [];
     if (db.status === 'matched') {
-      gives = people.filter(function (p) { return p.gives_to; }).map(function (p) { return { from: person(p), to: person(byId(db, p.gives_to)) }; });
+      line = db.people.filter(function (p) { return p.pos; }).sort(function (a, b) { return a.pos - b.pos; })
+        .map(function (p) { return { pos: p.pos, name: p.name }; });
     }
-    return { status: db.status, round: db.round, matched_at: db.matched_at, has_pin: true, people: people.map(person), gives: gives };
+    return {
+      status: db.status, round: db.round, matched_at: db.matched_at, has_pin: true,
+      people: people.map(function (p) { return { num: p.num, name: p.name }; }), line: line
+    };
   }
-  // Same circle as the database: the bigger tagged group spaced round the circle,
-  // everyone else in the gaps, the smaller tagged group never two together.
-  function makeCircle(db) {
-    var R = shuffle(db.people.filter(function (p) { return p.team === 'R'; }));
-    var S = shuffle(db.people.filter(function (p) { return p.team === 'S'; }));
-    var O = shuffle(db.people.filter(function (p) { return !p.team; }));
-    var A, B;
-    if (R.length > S.length || (R.length === S.length && randInt(2) === 0)) { A = R; B = S; } else { A = S; B = R; }
-    var a = A.length, n = a + B.length + O.length, m = n - a, circle = [], g, k;
-    if (a === 0) {
-      circle = O;
-    } else if (a > m) {
-      var rest = shuffle(B.concat(O));
-      var pick = shuffle(A.map(function (_, i) { return i; })).slice(0, m);
-      var ri = 0;
-      A.forEach(function (p, i) { circle.push(p); if (pick.indexOf(i) !== -1) circle.push(rest[ri++]); });
-    } else {
-      var cuts = shuffle(Array.from({ length: m - 1 }, function (_, i) { return i + 1; })).slice(0, a - 1).sort(function (x, y) { return x - y; });
-      var sizes = [], prev = 0;
-      for (g = 0; g < a; g++) { var nx = g < a - 1 ? cuts[g] : m; sizes.push(nx - prev); prev = nx; }
-      var slots = [];
-      sizes.forEach(function (sz, gi) { for (var q = 0; q < Math.ceil(sz / 2); q++) slots.push(gi); });
-      shuffle(slots);
-      var bc = sizes.map(function () { return 0; });
-      for (k = 0; k < B.length; k++) bc[slots[k]]++;
-      var bi = 0, oi = 0;
-      for (g = 0; g < a; g++) {
-        circle.push(A[g]);
-        var og = sizes[g] - bc[g];
-        var chosen = shuffle(Array.from({ length: og + 1 }, function (_, i) { return i; })).slice(0, bc[g]);
-        for (k = 0; k <= og; k++) {
-          if (chosen.indexOf(k) !== -1) circle.push(B[bi++]);
-          if (k < og) circle.push(O[oi++]);
-        }
-      }
-    }
-    circle.forEach(function (p, i) { p.grp = 1; p.pos = i + 1; p.gives_to = circle[(i + 1) % n].id; });
-    return db.people.filter(function (p) { var t = byId(db, p.gives_to); return p.team && t && t.team === p.team; }).length;
+  function makeLine(db) {
+    var rank = { front: 0, bridge: 1, end: 2, last: 3 };
+    var list = shuffle(db.people.slice()).map(function (p) { return { p: p, r: rank[placeOf(p.name) || 'front'] }; });
+    list.sort(function (a, b) { return a.r - b.r; });  // stable sort keeps the shuffle inside each part
+    var n = list.length;
+    list.forEach(function (x, i) { x.p.grp = 1; x.p.pos = i + 1; x.p.gives_to = list[(i + 1) % n].p.id; });
   }
   function nextNum(db) { return db.people.reduce(function (m, p) { return Math.max(m, p.num); }, 0) + 1; }
   function nameTaken(db, name) {
-    var hit = db.people.filter(function (p) { return p.name.toLowerCase() === name.toLowerCase(); })[0];
-    return hit ? hit.num : null;
+    return db.people.some(function (p) { return p.name.toLowerCase() === name.toLowerCase(); });
   }
   function newPerson(db, name, token) {
-    return { id: randToken(), num: nextNum(db), name: name, token: token || null, team: teamFor(db, name), grp: null, pos: null, gives_to: null };
+    return { id: randToken(), num: nextNum(db), name: name, token: token || null, grp: null, pos: null, gives_to: null };
   }
   var demoApi = {
     board: function () { return ok(boardOf(load())); },
@@ -200,11 +163,10 @@
       var db = load(); var n = clean(name);
       if (!n) return no('bad_input');
       if (db.status !== 'open') return no('closed');
-      var t = nameTaken(db, n); if (t) return no('name_taken:' + t);
+      if (nameTaken(db, n)) return no('name_taken');
       var token = randToken();
-      var p = newPerson(db, n, token);
-      db.people.push(p);
-      save(db); return ok({ num: p.num, name: n, token: token });
+      db.people.push(newPerson(db, n, token));
+      save(db); return ok({ name: n, token: token });
     },
     me: function (token) {
       var db = load();
@@ -212,10 +174,11 @@
       if (!me) return no('not_found');
       var match = null;
       if (db.status === 'matched' && me.gives_to) {
+        var give = byId(db, me.gives_to);
         var get = db.people.filter(function (p) { return p.gives_to === me.id; })[0];
-        match = { give: person(byId(db, me.gives_to)), get: person(get) };
+        match = { pos: me.pos, give: { pos: give.pos, name: give.name }, get: { pos: get.pos, name: get.name } };
       }
-      return ok({ num: me.num, name: me.name, status: db.status, round: db.round, count: db.people.length, match: match });
+      return ok({ name: me.name, status: db.status, round: db.round, count: db.people.length, match: match });
     },
     leave: function (token) {
       var db = load();
@@ -224,56 +187,14 @@
       save(db); return ok(null);
     },
     check: function (pin) { return pinOk(pin) ? ok({ ok: true }) : no('bad_pin'); },
-    people: function (pin) {
-      if (!pinOk(pin)) return no('bad_pin');
-      var db = load();
-      var n = db.people.length;
-      var r = db.people.filter(function (p) { return p.team === 'R'; }).length;
-      var s = db.people.filter(function (p) { return p.team === 'S'; }).length;
-      var clashes = null;
-      if (db.status === 'matched') clashes = db.people.filter(function (p) { var t = byId(db, p.gives_to); return p.team && t && t.team === p.team; }).length;
-      return ok({
-        ok: true, status: db.status, round: db.round,
-        people: db.people.slice().sort(function (a, b) { return a.num - b.num; }).map(function (p) { return { num: p.num, name: p.name, team: p.team || null }; }),
-        roster: db.roster.slice().sort(function (a, b) { return a.team.localeCompare(b.team) || key(a.name).localeCompare(key(b.name)); }),
-        count: n, r: r, s: s, min_clashes: minClashes(n, r, s), clashes: clashes
-      });
-    },
-    setTeam: function (pin, num, team) {
-      if (!pinOk(pin)) return no('bad_pin');
-      var db = load();
-      var p = db.people.filter(function (x) { return x.num === num; })[0];
-      if (!p) return no('not_found');
-      p.team = team || null;
-      db.roster = db.roster.filter(function (r) { return key(r.name) !== key(p.name); });
-      if (team) db.roster.push({ name: p.name, team: team });
-      save(db); return ok({ ok: true });
-    },
-    rosterAdd: function (pin, name, team) {
-      if (!pinOk(pin)) return no('bad_pin');
-      var n = clean(name);
-      if (!n || (team !== 'R' && team !== 'S')) return no('bad_input');
-      var db = load();
-      db.roster = db.roster.filter(function (r) { return key(r.name) !== key(n); });
-      db.roster.push({ name: n, team: team });
-      db.people.forEach(function (p) { var k = key(p.name), rk = key(n); if (!p.team && (k === rk || k.indexOf(rk + ' ') === 0)) p.team = team; });
-      save(db); return ok({ ok: true });
-    },
-    rosterRemove: function (pin, name) {
-      if (!pinOk(pin)) return no('bad_pin');
-      var db = load();
-      db.roster = db.roster.filter(function (r) { return key(r.name) !== key(name); });
-      save(db); return ok({ ok: true });
-    },
     add: function (pin, name) {
       if (!pinOk(pin)) return no('bad_pin');
       var db = load(); var n = clean(name);
       if (!n) return no('bad_input');
       if (db.status !== 'open') return no('already_matched');
-      var t = nameTaken(db, n); if (t) return no('name_taken:' + t);
-      var p = newPerson(db, n, null);
-      db.people.push(p);
-      save(db); return ok({ ok: true, num: p.num });
+      if (nameTaken(db, n)) return no('name_taken');
+      db.people.push(newPerson(db, n, null));
+      save(db); return ok({ ok: true, name: n });
     },
     remove: function (pin, num) {
       if (!pinOk(pin)) return no('bad_pin');
@@ -286,11 +207,10 @@
       if (!pinOk(pin)) return no('bad_pin');
       var db = load();
       if (db.status !== 'open') return no('already_matched');
-      var n = db.people.length;
-      if (n < 2) return no('too_few');
-      var c = makeCircle(db);
+      if (db.people.length < 2) return no('too_few');
+      makeLine(db);
       db.status = 'matched'; db.round += 1; db.matched_at = new Date().toISOString();
-      save(db); return ok({ ok: true, count: n, clashes: c });
+      save(db); return ok({ ok: true, count: db.people.length });
     },
     reopen: function (pin) {
       if (!pinOk(pin)) return no('bad_pin');

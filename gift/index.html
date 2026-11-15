@@ -28,6 +28,11 @@
 .kicker{margin:0;font-size:13px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--gold-2)}
 
 .join-gift{margin:22px 0 4px}
+.wait-gift{display:flex;flex-direction:column;align-items:center;gap:10px;margin:22px 0 18px}
+.wait-gift .giftbox{width:160px}
+.wait-gift .who{font-size:20px;font-weight:500;color:var(--cream)}
+.wait-gift.swing{animation:swing 1.3s cubic-bezier(.2,.9,.3,1.1) both;transform-origin:50% 0}
+.mc-get + .mc-get{margin-top:10px}
 .join-gift .giftbox{width:150px}
 .sheet{width:100%;margin-top:18px;padding:22px 20px;border-radius:22px;background:var(--paper);color:var(--ink);text-align:left;display:flex;flex-direction:column;gap:12px}
 .sheet label{font-size:15px;font-weight:700}
@@ -100,24 +105,17 @@
         <label for="name">Your name</label>
         <input class="input" id="name" maxlength="40" autocomplete="name" enterkeyhint="go" placeholder="First and last name">
         <p class="err" id="j-err" role="alert"></p>
-        <button class="btn btn-dark" id="joinBtn" type="submit">Get my number</button>
-        <p class="help">Keep this page open after. Your match shows here when everyone is matched.</p>
+        <button class="btn btn-dark" id="joinBtn" type="submit">Count me in</button>
+        <p class="help">Keep this page open after. You'll get your number here when everyone is matched.</p>
       </form>
     </section>
 
-    <!-- waiting with a number -->
+    <!-- joined, waiting for the matching -->
     <section class="view" id="v-wait" hidden>
       <p class="kicker" id="w-kicker">You're in</p>
-      <div class="numtag wait-tag" id="w-tag">
-        <span class="string"></span>
-        <div class="tag">
-          <span class="lbl">YOUR NUMBER</span>
-          <span class="big"><small>#</small><span id="w-num">0</span></span>
-          <span class="who" id="w-name"></span>
-        </div>
-      </div>
-      <h1 id="w-title" style="font-size:22px">Keep this page open</h1>
-      <p class="msg" style="margin-top:8px">When everyone's in, the organiser matches everyone on the big screen. Your match shows up here by itself.</p>
+      <div class="wait-gift" id="w-tag"><span class="giftbox idle gift-art" aria-hidden="true"></span><span class="who" id="w-name"></span></div>
+      <h1 id="w-title" style="font-size:24px">Keep this page open</h1>
+      <p class="msg" style="margin-top:8px">When everyone's in, the organiser matches everyone. You'll get your number here and on the big screen.</p>
       <div class="count"><span class="live-dot" aria-hidden="true"></span><span id="w-count">1 person in</span></div>
       <button class="link" type="button" id="fixName" style="margin-top:14px">Wrong name? Fix it</button>
     </section>
@@ -134,7 +132,7 @@
         <div id="reveal" hidden></div>
       </div>
       <p class="me-line" id="m-me"></p>
-      <details class="all" id="m-all"><summary>See all matches</summary><ul id="m-list"></ul></details>
+      <details class="all" id="m-all"><summary>See the whole line</summary><ul id="m-list"></ul></details>
     </section>
 
     <!-- matched already, this phone isn't on the list -->
@@ -240,16 +238,16 @@
     var name = $('#name').value.trim();
     $('#j-err').textContent = '';
     if (!name) { $('#j-err').textContent = 'Please type your name.'; $('#name').focus(); return; }
-    btn.disabled = true; btn.textContent = 'Getting your number...';
+    btn.disabled = true; btn.textContent = 'Adding you...';
     api.join(name).then(function (r) {
       token = r.token; G.device.saveToken(token);
-      btn.disabled = false; btn.textContent = 'Get my number';
+      btn.disabled = false; btn.textContent = 'Count me in';
       shownRound = null; opened = false;
       return refreshMe(true).then(function () {
         if (current === 'v-wait' && !REDUCED) { var t = $('#w-tag'); t.classList.remove('swing'); void t.offsetWidth; t.classList.add('swing'); }
       });
     }, function (err) {
-      btn.disabled = false; btn.textContent = 'Get my number';
+      btn.disabled = false; btn.textContent = 'Count me in';
       if (G.codeOf(err) === 'closed') { loadBoard(); return; }
       $('#j-err').textContent = G.messageOf(err);
     });
@@ -258,7 +256,6 @@
   /* ---------- waiting ---------- */
   function showWait() {
     var wasMatch = current === 'v-match';
-    $('#w-num').textContent = me.num;
     $('#w-name').textContent = me.name;
     $('#w-kicker').textContent = 'You\'re in, ' + G.firstName(me.name);
     $('#w-count').textContent = people(me.count);
@@ -282,19 +279,20 @@
 
   /* ---------- matched ---------- */
   function matchHTML(m) {
-    var same = m.give.num === m.get.num;
+    var same = m.give.pos === m.get.pos;
     return '<article class="match-card" id="card">' +
-      '<span class="mc-kicker">Give your gift to</span>' +
-      '<span class="mc-num">' + numHTML(m.give.num) + '</span>' +
-      '<span class="mc-name">' + G.esc(m.give.name) + '</span>' +
+      '<span class="mc-kicker">Your number</span>' +
+      '<span class="mc-num">' + numHTML(m.pos) + '</span>' +
+      '<div class="mc-get"><span class="lbl">Give your gift to</span>' +
+      '<span class="who"><b>#' + G.esc(m.give.pos) + '</b> ' + G.esc(m.give.name) + '</span></div>' +
       '<div class="mc-get"><span class="lbl">' + (same ? 'And they give theirs to you' : 'You get a gift from') + '</span>' +
-      (same ? '' : '<span class="who"><b>#' + G.esc(m.get.num) + '</b> ' + G.esc(m.get.name) + '</span>') + '</div>' +
+      (same ? '' : '<span class="who"><b>#' + G.esc(m.get.pos) + '</b> ' + G.esc(m.get.name) + '</span>') + '</div>' +
       '</article>';
   }
 
   function showMatch() {
     var fresh = shownRound !== me.round;
-    $('#m-me').innerHTML = 'You are <b>#' + G.esc(me.num) + '</b> ' + G.esc(me.name);
+    $('#m-me').innerHTML = 'Line up in number order. Each number gives to the next, and <b>#' + G.esc(me.count) + '</b> gives to <b>#1</b>.';
     $('#reveal').innerHTML = matchHTML(me.match);
     if (fresh) {
       if (shownRound !== null) toast('New matches! Tap your gift again.');
@@ -328,33 +326,31 @@
       var c = $('#card'); if (c && !REDUCED) c.classList.add('in');
       opened = true;
       var m = me.match;
-      $('#m-kicker').textContent = 'Your match';
-      $('#m-title').textContent = 'Give to #' + m.give.num;
+      $('#m-kicker').textContent = 'Your place in the line';
+      $('#m-title').textContent = 'You\'re #' + m.pos;
       $('#tapHint').textContent = 'TAP TO OPEN';
     }, shakeMs + openMs);
   });
 
   /* ---------- everyone's matches ---------- */
-  function listHTML(gives, myNum) {
-    return (gives || []).map(function (x) {
-      var mine = x.from.num === myNum;
-      return '<li' + (mine ? ' class="me"' : '') + '><span class="p"><b>#' + G.esc(x.from.num) + '</b>' + G.esc(x.from.name) + '</span>' +
-        G.ICON.arrow + '<span class="p"><b>#' + G.esc(x.to.num) + '</b>' + G.esc(x.to.name) + '</span></li>';
+  function listHTML(line, myPos) {
+    return (line || []).map(function (x) {
+      return '<li' + (x.pos === myPos ? ' class="me"' : '') + '><span class="p"><b>#' + G.esc(x.pos) + '</b>' + G.esc(x.name) + '</span></li>';
     }).join('');
   }
   function loadAll() {
-    api.board().then(function (b) { board = b; $('#m-list').innerHTML = listHTML(b.gives, me ? me.num : null); }, function () { /* fine */ });
+    api.board().then(function (b) { board = b; $('#m-list').innerHTML = listHTML(b.line, me && me.match ? me.match.pos : null); }, function () { /* fine */ });
   }
 
   /* ---------- closed ---------- */
   function showClosed() {
-    $('#c-list').innerHTML = listHTML(board.gives, null);
+    $('#c-list').innerHTML = listHTML(board.line, null);
     show('v-closed');
     poll(function () {
       api.board().then(function (b) {
         board = b;
         if (b.status === 'open' && current === 'v-closed') { showJoin(); return; }
-        $('#c-list').innerHTML = listHTML(b.gives, null);
+        $('#c-list').innerHTML = listHTML(b.line, null);
       }, function () { /* fine */ });
     }, 10000);
   }

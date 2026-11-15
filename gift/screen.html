@@ -101,6 +101,9 @@ button.tile.armed .x{color:var(--cream)}
 .mcard.anim{opacity:0;animation:cardin .6s cubic-bezier(.2,.9,.3,1.3) forwards;animation-delay:var(--d)}
 @keyframes cardin{0%{opacity:0;transform:translateY(1.5rem) scale(.85)}100%{opacity:1;transform:none}}
 .mcard .p{flex:1;display:flex;align-items:center;gap:.45em;min-width:0}
+.mcard .big-n{flex:none;display:inline-flex;align-items:center;justify-content:center;min-width:2.2em;height:2.2em;padding:0 .3em;border-radius:.5em;background:var(--bg);color:var(--gold);font-weight:700;font-variant-numeric:tabular-nums}
+.mcard .nm{flex:1}
+.tile .dot{flex:none;width:.5em;height:.5em;margin-left:.5em;border-radius:50%;background:var(--gold)}
 .mcard .n{flex:none;font-weight:700;color:var(--carmine);font-variant-numeric:tabular-nums}
 .mcard .nm{min-width:0;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-height:1.15;overflow-wrap:anywhere;font-weight:500}
 .mcard .sw{flex:none;display:inline-flex;align-items:center;justify-content:center;width:1.7em;height:1.7em;border-radius:50%;background:var(--bg);color:var(--gold)}
@@ -153,7 +156,7 @@ button.tile.armed .x{color:var(--cream)}
     <div class="qr-card">
       <span class="k">SCAN TO JOIN</span>
       <div id="qr" role="img" aria-label="QR code to join the gift exchange"></div>
-      <div class="steps"><span><i>1</i>Scan</span><span><i>2</i>Type your name</span><span><i>3</i>Get your number</span></div>
+      <div class="steps"><span><i>1</i>Scan</span><span><i>2</i>Type your name</span><span><i>3</i>Wait for the match</span></div>
       <span class="url" id="qrUrl"></span>
     </div>
     <div class="s-right" id="sRight">
@@ -171,7 +174,7 @@ button.tile.armed .x{color:var(--cream)}
   <!-- matches -->
   <section class="s-match" id="v-match" hidden>
     <div class="mhead">
-      <div><span class="script">The matches</span><h1>Find your number: that's who you give your gift to</h1></div>
+      <div><span class="script">The line</span><h1>Line up in this order and give to the next number</h1></div>
       <span class="sum" id="sum"></span>
     </div>
     <div class="cards" id="cards"></div>
@@ -230,7 +233,7 @@ button.tile.armed .x{color:var(--cream)}
   }
   function plan(n) {
     if (n < 2) return n === 1 ? '1 person so far' : 'Nobody yet';
-    return n + ' people, everyone gives one and gets one';
+    return 'The last number, #' + n + ', gives to #1';
   }
   // Shrink the tiles or cards until they all fit on the screen.
   function fit(el, startSize) {
@@ -294,9 +297,9 @@ button.tile.armed .x{color:var(--cream)}
       seen[p.num] = true;
       var on = p.num === armedNum;
       var cls = 'tile' + (isNew ? ' new' : '') + (on ? ' armed' : '');
-      var inner = '<span class="n">' + p.num + '</span><span class="nm">' + G.esc(p.name) + '</span>';
+      var inner = '<span class="dot" aria-hidden="true"></span><span class="nm">' + G.esc(p.name) + '</span>';
       if (editable) {
-        return '<button type="button" class="' + cls + '" data-num="' + p.num + '" aria-label="Remove #' + p.num + ' ' + G.esc(p.name) + '">' + inner +
+        return '<button type="button" class="' + cls + '" data-num="' + p.num + '" aria-label="Remove ' + G.esc(p.name) + '">' + inner +
           '<span class="x">' + (on ? 'Remove?' : '&times;') + '</span></button>';
       }
       return '<div class="' + cls + '">' + inner + '</div>';
@@ -316,7 +319,7 @@ button.tile.armed .x{color:var(--cream)}
       return;
     }
     armedTile = null; armedUntil = 0;
-    act(api.remove(pin, num), 'Removed #' + num + '.');
+    act(api.remove(pin, num), 'Removed.');
   });
 
   /* ---------- the big moment ---------- */
@@ -343,22 +346,21 @@ button.tile.armed .x{color:var(--cream)}
 
   function renderMatch(b, animate, force) {
     showView('v-match');
-    var gives = b.gives || [];
-    var key = JSON.stringify(gives);
+    var line = b.line || [];
+    var key = JSON.stringify(line);
     if (key === lastCardsKey && !animate && !force) return;
     lastCardsKey = key; lastTilesKey = '';
     var n = (b.people || []).length;
     $('#sum').textContent = plan(n);
-    var step = Math.min(220, 4200 / Math.max(gives.length, 1));
+    var step = Math.min(220, 4200 / Math.max(line.length, 1));
     var cards = $('#cards');
-    function person(p) { return '<span class="p"><span class="n">#' + p.num + '</span><span class="nm">' + G.esc(p.name) + '</span></span>'; }
-    cards.innerHTML = gives.map(function (x, i) {
+    cards.innerHTML = line.map(function (x, i) {
       var cls = 'mcard' + (animate && !REDUCED ? ' anim' : '');
       var style = animate ? ' style="--d:' + Math.round(i * step) + 'ms"' : '';
-      return '<div class="' + cls + '"' + style + '>' + person(x.from) + '<span class="sw" title="gives to">' + ICON.arrow + '</span>' + person(x.to) + '</div>';
+      return '<div class="' + cls + '"' + style + '><span class="big-n">' + x.pos + '</span><span class="nm">' + G.esc(x.name) + '</span></div>';
     }).join('');
-    var c = gives.length;
-    fit(cards, c <= 8 ? 0 : c <= 16 ? 1 : c <= 28 ? 2 : 3);
+    var c = line.length;
+    fit(cards, c <= 8 ? 1 : c <= 16 ? 2 : c <= 28 ? 3 : 4);
   }
 
   /* ---------- organiser ---------- */
@@ -465,7 +467,7 @@ button.tile.armed .x{color:var(--cream)}
       if (!name) { $('#addIn').focus(); return; }
       $('#addIn').value = '';
       document.activeElement.blur();
-      act(api.add(pin, name), function (r) { return 'Added #' + r.num + ' ' + name + '.'; });
+      act(api.add(pin, name), function (r) { return 'Added ' + (r.name || name) + '.'; });
     }
   });
 
