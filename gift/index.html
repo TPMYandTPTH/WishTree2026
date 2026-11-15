@@ -48,6 +48,10 @@
 .mc-num small{font-size:.5em;vertical-align:.55em;color:var(--carmine);margin-right:2px}
 .mc-name{display:block;margin-top:4px;font-size:26px;font-weight:500;overflow-wrap:anywhere}
 .mc-tip{margin:16px 0 0;padding-top:12px;border-top:1px dashed rgba(24,51,38,.25);font-size:14px;color:var(--slate)}
+.mc-get{display:flex;flex-direction:column;align-items:center;gap:2px;margin-top:16px;padding-top:12px;border-top:1px dashed rgba(24,51,38,.25)}
+.mc-get .lbl{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--slate)}
+.mc-get .who{font-size:17px;font-weight:500;overflow-wrap:anywhere}
+.mc-get .who b{color:var(--carmine)}
 .mc-row{display:flex;flex-direction:column;align-items:center;padding:12px 0}
 .mc-row + .mc-row{border-top:1px dashed rgba(24,51,38,.25)}
 .mc-row .lbl{font-size:13px;font-weight:700;letter-spacing:.06em;color:var(--slate)}
@@ -278,17 +282,13 @@
 
   /* ---------- matched ---------- */
   function matchHTML(m) {
-    if (m.size === 2) {
-      return '<article class="match-card" id="card">' +
-        '<span class="mc-kicker">Swap gifts with</span>' +
-        '<span class="mc-num">' + numHTML(m.give.num) + '</span>' +
-        '<span class="mc-name">' + G.esc(m.give.name) + '</span>' +
-        '<p class="mc-tip">Find #' + G.esc(m.give.num) + ' and swap your gifts.</p></article>';
-    }
+    var same = m.give.num === m.get.num;
     return '<article class="match-card" id="card">' +
-      '<span class="mc-kicker">You\'re in a group of 3</span>' +
-      '<div class="mc-row"><span class="lbl">Give your gift to</span><span class="n">' + numHTML(m.give.num) + '</span><span class="nm">' + G.esc(m.give.name) + '</span></div>' +
-      '<div class="mc-row"><span class="lbl">You get a gift from</span><span class="n">' + numHTML(m.get.num) + '</span><span class="nm">' + G.esc(m.get.name) + '</span></div>' +
+      '<span class="mc-kicker">Give your gift to</span>' +
+      '<span class="mc-num">' + numHTML(m.give.num) + '</span>' +
+      '<span class="mc-name">' + G.esc(m.give.name) + '</span>' +
+      '<div class="mc-get"><span class="lbl">' + (same ? 'And they give theirs to you' : 'You get a gift from') + '</span>' +
+      (same ? '' : '<span class="who"><b>#' + G.esc(m.get.num) + '</b> ' + G.esc(m.get.name) + '</span>') + '</div>' +
       '</article>';
   }
 
@@ -329,42 +329,32 @@
       opened = true;
       var m = me.match;
       $('#m-kicker').textContent = 'Your match';
-      $('#m-title').textContent = m.size === 2 ? 'Swap with #' + m.give.num : 'Give to #' + m.give.num;
+      $('#m-title').textContent = 'Give to #' + m.give.num;
       $('#tapHint').textContent = 'TAP TO OPEN';
     }, shakeMs + openMs);
   });
 
   /* ---------- everyone's matches ---------- */
-  function tidy(groups) {
-    return (groups || []).map(function (g) {
-      var min = 0;
-      g.forEach(function (p, i) { if (p.num < g[min].num) min = i; });
-      return g.slice(min).concat(g.slice(0, min));
-    }).sort(function (a, b) { return (a.length === 3) - (b.length === 3) || a[0].num - b[0].num; });
-  }
-  function listHTML(groups, myNum) {
-    return tidy(groups).map(function (g) {
-      var mine = g.some(function (p) { return p.num === myNum; });
-      var parts = g.map(function (p) { return '<span class="p"><b>#' + G.esc(p.num) + '</b>' + G.esc(p.name) + '</span>'; });
-      var inner = g.length === 2
-        ? parts[0] + G.ICON.swap + parts[1]
-        : parts.join(G.ICON.arrow) + G.ICON.arrow + '<span class="p"><b>#' + G.esc(g[0].num) + '</b></span><span class="trio">Group of 3: each gives to the next</span>';
-      return '<li' + (mine ? ' class="me"' : '') + '>' + inner + '</li>';
+  function listHTML(gives, myNum) {
+    return (gives || []).map(function (x) {
+      var mine = x.from.num === myNum;
+      return '<li' + (mine ? ' class="me"' : '') + '><span class="p"><b>#' + G.esc(x.from.num) + '</b>' + G.esc(x.from.name) + '</span>' +
+        G.ICON.arrow + '<span class="p"><b>#' + G.esc(x.to.num) + '</b>' + G.esc(x.to.name) + '</span></li>';
     }).join('');
   }
   function loadAll() {
-    api.board().then(function (b) { board = b; $('#m-list').innerHTML = listHTML(b.groups || [], me ? me.num : null); }, function () { /* fine */ });
+    api.board().then(function (b) { board = b; $('#m-list').innerHTML = listHTML(b.gives, me ? me.num : null); }, function () { /* fine */ });
   }
 
   /* ---------- closed ---------- */
   function showClosed() {
-    $('#c-list').innerHTML = listHTML(board.groups || [], null);
+    $('#c-list').innerHTML = listHTML(board.gives, null);
     show('v-closed');
     poll(function () {
       api.board().then(function (b) {
         board = b;
         if (b.status === 'open' && current === 'v-closed') { showJoin(); return; }
-        $('#c-list').innerHTML = listHTML(b.groups || [], null);
+        $('#c-list').innerHTML = listHTML(b.gives, null);
       }, function () { /* fine */ });
     }, 10000);
   }

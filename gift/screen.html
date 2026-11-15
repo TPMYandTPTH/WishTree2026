@@ -105,11 +105,6 @@ button.tile.armed .x{color:var(--cream)}
 .mcard .nm{min-width:0;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-height:1.15;overflow-wrap:anywhere;font-weight:500}
 .mcard .sw{flex:none;display:inline-flex;align-items:center;justify-content:center;width:1.7em;height:1.7em;border-radius:50%;background:var(--bg);color:var(--gold)}
 .mcard .sw svg{width:1em;height:1em}
-.mcard.trio{grid-column:1/-1;flex-wrap:wrap;background:#FFF3D6}
-.mcard.trio .p{flex:0 1 auto}
-.mcard.trio .ar{flex:none;color:var(--carmine);display:inline-flex}
-.mcard.trio .ar svg{width:1em;height:1em}
-.mcard.trio .note{flex-basis:100%;font-size:.7em;font-weight:500;color:var(--slate)}
 
 /* organiser bar */
 .admin{position:relative;z-index:20;display:flex;align-items:center;justify-content:flex-end;gap:.7rem;flex-wrap:wrap;min-height:48px;margin-top:1rem}
@@ -176,7 +171,7 @@ button.tile.armed .x{color:var(--cream)}
   <!-- matches -->
   <section class="s-match" id="v-match" hidden>
     <div class="mhead">
-      <div><span class="script">The matches</span><h1>Find your match and swap gifts!</h1></div>
+      <div><span class="script">The matches</span><h1>Find your number: that's who you give your gift to</h1></div>
       <span class="sum" id="sum"></span>
     </div>
     <div class="cards" id="cards"></div>
@@ -235,19 +230,7 @@ button.tile.armed .x{color:var(--cream)}
   }
   function plan(n) {
     if (n < 2) return n === 1 ? '1 person so far' : 'Nobody yet';
-    var trio = n % 2 === 1, pairs = trio ? (n - 3) / 2 : n / 2;
-    var parts = [];
-    if (pairs) parts.push(pairs + (pairs === 1 ? ' pair' : ' pairs'));
-    if (trio) parts.push('1 group of 3');
-    return n + ' people: ' + parts.join(' + ');
-  }
-  // Lower number first in each pair, a group of 3 starts at its lowest number, groups in number order.
-  function tidy(groups) {
-    return (groups || []).map(function (g) {
-      var min = 0;
-      g.forEach(function (p, i) { if (p.num < g[min].num) min = i; });
-      return g.slice(min).concat(g.slice(0, min));
-    }).sort(function (a, b) { return (a.length === 3) - (b.length === 3) || a[0].num - b[0].num; });
+    return n + ' people, everyone gives one and gets one';
   }
   // Shrink the tiles or cards until they all fit on the screen.
   function fit(el, startSize) {
@@ -360,28 +343,22 @@ button.tile.armed .x{color:var(--cream)}
 
   function renderMatch(b, animate, force) {
     showView('v-match');
-    var key = JSON.stringify(b.groups || []);
+    var gives = b.gives || [];
+    var key = JSON.stringify(gives);
     if (key === lastCardsKey && !animate && !force) return;
     lastCardsKey = key; lastTilesKey = '';
-    var groups = tidy(b.groups);
     var n = (b.people || []).length;
     $('#sum').textContent = plan(n);
-    var step = Math.min(260, 4200 / Math.max(groups.length, 1));
+    var step = Math.min(220, 4200 / Math.max(gives.length, 1));
     var cards = $('#cards');
-    cards.innerHTML = groups.map(function (g, i) {
-      var cls = 'mcard' + (g.length === 3 ? ' trio' : '') + (animate && !REDUCED ? ' anim' : '');
+    function person(p) { return '<span class="p"><span class="n">#' + p.num + '</span><span class="nm">' + G.esc(p.name) + '</span></span>'; }
+    cards.innerHTML = gives.map(function (x, i) {
+      var cls = 'mcard' + (animate && !REDUCED ? ' anim' : '');
       var style = animate ? ' style="--d:' + Math.round(i * step) + 'ms"' : '';
-      function person(p) { return '<span class="p"><span class="n">#' + p.num + '</span><span class="nm">' + G.esc(p.name) + '</span></span>'; }
-      if (g.length === 2) {
-        return '<div class="' + cls + '"' + style + '>' + person(g[0]) + '<span class="sw">' + ICON.swap + '</span>' + person(g[1]) + '</div>';
-      }
-      var arrow = '<span class="ar">' + ICON.arrow + '</span>';
-      return '<div class="' + cls + '"' + style + '>' + g.map(person).join(arrow) + arrow +
-        '<span class="p"><span class="n">#' + g[0].num + '</span></span>' +
-        '<span class="note">Group of 3: each person gives to the next one</span></div>';
+      return '<div class="' + cls + '"' + style + '>' + person(x.from) + '<span class="sw" title="gives to">' + ICON.arrow + '</span>' + person(x.to) + '</div>';
     }).join('');
-    var c = groups.length;
-    fit(cards, c <= 6 ? 0 : c <= 12 ? 1 : c <= 20 ? 2 : 3);
+    var c = gives.length;
+    fit(cards, c <= 8 ? 0 : c <= 16 ? 1 : c <= 28 ? 2 : 3);
   }
 
   /* ---------- organiser ---------- */
@@ -405,7 +382,7 @@ button.tile.armed .x{color:var(--cream)}
     }
     var b = board || { status: 'open', people: [] };
     var n = (b.people || []).length;
-    var html = '<span class="ainfo">' + G.esc(plan(n)) + (b.status === 'open' ? ' · tap a name to remove it' : '') + '</span>';
+    var html = '<span class="ainfo">' + G.esc(n + (n === 1 ? ' person' : ' people') + ' in') + (b.status === 'open' ? ' · tap a name to remove it' : '') + '</span>';
     if (b.status === 'open') {
       html += '<form class="group" id="addForm"><input class="ain" id="addIn" maxlength="40" placeholder="Add a name (no phone)" aria-label="Add a name"><button class="ab" type="submit">Add</button></form>';
       if (G.demo) html += '<button class="ab" type="button" id="samplesBtn">+6 sample names</button>';
