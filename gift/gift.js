@@ -320,6 +320,17 @@
     return out.join('');
   }
 
+  /* ---------- reload open pages when a new version goes live ----------
+     Bump VERSION here, the ?v= on the script/style links in index.html and
+     screen.html, and version.json together. */
+  var VERSION = '6';
+  setInterval(function () {
+    if (document.visibilityState !== 'visible' || !window.fetch) return;
+    fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+      if (j && j.v && String(j.v) !== VERSION) location.reload();
+    }, function () { /* offline for a moment: try again next time */ });
+  }, 60000);
+
   window.GIFT = {
     LIVE: LIVE,
     api: LIVE ? liveApi : demoApi,
