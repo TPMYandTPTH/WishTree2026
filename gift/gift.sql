@@ -107,8 +107,8 @@ language sql immutable set search_path = '' as $$
 $$;
 
 -- Where a name goes in the line: 'bridge', 'end', 'last', or null (anywhere at the front).
--- Matches the first word ("Sarah Lee" -> sarah), a two-word alias ("Yi Jie Tan" -> yi jie)
--- or the alias written as one word ("YiJie" -> yi jie).
+-- Matches the first word ("Jane Lee" -> jane), a two-word alias ("Mei Ling Tan" -> mei ling)
+-- or the alias written as one word ("MeiLing" -> mei ling).
 create or replace function public.gx_place(p_name text) returns text
 language sql stable set search_path = '' as $$
   with k as (
