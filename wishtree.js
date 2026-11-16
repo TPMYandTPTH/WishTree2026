@@ -120,6 +120,110 @@
       img.src = src;
     });
   }
+  // Christmas music (CFG.MUSIC.src). Browsers only start sound after a tap or click, so:
+  // - pages: a music button, off until tapped; the choice is remembered on that device
+  // - TVs (opts.tv): on by default, starting with the first tap or key press on the screen
+  var MUSIC_CSS = '.music-btn{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;padding:0;' +
+    'border-radius:50%;border:1.5px solid currentColor;background:transparent;color:inherit;cursor:pointer;flex:none;transition:background .2s,color .2s}' +
+    '.music-btn:focus-visible{outline:3px solid #B18854;outline-offset:2px}' +
+    '.music-btn[aria-pressed="true"]{background:#343F37;border-color:#343F37;color:#fff}' +
+    '.music-btn.fixed{position:fixed;left:16px;bottom:16px;z-index:60;width:48px;height:48px;background:rgba(255,255,255,.7);color:#343F37;opacity:.6}' +
+    '.music-btn.fixed[aria-pressed="true"]{background:#343F37;color:#fff}' +
+    '.music-btn.fixed:hover{opacity:1}' +
+    '.music-hint{position:fixed;left:76px;bottom:20px;z-index:60;padding:12px 22px;border-radius:999px;' +
+    'background:rgba(36,28,20,.86);color:#fff;font:600 18px/1.3 system-ui,sans-serif;pointer-events:none}';
+  var MUSIC_ON = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>';
+  var MUSIC_OFF = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/><path d="M3 3l18 18"/></svg>';
+  function setupMusic(opts) {
+    opts = opts || {};
+    var m = CFG.MUSIC || {};
+    var src = String(m.src || '').trim();
+    if (!src || /^(javascript|data):/i.test(src) || /[?&]music=off(&|$)/.test(location.search)) return null;
+    var tv = !!opts.tv;
+    var KEY = tv ? 'wt-music-tv' : 'wt-music';
+    var want = tv ? storageGet(KEY) !== 'off' : storageGet(KEY) === 'on';
+    var audio = new Audio();
+    audio.loop = true;
+    audio.preload = tv ? 'auto' : 'none';
+    audio.volume = typeof opts.volume === 'number' ? opts.volume : (tv ? 0.8 : 0.5);
+    audio.src = url(src);
+
+    if (!document.getElementById('wtMusicCss')) {
+      var st = document.createElement('style');
+      st.id = 'wtMusicCss';
+      st.textContent = MUSIC_CSS;
+      document.head.appendChild(st);
+    }
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'music-btn' + (opts.mount ? '' : ' fixed');
+    var hint = null;
+    function paint() {
+      var on = !audio.paused;
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+      btn.setAttribute('aria-label', on ? 'Turn the music off' : 'Turn the music on');
+      btn.title = on ? 'Music on' : 'Music off';
+      btn.innerHTML = on ? MUSIC_ON : MUSIC_OFF;
+      if (hint && on) { hint.remove(); hint = null; }
+    }
+    function showHint() {
+      if (!tv || hint || !want) return;
+      hint = document.createElement('div');
+      hint.className = 'music-hint';
+      hint.setAttribute('role', 'status');
+      hint.textContent = opts.hintText || 'Tap the screen to turn on the music';
+      document.body.appendChild(hint);
+    }
+    function onFirstTouch(e) {
+      if (btn.contains(e.target)) return;   // the button handles its own tap
+      document.removeEventListener('pointerdown', onFirstTouch, true);
+      document.removeEventListener('keydown', onFirstTouch, true);
+      if (want && audio.paused) play();
+    }
+    function waitForTouch() {
+      document.addEventListener('pointerdown', onFirstTouch, true);
+      document.addEventListener('keydown', onFirstTouch, true);
+      showHint();
+    }
+    function play() {
+      var p;
+      try { p = audio.play(); } catch (e) { p = null; }
+      if (p && p.then) p.then(paint, function () { paint(); waitForTouch(); });
+      else paint();
+    }
+    btn.addEventListener('click', function () {
+      if (audio.paused) {
+        want = true;
+        storageSet(KEY, 'on');
+        play();
+        track('music_on', { place: tv ? 'tv' : 'page' });
+      } else {
+        want = false;
+        storageSet(KEY, 'off');
+        audio.pause();
+        paint();
+        track('music_off', { place: tv ? 'tv' : 'page' });
+      }
+    });
+    audio.addEventListener('play', paint);
+    audio.addEventListener('pause', paint);
+    audio.addEventListener('error', function () {
+      // the file is missing or can't be played: no button rather than a broken one
+      btn.remove();
+      if (hint) { hint.remove(); hint = null; }
+    });
+    // phones: stop when the page is in the background, carry on when it comes back
+    var resume = false;
+    document.addEventListener('visibilitychange', function () {
+      if (tv) return;
+      if (document.hidden && !audio.paused) { resume = true; audio.pause(); }
+      else if (!document.hidden && resume && want) { resume = false; play(); }
+    });
+    paint();
+    if (opts.mount) opts.mount.appendChild(btn); else document.body.appendChild(btn);
+    if (want) play();
+    return { audio: audio, button: btn };
+  }
   // The TP logo, the picture on every employee wish: black on light circles, white on dark ones
   function tpMarkHtml(black) {
     return '<img class="tp-mark" src="' + esc(url(black ? 'assets/tp-logo-black.png' : 'assets/tp-logo-white.png')) + '" alt="">';
@@ -1309,6 +1413,7 @@
     tpMarkHtml: tpMarkHtml,
     fmtDate: fmtDate,
     shrinkPhoto: shrinkPhoto,
+    setupMusic: setupMusic,
     leaderConfig: leaderConfig,
     client: getClient,
     fetchApproved: fetchApproved,

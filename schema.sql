@@ -152,6 +152,8 @@ create table if not exists public.access_sessions (
   expires_at timestamptz not null
 );
 create index if not exists access_sessions_exp_idx on public.access_sessions (expires_at);
+-- The name an admin types on the Approvals page (everyone shares one password), shown as "Approved by ..."
+alter table public.access_sessions add column if not exists who text;
 
 -- Run from the SQL Editor only (section 10). A new password signs out everyone who used the old one.
 create or replace function public.set_access_password(p_role text, p_password text) returns text
@@ -229,6 +231,29 @@ begin
 end
 $$;
 
+-- The name given on the Approvals page for this token (or null)
+create or replace function public.session_who(p_token text) returns text
+language sql stable security definer set search_path = '' as $$
+  select s.who from public.access_sessions s
+  where coalesce(p_token, '') ~ '^[0-9a-f]{64}$'
+    and s.token_hash = encode(sha256(convert_to(p_token, 'UTF8')), 'hex')
+    and s.expires_at > now()
+$$;
+
+-- Approvals page: who is approving on this browser. Answers the name as saved.
+create or replace function public.admin_set_name(p_token text, p_name text) returns text
+language plpgsql security definer set search_path = '' as $$
+declare
+  v_name text := btrim(regexp_replace(coalesce(p_name, ''), '[[:space:]]+', ' ', 'g'));
+begin
+  if public.session_role(p_token) is distinct from 'admin' then raise exception 'not_allowed'; end if;
+  if char_length(v_name) not between 1 and 40 or v_name ~ '[<>]' then raise exception 'name_required'; end if;
+  update public.access_sessions s set who = v_name
+  where s.token_hash = encode(sha256(convert_to(p_token, 'UTF8')), 'hex');
+  return v_name;
+end
+$$;
+
 -- Is this browser still in? Answers 'leader', 'admin' or null
 create or replace function public.access_check(p_token text) returns text
 language sql stable security definer set search_path = '' as $$
@@ -287,6 +312,8 @@ alter table public.wishes add column if not exists bms text;
 alter table public.wishes add column if not exists edit_key_hash text;
 alter table public.wishes add column if not exists conn_code text;
 alter table public.wishes add column if not exists edit_count int not null default 0;
+-- Who approved or set it aside (the name typed on the Approvals page)
+alter table public.wishes add column if not exists reviewer text;
 
 alter table public.wishes drop constraint if exists wishes_bms_check;
 alter table public.wishes add constraint wishes_bms_check check (char_length(bms) between 1 and 20) not valid;
@@ -347,6 +374,7 @@ alter table public.leader_messages add column if not exists status text not null
 alter table public.leader_messages add column if not exists reviewed_at timestamptz;
 alter table public.leader_messages add column if not exists edit_key_hash text;
 alter table public.leader_messages add column if not exists conn_code text;
+alter table public.leader_messages add column if not exists reviewer text;
 
 alter table public.leader_messages drop constraint if exists leader_messages_display_name_check;
 alter table public.leader_messages add constraint leader_messages_display_name_check
@@ -734,7 +762,7 @@ begin
   return json_build_object(
     'wishes', coalesce((select json_agg(x) from (
       select w.id, w.created_at, w.updated_at, w.message, w.first_name, w.bms, w.site, w.lang, w.tag_color, w.charm,
-             w.status, w.flags, w.reviewed_at, w.approved_at, w.edit_count,
+             w.status, w.flags, w.reviewed_at, w.approved_at, w.edit_count, w.reviewer,
              (select count(*) from public.likes l where l.kind = 'wish' and l.target_id = w.id)::int as like_count
       from public.wishes w order by w.created_at desc limit 5000) x), '[]'::json),
     -- photos of approved messages come from get_leader_photos; the others come here, to be checked
@@ -742,11 +770,12 @@ begin
       select m.id, m.created_at, m.updated_at, m.display_name, m.title, m.message, m.lang,
              case when m.status = 'approved' then null else m.photo end as photo,
              case when m.photo is null then 0 else m.photo_version end as photo_version,
-             m.status, m.hidden, m.reviewed_at, m.sort_order,
+             m.status, m.hidden, m.reviewed_at, m.sort_order, m.reviewer,
              (select count(*) from public.likes l where l.kind = 'leader' and l.target_id = m.id)::int as like_count
       from public.leader_messages m order by m.updated_at desc) x), '[]'::json),
     'settings', (select json_build_object('submissions_open', s.submissions_open, 'likes_close_at', s.likes_close_at)
-                 from public.app_settings s where s.id = 1)
+                 from public.app_settings s where s.id = 1),
+    'me', public.session_who(p_token)
   );
 end
 $$;
@@ -764,13 +793,15 @@ begin
     update public.wishes w
        set status = p_status,
            reviewed_at = case when p_status = 'pending' then null else now() end,
+           reviewer = case when p_status = 'pending' then null else public.session_who(p_token) end,
            approved_at = case when p_status <> 'approved' then null
                               when w.status = 'approved' then w.approved_at else now() end
      where w.id = any (coalesce(p_ids, '{}'::uuid[]));
   elsif p_kind = 'leader' then
     update public.leader_messages m
        set status = p_status,
-           reviewed_at = case when p_status = 'pending' then null else now() end
+           reviewed_at = case when p_status = 'pending' then null else now() end,
+           reviewer = case when p_status = 'pending' then null else public.session_who(p_token) end
      where m.id = any (coalesce(p_ids, '{}'::uuid[]));
   else
     raise exception 'bad_kind';
@@ -792,11 +823,13 @@ begin
     if char_length(v_msg) not between 1 and 150 then raise exception 'bad_message'; end if;
     update public.wishes w
        set message = v_msg, flags = public.wish_flags(v_msg), status = 'approved', reviewed_at = now(),
+           reviewer = public.session_who(p_token),
            approved_at = case when w.status = 'approved' then w.approved_at else now() end
      where w.id = p_id;
   elsif p_kind = 'leader' then
     if char_length(v_msg) not between 1 and 250 then raise exception 'bad_message'; end if;
-    update public.leader_messages m set message = v_msg, status = 'approved', reviewed_at = now() where m.id = p_id;
+    update public.leader_messages m set message = v_msg, status = 'approved', reviewed_at = now(),
+           reviewer = public.session_who(p_token) where m.id = p_id;
   else
     raise exception 'bad_kind';
   end if;
@@ -822,7 +855,7 @@ begin
     update public.wishes w
        set first_name = v_name, message = v_msg, site = p_site, lang = p_lang,
            tag_color = p_tag_color, charm = p_charm, flags = public.wish_flags(v_msg),
-           status = 'approved', reviewed_at = now(),
+           status = 'approved', reviewed_at = now(), reviewer = public.session_who(p_token),
            approved_at = case when w.status = 'approved' then w.approved_at else now() end
      where w.id = p_id;
     get diagnostics n = row_count;
@@ -867,7 +900,7 @@ begin
            photo = case when coalesce(p_photo_change, false) then v_photo else m.photo end,
            photo_version = case when coalesce(p_photo_change, false) then m.photo_version + 1 else m.photo_version end,
            sort_order = coalesce(p_position, 100),
-           status = 'approved', reviewed_at = now()
+           status = 'approved', reviewed_at = now(), reviewer = public.session_who(p_token)
      where m.id = p_id;
     get diagnostics n = row_count;
   exception
@@ -974,6 +1007,7 @@ revoke execute on function public.bms_looks_real(text) from public, anon, authen
 revoke execute on function public.conn_code() from public, anon, authenticated;
 revoke execute on function public.wish_flags(text) from public, anon, authenticated;
 revoke execute on function public.session_role(text) from public, anon, authenticated;
+revoke execute on function public.session_who(text) from public, anon, authenticated;
 revoke execute on function public.set_access_password(text, text) from public, anon, authenticated;
 -- Everyone (each checks a password token or only shows approved things)
 grant execute on function public.get_approved_wishes() to anon, authenticated;
@@ -991,6 +1025,7 @@ grant execute on function public.leader_save(text, text, text, text, text, boole
 grant execute on function public.leader_get_mine(text, text) to anon, authenticated;
 grant execute on function public.leader_delete_mine(text, text) to anon, authenticated;
 grant execute on function public.admin_queue(text) to anon, authenticated;
+grant execute on function public.admin_set_name(text, text) to anon, authenticated;
 grant execute on function public.admin_set_status(text, text, uuid[], text) to anon, authenticated;
 grant execute on function public.admin_edit_message(text, text, uuid, text) to anon, authenticated;
 grant execute on function public.admin_edit_wish(text, uuid, text, text, text, text, text, text) to anon, authenticated;

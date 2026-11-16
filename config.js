@@ -135,6 +135,11 @@ window.WISH_CFG = {
     // The database stops counting likes at app_settings.likes_close_at (31 Dec 2026, 23:59 Malaysia time)
   },
 
+  // Christmas music: an MP3 in assets/music/ (royalty-free, or one TP may play in its offices).
+  // Leave src empty for no music. The tree and wish pages get a music button (off until someone taps it);
+  // the TVs play it in a loop after one tap on the screen. Add ?music=off to a TV link to keep that TV quiet.
+  MUSIC: { src: '' },
+
   MAX_LENGTH: 150,          // employee wish length (keep in step with schema.sql)
   LEADER_MAX_LENGTH: 250,   // leader message length (keep in step with schema.sql)
   TREE_REFRESH_SECONDS: 60,

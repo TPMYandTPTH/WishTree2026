@@ -273,6 +273,7 @@ body.pointer .fs{opacity:1;pointer-events:auto}
   'use strict';
   var C = window.WishCore;
   var CFG = C.cfg;
+  C.setupMusic({ tv: true });
   var params = new URLSearchParams(window.location.search);
   var $ = function (id) { return document.getElementById(id); };
   var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;

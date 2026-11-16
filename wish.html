@@ -41,6 +41,8 @@ button,input,select,textarea{font-family:inherit}
 /* top bar */
 .bar{position:relative;z-index:3;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 20px 0;padding-top:max(14px, env(safe-area-inset-top))}
 .bar-left{display:flex;align-items:center;gap:10px;min-height:36px}
+.bar-right{display:flex;align-items:center;gap:8px}
+.music-slot{display:contents;color:var(--cream)}
 .logo{height:28px;width:auto;display:block}
 .bar-name{font-size:14px;font-weight:500;color:var(--cream)}
 .langs{display:flex;gap:4px;padding:3px;border-radius:999px;background:rgba(108,21,30,.08)}
@@ -219,10 +221,13 @@ button,input,select,textarea{font-family:inherit}
       <img id="logo" class="logo" alt="TP" hidden>
       <span class="bar-name">Wish Tree 2026</span>
     </div>
+    <div class="bar-right">
+    <span id="musicSlot" class="music-slot"></span>
     <div class="langs" role="group" aria-label="Language">
       <button type="button" data-lang="en" aria-pressed="true">EN</button>
       <button type="button" data-lang="ms" aria-pressed="false">BM</button>
       <button type="button" data-lang="th" aria-pressed="false" lang="th">ไทย</button>
+    </div>
     </div>
   </div>
 
@@ -469,6 +474,7 @@ button,input,select,textarea{font-family:inherit}
   'use strict';
   var C = window.WishCore;
   var CFG = C.cfg;
+  C.setupMusic({ mount: document.getElementById('musicSlot') });
   var MAX = Number(CFG.MAX_LENGTH) || 150;
   var PRIZE = C.PRIZE || {};
 

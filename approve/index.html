@@ -50,6 +50,12 @@ a{color:var(--slate)}
 .me{display:flex;align-items:center;gap:12px;font-size:14px}
 .me button{min-height:36px;padding:0 14px;border:1px solid rgba(255,255,255,.5);border-radius:999px;background:transparent;color:#fff;font-size:14px;cursor:pointer}
 .me button:hover{background:rgba(255,255,255,.12)}
+.who-bar{margin:0 0 18px;padding:16px 18px;border:1.5px solid var(--slate);border-radius:12px;background:#fff}
+.who-bar label{display:block;font-weight:700;margin-bottom:8px}
+.who-row{display:flex;gap:10px;flex-wrap:wrap}
+.who-row .input{flex:1 1 220px;min-width:0}
+.who-bar .small{margin:8px 0 0}
+@media (max-width:640px){#meEmail{display:none}}
 
 .wrap{max-width:1320px;margin:0 auto;padding:28px 32px 56px}
 
@@ -212,6 +218,7 @@ a{color:var(--slate)}
     </div>
     <div class="me" id="meBox" hidden>
       <span id="meEmail">Signed in on this browser</span>
+      <button type="button" id="nameBtn">Change name</button>
       <button type="button" id="signOutBtn">Sign out</button>
     </div>
   </div>
@@ -226,11 +233,13 @@ a{color:var(--slate)}
       <p>For the Wish Tree team. Enter the Approvals password to approve wishes and leaders' messages before they go on the tree and the site TVs.</p>
       <div class="panel">
         <form id="passForm" novalidate style="display:flex;flex-direction:column;gap:10px">
+          <label for="who">Your name</label>
+          <input id="who" class="input" maxlength="40" autocomplete="name" spellcheck="false">
           <label for="pass">Approvals password</label>
           <input id="pass" class="input" type="password" autocomplete="current-password" spellcheck="false">
           <button type="submit" id="passBtn" class="btn btn-slate btn-block">Open Approvals</button>
         </form>
-        <p class="small" style="margin:0">You stay in on this browser for 12 hours. Five wrong tries lock the page for 15 minutes.</p>
+        <p class="small" style="margin:0">Your name shows as "Approved by ..." on what you approve or edit, so the team can see who did what. You stay in on this browser for 12 hours. Five wrong tries lock the page for 15 minutes.</p>
         <p id="signinErr" class="err" role="alert"></p>
       </div>
     </div>
@@ -243,6 +252,18 @@ a{color:var(--slate)}
         <p>Nothing shows on the tree or the TVs until it's approved here.</p>
       </div>
       <span id="openPill" class="pill on"><span class="d" aria-hidden="true"></span><span id="openText">Accepting new wishes</span></span>
+    </div>
+
+    <div id="whoBar" class="who-bar" hidden>
+      <form id="whoForm" novalidate>
+        <label for="whoName">Who's approving on this browser?</label>
+        <div class="who-row">
+          <input id="whoName" class="input" maxlength="40" autocomplete="name" spellcheck="false" placeholder="Your name">
+          <button type="submit" id="whoBtn" class="btn btn-slate">Save</button>
+        </div>
+        <p class="small">It shows as "Approved by ..." on everything you approve or edit from now on.</p>
+        <p id="whoErr" class="err" role="alert"></p>
+      </form>
     </div>
 
     <div class="stats" aria-live="polite">
@@ -340,7 +361,8 @@ a{color:var(--slate)}
     kind: 'wish', status: 'pending', site: 'all', q: '',
     wishes: [], leaders: [], likes: {},
     settings: { submissions_open: true },
-    editing: null, draft: '', busy: {}, shown: PAGE, bulkArmed: false
+    editing: null, draft: '', busy: {}, shown: PAGE, bulkArmed: false,
+    me: '', renaming: false
   };
   var sb = null;
   var $ = function (id) { return document.getElementById(id); };
@@ -372,6 +394,7 @@ a{color:var(--slate)}
     $('mainErr').textContent = '';
     if (C.demo) {
       var q = C.demoQueue();
+      gotMe(C.storageGet(NAME_KEY));
       S.wishes = q.wishes;
       S.leaders = q.leaders;
       S.settings = C.demoLoad('wt-demo-settings', { submissions_open: true, leaders_need_approval: true });
@@ -384,6 +407,7 @@ a{color:var(--slate)}
     }
     return adminRpc('admin_queue', {}).then(function (q) {
       q = q || {};
+      gotMe(q.me);
       S.wishes = q.wishes || [];
       S.likes = {};
       S.wishes.forEach(function (w) { S.likes['wish:' + w.id] = w.like_count || 0; });
@@ -498,6 +522,7 @@ a{color:var(--slate)}
     var metaBits = [];
     if (isW && x.bms) metaBits.push('BMS ' + x.bms);
     if (isW && x.edit_count) metaBits.push('Edited by the sender ' + x.edit_count + (x.edit_count === 1 ? ' time' : ' times'));
+    if (x.reviewer && status !== 'pending') metaBits.push((status === 'approved' ? 'Approved by ' : 'Set aside by ') + x.reviewer + (x.reviewed_at ? ', ' + ago(x.reviewed_at) : ''));
     if (metaBits.length) h += '<div class="meta">' + esc(metaBits.join(' · ')) + '</div>';
 
     h += '<div class="actions">';
@@ -597,8 +622,8 @@ a{color:var(--slate)}
     var pos = String(d.position || '').trim();
     if (f.kind === 'leader' && pos && !(/^\d+$/.test(pos) && +pos >= 1 && +pos <= 99)) { $('mainErr').textContent = 'Place in the list: a number from 1 to 99, or leave it empty.'; return; }
     var changes = f.kind === 'wish'
-      ? { first_name: name, message: text.slice(0, MAX.wish), site: d.site, lang: d.lang, tag_color: d.tag_color, charm: d.charm, status: 'approved' }
-      : { display_name: name, title: String(d.title || '').trim() || null, message: text.slice(0, MAX.leader), sort_order: pos ? +pos : 100, status: 'approved' };
+      ? { first_name: name, message: text.slice(0, MAX.wish), site: d.site, lang: d.lang, tag_color: d.tag_color, charm: d.charm, status: 'approved', reviewer: S.me || null }
+      : { display_name: name, title: String(d.title || '').trim() || null, message: text.slice(0, MAX.leader), sort_order: pos ? +pos : 100, status: 'approved', reviewer: S.me || null };
     if (f.kind === 'leader' && d.photoChanged) { changes.photo_url = d.photo || null; changes.photo = d.photo || null; }
     S.busy[key] = true;
     renderList();
@@ -859,6 +884,7 @@ a{color:var(--slate)}
     else if (action === 'reject') changes = { status: 'rejected' };
     else if (action === 'pending') changes = { status: 'pending' };
     else return;
+    changes.reviewer = changes.status === 'pending' ? null : (S.me || null);
     S.busy[key] = true;
     $('mainErr').textContent = '';
     renderList();
@@ -888,7 +914,7 @@ a{color:var(--slate)}
     }
     S.bulkArmed = false;
     $('bulkBtn').disabled = true;
-    update('wish', clean.map(function (w) { return String(w.id); }), { status: 'approved' }).then(function () {
+    update('wish', clean.map(function (w) { return String(w.id); }), { status: 'approved', reviewer: S.me || null }).then(function () {
       $('bulkBtn').disabled = false;
       C.track('approval_bulk', { count: clean.length });
       load();
@@ -936,6 +962,57 @@ a{color:var(--slate)}
     show('signin');
     return true;
   }
+  /* ---------- Who is approving ---------- */
+  var NAME_KEY = 'wt-admin-name';
+  function cleanName(v) { return String(v || '').replace(/\s+/g, ' ').trim().slice(0, 40); }
+  function paintMe() {
+    $('meEmail').textContent = S.me ? 'Signed in as ' + S.me : 'Signed in on this browser';
+    $('whoBar').hidden = !!S.me && !S.renaming;
+  }
+  function setName(name) {
+    name = cleanName(name);
+    if (!name || /[<>]/.test(name)) return Promise.reject(new Error('name_required'));
+    var p = C.demo ? Promise.resolve(name) : adminRpc('admin_set_name', { p_name: name });
+    return p.then(function (saved) {
+      S.me = cleanName(saved) || name;
+      S.renaming = false;
+      C.storageSet(NAME_KEY, S.me);
+      paintMe();
+      return S.me;
+    });
+  }
+  // The name saved with this browser's session; an older session without one uses the name typed last time
+  function gotMe(me) {
+    if (me) { S.me = me; paintMe(); return; }
+    S.me = '';
+    var last = cleanName(C.storageGet(NAME_KEY));
+    if (last && !C.demo) { setName(last).catch(function () { paintMe(); }); return; }
+    if (last && C.demo) { S.me = last; }
+    paintMe();
+  }
+  $('whoForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    $('whoErr').textContent = '';
+    var v = cleanName($('whoName').value);
+    if (!v) { $('whoErr').textContent = 'Type your name.'; $('whoName').focus(); return; }
+    $('whoBtn').disabled = true;
+    setName(v).then(function () {
+      $('whoBtn').disabled = false;
+      render();
+    }).catch(function (err) {
+      $('whoBtn').disabled = false;
+      if (signedOut(err)) return;
+      $('whoErr').textContent = /name_required/.test(String(err && err.message)) ? 'Use 1 to 40 characters, without < or >.' : 'That didn\'t save. Please try again.';
+    });
+  });
+  $('nameBtn').addEventListener('click', function () {
+    S.renaming = true;
+    $('whoName').value = S.me || '';
+    paintMe();
+    $('whoName').focus();
+    $('whoName').select();
+  });
+
   function enter() {
     show('main');
     renderSites();
@@ -945,12 +1022,19 @@ a{color:var(--slate)}
   $('passForm').addEventListener('submit', function (e) {
     e.preventDefault();
     var pw = $('pass').value;
+    var who = cleanName($('who').value);
     $('signinErr').textContent = '';
+    if (!who || /[<>]/.test(who)) { $('signinErr').textContent = 'Type your name, so the team can see who approved what.'; $('who').focus(); return; }
     if (!pw) { $('signinErr').textContent = 'Enter the password.'; $('pass').focus(); return; }
     $('passBtn').disabled = true;
     C.accessLogin('admin', pw).then(function (r) {
       $('passBtn').disabled = false;
-      if (r.result === 'ok') { $('pass').value = ''; S.token = r.token; enter(); return; }
+      if (r.result === 'ok') {
+        $('pass').value = '';
+        S.token = r.token;
+        setName(who).catch(function (err) { console.error(err); }).then(enter);
+        return;
+      }
       $('signinErr').textContent = r.result === 'slow_down' ? 'Too many wrong tries. Wait 15 minutes, then try again.'
         : r.result === 'not_set' ? 'The Approvals password hasn\'t been set yet (schema.sql, section 10).'
         : 'That password isn\'t right.';
@@ -1029,6 +1113,7 @@ a{color:var(--slate)}
     }
   }
   // Still in from earlier on this browser?
+  $('who').value = cleanName(C.storageGet(NAME_KEY));
   C.accessCheck('admin').then(function (t) {
     if (t) { S.token = t; enter(); } else show('signin');
   }).catch(function () { show('signin'); });

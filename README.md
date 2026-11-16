@@ -28,6 +28,10 @@ Until the Supabase keys are in `config.js`, every page runs in demo mode with sa
 4. Approved messages appear on the tree and the TVs within a minute. New ones jump the TV queue with a "Just hung" label.
 5. **Approval is always on, for security:** every wish and every leader message waits on the Approvals page, and any edit (words, name, title, photo) sends it back to waiting. The database enforces this; there's no switch to turn it off. The leaders' page needs the leaders' password and the Approvals page needs the Approvals password (see **Passwords** below).
 
+**Who approved what:** everyone on the Approvals page types their name when they sign in (the password is shared). It shows at the top ("Signed in as ...", with **Change name**) and on each card as "Approved by ..." or "Set aside by ...". Only the name is kept, nothing else about the admin.
+
+**Music:** put an MP3 in `assets/music/` and set `MUSIC.src` in `config.js` (empty = no music). Use a royalty-free track, or one TP may play in its offices. The tree and wish pages get a music button, off until someone taps it, remembered on that device. The TVs play it in a loop after one tap or key press on the screen (a small hint says so); add `?music=off` to a TV link to keep that screen quiet.
+
 **Edit** on the Approvals page changes anything: for a wish the name, words, site, language, tag colour and charm; for a leader message the name, title, words, photo and place in the list (1-99, lower comes first; empty keeps the order of `LEADERS` in `config.js`). Saving also approves it. Renaming a leader to a name that isn't in `LEADERS` gives them the regular card in the list.
 
 The **Accept new wishes** switch on the Approvals page closes or reopens the campaign.

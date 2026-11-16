@@ -57,6 +57,8 @@ button{font-family:inherit}
 
 /* header */
 .top{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-bottom:20px;border-bottom:1px solid var(--line)}
+.top-right{display:flex;align-items:center;gap:10px}
+.music-slot{display:contents;color:var(--spruce,#343F37)}
 .brand{display:flex;align-items:center;gap:14px;min-height:44px;color:var(--cream);text-decoration:none}
 .brand:hover{color:var(--cream)}
 .logo{height:38px;width:auto;display:block}
@@ -441,10 +443,13 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
       <span class="brand-divider" aria-hidden="true"></span>
       <span class="brand-name">Wish Tree 2026</span>
     </a>
+    <div class="top-right">
+    <span id="musicSlot" class="music-slot"></span>
     <a id="ctaTop" class="btn-gold" href="wish.html">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
       Hang your wish
     </a>
+    </div>
   </header>
 
   <main class="grid">
@@ -634,6 +639,7 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
   'use strict';
   var C = window.WishCore;
   var CFG = C.cfg;
+  C.setupMusic({ mount: document.getElementById('musicSlot') });
   // Wishes hidden in gifts under the tree (HIDDEN_WISHES in config.js)
   var SECRETS = {};
   (Array.isArray(CFG.HIDDEN_WISHES) ? CFG.HIDDEN_WISHES : (CFG.SECRET_WISH ? [Object.assign({ gift: 'red' }, CFG.SECRET_WISH)] : []))
