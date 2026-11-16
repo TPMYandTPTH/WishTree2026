@@ -81,6 +81,16 @@
     return '<img' + (imgClass ? ' class="' + esc(imgClass) + '"' : '') + ' src="' + esc(src) + '" alt="" data-initials="' + esc(initials || '') + '"' +
       (fallbackClass ? ' data-fallback-class="' + esc(fallbackClass) + '"' : '') + '>';
   }
+  // A campaign date: '2026-12-01' shows as "1 December" in the page language; any other text shows as written
+  function fmtDate(v, lang) {
+    v = String(v || '');
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v);
+    if (!m) return v;
+    var loc = lang === 'th' ? 'th-TH' : lang === 'ms' ? 'ms-MY' : 'en-GB';
+    try {
+      return new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], 12)).toLocaleDateString(loc, { day: 'numeric', month: 'long', timeZone: 'UTC' });
+    } catch (e) { return v; }
+  }
   // The TP logo, the picture on every employee wish: black on light circles, white on dark ones
   function tpMarkHtml(black) {
     return '<img class="tp-mark" src="' + esc(url(black ? 'assets/tp-logo-black.png' : 'assets/tp-logo-white.png')) + '" alt="">';
@@ -1265,6 +1275,7 @@
     random: mulberry32,
     initials: initials,
     tpMarkHtml: tpMarkHtml,
+    fmtDate: fmtDate,
     client: getClient,
     fetchApproved: fetchApproved,
     fetchLeaders: fetchLeaders,

@@ -13,10 +13,12 @@ window.WISH_CFG = {
   // Nobody signs in. The leaders' page and the Approvals page each ask for a password, set in Supabase
   // (schema.sql, section 10) and checked there. No emails are collected anywhere.
 
-  // Campaign details shown on the pages
-  OPEN_DATE: '[start date]',
-  CLOSE_DATE: '[end date]',
-  REVEAL_DATE: '[reveal date]',
+  // Campaign dates as YYYY-MM-DD, shown as "1 December" in each page's language (approximate for now; change any time).
+  // OPEN_DATE / CLOSE_DATE: the tree page says "Wishes open 1 December to 24 December".
+  // REVEAL_DATE: after hanging a wish, people read "The tree lights up for everyone on 25 December".
+  OPEN_DATE: '2026-12-01',
+  CLOSE_DATE: '2026-12-24',
+  REVEAL_DATE: '2026-12-25',
   SUBMISSIONS_OPEN: true,
 
   // Full public link to wish.html, used for the QR codes.
@@ -104,7 +106,7 @@ window.WISH_CFG = {
     {
       gift: 'red',
       kicker: 'YOU FOUND A HIDDEN WISH',
-      message: 'I built this tree so every one of us, on site or at home, could hang a wish in the same place. My wish is simple: that we keep lifting each other up in 2027. Thank you for finding this one. Merry Christmas!',
+      message: 'I built this tree so all of us, on site or at home, could hang our wishes in one place. My wish for 2027: that we keep lifting each other up. Merry Christmas!',
       name: 'Amr Mihany',
       title: 'Digital Services & Transformation',
       lang: 'en'

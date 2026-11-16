@@ -703,7 +703,7 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
     el('qrCard').hidden = true;
     el('datesText').textContent = 'Wishes are closed for this year. Thank you for every one of them.';
   } else {
-    el('datesText').textContent = 'Wishes open ' + (CFG.OPEN_DATE || '') + ' to ' + (CFG.CLOSE_DATE || '');
+    el('datesText').textContent = 'Wishes open ' + C.fmtDate(CFG.OPEN_DATE, 'en') + ' to ' + C.fmtDate(CFG.CLOSE_DATE, 'en');
   }
 
   function wishUrlForSite() {

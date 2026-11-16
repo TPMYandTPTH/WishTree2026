@@ -897,7 +897,7 @@ button,input,select,textarea{font-family:inherit}
 
   function renderDone() {
     $('doneTitle').textContent = S.lastWasEdit ? t('doneEditTitle') : t('doneTitle');
-    $('doneText').textContent = t('doneText', { reveal: CFG.REVEAL_DATE || '' });
+    $('doneText').textContent = t('doneText', { reveal: C.fmtDate(CFG.REVEAL_DATE, S.lang) });
     $('donePrize').hidden = !prizeOn();
     $('donePrize').textContent = prizeOn() ? t('donePrize', prizeVars()) : '';
     $('seeTreeBtn').href = C.url('index.html') + (S.site ? '?site=' + encodeURIComponent(S.site) : '');
