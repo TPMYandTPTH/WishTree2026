@@ -35,8 +35,8 @@ create table if not exists public.app_settings (
   id int primary key default 1 check (id = 1),
   submissions_open boolean not null default true
 );
--- Likes stop counting after this moment (end of 31 December, Malaysia time). Change it in Table Editor > app_settings.
-alter table public.app_settings add column if not exists likes_close_at timestamptz default '2026-12-31 23:59:59+08';
+-- Likes stop counting after this moment (end of 18 December, Malaysia time). Change it in Table Editor > app_settings.
+alter table public.app_settings add column if not exists likes_close_at timestamptz default '2026-12-18 23:59:59+08';
 -- Earlier versions had sign-in settings
 alter table public.app_settings drop column if exists allowed_domains;
 alter table public.app_settings drop column if exists max_wishes_per_person;

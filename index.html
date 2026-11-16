@@ -616,7 +616,7 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
   <dialog id="bmsDialog" class="bms-dialog" aria-labelledby="bmsTitle">
     <form id="bmsForm" class="bms-form" method="dialog" novalidate>
       <h2 id="bmsTitle">Like with your BMS</h2>
-      <p>Each person can like a message once. Your BMS keeps the likes fair for the RM 100 prizes. It's never shown on the tree, and this device remembers it so you only type it once.</p>
+      <p>Each person can like a message once. Your BMS keeps the likes fair for the RM 100 Grab vouchers. It's never shown on the tree, and this device remembers it so you only type it once.</p>
       <label for="bmsInput">Your BMS number</label>
       <input id="bmsInput" class="bms-input" type="text" inputmode="numeric" autocomplete="off" maxlength="20" aria-describedby="bmsErr">
       <p id="bmsErr" class="bms-err" role="alert"></p>
@@ -1508,7 +1508,7 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
   /* ---------- Start ---------- */
   if (PRIZE_ON) {
     el('prizeRow').hidden = false;
-    el('prizeLinkText').textContent = (PRIZE.winners || 5) + ' most-liked wishes win ' + (PRIZE.amount || '');
+    el('prizeLinkText').textContent = (PRIZE.winners || 5) + ' most-liked wishes win ' + (PRIZE.amount || '') + (PRIZE.reward ? ' ' + PRIZE.reward + 's' : '');
   }
   renderBmsRow();
   renderAll();

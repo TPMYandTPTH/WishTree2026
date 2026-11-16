@@ -314,7 +314,8 @@ a{color:var(--slate)}
 
         <div class="box" id="prizeBox">
           <h2 id="prizeTitle">Prize standings</h2>
-          <p class="small">The most-liked approved wishes. Only real-looking likes are stored: one per BMS and one per device, never the sender's own wish, and none after the deadline. "Not eligible" means the wish's BMS is in <b>prize_excluded</b> (Amr, Maszy, the Wish Tree team) or looks made up (not 4 to 7 digits, one digit repeated, or a straight run like 1234567). An orange row means most of its likes came from one connection: open "Who liked" before you announce winners.</p>
+          <p class="small">Likes stop counting at 11:59 pm on 18 December. Maszy approves the final list, and the winners are announced on 22 December. <b>Leaders, Amr and the Talent Engagement team can't win</b>: skip their wishes when you pick.</p>
+          <p class="small">The most-liked approved wishes. Only real-looking likes are stored: one per BMS and one per device, never the sender's own wish, and none after the deadline. "Not eligible" means the wish's BMS is in <b>prize_excluded</b> or looks made up (not 4 to 7 digits, one digit repeated, or a straight run like 1234567). An orange row means most of its likes came from one connection: open "Who liked" before you announce winners.</p>
           <ol id="prizeRows" class="pz-rows"></ol>
           <div class="pz-tools">
             <button type="button" id="prizeRefresh" class="btn btn-ghost">Refresh</button>
@@ -777,7 +778,7 @@ a{color:var(--slate)}
     if (!top.length) { $('prizeMsg').textContent = 'No eligible wishes with likes yet.'; return; }
     var lines = [['Place', 'Name', 'BMS', 'Site', 'Likes', 'Prize', 'Wish'].map(csvCell).join(',')];
     top.forEach(function (r, i) {
-      lines.push([i + 1, r.first_name, r.bms, C.siteName(r.site), r.like_count, PRIZE.amount ? PRIZE.amount + ' gift card' : '', r.message].map(csvCell).join(','));
+      lines.push([i + 1, r.first_name, r.bms, C.siteName(r.site), r.like_count, PRIZE.amount ? PRIZE.amount + ' ' + (PRIZE.reward || 'gift card') : '', r.message].map(csvCell).join(','));
     });
     saveCsv(lines, 'wish-tree-winners.csv');
     $('prizeMsg').textContent = 'Downloaded the top ' + top.length + (top.length === 1 ? ' wish' : ' wishes') + '. Check "Who liked" on each before you announce them.';

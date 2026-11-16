@@ -512,7 +512,7 @@ export function createTree3D(container, opts = {}) {
   const GIFT_SLOTS = {
     red: { x: -1.75, z: 1.6, rot: -0.35, W: 0.62, H: 0.5, D: 0.56, color: 0x6c151e, ribbon: 0xb18854, words: ['A wish', 'for you'] },
     gold: { x: -2.45, z: 0.7, rot: -0.6, W: 0.5, H: 0.58, D: 0.48, color: 0xb18854, ribbon: 0x6c151e, words: ['Where it', 'all began'] },
-    prize: { x: 2.0, z: 1.2, rot: 0.38, W: 1.25, H: 0.98, D: 1.1, color: 0x6c151e, ribbon: 0xc99a55, words: [prizeTag, 'gift cards'], prize: true },
+    prize: { x: 2.0, z: 1.2, rot: 0.38, W: 1.25, H: 0.98, D: 1.1, color: 0x6c151e, ribbon: 0xc99a55, words: [prizeTag, 'Grab vouchers'], prize: true },
     green: { x: 0.2, z: 2.1, rot: 0.9, W: 0.5, H: 0.42, D: 0.5, color: 0x343f37, ribbon: 0xb18854, words: ['A message', 'for you'] },
     cream: { x: -0.8, z: 2.2, rot: 0.7, W: 0.42, H: 0.36, D: 0.42, color: 0xf4eee3, ribbon: 0x6c151e, words: ['A message', 'for you'] }
   };
