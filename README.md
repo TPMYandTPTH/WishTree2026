@@ -47,8 +47,8 @@ The **Accept new wishes** switch on the Approvals page closes or reopens the cam
 ## The prize: 5 x RM 100 gift cards
 
 - The big Cranberry gift on the right of the tree hops every few seconds. Opening it shows the prize, the deadline and the rules (no live standings). On the TVs it's its own slide every 9 messages (`TV_PRIZE_EVERY`), and the gift opens on the tree.
-- **Deadline:** likes count until **11:59 pm on 25 December 2026, Malaysia time**. The database stops storing likes at `likes_close_at` in **Table Editor > app_settings** (change it there if the date moves, and the `deadline` wording in `PRIZE` in `config.js`).
-- **Who can win:** approved employee wishes only. Leaders' messages never count. A wish can't win when its BMS is in **Table Editor > prize_excluded** (add Amr's, Maszy's and the Wish Tree team's BMS there, never in the code: this repo is public) or looks made up (same rule as likes). Ties: the wish that reached that number of likes first ranks higher.
+- **Deadline:** likes count until **11:59 pm on 31 December 2026, Malaysia time**, when wishes close. The database stops storing likes at `likes_close_at` in **Table Editor > app_settings** (change it there if the date moves, and the `deadline` wording in `PRIZE` in `config.js`).
+- **Who can win:** approved employee wishes only. Leaders' messages never count. A wish can't win when its BMS is in **Table Editor > prize_excluded** (optional: add BMS numbers there, never in the code, because this repo is public; or leave it empty and take those wishes out by hand when picking winners) or looks made up (same rule as likes). Ties: the wish that reached that number of likes first ranks higher.
 - **Picking the winners:** the Approvals page has **Prize standings** (each wish's BMS, how many connections the likes came from, an orange row when most came from one, and "not eligible" with the reason), **Who liked** (BMS, connection, time), **Download winners** (the top 5 eligible: place, name, BMS, site, likes, wish), **Download full standings**, and **Remove likes** for a BMS whose likes look faked. Wishes with a made-up-looking BMS are also flagged in the approval queue.
 - Change the wording, number of winners or amount in `PRIZE` in `config.js`; `enabled: false` hides the prize everywhere.
 
@@ -97,7 +97,7 @@ The **Accept new wishes** switch on the Approvals page closes or reopens the cam
 
 1. **Database:** open the Supabase project, **SQL Editor**, paste all of `schema.sql`, click **Run**. It's safe to run again after updates; existing wishes are kept. It only touches the Wish Tree tables (the gift exchange tables are left alone), and removes the old email columns, the IP addresses and the old `leaders`, `moderators` and `bms_allowlist` tables.
 2. **Passwords:** in the SQL Editor, run the two `set_access_password` lines (see **Passwords** above) with your own passwords, then clear the editor.
-3. **Prize exclusions:** in **Table Editor > prize_excluded**, add Amr's, Maszy's and the Wish Tree team's BMS.
+3. **Prize exclusions (optional):** add BMS numbers in **Table Editor > prize_excluded**, or check the winners by hand after the event.
 4. **Dates:** in `config.js`, `OPEN_DATE`, `CLOSE_DATE` and `REVEAL_DATE` (YYYY-MM-DD; each page shows them in its own language). They're set to 16 November, 31 December and 25 December for now.
 5. **Keys:** **Project Settings > API**, copy the Project URL and the anon / publishable key into `config.js`, then commit and push with GitHub Desktop.
 

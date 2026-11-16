@@ -130,9 +130,9 @@ window.WISH_CFG = {
     amount: 'RM 100',
     title: '5 x RM 100 gift cards',
     text: 'The 5 most-liked wishes each win a RM 100 gift card. Each person can like a wish once.',
-    deadline: 'Likes count until 11:59 pm on 25 December 2026 (Malaysia time).',
+    deadline: 'Likes count until 11:59 pm on 31 December 2026 (Malaysia time).',
     rules: 'Leaders\' messages and the Wish Tree team can\'t win. The Wish Tree team checks every like before the winners are announced. If two wishes have the same likes, the one that got there first ranks higher.'
-    // The database stops counting likes at app_settings.likes_close_at (25 Dec 2026, 23:59 Malaysia time)
+    // The database stops counting likes at app_settings.likes_close_at (31 Dec 2026, 23:59 Malaysia time)
   },
 
   MAX_LENGTH: 150,          // employee wish length (keep in step with schema.sql)
