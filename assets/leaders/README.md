@@ -17,8 +17,9 @@ Upload any photo with any name and ask for it to be cropped and renamed if that'
 | Vivienne | `vivienne.jpg` (in) |
 | Chavis | `chavis.jpg` (in) |
 | Sudhar | `sudhar.jpg` (in) |
-| Noppawan Krynetr | `noppawan-krynetr.jpg` |
 | Rachel | `rachel.jpg` (in) |
+| Alen Celebic | `alen-celebic.jpg` |
+| Noppawan Krynetr | `noppawan-krynetr.jpg` |
 | Pranav Pillai | `pranav-pillai.jpg` |
 | Jamunah Maniram | `jamunah-maniram.jpg` |
 | Ken Yong | `ken-yong.jpg` |

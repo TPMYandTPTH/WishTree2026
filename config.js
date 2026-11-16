@@ -73,9 +73,10 @@ window.WISH_CFG = {
     { name: 'Vivienne',                 title: 'Vice President',               spot: 'list',  level: 'exec' },
     { name: 'Chavis',                   title: 'Vice President',               spot: 'list',  level: 'exec' },
     { name: 'Sudhar',                   title: 'Vice President',               spot: 'list',  level: 'exec' },
-    { name: 'Noppawan Krynetr',         title: 'VP of Business Development',   spot: 'list',  level: 'exec' },
     { name: 'Rachel',                   title: 'Director of Human Resources',  spot: 'crown', level: 'exec' },
+    { name: 'Alen Celebic',             title: 'VP of Business Development',   spot: 'list',  level: 'exec' },
     // Directors
+    { name: 'Noppawan Krynetr',         title: 'VP of Business Development',   spot: 'list',  level: 'director' },
     { name: 'Pranav Pillai',            title: 'Director of Operations',       spot: 'list',  level: 'director' },
     { name: 'Jamunah Maniram',          title: 'Director of Operations',       spot: 'list',  level: 'director' },
     { name: 'Ken Yong',                 title: 'Director of Operations',       spot: 'list',  level: 'director' },
