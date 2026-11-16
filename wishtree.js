@@ -91,6 +91,35 @@
       return new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], 12)).toLocaleDateString(loc, { day: 'numeric', month: 'long', timeZone: 'UTC' });
     } catch (e) { return v; }
   }
+  // A photo file shrunk to a 160 x 160 JPEG (centred square crop, a little above the middle where faces are),
+  // small enough to keep with a leader's message. Resolves with a data: URL.
+  function shrinkPhoto(file) {
+    return new Promise(function (resolve, reject) {
+      if (!file || !/^image\//.test(file.type)) { reject(new Error('type')); return; }
+      if (file.size > 15 * 1024 * 1024) { reject(new Error('size')); return; }
+      var src = URL.createObjectURL(file);
+      var img = new Image();
+      img.onload = function () {
+        var side = Math.min(img.naturalWidth, img.naturalHeight);
+        var sx = (img.naturalWidth - side) / 2;
+        var sy = Math.max(0, (img.naturalHeight - side) * 0.3);
+        var out = 160;
+        var cv = document.createElement('canvas');
+        cv.width = out; cv.height = out;
+        var x = cv.getContext('2d');
+        x.fillStyle = '#B18854';
+        x.fillRect(0, 0, out, out);
+        x.imageSmoothingQuality = 'high';
+        x.drawImage(img, sx, sy, side, side, 0, 0, out, out);
+        URL.revokeObjectURL(src);
+        var q = 0.85, dataUrl = cv.toDataURL('image/jpeg', q);
+        while (dataUrl.length > 58000 && q > 0.4) { q -= 0.1; dataUrl = cv.toDataURL('image/jpeg', q); }
+        resolve(dataUrl);
+      };
+      img.onerror = function () { URL.revokeObjectURL(src); reject(new Error('decode')); };
+      img.src = src;
+    });
+  }
   // The TP logo, the picture on every employee wish: black on light circles, white on dark ones
   function tpMarkHtml(black) {
     return '<img class="tp-mark" src="' + esc(url(black ? 'assets/tp-logo-black.png' : 'assets/tp-logo-white.png')) + '" alt="">';
@@ -774,7 +803,10 @@
     var c = leaderConfig(l.display_name);
     // a name that isn't on the list (typed on the leaders' page) goes in the list only, with the regular card
     if (!c) return CFG.LEADERS && CFG.LEADERS.length ? Object.assign({}, l, { spot: 'list', senior: false, level: 'manager' }) : l;
-    return Object.assign({}, l, { spot: c.spot, senior: c.senior, level: c.level, sort_order: c.order, photo_url: l.photo_url || leaderPhoto(l.display_name) || null });
+    // a place set on the Approvals page (1-99) wins over the order of the list; 100 means none was set
+    var pos = Number(l.sort_order);
+    var order = pos >= 1 && pos <= 99 ? pos : c.order;
+    return Object.assign({}, l, { spot: c.spot, senior: c.senior, level: c.level, sort_order: order, photo_url: l.photo_url || leaderPhoto(l.display_name) || null });
   }
 
   /* ---------- Small helpers ---------- */
@@ -1276,6 +1308,8 @@
     initials: initials,
     tpMarkHtml: tpMarkHtml,
     fmtDate: fmtDate,
+    shrinkPhoto: shrinkPhoto,
+    leaderConfig: leaderConfig,
     client: getClient,
     fetchApproved: fetchApproved,
     fetchLeaders: fetchLeaders,

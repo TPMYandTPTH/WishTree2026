@@ -158,6 +158,15 @@ a{color:var(--slate)}
 .edit-box{display:flex;flex-direction:column;gap:6px}
 .edit-box textarea{width:100%;min-height:90px;padding:12px 14px;border:1.5px solid var(--slate);border-radius:10px;color:var(--ink);font-size:16px;line-height:1.45;resize:vertical}
 .edit-foot{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
+.edit-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.fld{display:flex;flex-direction:column;gap:4px;min-width:0;font-size:12px;font-weight:600;color:var(--muted)}
+.fld input,.fld select{width:100%;min-width:0;height:40px;padding:0 10px;border:1.5px solid var(--line-2);border-radius:8px;background:#fff;color:var(--ink);font-size:15px;font-weight:400}
+.fld input:focus,.fld select:focus,.edit-box textarea:focus{outline:none;border-color:var(--slate)}
+.fld small{font-weight:400;line-height:1.4}
+.ph-edit{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.ph-edit img,.ph-edit .ph-none{width:56px;height:56px;border-radius:50%;object-fit:cover;flex:none}
+.ph-edit .btn{min-height:38px;font-size:14px}
+.ph-edit input[type=file]{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
 .empty{padding:44px 20px;border:1px dashed var(--line-2);border-radius:12px;text-align:center;color:var(--muted);font-size:15px}
 .more{align-self:center}
 
@@ -279,7 +288,7 @@ a{color:var(--slate)}
           <div class="rule"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00AF9B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Free of client or account names</div>
           <div class="rule"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00AF9B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Free of phone numbers, emails or other personal details</div>
           <div class="rule"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00AF9B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Nothing confidential about work</div>
-          <div class="small">Orange flags are automatic checks for phone numbers and emails. A person always decides. Use Edit to fix a small thing and approve in one step.</div>
+          <div class="small">Orange flags are automatic checks for phone numbers and emails. A person always decides. Use Edit to change anything (name, words, site, title, photo, place in the list) and approve in one step.</div>
         </div>
 
         <div class="box" id="prizeBox">
@@ -482,9 +491,7 @@ a{color:var(--slate)}
       }).join('') + '</div>';
     }
     if (editing) {
-      h += '<div class="edit-box"><label for="draft" class="meta">Edit before approving</label>' +
-        '<textarea id="draft" maxlength="' + MAX[S.kind] + '">' + esc(S.draft) + '</textarea>' +
-        '<div class="edit-foot"><span>Keep the meaning; fix only what breaks the rules.</span><span id="draftCount">' + S.draft.length + ' / ' + MAX[S.kind] + '</span></div></div>';
+      h += editorHtml(x, isW);
     } else {
       h += '<p class="msg">' + esc(x.message) + '</p>';
     }
@@ -499,7 +506,7 @@ a{color:var(--slate)}
     }
     var dis = busy ? ' disabled' : '';
     if (editing) {
-      h += '<button type="button" class="btn btn-approve" data-act="save"' + dis + '>Save and approve</button>';
+      h += '<button type="button" class="btn btn-approve" data-act="save"' + dis + '>' + (status === 'approved' ? 'Save' : 'Save and approve') + '</button>';
       h += '<button type="button" class="btn btn-ghost" data-act="cancel"' + dis + '>Cancel</button>';
     } else if (status === 'pending') {
       h += '<button type="button" class="btn btn-approve" data-act="approve"' + dis + '>' + checkIcon() + 'Approve</button>';
@@ -510,6 +517,7 @@ a{color:var(--slate)}
       h += '<button type="button" class="btn btn-reject" data-act="reject"' + dis + '>Take down</button>';
     } else {
       h += '<button type="button" class="btn btn-approve" data-act="approve"' + dis + '>' + checkIcon() + 'Approve</button>';
+      h += '<button type="button" class="btn btn-ghost" data-act="edit"' + dis + '>Edit</button>';
       h += '<button type="button" class="btn btn-ghost" data-act="pending"' + dis + '>Move back to waiting</button>';
     }
     if (isW && status !== 'approved' && x.bms) {
@@ -522,6 +530,113 @@ a{color:var(--slate)}
     }
     h += '</div></article>';
     return h;
+  }
+  /* ---------- Edit everything ---------- */
+  var COLOURS = [['cream', 'Eggnog (light)'], ['red', 'Cranberry'], ['gold', 'Brass']];
+  var CHARMS = [['snow', 'Snowflake'], ['star', 'Star'], ['tree', 'Tree'], ['gift', 'Gift']];
+  function opts(list, value) {
+    return list.map(function (o) {
+      return '<option value="' + esc(o[0]) + '"' + (o[0] === value ? ' selected' : '') + '>' + esc(o[1]) + '</option>';
+    }).join('');
+  }
+  function startEdit(f) {
+    var x = f.item;
+    S.editing = f.kind + ':' + f.id;
+    if (f.kind === 'wish') {
+      S.draft = { message: x.message || '', name: x.first_name || '', site: x.site || 'gtower', lang: x.lang || 'en',
+                  tag_color: x.tag_color || 'cream', charm: x.charm || 'snow' };
+    } else {
+      var pos = Number(x.sort_order);
+      S.draft = { message: x.message || '', name: x.display_name || '', title: x.title || '',
+                  position: pos >= 1 && pos <= 99 ? String(pos) : '', photo: x.photo_url || '', photoChanged: false };
+    }
+    renderList();
+  }
+  function editorHtml(x, isW) {
+    var d = S.draft;
+    var h = '<div class="edit-box">';
+    if (isW) {
+      h += '<div class="edit-grid">' +
+        '<label class="fld">Name<input id="edName" maxlength="30" autocomplete="off" value="' + esc(d.name) + '"></label>' +
+        '<label class="fld">Site<select id="edSite">' + opts(C.SITES.map(function (st) { return [st.id, C.siteName(st.id)]; }), d.site) + '</select></label>' +
+        '<label class="fld">Language<select id="edLang">' + opts(C.LANGUAGES.map(function (l) { return [l.code, l.english || l.label]; }), d.lang) + '</select></label>' +
+        '<label class="fld">Tag colour<select id="edTag">' + opts(COLOURS, d.tag_color) + '</select></label>' +
+        '<label class="fld">Charm<select id="edCharm">' + opts(CHARMS, d.charm) + '</select></label>' +
+        '</div>';
+    } else {
+      var cfgL = C.leaderConfig(d.name);
+      h += '<div class="edit-grid">' +
+        '<label class="fld">Name<input id="edName" maxlength="60" autocomplete="off" value="' + esc(d.name) + '"></label>' +
+        '<label class="fld">Title<input id="edTitle" maxlength="80" autocomplete="off" value="' + esc(d.title) + '"></label>' +
+        '<label class="fld">Place in the list<input id="edPos" type="number" min="1" max="99" inputmode="numeric" placeholder="' +
+          esc(cfgL ? String(cfgL.order) : 'Last') + '" value="' + esc(d.position) + '">' +
+          '<small>Lower comes first. Empty keeps the order of the leaders list' + (cfgL ? ' (' + cfgL.order + ')' : '') + '.</small></label>' +
+        '</div>';
+      var src = C.safePhoto(d.photo);
+      h += '<div class="ph-edit">' +
+        (src ? '<img src="' + esc(src) + '" alt="">' : '<span class="ph-none" title="No photo">' + esc(C.initials(d.name || '?')) + '</span>') +
+        '<label class="btn btn-ghost" for="edPhoto">' + (src ? 'Change photo' : 'Add a photo') + '</label>' +
+        '<input id="edPhoto" type="file" accept="image/*">' +
+        (src ? '<button type="button" class="btn btn-ghost" data-act="photo-remove">Remove photo</button>' : '') +
+        '<span class="small">' + (d.photoChanged ? 'New photo, saved when you click Save.' : (src ? 'Their own photo.' : 'No photo of their own: the default photo (or initials) shows.')) + '</span>' +
+        '</div>';
+    }
+    h += '<label for="draft" class="fld">Message' +
+      '<textarea id="draft" maxlength="' + MAX[S.kind] + '">' + esc(d.message) + '</textarea></label>' +
+      '<div class="edit-foot"><span>' + (isW ? 'Saving also approves it.' : 'English only. Saving also approves it.') + '</span><span id="draftCount">' + d.message.length + ' / ' + MAX[S.kind] + '</span></div>' +
+      '</div>';
+    return h;
+  }
+  function saveEdit(key, f) {
+    var d = S.draft;
+    var name = String(d.name || '').replace(/\s+/g, ' ').trim();
+    var text = String(d.message || '').trim();
+    $('mainErr').textContent = '';
+    if (!name) { $('mainErr').textContent = 'Add a name.'; return; }
+    if (!text) { $('mainErr').textContent = 'The message can\'t be empty.'; return; }
+    var pos = String(d.position || '').trim();
+    if (f.kind === 'leader' && pos && !(/^\d+$/.test(pos) && +pos >= 1 && +pos <= 99)) { $('mainErr').textContent = 'Place in the list: a number from 1 to 99, or leave it empty.'; return; }
+    var changes = f.kind === 'wish'
+      ? { first_name: name, message: text.slice(0, MAX.wish), site: d.site, lang: d.lang, tag_color: d.tag_color, charm: d.charm, status: 'approved' }
+      : { display_name: name, title: String(d.title || '').trim() || null, message: text.slice(0, MAX.leader), sort_order: pos ? +pos : 100, status: 'approved' };
+    if (f.kind === 'leader' && d.photoChanged) { changes.photo_url = d.photo || null; changes.photo = d.photo || null; }
+    S.busy[key] = true;
+    renderList();
+    var p;
+    if (C.demo) {
+      C.demoReview(f.kind, f.id, changes);
+      p = Promise.resolve('ok');
+    } else if (f.kind === 'wish') {
+      p = adminRpc('admin_edit_wish', { p_id: f.id, p_name: changes.first_name, p_message: changes.message, p_site: changes.site,
+                                        p_lang: changes.lang, p_tag_color: changes.tag_color, p_charm: changes.charm });
+    } else {
+      p = adminRpc('admin_edit_leader', { p_id: f.id, p_name: changes.display_name, p_title: changes.title, p_message: changes.message,
+                                          p_photo: d.photoChanged ? (d.photo || null) : null, p_photo_change: !!d.photoChanged,
+                                          p_position: pos ? +pos : null });
+    }
+    p.then(function (r) {
+      S.busy[key] = false;
+      if (r === 'name_taken') { renderList(); $('mainErr').textContent = 'Another leader message already uses the name "' + name + '".'; return; }
+      if (r !== 'ok') { renderList(); $('mainErr').textContent = 'That message is no longer there. Refresh to see the latest.'; return; }
+      S.editing = null;
+      Object.assign(f.item, changes, { reviewed_at: new Date().toISOString() });
+      C.track('approval_save', { kind: f.kind });
+      render();
+      if (!C.demo) load();
+    }).catch(function (err) {
+      console.error(err);
+      S.busy[key] = false;
+      renderList();
+      if (signedOut(err)) return;
+      var m = String(err && err.message || '');
+      $('mainErr').textContent = /english_only/.test(m) ? 'Leaders\' messages, names and titles have to be in English.'
+        : /bad_photo/.test(m) ? 'That photo couldn\'t be used. Try another JPG or PNG.'
+        : /name_required/.test(m) ? 'Add a name (no < or > signs).'
+        : /bad_title/.test(m) ? 'The title is too long or has < or > in it.'
+        : /bad_position/.test(m) ? 'Place in the list: a number from 1 to 99, or leave it empty.'
+        : /bad_message/.test(m) ? 'The message is empty or too long.'
+        : 'That didn\'t save. Please try again.';
+    });
   }
   function checkIcon() {
     return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
@@ -735,17 +850,15 @@ a{color:var(--slate)}
     var f = findByKey(key);
     if (!f) return;
     if (action === 'delete') { removeWish(key, f); return; }
-    if (action === 'edit') { S.editing = key; S.draft = f.item.message; renderList(); return; }
+    if (action === 'edit') { startEdit(f); return; }
     if (action === 'cancel') { S.editing = null; renderList(); return; }
+    if (action === 'save') { saveEdit(key, f); return; }
+    if (action === 'photo-remove') { S.draft.photo = ''; S.draft.photoChanged = true; renderList(); return; }
     var changes;
     if (action === 'approve') changes = { status: 'approved' };
     else if (action === 'reject') changes = { status: 'rejected' };
     else if (action === 'pending') changes = { status: 'pending' };
-    else if (action === 'save') {
-      var text = S.draft.trim();
-      if (!text) { $('mainErr').textContent = 'The message can\'t be empty.'; return; }
-      changes = { message: text.slice(0, MAX[f.kind]), status: 'approved' };
-    } else return;
+    else return;
     S.busy[key] = true;
     $('mainErr').textContent = '';
     renderList();
@@ -872,11 +985,28 @@ a{color:var(--slate)}
     var card = btn.closest('.item');
     act(card.getAttribute('data-key'), btn.getAttribute('data-act'));
   });
-  $('list').addEventListener('input', function (e) {
-    if (e.target.id !== 'draft') return;
-    S.draft = e.target.value.slice(0, MAX[S.kind]);
-    var c = $('draftCount');
-    if (c) c.textContent = S.draft.length + ' / ' + MAX[S.kind];
+  var FIELD = { draft: 'message', edName: 'name', edSite: 'site', edLang: 'lang', edTag: 'tag_color', edCharm: 'charm', edTitle: 'title', edPos: 'position' };
+  function onField(e) {
+    var k = FIELD[e.target.id];
+    if (!k || !S.editing || typeof S.draft !== 'object') return;
+    S.draft[k] = k === 'message' ? e.target.value.slice(0, MAX[S.kind]) : e.target.value;
+    if (k === 'message') {
+      var c = $('draftCount');
+      if (c) c.textContent = S.draft.message.length + ' / ' + MAX[S.kind];
+    }
+  }
+  $('list').addEventListener('input', onField);
+  $('list').addEventListener('change', function (e) {
+    if (e.target.id !== 'edPhoto') { onField(e); return; }
+    var file = e.target.files && e.target.files[0];
+    if (!file) return;
+    C.shrinkPhoto(file).then(function (dataUrl) {
+      S.draft.photo = dataUrl;
+      S.draft.photoChanged = true;
+      renderList();
+    }).catch(function () {
+      $('mainErr').textContent = 'That photo couldn\'t be used. Try a JPG or PNG under 15 MB.';
+    });
   });
 
   /* ---------- Start ---------- */

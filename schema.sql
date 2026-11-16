@@ -742,7 +742,7 @@ begin
       select m.id, m.created_at, m.updated_at, m.display_name, m.title, m.message, m.lang,
              case when m.status = 'approved' then null else m.photo end as photo,
              case when m.photo is null then 0 else m.photo_version end as photo_version,
-             m.status, m.hidden, m.reviewed_at,
+             m.status, m.hidden, m.reviewed_at, m.sort_order,
              (select count(*) from public.likes l where l.kind = 'leader' and l.target_id = m.id)::int as like_count
       from public.leader_messages m order by m.updated_at desc) x), '[]'::json),
     'settings', (select json_build_object('submissions_open', s.submissions_open, 'likes_close_at', s.likes_close_at)
@@ -801,6 +801,83 @@ begin
     raise exception 'bad_kind';
   end if;
   return found;
+end
+$$;
+
+-- Change any part of a wish (name, words, site, language, tag colour, charm). Saving also approves it.
+-- Answers 'ok' or 'not_found'.
+drop function if exists public.admin_edit_wish(text, uuid, text, text, text, text, text, text);
+create function public.admin_edit_wish(p_token text, p_id uuid, p_name text, p_message text, p_site text,
+                                       p_lang text, p_tag_color text, p_charm text)
+returns text language plpgsql security definer set search_path = '' as $$
+declare
+  v_name text := btrim(regexp_replace(coalesce(p_name, ''), '[[:space:]]+', ' ', 'g'));
+  v_msg text := btrim(coalesce(p_message, ''));
+  n int;
+begin
+  if public.session_role(p_token) is distinct from 'admin' then raise exception 'not_allowed'; end if;
+  if char_length(v_name) not between 1 and 30 or v_name ~ '[<>]' then raise exception 'name_required'; end if;
+  if char_length(v_msg) not between 1 and 150 then raise exception 'bad_message'; end if;
+  begin
+    update public.wishes w
+       set first_name = v_name, message = v_msg, site = p_site, lang = p_lang,
+           tag_color = p_tag_color, charm = p_charm, flags = public.wish_flags(v_msg),
+           status = 'approved', reviewed_at = now(),
+           approved_at = case when w.status = 'approved' then w.approved_at else now() end
+     where w.id = p_id;
+    get diagnostics n = row_count;
+  exception when check_violation or not_null_violation then
+    raise exception 'bad_input';
+  end;
+  if n = 0 then return 'not_found'; end if;
+  return 'ok';
+end
+$$;
+
+-- Change any part of a leader message (name, title, words, photo, place in the list). Saving also approves it.
+-- p_position 1-99 puts it at that place in the list; null keeps the order of LEADERS in config.js.
+-- Answers 'ok', 'name_taken' or 'not_found'.
+drop function if exists public.admin_edit_leader(text, uuid, text, text, text, text, boolean, int);
+create function public.admin_edit_leader(p_token text, p_id uuid, p_name text, p_title text, p_message text,
+                                         p_photo text, p_photo_change boolean, p_position int)
+returns text language plpgsql security definer set search_path = '' as $$
+declare
+  v_name text := btrim(regexp_replace(coalesce(p_name, ''), '[[:space:]]+', ' ', 'g'));
+  v_title text := nullif(btrim(regexp_replace(coalesce(p_title, ''), '[[:space:]]+', ' ', 'g')), '');
+  v_msg text := btrim(coalesce(p_message, ''));
+  v_photo text := nullif(btrim(coalesce(p_photo, '')), '');
+  n int;
+begin
+  if public.session_role(p_token) is distinct from 'admin' then raise exception 'not_allowed'; end if;
+  if char_length(v_name) not between 1 and 60 or v_name ~ '[<>]' then raise exception 'name_required'; end if;
+  if v_title is not null and (char_length(v_title) > 80 or v_title ~ '[<>]') then raise exception 'bad_title'; end if;
+  if char_length(v_msg) not between 1 and 250 then raise exception 'bad_message'; end if;
+  if (v_msg || ' ' || coalesce(v_title, '') || ' ' || v_name)
+     ~ '[\u0590-\u08FF\u0900-\u0DFF\u0E00-\u0EFF\u1000-\u109F\u1100-\u11FF\u3040-\u30FF\u3100-\u31FF\u3400-\u4DBF\u4E00-\u9FFF\uAC00-\uD7AF\uF900-\uFAFF]' then
+    raise exception 'english_only';
+  end if;
+  if coalesce(p_photo_change, false) and v_photo is not null
+     and (char_length(v_photo) > 60000 or v_photo !~ '^data:image/jpeg;base64,[A-Za-z0-9+/]+=*$') then
+    raise exception 'bad_photo';
+  end if;
+  if p_position is not null and p_position not between 1 and 99 then raise exception 'bad_position'; end if;
+  begin
+    update public.leader_messages m
+       set display_name = v_name, title = v_title, message = v_msg, lang = 'en',
+           photo = case when coalesce(p_photo_change, false) then v_photo else m.photo end,
+           photo_version = case when coalesce(p_photo_change, false) then m.photo_version + 1 else m.photo_version end,
+           sort_order = coalesce(p_position, 100),
+           status = 'approved', reviewed_at = now()
+     where m.id = p_id;
+    get diagnostics n = row_count;
+  exception
+    when unique_violation then
+      return 'name_taken';
+    when check_violation or not_null_violation then
+      raise exception 'bad_input';
+  end;
+  if n = 0 then return 'not_found'; end if;
+  return 'ok';
 end
 $$;
 
@@ -916,6 +993,8 @@ grant execute on function public.leader_delete_mine(text, text) to anon, authent
 grant execute on function public.admin_queue(text) to anon, authenticated;
 grant execute on function public.admin_set_status(text, text, uuid[], text) to anon, authenticated;
 grant execute on function public.admin_edit_message(text, text, uuid, text) to anon, authenticated;
+grant execute on function public.admin_edit_wish(text, uuid, text, text, text, text, text, text) to anon, authenticated;
+grant execute on function public.admin_edit_leader(text, uuid, text, text, text, text, boolean, int) to anon, authenticated;
 grant execute on function public.admin_delete(text, text, uuid) to anon, authenticated;
 grant execute on function public.get_prize_check(text, int) to anon, authenticated;
 grant execute on function public.get_wish_likes(text, uuid) to anon, authenticated;
