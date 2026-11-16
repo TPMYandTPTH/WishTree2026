@@ -886,6 +886,7 @@
       return {
         name: name,
         title: String(l.title || '').trim(),
+        draft: String(l.draft || '').trim(),
         spot: ['ceo', 'crown', 'gift', 'list'].indexOf(l.spot) !== -1 ? l.spot : 'list',
         level: level,
         senior: level === 'exec',

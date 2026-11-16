@@ -62,18 +62,26 @@ window.WISH_CFG = {
   //        'manager' = Managers and below: small cards, 6 per row, behind "Show more", once they post.
   // Photo: assets/leaders/<name in lower case with dashes>.jpg, e.g. alex-ma.jpg (initials show until it's there).
   // Add photo: 'assets/leaders/other-file.jpg' to a line to use a different file.
+  // draft: a suggested message, filled in on the leaders' page when that leader picks their name.
+  // Nothing is sent until they press Send; they can change every word first.
   LEADERS: [
     // C-level and VP
-    { name: 'Andy',                     title: 'Chief Executive Officer',      spot: 'ceo',   level: 'exec' },
-    { name: 'Divya Dutta',              title: 'Chief Operating Officer',      spot: 'crown', level: 'exec' },
-    { name: 'Himanshu',                 title: 'Chief Operating Officer',      spot: 'crown', level: 'exec' },
-    { name: 'Alex Ma',                  title: 'Chief Financial Officer',      spot: 'crown', level: 'exec' },
-    { name: 'Sarah',                    title: 'Chief of Staff',               spot: 'crown', level: 'exec' },
+    { name: 'Andy',                     title: 'Chief Executive Officer',      spot: 'ceo',   level: 'exec',
+      draft: 'To every one of you across Malaysia and Thailand: thank you. Every call, chat and customer you helped this year made a difference. Enjoy the holidays with the people you love, and let\'s make 2027 our best year yet. Merry Christmas!' },
+    { name: 'Divya Dutta',              title: 'Chief Operating Officer',      spot: 'crown', level: 'exec',
+      draft: 'Thank you for the care and energy you bring to our customers and to each other every day. I\'m proud of what we achieved together this year. Wishing you and your families a joyful Christmas and a bright New Year!' },
+    { name: 'Himanshu',                 title: 'Chief Operating Officer',      spot: 'crown', level: 'exec',
+      draft: 'To our teams on every site and at home: thank you for showing up for our customers, day and night. Rest well, celebrate the wins, and come back ready for an amazing 2027. Happy holidays!' },
+    { name: 'Alex Ma',                  title: 'Chief Financial Officer',      spot: 'crown', level: 'exec',
+      draft: 'Behind every result this year is a team that cared about getting it right. Thank you for your hard work and commitment. Wishing you a peaceful Christmas and a healthy, happy New Year with your loved ones.' },
+    { name: 'Sarah',                    title: 'Chief of Staff',               spot: 'crown', level: 'exec',
+      draft: 'What a year! Thank you for your kindness, your teamwork and the extra mile you go for each other. May this season bring you rest, laughter and time with the people who matter most. Merry Christmas and Happy New Year!' },
     { name: 'Michael Costevec',         title: 'VP of Transformations',        spot: 'list',  level: 'exec' },
     { name: 'Vivienne',                 title: 'Vice President',               spot: 'list',  level: 'exec' },
     { name: 'Chavis',                   title: 'Vice President',               spot: 'list',  level: 'exec' },
     { name: 'Sudhar',                   title: 'Vice President',               spot: 'list',  level: 'exec' },
-    { name: 'Rachel',                   title: 'Director of Human Resources',  spot: 'crown', level: 'exec' },
+    { name: 'Rachel',                   title: 'Director of Human Resources',  spot: 'crown', level: 'exec',
+      draft: 'Our people are what make TP special, and that means you. Thank you for everything you gave this year. Take care of yourselves this season, enjoy every moment with your loved ones, and happy holidays from all of us in HR!' },
     { name: 'Alen Celebic',             title: 'VP of Business Development',   spot: 'list',  level: 'exec' },
     // Directors
     { name: 'Noppawan Krynetr',         title: 'VP of Business Development',   spot: 'list',  level: 'director' },
