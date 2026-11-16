@@ -14,10 +14,10 @@ window.WISH_CFG = {
   // (schema.sql, section 10) and checked there. No emails are collected anywhere.
 
   // Campaign dates as YYYY-MM-DD, shown as "1 December" in each page's language (approximate for now; change any time).
-  // OPEN_DATE / CLOSE_DATE: the tree page says "Wishes open 1 December to 24 December".
+  // OPEN_DATE / CLOSE_DATE: the tree page says "Wishes open 16 November to 31 December".
   // REVEAL_DATE: after hanging a wish, people read "The tree lights up for everyone on 25 December".
-  OPEN_DATE: '2026-12-01',
-  CLOSE_DATE: '2026-12-24',
+  OPEN_DATE: '2026-11-16',
+  CLOSE_DATE: '2026-12-31',
   REVEAL_DATE: '2026-12-25',
   SUBMISSIONS_OPEN: true,
 
@@ -106,7 +106,7 @@ window.WISH_CFG = {
     {
       gift: 'red',
       kicker: 'YOU FOUND A HIDDEN WISH',
-      message: 'I built this tree so all of us, on site or at home, could hang our wishes in one place. My wish for 2027: that we keep lifting each other up. Merry Christmas!',
+      message: 'I built this tree so all of us, on site or at home, could hang our wishes in one place. My wish for 2027: that we keep lifting each other up. Happy New Year!',
       name: 'Amr Mihany',
       title: 'Digital Services & Transformation',
       lang: 'en'

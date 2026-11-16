@@ -98,7 +98,7 @@ The **Accept new wishes** switch on the Approvals page closes or reopens the cam
 1. **Database:** open the Supabase project, **SQL Editor**, paste all of `schema.sql`, click **Run**. It's safe to run again after updates; existing wishes are kept. It only touches the Wish Tree tables (the gift exchange tables are left alone), and removes the old email columns, the IP addresses and the old `leaders`, `moderators` and `bms_allowlist` tables.
 2. **Passwords:** in the SQL Editor, run the two `set_access_password` lines (see **Passwords** above) with your own passwords, then clear the editor.
 3. **Prize exclusions:** in **Table Editor > prize_excluded**, add Amr's, Maszy's and the Wish Tree team's BMS.
-4. **Dates:** in `config.js`, `OPEN_DATE`, `CLOSE_DATE` and `REVEAL_DATE` (YYYY-MM-DD; each page shows them in its own language). They're set to 1, 24 and 25 December for now.
+4. **Dates:** in `config.js`, `OPEN_DATE`, `CLOSE_DATE` and `REVEAL_DATE` (YYYY-MM-DD; each page shows them in its own language). They're set to 16 November, 31 December and 25 December for now.
 5. **Keys:** **Project Settings > API**, copy the Project URL and the anon / publishable key into `config.js`, then commit and push with GitHub Desktop.
 
 No Google sign-in or email setup is needed. If an older version created a `leader-photos` bucket in **Storage**, you can delete it.

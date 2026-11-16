@@ -657,7 +657,7 @@ begin
   if char_length(v_msg) not between 1 and 250 then raise exception 'bad_message'; end if;
   -- Leaders' messages are in English only: no Thai, Chinese, Japanese, Korean, Tamil, Arabic and other non-Latin scripts
   if (v_msg || ' ' || coalesce(v_title, '') || ' ' || v_name)
-     ~ '[֐-ࣿऀ-෿฀-໿က-႟ᄀ-ᇿ぀-ヿ㄀-ㇿ㐀-䶿一-鿿가-힯豈-﫿]' then
+     ~ '[\u0590-\u08FF\u0900-\u0DFF\u0E00-\u0EFF\u1000-\u109F\u1100-\u11FF\u3040-\u30FF\u3100-\u31FF\u3400-\u4DBF\u4E00-\u9FFF\uAC00-\uD7AF\uF900-\uFAFF]' then
     raise exception 'english_only';
   end if;
   if v_photo is not null and (char_length(v_photo) > 60000 or v_photo !~ '^data:image/jpeg;base64,[A-Za-z0-9+/]+=*$') then
