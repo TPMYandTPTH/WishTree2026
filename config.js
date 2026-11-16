@@ -6,8 +6,8 @@
    ========================================================= */
 window.WISH_CFG = {
   // Supabase: Project Settings > API
-  SUPABASE_URL: '',
-  SUPABASE_ANON_KEY: '',
+  SUPABASE_URL: 'https://yemysibghglelnapsekg.supabase.co',
+  SUPABASE_ANON_KEY: 'sb_publishable_WhJt7GcqNOfWrTAntHqWOw_ZC9TSYlC',
 
   // Employees don't sign in: they give a first name (or nickname) and their BMS number.
   // Nobody signs in. The leaders' page and the Approvals page each ask for a password, set in Supabase
