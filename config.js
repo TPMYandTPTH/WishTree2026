@@ -140,7 +140,8 @@ window.WISH_CFG = {
   // Christmas music: an MP3 in assets/music/ (royalty-free, or one TP may play in its offices).
   // Leave src empty for no music. The tree and wish pages get a music button (off until someone taps it);
   // the TVs play it in a loop after one tap on the screen. Add ?music=off to a TV link to keep that TV quiet.
-  MUSIC: { src: '' },
+  // christmas.mp3: our own instrumental of two public-domain carols, made by assets/music/make_music.py
+  MUSIC: { src: 'assets/music/christmas.mp3' },
 
   MAX_LENGTH: 150,          // employee wish length (keep in step with schema.sql)
   LEADER_MAX_LENGTH: 250,   // leader message length (keep in step with schema.sql)
