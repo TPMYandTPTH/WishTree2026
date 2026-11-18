@@ -382,10 +382,10 @@ alter table public.leader_messages add constraint leader_messages_display_name_c
 alter table public.leader_messages drop constraint if exists leader_messages_title_check;
 alter table public.leader_messages add constraint leader_messages_title_check
   check (title is null or char_length(title) <= 80);
--- Message length: 250 characters (keep LEADER_MAX_LENGTH in config.js the same)
+-- Message length: 300 characters (keep LEADER_MAX_LENGTH in config.js the same)
 alter table public.leader_messages drop constraint if exists leader_messages_message_check;
 alter table public.leader_messages add constraint leader_messages_message_check
-  check (char_length(btrim(message)) between 1 and 250) not valid;
+  check (char_length(btrim(message)) between 1 and 300) not valid;
 alter table public.leader_messages drop constraint if exists leader_messages_lang_check;
 alter table public.leader_messages add constraint leader_messages_lang_check check (lang ~ '^[a-z]{2,3}$');
 alter table public.leader_messages drop constraint if exists leader_messages_status_check;
@@ -682,7 +682,7 @@ begin
   end if;
   if char_length(v_name) not between 1 and 60 or v_name ~ '[<>]' then raise exception 'name_required'; end if;
   if v_title is not null and (char_length(v_title) > 80 or v_title ~ '[<>]') then raise exception 'bad_title'; end if;
-  if char_length(v_msg) not between 1 and 250 then raise exception 'bad_message'; end if;
+  if char_length(v_msg) not between 1 and 300 then raise exception 'bad_message'; end if;
   -- Leaders' messages are in English only: no Thai, Chinese, Japanese, Korean, Tamil, Arabic and other non-Latin scripts
   if (v_msg || ' ' || coalesce(v_title, '') || ' ' || v_name)
      ~ '[\u0590-\u08FF\u0900-\u0DFF\u0E00-\u0EFF\u1000-\u109F\u1100-\u11FF\u3040-\u30FF\u3100-\u31FF\u3400-\u4DBF\u4E00-\u9FFF\uAC00-\uD7AF\uF900-\uFAFF]' then
@@ -827,7 +827,7 @@ begin
            approved_at = case when w.status = 'approved' then w.approved_at else now() end
      where w.id = p_id;
   elsif p_kind = 'leader' then
-    if char_length(v_msg) not between 1 and 250 then raise exception 'bad_message'; end if;
+    if char_length(v_msg) not between 1 and 300 then raise exception 'bad_message'; end if;
     update public.leader_messages m set message = v_msg, status = 'approved', reviewed_at = now(),
            reviewer = public.session_who(p_token) where m.id = p_id;
   else
@@ -884,7 +884,7 @@ begin
   if public.session_role(p_token) is distinct from 'admin' then raise exception 'not_allowed'; end if;
   if char_length(v_name) not between 1 and 60 or v_name ~ '[<>]' then raise exception 'name_required'; end if;
   if v_title is not null and (char_length(v_title) > 80 or v_title ~ '[<>]') then raise exception 'bad_title'; end if;
-  if char_length(v_msg) not between 1 and 250 then raise exception 'bad_message'; end if;
+  if char_length(v_msg) not between 1 and 300 then raise exception 'bad_message'; end if;
   if (v_msg || ' ' || coalesce(v_title, '') || ' ' || v_name)
      ~ '[\u0590-\u08FF\u0900-\u0DFF\u0E00-\u0EFF\u1000-\u109F\u1100-\u11FF\u3040-\u30FF\u3100-\u31FF\u3400-\u4DBF\u4E00-\u9FFF\uAC00-\uD7AF\uF900-\uFAFF]' then
     raise exception 'english_only';

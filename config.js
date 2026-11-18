@@ -67,7 +67,7 @@ window.WISH_CFG = {
   LEADERS: [
     // C-level and VP
     { name: 'Andy',                     title: 'Chief Executive Officer',      spot: 'ceo',   level: 'exec',
-      draft: 'To every one of you across Malaysia and Thailand: thank you. Every call, chat and customer you helped this year made a difference. Enjoy the holidays with the people you love, and let\'s make 2027 our best year yet. Merry Christmas!' },
+      draft: 'To every one of you across Malaysia, Thailand, Vietnam and beyond: THANK YOU. Every customer, client, or colleague you helped made a difference and each of those are appreciated. Enjoy the holidays with the people you love and let\'s make 2027 our best year yet. Merry Christmas & Happy New Year!' },
     { name: 'Divya Dutta',              title: 'Chief Operating Officer',      spot: 'crown', level: 'exec',
       draft: 'Thank you for the care and energy you bring to our customers and to each other every day. I\'m proud of what we achieved together this year. Wishing you and your families a joyful Christmas and a bright New Year!' },
     { name: 'Himanshu',                 title: 'Chief Operating Officer',      spot: 'crown', level: 'exec',
@@ -157,7 +157,7 @@ window.WISH_CFG = {
   MUSIC: { src: 'assets/music/christmas.mp3' },
 
   MAX_LENGTH: 150,          // employee wish length (keep in step with schema.sql)
-  LEADER_MAX_LENGTH: 250,   // leader message length (keep in step with schema.sql)
+  LEADER_MAX_LENGTH: 300,   // leader message length (keep in step with schema.sql)
   TREE_REFRESH_SECONDS: 60,
   MAX_TAGS_ON_TREE: 40,     // flat tree (fallback and leaders' preview)
   MAX_TAGS_3D: 60,          // 3D tree: the most it holds without tags overlapping. With more wishes, the most-liked go on the tree and every wish stays in the list below it
