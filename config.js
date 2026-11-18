@@ -110,7 +110,6 @@ window.WISH_CFG = {
     { name: 'Chris Tsu',                title: 'Sr. Manager of Operations',    spot: 'list',  level: 'manager' },
     { name: 'Aquil Sugui',              title: 'Sr. Manager of L&D',           spot: 'list',  level: 'manager' },
     { name: 'Liew Kin Wai',             title: 'Compliance Manager',           spot: 'list',  level: 'manager' },
-    { name: 'Zhiyuan Kerk',             title: 'L&D Officer',                  spot: 'list',  level: 'manager' }
   ],
 
   // Hidden wishes inside two small gifts on the left under the tree. A gift opens when the mouse rests on it

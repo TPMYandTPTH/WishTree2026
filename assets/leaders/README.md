@@ -39,4 +39,3 @@ Upload any photo with any name and ask for it to be cropped and renamed if that'
 | Chris Tsu | `chris-tsu.jpg` |
 | Aquil Sugui | `aquil-sugui.jpg` |
 | Liew Kin Wai | `liew-kin-wai.jpg` |
-| Zhiyuan Kerk | `zhiyuan-kerk.jpg` |
