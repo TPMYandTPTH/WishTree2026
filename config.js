@@ -145,7 +145,7 @@ window.WISH_CFG = {
     title: '5 x RM 100 Grab vouchers',
     text: 'The 5 most-liked wishes each win a RM 100 Grab voucher. Each person can like a wish once.',
     deadline: 'Likes count until 11:59 pm on 18 December 2026 (Malaysia time). Winners are announced on 22 December.',
-    rules: 'Leaders, Amr and the Talent Engagement team can\'t win. The Wish Tree team checks every like before the winners are announced. If two wishes have the same likes, the one that got there first ranks higher.'
+    rules: 'Leaders and organizers can\'t win. The Wish Tree team checks every like before the winners are announced. If two wishes have the same likes, the one that got there first ranks higher.'
     // The database stops counting likes at app_settings.likes_close_at (18 Dec 2026, 23:59 Malaysia time).
     // Wishes can still be hung until CLOSE_DATE (31 Dec); they just can't collect likes for the prize after the 18th.
   },
