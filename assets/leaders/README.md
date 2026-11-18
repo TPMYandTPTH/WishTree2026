@@ -18,24 +18,24 @@ Upload any photo with any name and ask for it to be cropped and renamed if that'
 | Chavis | `chavis.jpg` (in) |
 | Sudhar | `sudhar.jpg` (in) |
 | Rachel | `rachel.jpg` (in) |
-| Alen Celebic | `alen-celebic.jpg` |
-| Noppawan Krynetr | `noppawan-krynetr.jpg` |
-| Pranav Pillai | `pranav-pillai.jpg` |
-| Jamunah Maniram | `jamunah-maniram.jpg` |
-| Ken Yong | `ken-yong.jpg` |
-| Irshad Gori | `irshad-gori.jpg` |
+| Alen Celebic | `alen-celebic.jpg` (in) |
+| Noppawan Krynetr | `noppawan-krynetr.jpg` (in) |
+| Pranav Pillai | `pranav-pillai.jpg` (in) |
+| Jamunah Maniram | `jamunah-maniram.jpg` (in) |
+| Ken Yong | `ken-yong.jpg` (in) |
+| Irshad Gori | `irshad-gori.jpg` (in) |
 | Syed Suleiman | `syed-suleiman.jpg` |
 | Aloke Dutta | `aloke-dutta.jpg` |
-| Eric Ooi | `eric-ooi.jpg` |
-| Prabitha Preymachandran | `prabitha-preymachandran.jpg` |
+| Eric Ooi | `eric-ooi.jpg` (in) |
+| Prabitha Preymachandran | `prabitha-preymachandran.jpg` (in) |
 | Chun Wei Chin | `chun-wei-chin.jpg` |
 | Michael Sanchez | `michael-sanchez.jpg` |
 | Hanisha Reza | `hanisha-reza.jpg` |
 | Amit Mittal | `amit-mittal.jpg` |
 | Sol Catherine Marticio | `sol-catherine-marticio.jpg` |
-| Partiban Periannan | `partiban-periannan.jpg` |
-| Parvathy Ramar | `parvathy-ramar.jpg` |
+| Partiban Periannan | `partiban-periannan.jpg` (in) |
+| Parvathy Ramar | `parvathy-ramar.jpg` (in) |
 | Choon Haw | `choon-haw.jpg` |
-| Chris Tsu | `chris-tsu.jpg` |
+| Chris Tsu | `chris-tsu.jpg` (in) |
 | Aquil Sugui | `aquil-sugui.jpg` |
-| Liew Kin Wai | `liew-kin-wai.jpg` |
+| Liew Kin Wai | `liew-kin-wai.jpg` (in) |
