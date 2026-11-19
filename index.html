@@ -164,6 +164,7 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
 .gift-badge{display:none;position:absolute;top:-16px;left:22px;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;background:#6C151E;color:#F4EEE3;font-size:11px;font-weight:700;letter-spacing:.1em;box-shadow:0 0 0 2px #B18854}
 .wish-card[data-kind="secret"]{--card-bg:#6C151E;--card-ink:#F4EEE3;--card-kicker:#E2BF85;--card-sub:#E9DCCB;--card-pill:rgba(244,238,227,.14);--card-line:rgba(226,191,133,.4);--card-avatar-bg:#B18854;--card-avatar-fg:#6C151E;border-color:#B18854;border-radius:14px;background-image:linear-gradient(90deg,transparent calc(50% - 7px),rgba(177,136,84,.28) calc(50% - 7px),rgba(177,136,84,.28) calc(50% + 7px),transparent calc(50% + 7px));box-shadow:0 0 0 6px rgba(108,21,30,.14),0 18px 40px rgba(59,47,34,.3);animation:giftIn .6s cubic-bezier(.2,.8,.3,1.2)}
 .wish-card[data-kind="secret"] .gift-badge{display:inline-flex}
+.wish-card[data-kind="secret"] .avatar.has-photo{box-shadow:0 0 0 2px #F4EEE3}
 .wish-card[data-kind="secret"] .hole{background:var(--brass);opacity:.9}
 .wish-card[data-kind="secret"] .card-text{font-size:19px;font-weight:300}
 .wish-card[data-gift="gold"] .like.thank{color:#241C14;border-color:rgba(36,28,20,.55);background:rgba(36,28,20,.08)}
@@ -667,6 +668,7 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
         message: String(h.message).trim().slice(0, 400),
         display_name: String(h.name || '').trim(),
         title: String(h.title || '').trim(),
+        photo: C.safePhoto(String(h.photo || '').trim()),
         lang: C.LANG_LABEL[h.lang] ? h.lang : 'en'
       };
     });
@@ -959,7 +961,7 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
       return '<article class="li team team-' + C.esc(id) + '" lang="' + C.esc(h.lang) + '">' +
         '<div class="li-top"><span class="li-kicker">' + C.iconSvg('gift', 14) + ' THE WISH TREE TEAM</span></div>' +
         '<p class="li-text">' + C.esc(h.message) + '</p>' +
-        '<div class="li-foot"><span class="li-init" aria-hidden="true">' + C.esc(C.initials(h.display_name)) + '</span>' +
+        '<div class="li-foot">' + (h.photo ? C.photoHtml(h.photo, C.initials(h.display_name), 'li-init', 'li-photo') : '<span class="li-init" aria-hidden="true">' + C.esc(C.initials(h.display_name)) + '</span>') +
         '<div class="li-who"><b>' + C.esc(h.display_name) + '</b><span>' + C.esc(h.title) + '</span></div>' +
         '<button type="button" class="like thank" data-team-thank="' + C.esc(id) + '" aria-pressed="' + (teamThanked(id) ? 'true' : 'false') + '"' +
         ' aria-label="' + (teamThanked(id) ? 'Thanked ' : 'Say thank you to ') + C.esc(h.display_name) + '">' + HEART +
@@ -1084,8 +1086,8 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
       el('cardFoot').hidden = false;
       el('cardName').textContent = item.display_name || 'A TP colleague';
       el('cardWhere').textContent = item.title;
-      el('cardInitial').classList.remove('has-photo');
-      el('cardInitial').innerHTML = C.iconSvg('gift', 20);
+      el('cardInitial').classList.toggle('has-photo', !!item.photo);
+      el('cardInitial').innerHTML = item.photo ? C.photoHtml(item.photo, C.initials(item.display_name)) : C.iconSvg('gift', 20);
       // Amr's and Maszy's wishes can be thanked too (remembered on this device, no count)
       var thanked = teamThanked(item.id);
       el('likeBtn').classList.add('thank');

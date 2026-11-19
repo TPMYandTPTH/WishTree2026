@@ -185,7 +185,12 @@ button,input,select,textarea{font-family:inherit}
 .done-copy .script{font-family:var(--script);font-size:42px;line-height:1;color:var(--gold)}
 .done-copy h1{font-size:28px}
 .done-copy p{margin:0;font-size:15px;line-height:1.55;font-weight:400;color:var(--cream-2)}
-.invite{display:flex;align-items:center;gap:14px;margin:26px 20px 0;padding:16px;border-radius:14px;border:1px solid rgba(108,21,30,.2);background:rgba(255,255,255,.3)}
+.see-tree{display:flex;flex-direction:column;gap:12px;margin:24px 20px 0}
+.btn-big{min-height:68px;font-size:20px;gap:12px;box-shadow:0 12px 26px rgba(108,21,30,.28)}
+.btn-big .ic-tree{flex:none}
+.review-note{display:flex;align-items:flex-start;gap:10px;margin:0;padding:12px 14px;border-radius:12px;background:rgba(177,136,84,.18);font-size:14px;line-height:1.45;color:var(--cream-2)}
+.review-note svg{flex:none;margin-top:1px;color:var(--gold)}
+.invite{display:flex;align-items:center;gap:14px;margin:22px 20px 0;padding:16px;border-radius:14px;border:1px solid rgba(108,21,30,.2);background:rgba(255,255,255,.3)}
 .invite-icon{flex:none;display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:50%;background:rgba(177,136,84,.25);color:var(--gold)}
 .invite-main{flex:1;min-width:0}
 .invite-title{font-size:15px;font-weight:700}
@@ -461,6 +466,17 @@ button,input,select,textarea{font-family:inherit}
       <p id="doneText"></p>
       <p id="donePrize" hidden></p>
     </div>
+    <div class="see-tree">
+      <a class="btn btn-gold btn-big" href="index.html" id="seeTreeBtn">
+        <svg class="ic-tree" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 6.5 10h3L5 16h14l-4.5-6h3zM12 16v4.5"/></svg>
+        <span data-i18n="seeTree"></span>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>
+      <p class="review-note" id="reviewNote">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+        <span data-i18n="reviewNote"></span>
+      </p>
+    </div>
     <div class="invite">
       <div class="invite-icon" aria-hidden="true">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5M16 4.8a3.5 3.5 0 0 1 0 6.4M18.5 14.8c1.6.8 2.7 2.6 3 5.2"/></svg>
@@ -472,10 +488,6 @@ button,input,select,textarea{font-family:inherit}
       <button type="button" id="shareBtn" data-i18n="copyLink"></button>
     </div>
     <div class="actions">
-      <a class="btn btn-gold" href="index.html" id="seeTreeBtn">
-        <span data-i18n="seeTree"></span>
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-      </a>
       <button type="button" id="anotherBtn" class="link" style="align-self:center" data-i18n="changeMine"></button>
       <button type="button" id="forgetDoneBtn" class="link" style="align-self:center;min-height:36px;font-size:13px" data-i18n="forgetShared"></button>
     </div>
@@ -559,7 +571,8 @@ button,input,select,textarea{font-family:inherit}
       editBtn: 'Edit my wish',
       doneTitle: 'Your wish is on its way to the tree',
       doneEditTitle: 'Your changes are on their way',
-      doneText: 'Once it is approved it will appear on the tree. The tree lights up for everyone on {reveal}.',
+      doneText: 'The tree lights up for everyone on {reveal}.',
+      reviewNote: 'Quick reminder: every wish is reviewed first, so yours may take a little while to show up on the tree.',
       donePrize: 'The {n} most-liked wishes each win a {amount} Grab voucher. Share the tree so colleagues can like yours.',
       inviteTitle: 'Invite your team',
       inviteSub: 'The more wishes, the fuller the tree.',
@@ -635,7 +648,8 @@ button,input,select,textarea{font-family:inherit}
       editBtn: 'Ubah hajat saya',
       doneTitle: 'Hajat anda dalam perjalanan ke pokok',
       doneEditTitle: 'Perubahan anda sedang dihantar',
-      doneText: 'Selepas diluluskan, hajat anda akan muncul di pokok. Pokok akan menyala untuk semua pada {reveal}.',
+      doneText: 'Pokok akan menyala untuk semua pada {reveal}.',
+      reviewNote: 'Peringatan: setiap hajat disemak dahulu, jadi hajat anda mungkin mengambil sedikit masa untuk muncul di pokok.',
       donePrize: '{n} hajat yang paling banyak disukai masing-masing memenangi baucar Grab {amount}. Kongsi pokok supaya rakan sekerja boleh menyukai hajat anda.',
       inviteTitle: 'Ajak pasukan anda',
       inviteSub: 'Lebih banyak hajat, lebih meriah pokoknya.',
@@ -711,7 +725,8 @@ button,input,select,textarea{font-family:inherit}
       editBtn: 'แก้ไขคำอวยพร',
       doneTitle: 'คำอวยพรของคุณกำลังเดินทางไปที่ต้นไม้',
       doneEditTitle: 'การแก้ไขของคุณกำลังถูกส่ง',
-      doneText: 'เมื่อได้รับการอนุมัติ คำอวยพรจะปรากฏบนต้นไม้ ต้นไม้จะเปิดไฟให้ทุกคนชมในวันที่ {reveal}',
+      doneText: 'ต้นไม้จะเปิดไฟให้ทุกคนชมในวันที่ {reveal}',
+      reviewNote: 'ขอเตือน: ทุกคำอวยพรต้องผ่านการตรวจสอบก่อน คำอวยพรของคุณจึงอาจใช้เวลาสักครู่กว่าจะขึ้นบนต้นไม้',
       donePrize: 'คำอวยพร {n} อันดับที่ได้รับถูกใจมากที่สุดจะได้รับบัตรกำนัล Grab มูลค่า {amount} แชร์ต้นไม้เพื่อให้เพื่อนร่วมงานกดถูกใจคำอวยพรของคุณ',
       inviteTitle: 'ชวนทีมของคุณ',
       inviteSub: 'ยิ่งมีคำอวยพรมาก ต้นไม้ก็ยิ่งสวย',

@@ -25,17 +25,23 @@ Upload any photo with any name and ask for it to be cropped and renamed if that'
 | Ken Yong | `ken-yong.jpg` (in) |
 | Irshad Gori | `irshad-gori.jpg` (in) |
 | Syed Suleiman | `syed-suleiman.jpg` |
-| Aloke Dutta | `aloke-dutta.jpg` |
+| Aloke Dutta | `aloke-dutta.jpg` (in) |
 | Eric Ooi | `eric-ooi.jpg` (in) |
 | Prabitha Preymachandran | `prabitha-preymachandran.jpg` (in) |
 | Chun Wei Chin | `chun-wei-chin.jpg` |
-| Michael Sanchez | `michael-sanchez.jpg` |
+| Michael Sanchez | `michael-sanchez.jpg` (in) |
 | Hanisha Reza | `hanisha-reza.jpg` |
 | Amit Mittal | `amit-mittal.jpg` (in) |
-| Sol Catherine Marticio | `sol-catherine-marticio.jpg` |
+| Sol Catherine Marticio | `sol-catherine-marticio.jpg` (in) |
 | Partiban Periannan | `partiban-periannan.jpg` (in) |
 | Parvathy Ramar | `parvathy-ramar.jpg` (in) |
-| Choon Haw | `choon-haw.jpg` |
+| Choon Haw | `choon-haw.jpg` (in) |
 | Chris Tsu | `chris-tsu.jpg` (in) |
-| Aquil Sugui | `aquil-sugui.jpg` |
+| Aquil Sugui | `aquil-sugui.jpg` (in) |
 | Liew Kin Wai | `liew-kin-wai.jpg` (in) |
+
+## Wish Tree team cards
+
+| Card | File |
+|---|---|
+| Maszy Ulip (gold gift) | `maszy-ulip.jpg` (in), set as `photo` in HIDDEN_WISHES in config.js |

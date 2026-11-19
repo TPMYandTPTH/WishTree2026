@@ -115,6 +115,7 @@ window.WISH_CFG = {
   // Hidden wishes inside two small gifts on the left under the tree. A gift opens when the mouse rests on it
   // (or a tap on phones). gift: 'red' (Cranberry gift, front left) or 'gold' (Brass gift, behind it).
   // Change the words freely (up to about 250 characters). Delete an entry to make that gift a normal one again.
+  // photo (optional): a file in assets/leaders/, shown on the card instead of the gift icon.
   HIDDEN_WISHES: [
     {
       gift: 'red',
@@ -130,6 +131,7 @@ window.WISH_CFG = {
       message: 'The Wish Tree started with Maszy\'s idea and the email he sent to get it going. Thank you, Maszy, for giving all of us one place to share our Christmas wishes.',
       name: 'Maszy Ulip',
       title: 'The idea behind the Wish Tree',
+      photo: 'assets/leaders/maszy-ulip.jpg',
       lang: 'en'
     }
   ],
