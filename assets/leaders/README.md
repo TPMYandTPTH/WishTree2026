@@ -36,7 +36,7 @@ Upload any photo with any name and ask for it to be cropped and renamed if that'
 | Partiban Periannan | `partiban-periannan.jpg` (in) |
 | Parvathy Ramar | `parvathy-ramar.jpg` (in) |
 | Choon Haw | `choon-haw.jpg` (in) |
-| Chris Tsu | `chris-tsu.jpg` (in) |
+| Chris Hsu | `chris-hsu.jpg` (in) |
 | Aquil Sugui | `aquil-sugui.jpg` (in) |
 | Liew Kin Wai | `liew-kin-wai.jpg` (in) |
 
