@@ -31,7 +31,7 @@ Upload any photo with any name and ask for it to be cropped and renamed if that'
 | Chun Wei Chin | `chun-wei-chin.jpg` |
 | Michael Sanchez | `michael-sanchez.jpg` |
 | Hanisha Reza | `hanisha-reza.jpg` |
-| Amit Mittal | `amit-mittal.jpg` |
+| Amit Mittal | `amit-mittal.jpg` (in) |
 | Sol Catherine Marticio | `sol-catherine-marticio.jpg` |
 | Partiban Periannan | `partiban-periannan.jpg` (in) |
 | Parvathy Ramar | `parvathy-ramar.jpg` (in) |
