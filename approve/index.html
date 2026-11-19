@@ -52,6 +52,14 @@ a{color:var(--slate)}
 .me{display:flex;align-items:center;gap:12px;font-size:14px}
 .me button{min-height:36px;padding:0 14px;border:1px solid rgba(255,255,255,.5);border-radius:999px;background:transparent;color:#fff;font-size:14px;cursor:pointer}
 .me button:hover{background:rgba(255,255,255,.12)}
+.kpi-kinds{display:flex;gap:6px;margin:4px 0 10px}
+.kpi-kind{flex:1;min-height:34px;border:1.5px solid var(--line-2);border-radius:999px;background:#fff;font:inherit;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer}
+.kpi-kind[aria-pressed="true"]{background:var(--slate);border-color:var(--slate);color:#fff}
+.kpi-rows{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
+.kpi-row{border:1px solid var(--line-2);border-radius:10px;padding:10px 12px;background:#fff}
+.kpi-row b{display:flex;justify-content:space-between;gap:8px;font-size:15px}
+.kpi-row b span{font-weight:600;color:var(--slate);white-space:nowrap}
+.kpi-row .kpi-sub{font-size:13px;color:var(--muted);margin-top:3px;line-height:1.45}
 .who-bar{margin:0 0 18px;padding:16px 18px;border:1.5px solid var(--slate);border-radius:12px;background:#fff}
 .who-bar label{display:block;font-weight:700;margin-bottom:8px}
 .who-row{display:flex;gap:10px;flex-wrap:wrap}
@@ -332,6 +340,21 @@ a{color:var(--slate)}
           <p id="prizeMsg" class="small" role="status"></p>
         </div>
 
+        <div class="box" id="kpiBox">
+          <h2>Team numbers</h2>
+          <p class="small">What each admin decided, by the name they typed when they signed in. <b>Reviewed</b> counts every wish or message they approved, set aside or deleted; <b>accepted</b> the ones they approved (an edit also approves). <b>Wait</b> is how long things waited, on average, before they decided.</p>
+          <div class="kpi-kinds" role="group" aria-label="Show numbers for">
+            <button type="button" class="kpi-kind" data-kpi-kind="wish" aria-pressed="true">Wishes</button>
+            <button type="button" class="kpi-kind" data-kpi-kind="leader" aria-pressed="false">Leader messages</button>
+          </div>
+          <div id="kpiRows" class="kpi-rows"></div>
+          <div class="pz-tools">
+            <button type="button" id="kpiRefresh" class="btn btn-ghost">Refresh</button>
+            <button type="button" id="kpiCsv" class="btn btn-ghost">Download team numbers</button>
+          </div>
+          <p id="kpiMsg" class="small" role="status"></p>
+        </div>
+
         <div class="box">
           <h2>Campaign switch</h2>
           <label class="switch"><span>Accept new wishes</span><input type="checkbox" id="swOpen"></label>
@@ -406,6 +429,7 @@ a{color:var(--slate)}
         r[0].forEach(function (w) { S.likes['wish:' + w.id] = w.like_count || 0; });
         r[1].forEach(function (l) { S.likes['leader:' + l.id] = l.like_count || 0; });
         render();
+        loadKpi();
       });
     }
     return adminRpc('admin_queue', {}).then(function (q) {
@@ -422,6 +446,7 @@ a{color:var(--slate)}
         S.leaders = leaders;
         S.leaders.forEach(function (l) { S.likes['leader:' + l.id] = l.like_count || 0; });
         render();
+        loadKpi();
       });
     }).catch(function (err) {
       if (signedOut(err)) return;
@@ -688,6 +713,76 @@ a{color:var(--slate)}
     $('siteFilter').innerHTML = html;
     $('siteFilter').value = S.site;
   }
+
+  /* ---------- Team numbers (what each admin decided) ---------- */
+  var kpi = { rows: [], kind: 'wish' };
+  function kpiFromQueue() {
+    // preview: worked out from the sample cards (the live page reads the database log)
+    var by = {};
+    [['wish', S.wishes], ['leader', S.leaders]].forEach(function (pair) {
+      (pair[1] || []).forEach(function (x) {
+        if (!x.status || x.status === 'pending') return;
+        var who = x.reviewer || 'Name not given';
+        var k = who + '|' + pair[0];
+        var r = by[k] || (by[k] = { who: who, kind: pair[0], reviewed: 0, accepted: 0, set_aside: 0, edited: 0, deleted: 0, avg_wait_mins: null, last_at: null });
+        r.reviewed++;
+        if (x.status === 'approved') r.accepted++; else r.set_aside++;
+        if (x.reviewed_at && (!r.last_at || x.reviewed_at > r.last_at)) r.last_at = x.reviewed_at;
+      });
+    });
+    return Object.keys(by).map(function (k) { return by[k]; }).sort(function (a, b) { return b.reviewed - a.reviewed; });
+  }
+  function loadKpi() {
+    if (C.demo) { kpi.rows = kpiFromQueue(); renderKpi(); return Promise.resolve(); }
+    return adminRpc('admin_kpi', {}).then(function (rows) {
+      kpi.rows = rows || [];
+      $('kpiMsg').textContent = '';
+      renderKpi();
+    }).catch(function (err) {
+      if (signedOut(err)) return;
+      console.error(err);
+      $('kpiMsg').textContent = 'Could not load the team numbers.';
+    });
+  }
+  function waitText(m) {
+    if (m == null) return '';
+    if (m < 1) return 'under a minute';
+    if (m < 60) return m + ' min';
+    if (m < 60 * 48) return Math.round(m / 6) / 10 + ' h';
+    return Math.round(m / 144) / 10 + ' days';
+  }
+  function renderKpi() {
+    var rows = kpi.rows.filter(function (r) { return r.kind === kpi.kind; });
+    var noun = kpi.kind === 'wish' ? ['wish', 'wishes'] : ['message', 'messages'];
+    $('kpiRows').innerHTML = rows.length ? rows.map(function (r) {
+      var bits = [fmt(r.accepted) + ' accepted', fmt(r.set_aside) + ' set aside'];
+      if (r.edited) bits.push(fmt(r.edited) + ' edited');
+      if (r.deleted) bits.push(fmt(r.deleted) + ' deleted');
+      if (r.avg_wait_mins != null) bits.push('wait ' + waitText(r.avg_wait_mins));
+      if (r.last_at) bits.push('last ' + ago(r.last_at));
+      return '<div class="kpi-row"><b>' + esc(r.who) + '<span>' + fmt(r.reviewed) + ' reviewed</span></b>' +
+        '<div class="kpi-sub">' + esc(bits.join(' · ')) + '</div></div>';
+    }).join('') : '<p class="small">No ' + noun[1] + ' decided yet.</p>';
+    var total = rows.reduce(function (n, r) { return n + (r.reviewed || 0); }, 0);
+    if (rows.length > 1) $('kpiRows').insertAdjacentHTML('beforeend', '<p class="small" style="margin:2px 0 0">Team total: ' + fmt(total) + ' ' + (total === 1 ? noun[0] : noun[1]) + ' reviewed.</p>');
+  }
+  function downloadKpi() {
+    var lines = [['Admin', 'Type', 'Reviewed', 'Accepted', 'Set aside', 'Edited', 'Deleted', 'Average wait (minutes)', 'Last decision'].map(csvCell).join(',')];
+    kpi.rows.forEach(function (r) {
+      lines.push([r.who, r.kind === 'wish' ? 'Wishes' : 'Leader messages', r.reviewed, r.accepted, r.set_aside, r.edited, r.deleted,
+        r.avg_wait_mins == null ? '' : r.avg_wait_mins, r.last_at ? new Date(r.last_at).toLocaleString('en-GB') : ''].map(csvCell).join(','));
+    });
+    saveCsv(lines, 'wish-tree-team-numbers.csv');
+  }
+  document.querySelectorAll('[data-kpi-kind]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      kpi.kind = b.getAttribute('data-kpi-kind');
+      document.querySelectorAll('[data-kpi-kind]').forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+      renderKpi();
+    });
+  });
+  $('kpiRefresh').addEventListener('click', function () { loadKpi(); });
+  $('kpiCsv').addEventListener('click', downloadKpi);
 
   /* ---------- Prize standings ---------- */
   var PRIZE = C.PRIZE || {};

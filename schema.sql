@@ -422,6 +422,29 @@ create index if not exists likes_bms_idx on public.likes (bms);
 create index if not exists likes_device_idx on public.likes (device_id, kind, target_id);
 
 
+-- 7b. What each admin did on the Approvals page (for the team's numbers) --
+-- One row per decision: approved, set aside (rejected), back to waiting (pending) or deleted, by the name typed
+-- on the Approvals page. wait_secs: how long the wish or message had been waiting when it was decided.
+create table if not exists public.admin_log (
+  id bigint generated always as identity primary key,
+  at timestamptz not null default now(),
+  who text,
+  action text not null check (action in ('approved', 'rejected', 'pending', 'deleted')),
+  kind text not null check (kind in ('wish', 'leader')),
+  target_id uuid not null,
+  edited boolean not null default false,
+  wait_secs int
+);
+create index if not exists admin_log_who_idx on public.admin_log (who, kind);
+-- The first time: what was already decided before this log existed
+insert into public.admin_log (at, who, action, kind, target_id)
+select coalesce(w.reviewed_at, now()), w.reviewer, w.status, 'wish', w.id
+from public.wishes w where w.status <> 'pending' and not exists (select 1 from public.admin_log)
+union all
+select coalesce(m.reviewed_at, now()), m.reviewer, m.status, 'leader', m.id
+from public.leader_messages m where m.status <> 'pending' and not exists (select 1 from public.admin_log);
+
+
 -- 8. Locked down: the website never reads or writes a table directly ----
 -- Earlier versions: email lists, sign-in rules and photo uploads are removed
 do $$
@@ -453,9 +476,11 @@ alter table public.access_sessions enable row level security;
 alter table public.wishes enable row level security;
 alter table public.leader_messages enable row level security;
 alter table public.likes enable row level security;
+alter table public.admin_log enable row level security;
 -- No policies on purpose: the pages only reach the data through the functions below.
 revoke all on public.app_settings, public.private_salt, public.rate_events, public.prize_excluded,
-              public.access_passwords, public.access_sessions, public.wishes, public.leader_messages, public.likes
+              public.access_passwords, public.access_sessions, public.wishes, public.leader_messages, public.likes,
+              public.admin_log
   from anon, authenticated;
 
 
@@ -780,29 +805,40 @@ begin
 end
 $$;
 
--- Approve, set aside or move back to waiting (one or many)
+-- Approve, set aside or move back to waiting (one or many). Each change is logged for the team's numbers.
 drop function if exists public.admin_set_status(text, text, uuid[], text);
 create function public.admin_set_status(p_token text, p_kind text, p_ids uuid[], p_status text) returns int
 language plpgsql security definer set search_path = '' as $$
 declare
   n int;
+  v_who text := public.session_who(p_token);
 begin
   if public.session_role(p_token) is distinct from 'admin' then raise exception 'not_allowed'; end if;
   if p_status not in ('pending', 'approved', 'rejected') then raise exception 'bad_status'; end if;
   if p_kind = 'wish' then
-    update public.wishes w
-       set status = p_status,
-           reviewed_at = case when p_status = 'pending' then null else now() end,
-           reviewer = case when p_status = 'pending' then null else public.session_who(p_token) end,
-           approved_at = case when p_status <> 'approved' then null
-                              when w.status = 'approved' then w.approved_at else now() end
-     where w.id = any (coalesce(p_ids, '{}'::uuid[]));
+    with u as (
+      update public.wishes w
+         set status = p_status,
+             reviewed_at = case when p_status = 'pending' then null else now() end,
+             reviewer = case when p_status = 'pending' then null else v_who end,
+             approved_at = case when p_status <> 'approved' then null
+                                when w.status = 'approved' then w.approved_at else now() end
+       where w.id = any (coalesce(p_ids, '{}'::uuid[]))
+      returning w.id, coalesce(w.updated_at, w.created_at) as since
+    )
+    insert into public.admin_log (who, action, kind, target_id, wait_secs)
+    select v_who, p_status, 'wish', u.id, greatest(0, extract(epoch from now() - u.since))::int from u;
   elsif p_kind = 'leader' then
-    update public.leader_messages m
-       set status = p_status,
-           reviewed_at = case when p_status = 'pending' then null else now() end,
-           reviewer = case when p_status = 'pending' then null else public.session_who(p_token) end
-     where m.id = any (coalesce(p_ids, '{}'::uuid[]));
+    with u as (
+      update public.leader_messages m
+         set status = p_status,
+             reviewed_at = case when p_status = 'pending' then null else now() end,
+             reviewer = case when p_status = 'pending' then null else v_who end
+       where m.id = any (coalesce(p_ids, '{}'::uuid[]))
+      returning m.id, m.updated_at as since
+    )
+    insert into public.admin_log (who, action, kind, target_id, wait_secs)
+    select v_who, p_status, 'leader', u.id, greatest(0, extract(epoch from now() - u.since))::int from u;
   else
     raise exception 'bad_kind';
   end if;
@@ -833,7 +869,10 @@ begin
   else
     raise exception 'bad_kind';
   end if;
-  return found;
+  if not found then return false; end if;
+  insert into public.admin_log (who, action, kind, target_id, edited)
+  values (public.session_who(p_token), 'approved', p_kind, p_id, true);
+  return true;
 end
 $$;
 
@@ -846,6 +885,7 @@ returns text language plpgsql security definer set search_path = '' as $$
 declare
   v_name text := btrim(regexp_replace(coalesce(p_name, ''), '[[:space:]]+', ' ', 'g'));
   v_msg text := btrim(coalesce(p_message, ''));
+  v_since timestamptz;
   n int;
 begin
   if public.session_role(p_token) is distinct from 'admin' then raise exception 'not_allowed'; end if;
@@ -857,12 +897,15 @@ begin
            tag_color = p_tag_color, charm = p_charm, flags = public.wish_flags(v_msg),
            status = 'approved', reviewed_at = now(), reviewer = public.session_who(p_token),
            approved_at = case when w.status = 'approved' then w.approved_at else now() end
-     where w.id = p_id;
+     where w.id = p_id
+    returning coalesce(w.updated_at, w.created_at) into v_since;
     get diagnostics n = row_count;
   exception when check_violation or not_null_violation then
     raise exception 'bad_input';
   end;
   if n = 0 then return 'not_found'; end if;
+  insert into public.admin_log (who, action, kind, target_id, edited, wait_secs)
+  values (public.session_who(p_token), 'approved', 'wish', p_id, true, greatest(0, extract(epoch from now() - v_since))::int);
   return 'ok';
 end
 $$;
@@ -879,6 +922,7 @@ declare
   v_title text := nullif(btrim(regexp_replace(coalesce(p_title, ''), '[[:space:]]+', ' ', 'g')), '');
   v_msg text := btrim(coalesce(p_message, ''));
   v_photo text := nullif(btrim(coalesce(p_photo, '')), '');
+  v_since timestamptz;
   n int;
 begin
   if public.session_role(p_token) is distinct from 'admin' then raise exception 'not_allowed'; end if;
@@ -901,7 +945,8 @@ begin
            photo_version = case when coalesce(p_photo_change, false) then m.photo_version + 1 else m.photo_version end,
            sort_order = coalesce(p_position, 100),
            status = 'approved', reviewed_at = now(), reviewer = public.session_who(p_token)
-     where m.id = p_id;
+     where m.id = p_id
+    returning m.updated_at into v_since;
     get diagnostics n = row_count;
   exception
     when unique_violation then
@@ -910,6 +955,8 @@ begin
       raise exception 'bad_input';
   end;
   if n = 0 then return 'not_found'; end if;
+  insert into public.admin_log (who, action, kind, target_id, edited, wait_secs)
+  values (public.session_who(p_token), 'approved', 'leader', p_id, true, greatest(0, extract(epoch from now() - v_since))::int);
   return 'ok';
 end
 $$;
@@ -919,19 +966,47 @@ drop function if exists public.admin_delete(text, text, uuid);
 create function public.admin_delete(p_token text, p_kind text, p_id uuid) returns boolean
 language plpgsql security definer set search_path = '' as $$
 declare
-  n int;
+  v_id uuid;
+  v_since timestamptz;
 begin
   if public.session_role(p_token) is distinct from 'admin' then raise exception 'not_allowed'; end if;
   if p_kind = 'wish' then
-    delete from public.wishes w where w.id = p_id;
+    delete from public.wishes w where w.id = p_id returning w.id, coalesce(w.updated_at, w.created_at) into v_id, v_since;
   elsif p_kind = 'leader' then
-    delete from public.leader_messages m where m.id = p_id;
+    delete from public.leader_messages m where m.id = p_id returning m.id, m.updated_at into v_id, v_since;
   else
     raise exception 'bad_kind';
   end if;
-  get diagnostics n = row_count;
   delete from public.likes l where l.kind = p_kind and l.target_id = p_id;
-  return n > 0;
+  if v_id is null then return false; end if;
+  insert into public.admin_log (who, action, kind, target_id, wait_secs)
+  values (public.session_who(p_token), 'deleted', p_kind, p_id, greatest(0, extract(epoch from now() - v_since))::int);
+  return true;
+end
+$$;
+
+-- The team's numbers: per admin name and per kind, how many wishes or messages they reviewed (approved, set aside
+-- or deleted), accepted, set aside, edited and deleted, how long things waited on average before they decided,
+-- and when they last did something
+drop function if exists public.admin_kpi(text);
+create function public.admin_kpi(p_token text)
+returns table (who text, kind text, reviewed int, accepted int, set_aside int, edited int, deleted int,
+               avg_wait_mins int, last_at timestamptz)
+language plpgsql stable security definer set search_path = '' as $$
+begin
+  if public.session_role(p_token) is distinct from 'admin' then raise exception 'not_allowed'; end if;
+  return query
+  select coalesce(nullif(btrim(l.who), ''), 'Name not given') as who, l.kind,
+         (count(distinct l.target_id) filter (where l.action in ('approved', 'rejected', 'deleted')))::int,
+         (count(distinct l.target_id) filter (where l.action = 'approved'))::int,
+         (count(distinct l.target_id) filter (where l.action = 'rejected'))::int,
+         (count(distinct l.target_id) filter (where l.edited))::int,
+         (count(distinct l.target_id) filter (where l.action = 'deleted'))::int,
+         round(avg(l.wait_secs) filter (where l.action in ('approved', 'rejected', 'deleted')) / 60.0)::int,
+         max(l.at)
+  from public.admin_log l
+  group by 1, 2
+  order by 3 desc, 1;
 end
 $$;
 
@@ -1031,6 +1106,7 @@ grant execute on function public.admin_edit_message(text, text, uuid, text) to a
 grant execute on function public.admin_edit_wish(text, uuid, text, text, text, text, text, text) to anon, authenticated;
 grant execute on function public.admin_edit_leader(text, uuid, text, text, text, text, boolean, int) to anon, authenticated;
 grant execute on function public.admin_delete(text, text, uuid) to anon, authenticated;
+grant execute on function public.admin_kpi(text) to anon, authenticated;
 grant execute on function public.get_prize_check(text, int) to anon, authenticated;
 grant execute on function public.get_wish_likes(text, uuid) to anon, authenticated;
 grant execute on function public.remove_likes_by_bms(text, text) to anon, authenticated;

@@ -32,6 +32,8 @@ Until the Supabase keys are in `config.js`, every page runs in demo mode with sa
 
 **Music:** put an MP3 in `assets/music/` and set `MUSIC.src` in `config.js` (empty = no music). Use a royalty-free track, or one TP may play in its offices. The tree and wish pages get a music button, off until someone taps it, remembered on that device. The TVs play it in a loop after one tap or key press on the screen (a small hint says so); add `?music=off` to a TV link to keep that screen quiet.
 
+**Team numbers:** the Approvals page has a **Team numbers** box: for each admin name, how many wishes (or leader messages) they reviewed, accepted, set aside, edited and deleted, how long things waited before they decided, and when they last did something. Every decision is logged in the database (`admin_log`, readable only through the Approvals password); **Download team numbers** saves it as a CSV.
+
 **Suggested messages:** a leader on `LEADERS` in `config.js` can have a `draft`. When they pick their name on the leaders' page, the message box fills with it, with a note saying they can change anything; nothing is sent until they press Send. Every C-level and VP leader has one, and so does Rachel.
 
 **Edit** on the Approvals page changes anything: for a wish the name, words, site, language, tag colour and charm; for a leader message the name, title, words, photo and place in the list (1-99, lower comes first; empty keeps the order of `LEADERS` in `config.js`). Saving also approves it. Renaming a leader to a name that isn't in `LEADERS` gives them the regular card in the list.
