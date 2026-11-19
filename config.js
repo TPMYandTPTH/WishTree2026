@@ -100,7 +100,7 @@ window.WISH_CFG = {
     { name: 'Prabitha Preymachandran',  title: 'Director of Operations',       spot: 'list',  level: 'director' },
     { name: 'Chun Wei Chin',            title: 'Director of Operations',       spot: 'list',  level: 'director' },
     { name: 'Michael Sanchez',          title: 'Director of Operations',       spot: 'list',  level: 'director' },
-    { name: 'Hanisha Reza',             title: 'Director of Operations',       spot: 'list',  level: 'director' },
+    { name: 'Noorhanisha Reza',         title: 'Director of Operations',       spot: 'list',  level: 'director' },
     { name: 'Amit Mittal',              title: 'Director of WFM',              spot: 'list',  level: 'director' },
     { name: 'Sol Catherine Marticio',   title: 'Executive Asst. to the CEO, MY & TH', spot: 'list', level: 'director' },
     // Managers and below
