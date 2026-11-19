@@ -24,7 +24,7 @@ Upload any photo with any name and ask for it to be cropped and renamed if that'
 | Jamunah Maniram | `jamunah-maniram.jpg` (in) |
 | Ken Yong | `ken-yong.jpg` (in) |
 | Irshad Gori | `irshad-gori.jpg` (in) |
-| Syed Suleiman | `syed-suleiman.jpg` |
+| Syed Suleiman | `syed-suleiman.jpg` (in) |
 | Aloke Dutta | `aloke-dutta.jpg` (in) |
 | Eric Ooi | `eric-ooi.jpg` (in) |
 | Prabitha Preymachandran | `prabitha-preymachandran.jpg` (in) |
