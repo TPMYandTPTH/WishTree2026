@@ -111,10 +111,14 @@ button,input,select,textarea{font-family:inherit}
 .input{height:50px;padding:0 14px}
 .combo{position:relative}
 .input[readonly]{background:#F4EEE3;font-weight:700;cursor:default}
-.combo-list{position:absolute;z-index:20;left:0;right:0;top:calc(100% + 6px);max-height:288px;margin:0;padding:6px;overflow-y:auto;list-style:none;border:1px solid rgba(108,21,30,.22);border-radius:12px;background:#fff;box-shadow:0 14px 34px rgba(36,28,20,.18)}
-.combo-list li{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:10px 12px;border-radius:8px;cursor:pointer}
-.combo-list li b{font-weight:700;color:var(--ink)}
-.combo-list li span{flex:none;max-width:55%;font-size:13px;color:#6B6157;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.combo-list{position:absolute;z-index:20;left:0;right:0;top:calc(100% + 6px);max-height:336px;margin:0;padding:6px;overflow-y:auto;list-style:none;border:1px solid rgba(108,21,30,.22);border-radius:12px;background:#fff;box-shadow:0 14px 34px rgba(36,28,20,.18)}
+.combo-list li{display:flex;align-items:center;gap:12px;padding:8px 10px;border-radius:8px;cursor:pointer}
+.combo-list .cl-av{flex:none;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;overflow:hidden;background:var(--spruce);box-shadow:0 0 0 2px var(--brass)}
+.combo-list .cl-av img{width:100%;height:100%;object-fit:cover;display:block}
+.combo-list .cl-av img.tp-mark{width:auto;height:42%;object-fit:contain}
+.combo-list .cl-tx{flex:1;min-width:0}
+.combo-list li b{display:block;font-weight:700;color:var(--ink);line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.combo-list li small{display:block;margin-top:1px;font-size:13px;color:#6B6157;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .combo-list li[aria-selected="true"],.combo-list li:hover{background:#F4EEE3}
 .combo-list li mark{background:rgba(177,136,84,.3);color:inherit;border-radius:2px}
 .combo-empty{padding:10px 12px;font-size:14px;color:#6B6157}
@@ -462,10 +466,11 @@ button,input,select,textarea{font-family:inherit}
       : 'Type your name or pick it from the suggestions. It can\'t be changed after you send your message.';
   }
   var nameActive = -1, nameHits = [];
-  // Suggestions: names that start with what's typed first, then names with a word that starts with it, then any match
+  // Suggestions in the order of config.js LEADERS (by title: CEO, C-level and VPs, directors, managers).
+  // While typing: names that start with what's typed first, then names with a word that starts with it, then any match
   function nameMatches(q) {
     q = String(q || '').trim().toLowerCase();
-    var all = LEADERS.slice().sort(function (a, b) { return a.name.localeCompare(b.name); });
+    var all = LEADERS.slice();
     if (!q) return all;
     var rank = function (l) {
       var n = l.name.toLowerCase();
@@ -487,8 +492,10 @@ button,input,select,textarea{font-family:inherit}
     nameHits = nameMatches(q);
     if (nameActive >= nameHits.length) nameActive = nameHits.length - 1;
     $('nameList').innerHTML = nameHits.length ? nameHits.map(function (l, i) {
+      var src = C.safePhoto(l.photo);
       return '<li role="option" id="nameOpt' + i + '" data-name="' + C.esc(l.name) + '" aria-selected="' + (i === nameActive ? 'true' : 'false') + '">' +
-        '<b>' + markHit(l.name, q) + '</b><span>' + C.esc(l.title) + '</span></li>';
+        '<span class="cl-av" aria-hidden="true">' + (src ? '<img src="' + C.esc(src) + '" alt="" loading="lazy" decoding="async">' : C.tpMarkHtml(false)) + '</span>' +
+        '<span class="cl-tx"><b>' + markHit(l.name, q) + '</b><small>' + C.esc(l.title) + '</small></span></li>';
     }).join('') : '<li class="combo-empty" role="presentation">Not on the list. That\'s fine: keep typing your name as it should appear.</li>';
     $('nameList').hidden = false;
     $('lName').setAttribute('aria-expanded', 'true');
@@ -757,6 +764,12 @@ button,input,select,textarea{font-family:inherit}
     e.preventDefault();
     setName(li.getAttribute('data-name'), true);
   });
+  // a leader's photo that can't be loaded shows the TP logo instead (error doesn't bubble, so listen while it travels down)
+  $('nameList').addEventListener('error', function (e) {
+    var img = e.target;
+    if (!img || img.tagName !== 'IMG' || img.classList.contains('tp-mark')) return;
+    img.outerHTML = C.tpMarkHtml(false);
+  }, true);
   $('lTitle').addEventListener('input', function (e) { S.title = e.target.value; S.titleTouched = true; renderPreview(); });
   $('lMessage').addEventListener('input', function (e) {
     S.message = e.target.value.slice(0, MAX);
