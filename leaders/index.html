@@ -7,6 +7,18 @@
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <style id="antiframe">html{display:none !important}</style>
 <script>if (window.self === window.top) { document.getElementById('antiframe').remove(); } else { try { window.top.location = window.self.location.href; } catch (e) { /* stay hidden */ } }</script>
+<script>
+// The leaders' QR code carries the password after "#k=". The part after # is never sent to any server; it's kept
+// for this tab only and taken out of the address bar straight away (before analytics loads), then used to sign in.
+(function () {
+  try {
+    var m = location.hash.match(/[#&]k=([^&]+)/);
+    if (!m) return;
+    sessionStorage.setItem('wt-leader-pass', decodeURIComponent(m[1]));
+    history.replaceState(null, '', location.pathname + location.search);
+  } catch (e) { /* the person types the password instead */ }
+})();
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Leaders' messages · TP Wish Tree 2026</title>
 <meta name="robots" content="noindex, nofollow">
@@ -791,8 +803,16 @@ button,input,select,textarea{font-family:inherit}
     }
   }
   // Still in from earlier on this browser?
+  // A password brought by the QR code (see the top of the page): used once, then forgotten
+  var qrPass = '';
+  try { qrPass = sessionStorage.getItem('wt-leader-pass') || ''; sessionStorage.removeItem('wt-leader-pass'); } catch (e) { qrPass = ''; }
   C.accessCheck('leader').then(function (t) {
-    if (t) { S.token = t; loadLeader(); } else show('signin');
+    if (t) { S.token = t; loadLeader(); return; }
+    show('signin');
+    if (qrPass) {
+      $('pass').value = qrPass;
+      enterPassword();
+    }
   }).catch(function () { show('signin'); });
 })();
 </script>
