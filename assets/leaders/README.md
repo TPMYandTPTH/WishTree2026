@@ -28,9 +28,9 @@ Upload any photo with any name and ask for it to be cropped and renamed if that'
 | Aloke Dutta | `aloke-dutta.jpg` (in) |
 | Eric Ooi | `eric-ooi.jpg` (in) |
 | Prabitha Preymachandran | `prabitha-preymachandran.jpg` (in) |
-| Chun Wei Chin | `chun-wei-chin.jpg` |
+| Chun Wei Chin | `chun-wei-chin.jpg` (in) |
 | Michael Sanchez | `michael-sanchez.jpg` (in) |
-| Hanisha Reza | `hanisha-reza.jpg` |
+| Hanisha Reza | `hanisha-reza.jpg` (in) |
 | Amit Mittal | `amit-mittal.jpg` (in) |
 | Sol Catherine Marticio | `sol-catherine-marticio.jpg` (in) |
 | Partiban Periannan | `partiban-periannan.jpg` (in) |
