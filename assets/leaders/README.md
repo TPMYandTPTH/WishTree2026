@@ -23,7 +23,7 @@ Upload any photo with any name and ask for it to be cropped and renamed if that'
 | Pranav Pillai | `pranav-pillai.jpg` (in) |
 | Jamunah Maniram | `jamunah-maniram.jpg` (in) |
 | Ken Yong | `ken-yong.jpg` (in) |
-| Irshad Gori | `irshad-gori.jpg` (in) |
+| Mohammed Irshad Ghori | `mohammed-irshad-ghori.jpg` (in) |
 | Syed Suleiman | `syed-suleiman.jpg` (in) |
 | Aloke Dutta | `aloke-dutta.jpg` (in) |
 | Eric Ooi | `eric-ooi.jpg` (in) |

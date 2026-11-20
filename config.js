@@ -93,7 +93,7 @@ window.WISH_CFG = {
     { name: 'Pranav Pillai',            title: 'Director of Operations',       spot: 'list',  level: 'director' },
     { name: 'Jamunah Maniram',          title: 'Director of Operations',       spot: 'list',  level: 'director' },
     { name: 'Ken Yong',                 title: 'Director of Operations',       spot: 'list',  level: 'director' },
-    { name: 'Irshad Gori',              title: 'Director of Operations',       spot: 'list',  level: 'director' },
+    { name: 'Mohammed Irshad Ghori',    title: 'Director of Operations',       spot: 'list',  level: 'director' },
     { name: 'Syed Suleiman',            title: 'Director of Operations',       spot: 'list',  level: 'director' },
     { name: 'Aloke Dutta',              title: 'Director of Quality',          spot: 'list',  level: 'director' },
     { name: 'Eric Ooi',                 title: 'Director of Finance',          spot: 'list',  level: 'director' },

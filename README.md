@@ -117,7 +117,7 @@ No Google sign-in or email setup is needed. If an older version created a `leade
 
 ## Notes
 
-- **Version tags:** every page loads `config.js`, `wishtree.js` and the files in `vendor/` with `?v=2026112002`. When you change `config.js` or `wishtree.js`, raise that number on all five pages (tree, wish page, leaders, Approvals, TV) so no browser mixes a new page with an old cached file.
+- **Version tags:** every page loads `config.js`, `wishtree.js` and the files in `vendor/` with `?v=2026112003`. When you change `config.js` or `wishtree.js`, raise that number on all five pages (tree, wish page, leaders, Approvals, TV) so no browser mixes a new page with an old cached file.
 
 - Character limits live in two places: `MAX_LENGTH` / `LEADER_MAX_LENGTH` in `config.js` and the two `char_length` checks in `schema.sql`. Keep them the same.
 - Likes need no sign-in, only a BMS once per device. Counts show on the tree, the TVs and the Approvals page.
