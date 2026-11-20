@@ -428,7 +428,9 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
   .all{margin-top:36px;padding-top:24px}
   .all-head h2{font-size:26px}
   .all-tools{width:100%}
-  .search{flex:1;width:auto;min-width:0}
+  .search{flex:1 1 100%;width:auto;min-width:0}
+  .sort{flex:1 1 100%}
+  .sort button{flex:1;padding:0 8px}
   .spin-stage{width:calc(100% + 32px);margin:0 -16px}
   .tree3d{border-radius:0}
   .tree-label{left:0}
@@ -619,7 +621,8 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
       <div class="all-tools">
         <input type="search" id="allSearch" class="search" placeholder="Search words or names" aria-label="Search wishes">
         <div class="sort" role="group" aria-label="Sort wishes">
-          <button type="button" data-sort="new" aria-pressed="true">Newest</button>
+          <button type="button" data-sort="random" aria-pressed="true" title="A fresh order for every visit. Tap again to shuffle.">Random</button>
+          <button type="button" data-sort="new" aria-pressed="false">Newest</button>
           <button type="button" data-sort="likes" aria-pressed="false">Most liked</button>
         </div>
       </div>
@@ -700,7 +703,8 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
     loadedOnce: false,
     spinning: false,
     pendingSite: null,
-    sort: 'new',       // list order: 'new' (default, newest on the tree first) or 'likes'
+    sort: 'random',    // list order: 'random' (default), 'new' (newest on the tree first) or 'likes'
+    seed: newSeed(),   // the random order for this visit (tap Random again for a new one)
     q: '',
     shown: LIST_PAGE
   };
@@ -909,9 +913,32 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
       if (!q) return true;
       return [w.message, w.display_name, C.siteName(w.site)].join(' ').toLowerCase().indexOf(q) !== -1;
     });
+    if (state.sort === 'random') {
+      // Each wish gets a fixed spot from this visit's seed: the order stays the same while you scroll, search or
+      // load more, and a wish that arrives later drops into a random spot without moving the others.
+      return list.sort(function (a, b) { return (shuffleRank(a.id) - shuffleRank(b.id)) || (String(a.id) < String(b.id) ? -1 : 1); });
+    }
     return list.sort(state.sort === 'likes'
       ? function (a, b) { return ((b.like_count || 0) - (a.like_count || 0)) || (String(a.approved_at) < String(b.approved_at) ? 1 : -1); }
       : function (a, b) { return String(a.approved_at) < String(b.approved_at) ? 1 : -1; });
+  }
+  function newSeed() {
+    try {
+      var a = new Uint32Array(1);
+      window.crypto.getRandomValues(a);
+      return a[0];
+    } catch (e) { return Math.floor(Math.random() * 4294967296); }
+  }
+  // A number from 0 to 4294967295 for a wish, from its id and this visit's seed (FNV-1a hash)
+  function shuffleRank(id) {
+    var h = (2166136261 ^ state.seed) >>> 0;
+    var str = String(id);
+    for (var i = 0; i < str.length; i++) {
+      h ^= str.charCodeAt(i);
+      h = Math.imul(h, 16777619) >>> 0;
+    }
+    h ^= h >>> 15; h = Math.imul(h, 2246822519) >>> 0; h ^= h >>> 13;   // mix the end so similar ids spread out
+    return h >>> 0;
   }
   function renderList() {
     var all = siteWishes();
@@ -1451,7 +1478,14 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
   el('leaderList').addEventListener('click', onListClick);
   el('allSearch').addEventListener('input', function (e) { state.q = e.target.value; state.shown = LIST_PAGE; renderList(); });
   Array.prototype.forEach.call(document.querySelectorAll('.sort button'), function (b) {
-    b.addEventListener('click', function () { state.sort = b.getAttribute('data-sort'); state.shown = LIST_PAGE; renderList(); });
+    b.addEventListener('click', function () {
+      var sort = b.getAttribute('data-sort');
+      if (sort === 'random' && state.sort === 'random') state.seed = newSeed();   // Random again: a new shuffle
+      state.sort = sort;
+      state.shown = LIST_PAGE;
+      renderList();
+      C.track('wish_sort', { sort: sort });
+    });
   });
   el('moreBtn').addEventListener('click', function () { state.shown += LIST_PAGE; renderList(); });
   el('langList').addEventListener('change', function () {
