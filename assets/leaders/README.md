@@ -44,4 +44,5 @@ Upload any photo with any name and ask for it to be cropped and renamed if that'
 
 | Card | File |
 |---|---|
+| Amr Mihany (gift) | `amr-mihany.jpg` (in), set as `photo` in HIDDEN_WISHES in config.js |
 | Maszy Ulip (gold gift) | `maszy-ulip.jpg` (in), set as `photo` in HIDDEN_WISHES in config.js |

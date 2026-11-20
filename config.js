@@ -123,6 +123,7 @@ window.WISH_CFG = {
       message: 'I built this tree so all of us, on site or at home, could hang our wishes in one place. My wish for 2027: that we keep lifting each other up. Happy New Year!',
       name: 'Amr Mihany',
       title: 'Digital Services & Transformation',
+      photo: 'assets/leaders/amr-mihany.jpg',
       lang: 'en'
     },
     {
