@@ -236,9 +236,9 @@ button,input,select,textarea{font-family:inherit}
 @media (max-width:360px){ .opt-grid.three{grid-template-columns:minmax(0,1fr)} .two{grid-template-columns:minmax(0,1fr)} .tag.big{width:100%} }
 @media (prefers-reduced-motion:reduce){ .spinner{animation:none} .tag{transition:none} }
 </style>
-<script src="vendor/supabase.js"></script>
-<script src="config.js"></script>
-<script src="wishtree.js"></script>
+<script src="vendor/supabase.js?v=2026112001"></script>
+<script src="config.js?v=2026112001"></script>
+<script src="wishtree.js?v=2026112001"></script>
 </head>
 <body>
 <div class="app">
@@ -532,6 +532,7 @@ button,input,select,textarea{font-family:inherit}
       privacy: 'Only your first name (or nickname), site and wish are shown. Your BMS stays with the Wish Tree team.',
       errGeneric: 'Something went wrong. Please try again.',
       errSubmit: "We couldn't hang your wish. Please try again.",
+      errNetwork: "We couldn't reach the Wish Tree. Check your connection, or try mobile data or another browser, then send it again.",
       errClosed: 'Wishes are closed for this year.',
       errBmsTaken: 'This BMS already has a wish on the tree. Each BMS hangs one wish, and it can only be changed from the phone or browser that sent it. If that was you on another device, open the wish page there. Need help? Ask the Wish Tree team.',
       errSlow: 'Lots of wishes are coming in from here. Please try again in a few minutes.',
@@ -612,6 +613,7 @@ button,input,select,textarea{font-family:inherit}
       privacy: 'Hanya nama pertama (atau nama panggilan), lokasi dan hajat anda dipaparkan. Nombor BMS anda hanya untuk pasukan Pokok Hajat.',
       errGeneric: 'Ada masalah. Sila cuba lagi.',
       errSubmit: 'Kami tidak dapat menggantung hajat anda. Sila cuba lagi.',
+      errNetwork: 'Kami tidak dapat menghubungi Wish Tree. Semak sambungan anda, atau cuba data mudah alih atau pelayar lain, kemudian hantar semula.',
       errClosed: 'Hajat telah ditutup untuk tahun ini.',
       errBmsTaken: 'BMS ini sudah mempunyai hajat di pokok. Setiap BMS boleh menggantung satu hajat, dan ia hanya boleh diubah daripada telefon atau pelayar yang menghantarnya. Jika itu anda pada peranti lain, buka halaman hajat di sana. Perlu bantuan? Hubungi pasukan Pokok Hajat.',
       errSlow: 'Banyak hajat sedang dihantar dari sini. Sila cuba lagi dalam beberapa minit.',
@@ -692,6 +694,7 @@ button,input,select,textarea{font-family:inherit}
       privacy: 'จะแสดงเฉพาะชื่อจริง (หรือชื่อเล่น) สาขา และคำอวยพรของคุณเท่านั้น หมายเลข BMS จะอยู่กับทีมต้นไม้แห่งคำอวยพรเท่านั้น',
       errGeneric: 'เกิดข้อผิดพลาด กรุณาลองอีกครั้ง',
       errSubmit: 'ไม่สามารถแขวนคำอวยพรได้ กรุณาลองอีกครั้ง',
+      errNetwork: 'เชื่อมต่อ Wish Tree ไม่ได้ กรุณาตรวจสอบการเชื่อมต่อ หรือลองใช้อินเทอร์เน็ตมือถือหรือเบราว์เซอร์อื่น แล้วส่งอีกครั้ง',
       errClosed: 'ปิดรับคำอวยพรสำหรับปีนี้แล้ว',
       errBmsTaken: 'BMS นี้มีคำอวยพรบนต้นไม้แล้ว แต่ละ BMS แขวนคำอวยพรได้หนึ่งรายการ และแก้ไขได้จากโทรศัพท์หรือเบราว์เซอร์ที่ใช้ส่งเท่านั้น หากคุณส่งจากอุปกรณ์อื่น กรุณาเปิดหน้าคำอวยพรบนอุปกรณ์นั้น ต้องการความช่วยเหลือ ติดต่อทีมต้นไม้แห่งคำอวยพร',
       errSlow: 'มีคำอวยพรส่งมาจากที่นี่จำนวนมาก กรุณาลองอีกครั้งในอีกไม่กี่นาที',
@@ -1029,6 +1032,7 @@ button,input,select,textarea{font-family:inherit}
 
     C.submitWish(row).then(function (r) {
       S.busy = false;
+      if (r.retried) C.track('wish_retry', { ok: r.result === 'ok' ? 'yes' : 'no' });
       if (r.result === 'ok') {
         S.lastWasEdit = wasEdit || !r.isNew;   // the database also treats the same device + same BMS as a change
         var before = (S.mines || []).filter(function (w) { return w.bms === row.bms; })[0] || {};
@@ -1039,15 +1043,28 @@ button,input,select,textarea{font-family:inherit}
         return;
       }
       S.errKey = r.result === 'bms_taken' ? 'errBmsTaken'  : r.result === 'slow_down' ? 'errSlow' : 'errSubmit';
+      C.track('wish_error', { reason: r.result === 'bms_taken' || r.result === 'slow_down' ? r.result : 'other', detail: 'none', retried: r.retried ? 'yes' : 'no' });
       renderPreview();
-    }).catch(function (err) {
+    }, function (err) {
+      // (a second callback, not .catch: a problem drawing the "done" screen must never look like a failed send)
       console.error(err);
       S.busy = false;
       var m = String((err && (err.message || err.details)) || '').toLowerCase();
-      S.errKey = m.indexOf('wishes_closed') !== -1 ? 'errClosed' : m.indexOf('bad_bms') !== -1 ? 'needBms'
+      S.errKey = err && err.network ? 'errNetwork'
+        : m.indexOf('wishes_closed') !== -1 ? 'errClosed' : m.indexOf('bad_bms') !== -1 ? 'needBms'
         : m.indexOf('name_required') !== -1 ? 'needName' : 'errSubmit';
+      C.track('wish_error', { reason: ERR_REASON[S.errKey] || 'other', detail: errDetail(err), retried: err && err.retried ? 'yes' : 'no' });
       renderPreview();
     });
+  }
+
+  // For GA4: why a send failed, as a short code. Never a name, BMS or wish.
+  var ERR_REASON = { errNetwork: 'network', errClosed: 'closed', needBms: 'bad_bms', needName: 'name', errSubmit: 'other' };
+  function errDetail(err) {
+    var msg = String((err && err.message) || '');
+    if (/^[a-z_]{3,30}$/.test(msg)) return msg;           // the database's own codes, e.g. bad_message
+    var code = String((err && err.code) || '').replace(/[^A-Za-z0-9_]/g, '').slice(0, 12);
+    return code || (err && err.network ? 'no_connection' : 'none');
   }
 
   function share() {

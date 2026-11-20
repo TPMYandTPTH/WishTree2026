@@ -766,18 +766,43 @@
       saveMyWishRef({ bms: row.bms, key: newKey, id: 'local-' + (list.length - 1) });
       return Promise.resolve({ result: 'ok', id: 'local-' + (list.length - 1), isNew: true });
     }
-    return getClient().rpc('submit_wish', {
+    var args = {
       p_bms: row.bms, p_name: row.first_name, p_message: row.message,
       p_site: row.site, p_lang: row.lang, p_tag_color: row.tag_color, p_charm: row.charm, p_consent: true, p_edit_key: key,
       p_device: deviceId()
-    }).then(function (res) {
-      if (res.error) throw res.error;
-      var r = Array.isArray(res.data) ? res.data[0] : res.data;
-      if (!r) throw new Error('No answer from the server');
+    };
+    var send = function () {
+      var q = getClient().rpc('submit_wish', args);
+      // give up on a send that gets no answer in 20 seconds (it counts as a connection problem)
+      if (q && typeof q.abortSignal === 'function' && window.AbortSignal && typeof AbortSignal.timeout === 'function') {
+        q = q.abortSignal(AbortSignal.timeout(SEND_TIMEOUT_MS));
+      }
+      return q.then(function (res) {
+        if (res.error) {
+          res.error.network = res.status === 0;   // never reached the database: no connection, blocked or timed out
+          throw res.error;
+        }
+        var r = Array.isArray(res.data) ? res.data[0] : res.data;
+        if (!r) throw new Error('No answer from the server');
+        return r;
+      });
+    };
+    var retried = false;
+    return send().catch(function (err) {
+      if (!(err && err.network)) throw err;
+      // One more try. Safe even if the first send did arrive: the same device and BMS just update that wish.
+      retried = true;
+      return new Promise(function (done) { setTimeout(done, 1500); }).then(send);
+    }).then(function (r) {
       if (r.result === 'ok' && r.edit_key) saveMyWishRef({ bms: row.bms, key: r.edit_key, id: r.wish_id });
-      return { result: r.result, id: r.wish_id, isNew: !!r.is_new };
+      // after a retry, a wish that is new to this person comes back as a change of the first send: still new
+      return { result: r.result, id: r.wish_id, isNew: !!r.is_new || (retried && !key), retried: retried };
+    }, function (err) {
+      if (err && typeof err === 'object') err.retried = retried;
+      throw err;
     });
   }
+  var SEND_TIMEOUT_MS = 20000;
 
   // The wish this browser sent for one BMS (or the last one), or null. A wish the team deleted is forgotten here too.
   function getMyWish(bms) {

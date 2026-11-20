@@ -92,8 +92,9 @@ The **Accept new wishes** switch on the Approvals page closes or reopens the cam
 
 - `GTM_ID` in `config.js` (`GTM-P4TRBDVQ`) loads Tag Manager on the tree, the wish page, the TVs and the leaders' page. Set up GA4 inside Tag Manager (a Google tag with your G- ID, trigger: All Pages).
 - GA4 (G-G5Q9FDEKEZ) is set up inside the container. The pages send their events to it through that GA4 tag (`GA4_EVENTS_VIA_GTM` in `config.js`), so they show in GA4 without any Tag Manager change. To report on the details (site, kind, who, place, method, langs), add them in GA4 > Admin > Custom definitions as event-scoped custom dimensions.
-- The pages also push these to the dataLayer as **Custom Events**, to use as triggers: `wish_open`, `leader_open`, `prize_open`, `secret_wish_found`, `wish_like`, `wish_unlike`, `leader_thanks`, `leader_unthanks`, `team_thanks`, `team_unthanks`, `leaders_more`, `wish_cta`, `wish_submit`, `wish_edit`, `leader_publish`. They never include a name, BMS or message.
+- The pages also push these to the dataLayer as **Custom Events**, to use as triggers: `wish_open`, `leader_open`, `prize_open`, `secret_wish_found`, `wish_like`, `wish_unlike`, `leader_thanks`, `leader_unthanks`, `team_thanks`, `team_unthanks`, `leaders_more`, `wish_cta`, `wish_submit`, `wish_edit`, `wish_error`, `wish_retry`, `leader_publish`. They never include a name, BMS or message.
 - If you add a tag that loads from another domain, add that domain to the Content Security Policy line at the top of each page.
+- Failed sends are reported as `wish_error` (reason: network, closed, bad_bms, name, bms_taken, slow_down or other; detail: a short code; retried: yes/no), and an automatic second try as `wish_retry` (ok: yes/no). A send that gets no answer in 20 seconds counts as a connection problem and is tried once more (safe: the same device and BMS just update the wish).
 
 ## TV screens
 
@@ -114,6 +115,8 @@ The **Accept new wishes** switch on the Approvals page closes or reopens the cam
 No Google sign-in or email setup is needed. If an older version created a `leader-photos` bucket in **Storage**, you can delete it.
 
 ## Notes
+
+- **Version tags:** every page loads `config.js`, `wishtree.js` and the files in `vendor/` with `?v=2026112001`. When you change `config.js` or `wishtree.js`, raise that number on all five pages (tree, wish page, leaders, Approvals, TV) so no browser mixes a new page with an old cached file.
 
 - Character limits live in two places: `MAX_LENGTH` / `LEADER_MAX_LENGTH` in `config.js` and the two `char_length` checks in `schema.sql`. Keep them the same.
 - Likes need no sign-in, only a BMS once per device. Counts show on the tree, the TVs and the Approvals page.
