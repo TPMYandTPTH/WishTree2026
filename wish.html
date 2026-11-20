@@ -308,7 +308,6 @@ button,input,select,textarea{font-family:inherit}
           <ul id="mineList" class="mine-list"></ul>
         </div>
         <div style="display:flex;flex-wrap:wrap;gap:0 18px">
-          <button type="button" class="link" id="otherBmsBtn" data-i18n="otherBms"></button>
           <button type="button" class="link" id="forgetBtn" data-i18n="forgetMe"></button>
         </div>
       </div>
@@ -548,7 +547,6 @@ button,input,select,textarea{font-family:inherit}
       editApprovedWarn: 'Heads up: sending this change takes your wish off the tree until it’s approved again. Your likes stay.',
       phoneWishes: 'Wishes from this phone.',
       phoneWishesHelp: 'Tap one to change it.',
-      otherBms: 'Hang a wish for a different BMS',
       forgetMe: 'Forget me on this device',
       forgetShared: 'Using a shared phone or laptop? Forget me on this device',
       forgotten: 'Done. This device no longer remembers your wish or BMS.',
@@ -629,7 +627,6 @@ button,input,select,textarea{font-family:inherit}
       editApprovedWarn: 'Perhatian: menghantar perubahan ini akan menurunkan hajat anda dari pokok sehingga diluluskan semula. Jumlah suka anda kekal.',
       phoneWishes: 'Hajat dari telefon ini.',
       phoneWishesHelp: 'Tekan satu untuk mengubahnya.',
-      otherBms: 'Gantung hajat untuk BMS lain',
       forgetMe: 'Lupakan saya pada peranti ini',
       forgetShared: 'Guna telefon atau komputer riba bersama? Lupakan saya pada peranti ini',
       forgotten: 'Selesai. Peranti ini tidak lagi mengingati hajat atau BMS anda.',
@@ -710,7 +707,6 @@ button,input,select,textarea{font-family:inherit}
       editApprovedWarn: 'โปรดทราบ: เมื่อส่งการแก้ไขนี้ คำอวยพรของคุณจะถูกนำลงจากต้นไม้จนกว่าจะได้รับการอนุมัติอีกครั้ง ยอดถูกใจยังอยู่ครบ',
       phoneWishes: 'คำอวยพรจากโทรศัพท์เครื่องนี้',
       phoneWishesHelp: 'แตะเพื่อแก้ไข',
-      otherBms: 'แขวนคำอวยพรสำหรับ BMS อื่น',
       forgetMe: 'ลบข้อมูลของฉันออกจากอุปกรณ์นี้',
       forgetShared: 'ใช้โทรศัพท์หรือแล็ปท็อปร่วมกับผู้อื่น? ลบข้อมูลของฉันออกจากอุปกรณ์นี้',
       forgotten: 'เรียบร้อย อุปกรณ์นี้จะไม่จำคำอวยพรหรือ BMS ของคุณอีกต่อไป',
@@ -916,7 +912,6 @@ button,input,select,textarea{font-family:inherit}
     $('writeTitle').textContent = editing() ? t('editTitle') : t('writeTitle');
     $('mineCur').hidden = !m;
     $('minePhone').hidden = !showList;
-    $('otherBmsBtn').hidden = !m;
     if (showList) {
       $('mineList').innerHTML = all.map(function (w) {
         var st = statusOf(w);
@@ -1035,7 +1030,7 @@ button,input,select,textarea{font-family:inherit}
     C.submitWish(row).then(function (r) {
       S.busy = false;
       if (r.result === 'ok') {
-        S.lastWasEdit = wasEdit;
+        S.lastWasEdit = wasEdit || !r.isNew;   // the database also treats the same device + same BMS as a change
         var before = (S.mines || []).filter(function (w) { return w.bms === row.bms; })[0] || {};
         S.mine = Object.assign({}, before, { bms: row.bms, status: 'pending' }, row);
         S.mines = (S.mines || []).filter(function (w) { return w.bms !== row.bms; }).concat([S.mine]);
@@ -1159,20 +1154,6 @@ button,input,select,textarea{font-family:inherit}
     S.triedPreview = false;
     S.errKey = '';
     renderWrite();
-  });
-  $('otherBmsBtn').addEventListener('click', function () {
-    // a colleague on the same phone: start a fresh wish with their own BMS (the first one stays as it is)
-    S.mine = null;
-    S.bms = '';
-    S.first = '';
-    S.text = '';
-    S.consent = false;
-    S.triedPreview = false;
-    S.wishLang = null;
-    S.wishLangTouched = false;
-    $('bms').readOnly = false;
-    renderWrite();
-    $('firstName').focus();
   });
 
   $('toPreviewBtn').addEventListener('click', function () {

@@ -319,7 +319,7 @@ a{color:var(--slate)}
           <div class="rule"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00AF9B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Free of client or account names</div>
           <div class="rule"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00AF9B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Free of phone numbers, emails or other personal details</div>
           <div class="rule"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00AF9B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Nothing confidential about work</div>
-          <div class="small">Orange flags are automatic checks: phone numbers or emails, a BMS that looks made up, and wishes sent from the same phone. A person always decides, and "Approve all" skips flagged wishes. Use Edit to change anything (name, words, site, title, photo, place in the list) and approve in one step.</div>
+          <div class="small">Orange flags are automatic checks: phone numbers or emails, a BMS that looks made up, and wishes sent from the same device. One device, one BMS: a wish from a device that already sent one for another BMS goes straight to Not approved. A person always decides, and "Approve all" skips flagged wishes. Use Edit to change anything (name, words, site, title, photo, place in the list) and approve in one step.</div>
         </div>
 
         <div class="box" id="prizeBox">
@@ -504,11 +504,17 @@ a{color:var(--slate)}
   }
 
   // Orange flags on a wish: phone numbers or emails in the words (checked when it was sent), a BMS that looks
-  // made up, and other wishes sent from the same phone or laptop
+  // made up, and other wishes sent from the same device (BMS only, no names). One device, one BMS: the database
+  // sets aside a wish from a device that already sent one for another BMS (reviewer AUTO_REVIEWER).
+  var AUTO_REVIEWER = 'Automatic check';
   function wishFlags(w) {
     var flags = w.flags && w.flags.length ? w.flags.slice() : [];
     if (w.bms && !C.bmsLooksReal(w.bms)) flags.push("BMS looks made up: this wish can't win");
-    if (w.same_device) flags.push('Same phone as ' + w.same_device + '. Fine if they share a phone; check it if it looks like one person');
+    if (w.same_device) {
+      flags.push(w.status === 'rejected' && w.reviewer === AUTO_REVIEWER
+        ? 'Same device as ' + w.same_device + ', which sent a wish first: set aside automatically. Approve it only if they really share a device'
+        : 'Same device as ' + w.same_device);
+    }
     return flags;
   }
 

@@ -540,8 +540,11 @@ language sql stable security definer set search_path = '' as $$
   select s.submissions_open, s.likes_close_at from public.app_settings s where s.id = 1
 $$;
 
--- Wish page: hang or edit a wish. One wish per BMS: sending again from the same browser edits it
--- (it goes back for approval); from any other browser the BMS is refused.
+-- Wish page: hang or edit a wish. One wish per BMS: sending again from the same browser (its edit key) or the
+-- same device (its device code, e.g. after "Forget me") edits it and it goes back for approval; from any other
+-- device the BMS is refused. One device, one BMS: a wish from a device that already sent a wish for a different
+-- BMS is accepted quietly but set aside straight away (status 'rejected', reviewer AUTO_REVIEWER below), so the
+-- team only approves it if the device is really shared. Wishes sent before device codes existed don't count.
 -- Answers result 'ok', 'bms_taken' or 'slow_down' (answers, not errors, so the rate limits still count the attempt).
 drop function if exists public.submit_wish(text, text, text, text, text, text, text, text, boolean, text);
 drop function if exists public.submit_wish(text, text, text, text, text, text, text, boolean, text);
@@ -558,9 +561,14 @@ declare
   v_msg text := btrim(coalesce(p_message, ''));
   v_dev text := case when btrim(coalesce(p_device, '')) ~ '^[A-Za-z0-9-]{16,64}$' then btrim(p_device) end;
   v_conn text := public.conn_code();
+  v_auto constant text := 'Automatic check';   -- AUTO_REVIEWER: shown as "Set aside by Automatic check"
   v_id uuid;
   v_hash text;
+  v_wdev text;
+  v_created timestamptz;
   v_key text;
+  v_by_key boolean;
+  v_shared boolean;
 begin
   select * into st from public.app_settings where id = 1;
   if not found or not st.submissions_open then raise exception 'wishes_closed'; end if;
@@ -574,34 +582,53 @@ begin
     return query select 'slow_down'::text, null::uuid, null::text, false; return;
   end if;
 
-  select w.id, w.edit_key_hash into v_id, v_hash from public.wishes w where w.bms = v_bms for update;
+  select w.id, w.edit_key_hash, w.device_id, w.created_at into v_id, v_hash, v_wdev, v_created
+    from public.wishes w where w.bms = v_bms for update;
   if found then
-    if p_edit_key is null or v_hash is null or v_hash <> encode(sha256(convert_to(p_edit_key, 'UTF8')), 'hex') then
+    -- an edit needs this browser's edit key, or the device that sent the wish
+    v_by_key := p_edit_key is not null and v_hash is not null and v_hash = encode(sha256(convert_to(p_edit_key, 'UTF8')), 'hex');
+    if not (v_by_key or (v_dev is not null and v_wdev is not null and v_wdev = v_dev)) then
       return query select 'bms_taken'::text, null::uuid, null::text, false; return;
     end if;
     if not public.rate_hit('edit_bms', v_bms, 20, interval '1 hour') then
       return query select 'slow_down'::text, null::uuid, null::text, false; return;
     end if;
+    -- the same device without the key (after "Forget me"): a fresh key for this browser
+    v_key := case when v_by_key then p_edit_key else encode(extensions.gen_random_bytes(24), 'hex') end;
+    -- set aside again if this device sent a wish for a different BMS before this one
+    v_shared := coalesce(v_wdev, v_dev) is not null and exists (
+      select 1 from public.wishes o
+       where o.device_id = coalesce(v_wdev, v_dev) and o.bms <> v_bms and o.created_at < v_created);
     begin
       update public.wishes w
          set message = v_msg, first_name = v_name, site = p_site, lang = p_lang,
              tag_color = p_tag_color, charm = p_charm, consent = true,
-             status = 'pending', reviewed_at = null, approved_at = null,
+             status = case when v_shared then 'rejected' else 'pending' end,
+             reviewed_at = case when v_shared then now() end,
+             reviewer = case when v_shared then v_auto else w.reviewer end,
+             approved_at = null,
              flags = public.wish_flags(v_msg), updated_at = now(), edit_count = w.edit_count + 1, conn_code = v_conn,
-             device_id = coalesce(v_dev, w.device_id)
+             edit_key_hash = encode(sha256(convert_to(v_key, 'UTF8')), 'hex'),
+             device_id = coalesce(w.device_id, v_dev)   -- a wish keeps the device that first sent it
        where w.id = v_id;
     exception when check_violation or not_null_violation then
       raise exception 'bad_input';   -- a plain message, so no row details go back to the browser
     end;
-    return query select 'ok'::text, v_id, p_edit_key, false;
+    return query select 'ok'::text, v_id, v_key, false;
     return;
   end if;
 
+  -- a new BMS from a device that already sent a wish for another BMS: accepted, but set aside
+  v_shared := v_dev is not null and exists (select 1 from public.wishes o where o.device_id = v_dev and o.bms <> v_bms);
   v_key := encode(extensions.gen_random_bytes(24), 'hex');
   begin
-    insert into public.wishes (bms, first_name, message, site, lang, tag_color, charm, consent, flags, edit_key_hash, conn_code, device_id)
+    insert into public.wishes (bms, first_name, message, site, lang, tag_color, charm, consent, flags, edit_key_hash, conn_code, device_id,
+                               status, reviewer, reviewed_at)
     values (v_bms, v_name, v_msg, p_site, p_lang, p_tag_color, p_charm, true, public.wish_flags(v_msg),
-            encode(sha256(convert_to(v_key, 'UTF8')), 'hex'), v_conn, v_dev)
+            encode(sha256(convert_to(v_key, 'UTF8')), 'hex'), v_conn, v_dev,
+            case when v_shared then 'rejected' else 'pending' end,
+            case when v_shared then v_auto end,
+            case when v_shared then now() end)
     returning id into v_id;
   exception
     when unique_violation then
@@ -797,8 +824,8 @@ begin
       select w.id, w.created_at, w.updated_at, w.message, w.first_name, w.bms, w.site, w.lang, w.tag_color, w.charm,
              w.status, w.flags, w.reviewed_at, w.approved_at, w.edit_count, w.reviewer,
              (select count(*) from public.likes l where l.kind = 'wish' and l.target_id = w.id)::int as like_count,
-             -- other wishes sent from the same phone or laptop, e.g. 'Ali (BMS 12345)'
-             (select string_agg(o.first_name || ' (BMS ' || o.bms || ')', ', ' order by o.created_at)
+             -- other wishes sent from the same device (BMS only, no names), e.g. 'BMS 12345, BMS 67890'
+             (select string_agg('BMS ' || o.bms, ', ' order by o.created_at)
                 from public.wishes o
                where w.device_id is not null and o.device_id = w.device_id and o.id <> w.id) as same_device
       from public.wishes w order by w.created_at desc limit 5000) x), '[]'::json),
