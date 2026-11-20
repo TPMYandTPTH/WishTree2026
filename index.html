@@ -619,8 +619,8 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
       <div class="all-tools">
         <input type="search" id="allSearch" class="search" placeholder="Search words or names" aria-label="Search wishes">
         <div class="sort" role="group" aria-label="Sort wishes">
-          <button type="button" data-sort="likes" aria-pressed="true">Most liked</button>
-          <button type="button" data-sort="new" aria-pressed="false">Newest</button>
+          <button type="button" data-sort="new" aria-pressed="true">Newest</button>
+          <button type="button" data-sort="likes" aria-pressed="false">Most liked</button>
         </div>
       </div>
     </div>
@@ -700,7 +700,7 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
     loadedOnce: false,
     spinning: false,
     pendingSite: null,
-    sort: 'likes',     // list order: 'likes' or 'new'
+    sort: 'new',       // list order: 'new' (default, newest on the tree first) or 'likes'
     q: '',
     shown: LIST_PAGE
   };
