@@ -125,6 +125,14 @@ button,input,select,textarea{font-family:inherit}
 .status[data-s="approved"]{background:#DDE6DA;color:#25402D}
 .status[data-s="rejected"]{background:#F3DADC;color:#6C151E}
 .mine .link{min-height:32px;font-size:13px}
+.mine-cur{display:flex;flex-direction:column;gap:8px}
+.mine-sub{font-size:13px;color:var(--slate)}
+.mine-sub b{color:var(--cran)}
+.mine-list{display:flex;flex-direction:column;gap:6px;margin:6px 0 0;padding:0;list-style:none}
+.mine-pick{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-height:44px;padding:8px 12px;border:1px solid rgba(108,21,30,.22);border-radius:10px;background:#FFFDF8;color:var(--ink);font:inherit;font-size:14px;line-height:1.3;text-align:left;cursor:pointer}
+.mine-pick b{color:var(--ink)}
+.mine-pick[aria-pressed="true"]{border-color:var(--cran);box-shadow:inset 0 0 0 1px var(--cran);background:#fff}
+.mine-pick:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 
 /* write view */
 .opt-grid{display:grid;gap:10px}
@@ -291,8 +299,14 @@ button,input,select,textarea{font-family:inherit}
 
     <div class="sheet">
       <div id="mineBox" class="mine" hidden>
-        <div class="mine-top"><b data-i18n="mineTitle"></b><span id="mineStatus" class="status"></span></div>
-        <div id="mineText"></div>
+        <div id="mineCur" class="mine-cur">
+          <div class="mine-top"><b data-i18n="mineTitle"></b><span id="mineStatus" class="status"></span></div>
+          <div id="mineText"></div>
+        </div>
+        <div id="minePhone" hidden>
+          <div class="mine-sub"><b data-i18n="phoneWishes"></b> <span data-i18n="phoneWishesHelp"></span></div>
+          <ul id="mineList" class="mine-list"></ul>
+        </div>
         <div style="display:flex;flex-wrap:wrap;gap:0 18px">
           <button type="button" class="link" id="otherBmsBtn" data-i18n="otherBms"></button>
           <button type="button" class="link" id="forgetBtn" data-i18n="forgetMe"></button>
@@ -424,6 +438,10 @@ button,input,select,textarea{font-family:inherit}
       <div class="next-row"><b>2</b><span data-i18n="next2"></span></div>
       <div class="next-row"><b>3</b><span id="next3"></span></div>
     </div>
+    <p id="approvedWarn" class="review-note" style="position:relative;margin:16px 20px 0" hidden>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4 2.5 20h19zM12 10v4M12 17h.01"/></svg>
+      <span data-i18n="editApprovedWarn"></span>
+    </p>
     <p id="submitErr" class="err" role="alert" style="margin:16px 20px 0"></p>
     <div class="actions">
       <button type="button" id="hangBtn" class="btn btn-gold">
@@ -526,6 +544,10 @@ button,input,select,textarea{font-family:inherit}
       status_approved: 'On the tree',
       status_rejected: 'Not approved yet',
       mineRejected: 'It wasn’t approved as it was. Change it below and send it again.',
+      mineApproved: 'Your wish (BMS {bms}) is on the tree. If you change it, it comes off the tree until it’s approved again. Your likes stay.',
+      editApprovedWarn: 'Heads up: sending this change takes your wish off the tree until it’s approved again. Your likes stay.',
+      phoneWishes: 'Wishes from this phone.',
+      phoneWishesHelp: 'Tap one to change it.',
       otherBms: 'Hang a wish for a different BMS',
       forgetMe: 'Forget me on this device',
       forgetShared: 'Using a shared phone or laptop? Forget me on this device',
@@ -603,6 +625,10 @@ button,input,select,textarea{font-family:inherit}
       status_approved: 'Di pokok',
       status_rejected: 'Belum diluluskan',
       mineRejected: 'Hajat ini belum diluluskan. Ubah di bawah dan hantar semula.',
+      mineApproved: 'Hajat anda (BMS {bms}) sudah di pokok. Jika anda mengubahnya, hajat akan diturunkan dari pokok sehingga diluluskan semula. Jumlah suka anda kekal.',
+      editApprovedWarn: 'Perhatian: menghantar perubahan ini akan menurunkan hajat anda dari pokok sehingga diluluskan semula. Jumlah suka anda kekal.',
+      phoneWishes: 'Hajat dari telefon ini.',
+      phoneWishesHelp: 'Tekan satu untuk mengubahnya.',
       otherBms: 'Gantung hajat untuk BMS lain',
       forgetMe: 'Lupakan saya pada peranti ini',
       forgetShared: 'Guna telefon atau komputer riba bersama? Lupakan saya pada peranti ini',
@@ -680,6 +706,10 @@ button,input,select,textarea{font-family:inherit}
       status_approved: 'อยู่บนต้นไม้แล้ว',
       status_rejected: 'ยังไม่ได้รับการอนุมัติ',
       mineRejected: 'คำอวยพรนี้ยังไม่ได้รับการอนุมัติ กรุณาแก้ไขด้านล่างแล้วส่งอีกครั้ง',
+      mineApproved: 'คำอวยพรของคุณ (BMS {bms}) อยู่บนต้นไม้แล้ว หากแก้ไข คำอวยพรจะถูกนำลงจากต้นไม้จนกว่าจะได้รับการอนุมัติอีกครั้ง ยอดถูกใจยังอยู่ครบ',
+      editApprovedWarn: 'โปรดทราบ: เมื่อส่งการแก้ไขนี้ คำอวยพรของคุณจะถูกนำลงจากต้นไม้จนกว่าจะได้รับการอนุมัติอีกครั้ง ยอดถูกใจยังอยู่ครบ',
+      phoneWishes: 'คำอวยพรจากโทรศัพท์เครื่องนี้',
+      phoneWishesHelp: 'แตะเพื่อแก้ไข',
       otherBms: 'แขวนคำอวยพรสำหรับ BMS อื่น',
       forgetMe: 'ลบข้อมูลของฉันออกจากอุปกรณ์นี้',
       forgetShared: 'ใช้โทรศัพท์หรือแล็ปท็อปร่วมกับผู้อื่น? ลบข้อมูลของฉันออกจากอุปกรณ์นี้',
@@ -747,6 +777,7 @@ button,input,select,textarea{font-family:inherit}
     view: 'loading',
     lang: T[stored] ? stored : 'en',
     mine: null,          // the wish this browser already sent (edit mode), or null
+    mines: [],           // every wish sent from this browser (a shared phone can hold several BMS)
     color: 'cream',
     charm: 'snow',
     text: '',
@@ -873,16 +904,34 @@ button,input,select,textarea{font-family:inherit}
     node.setAttribute('aria-label', (has ? S.text : t('tagPlaceholder')) + '. ' + signature());
   }
 
+  function statusOf(w) { return w && (w.status === 'approved' || w.status === 'rejected') ? w.status : 'pending'; }
+
   function renderMine() {
     var box = $('mineBox');
     var m = S.mine;
-    box.hidden = !m;
+    var all = S.mines || [];
+    // the list shows when this phone holds more than one wish, or holds one and a new one is being written
+    var showList = all.length > 1 || (all.length > 0 && !m);
+    box.hidden = !m && !all.length;
     $('writeTitle').textContent = editing() ? t('editTitle') : t('writeTitle');
+    $('mineCur').hidden = !m;
+    $('minePhone').hidden = !showList;
+    $('otherBmsBtn').hidden = !m;
+    if (showList) {
+      $('mineList').innerHTML = all.map(function (w) {
+        var st = statusOf(w);
+        var cur = !!(m && m.bms === w.bms);
+        return '<li><button type="button" class="mine-pick" data-pick="' + C.esc(w.bms) + '" aria-pressed="' + (cur ? 'true' : 'false') + '">' +
+          '<span><b>' + C.esc(w.first_name || '') + '</b> · BMS ' + C.esc(w.bms) + '</span>' +
+          '<span class="status" data-s="' + st + '">' + C.esc(t('status_' + st)) + '</span></button></li>';
+      }).join('');
+    }
     if (!m) return;
-    var st = m.status === 'approved' || m.status === 'rejected' ? m.status : 'pending';
+    var st = statusOf(m);
     $('mineStatus').setAttribute('data-s', st);
     $('mineStatus').textContent = t('status_' + st);
-    $('mineText').textContent = st === 'rejected' ? t('mineRejected') : t('mineText', { bms: m.bms });
+    $('mineText').textContent = st === 'rejected' ? t('mineRejected')
+      : st === 'approved' ? t('mineApproved', { bms: m.bms }) : t('mineText', { bms: m.bms });
     $('bms').readOnly = editing();
   }
 
@@ -921,6 +970,7 @@ button,input,select,textarea{font-family:inherit}
     $('next3').textContent = prizeOn() ? t('next3', prizeVars()) : t('next3plain');
     $('hangLabel').textContent = S.busy ? t('sending') : (editing() ? t('saveBtn') : t('hangBtn'));
     $('hangBtn').disabled = S.busy;
+    $('approvedWarn').hidden = !(editing() && statusOf(S.mine) === 'approved');
     $('submitErr').textContent = S.errKey ? t(S.errKey) : '';
   }
 
@@ -975,7 +1025,8 @@ button,input,select,textarea{font-family:inherit}
       tag_color: S.color,
       charm: S.charm
     };
-    var wasEdit = editing();
+    // also an edit when this phone already sent a wish for the BMS typed in
+    var wasEdit = editing() || !!C.myWishRef(row.bms);
 
     S.errKey = '';
     S.busy = true;
@@ -985,7 +1036,9 @@ button,input,select,textarea{font-family:inherit}
       S.busy = false;
       if (r.result === 'ok') {
         S.lastWasEdit = wasEdit;
-        S.mine = Object.assign({}, S.mine || {}, { bms: row.bms, status: 'pending' }, row);
+        var before = (S.mines || []).filter(function (w) { return w.bms === row.bms; })[0] || {};
+        S.mine = Object.assign({}, before, { bms: row.bms, status: 'pending' }, row);
+        S.mines = (S.mines || []).filter(function (w) { return w.bms !== row.bms; }).concat([S.mine]);
         C.track(wasEdit ? 'wish_edit' : 'wish_submit', { site: row.site, lang: row.lang });
         show('done');
         return;
@@ -1088,12 +1141,25 @@ button,input,select,textarea{font-family:inherit}
   }
   function forget() {
     C.forgetMe();
+    S.mines = [];
     freshForm();
     show('write');
     $('blocker').textContent = t('forgotten');
   }
   $('forgetBtn').addEventListener('click', forget);
   $('forgetDoneBtn').addEventListener('click', forget);
+  // a shared phone: pick which of its wishes to change
+  $('mineList').addEventListener('click', function (e) {
+    var b = e.target.closest ? e.target.closest('[data-pick]') : null;
+    if (!b) return;
+    var bms = b.getAttribute('data-pick');
+    var w = (S.mines || []).filter(function (x) { return x.bms === bms; })[0];
+    if (!w) return;
+    fillFromMine(w);
+    S.triedPreview = false;
+    S.errKey = '';
+    renderWrite();
+  });
   $('otherBmsBtn').addEventListener('click', function () {
     // a colleague on the same phone: start a fresh wish with their own BMS (the first one stays as it is)
     S.mine = null;
@@ -1140,8 +1206,10 @@ button,input,select,textarea{font-family:inherit}
   }
 
   function start() {
-    C.getMyWish().then(function (m) {
-      fillFromMine(m);
+    // every wish this phone sent; the form opens on the one sent or changed last
+    C.getMyWishes().then(function (list) {
+      S.mines = list;
+      fillFromMine(list.length ? list[list.length - 1] : null);
       show('write');
     }).catch(function (err) {
       console.error(err);

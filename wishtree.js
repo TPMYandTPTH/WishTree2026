@@ -692,22 +692,56 @@
   }
 
   /* ---------- Hanging a wish (no sign-in: name + BMS, one wish per BMS) ---------- */
-  // What this browser remembers about the wish it sent: { bms, key, id }. The key is the only way to edit it.
-  function myWishRef() {
-    var r = demoLoad('wt-my-wish', null);
-    return r && validBms(r.bms) && r.key ? r : null;
+  // What this browser remembers about the wishes it sent: [{ bms, key, id }], oldest first. The key is the only
+  // way to edit a wish. A shared phone can hold several (one per BMS), so colleagues can each change their own.
+  var MAX_MY_WISHES = 10;
+  function myWishRefs() {
+    var list = demoLoad('wt-my-wishes', null);
+    if (!Array.isArray(list)) {
+      // before several wishes per phone, a browser kept one wish under 'wt-my-wish'
+      var old = demoLoad('wt-my-wish', null);
+      list = old ? [old] : [];
+    }
+    var seen = {};
+    return list.filter(function (r) {
+      if (!r || !validBms(r.bms) || !r.key || seen[r.bms]) return false;
+      seen[r.bms] = true;
+      return true;
+    });
   }
-  function saveMyWishRef(r) { demoSave('wt-my-wish', r); }
-  // On a shared phone or laptop: forget the wish and the BMS this browser remembers
+  function saveMyWishRefs(list) {
+    demoSave('wt-my-wishes', list.slice(-MAX_MY_WISHES));
+    try { window.localStorage.removeItem('wt-my-wish'); } catch (e) { /* ignore */ }
+  }
+  // The wish this browser sent for one BMS, or (no BMS given) the one it sent or changed last
+  function myWishRef(bms) {
+    var list = myWishRefs();
+    if (bms != null) {
+      var b = cleanBms(bms);
+      return list.filter(function (r) { return r.bms === b; })[0] || null;
+    }
+    return list.length ? list[list.length - 1] : null;
+  }
+  function saveMyWishRef(r) {
+    var list = myWishRefs().filter(function (x) { return x.bms !== r.bms; });
+    list.push(r);
+    saveMyWishRefs(list);
+  }
+  function dropMyWishRef(bms) {
+    saveMyWishRefs(myWishRefs().filter(function (x) { return x.bms !== bms; }));
+  }
+  // On a shared phone or laptop: forget every wish and the BMS this browser remembers
   function forgetMe() {
-    try { window.localStorage.removeItem('wt-my-wish'); window.localStorage.removeItem('wt-bms'); } catch (e) { /* ignore */ }
+    try {
+      ['wt-my-wishes', 'wt-my-wish', 'wt-bms'].forEach(function (k) { window.localStorage.removeItem(k); });
+    } catch (e) { /* ignore */ }
   }
 
   // row: { bms, first_name, message, site, lang, tag_color, charm }
   // Resolves to { result: 'ok' | 'bms_taken' | 'slow_down', id, isNew }
   function submitWish(row) {
-    var ref = myWishRef();
-    var key = ref && ref.bms === row.bms ? ref.key : null;
+    var ref = myWishRef(row.bms);
+    var key = ref ? ref.key : null;
     if (DEMO) {
       var list = demoLoad('wt-demo-wishes', []);
       var idx = -1;
@@ -734,7 +768,8 @@
     }
     return getClient().rpc('submit_wish', {
       p_bms: row.bms, p_name: row.first_name, p_message: row.message,
-      p_site: row.site, p_lang: row.lang, p_tag_color: row.tag_color, p_charm: row.charm, p_consent: true, p_edit_key: key
+      p_site: row.site, p_lang: row.lang, p_tag_color: row.tag_color, p_charm: row.charm, p_consent: true, p_edit_key: key,
+      p_device: deviceId()
     }).then(function (res) {
       if (res.error) throw res.error;
       var r = Array.isArray(res.data) ? res.data[0] : res.data;
@@ -744,22 +779,30 @@
     });
   }
 
-  // The wish this browser sent (or null)
-  function getMyWish() {
-    var ref = myWishRef();
+  // The wish this browser sent for one BMS (or the last one), or null. A wish the team deleted is forgotten here too.
+  function getMyWish(bms) {
+    var ref = myWishRef(bms);
     if (!ref) return Promise.resolve(null);
     if (DEMO) {
       var found = null;
       demoLoad('wt-demo-wishes', []).forEach(function (w, i) {
-        if (w.bms === ref.bms && w.key === ref.key) found = Object.assign({ id: 'local-' + i, like_count: 0 }, w);
+        if (w.bms === ref.bms && w.key === ref.key && w.status !== 'deleted') found = Object.assign({ id: 'local-' + i, like_count: 0 }, w);
       });
+      if (!found) dropMyWishRef(ref.bms);
       return Promise.resolve(found ? Object.assign({ bms: ref.bms }, found) : null);
     }
     return getClient().rpc('get_my_wish', { p_bms: ref.bms, p_edit_key: ref.key }).then(function (res) {
       if (res.error) throw res.error;
       var r = Array.isArray(res.data) ? res.data[0] : res.data;
+      if (!r) dropMyWishRef(ref.bms);
       return r ? Object.assign({ bms: ref.bms }, r) : null;
     });
+  }
+  // Every wish this browser sent, oldest first (one that can't be loaded right now is left out, not forgotten)
+  function getMyWishes() {
+    return Promise.all(myWishRefs().map(function (r) {
+      return getMyWish(r.bms).catch(function (err) { console.error(err); return null; });
+    })).then(function (list) { return list.filter(Boolean); });
   }
 
   /* ---------- Prize: the most-liked wishes ---------- */
@@ -1433,6 +1476,8 @@
     forgetMe: forgetMe,
     submitWish: submitWish,
     getMyWish: getMyWish,
+    getMyWishes: getMyWishes,
+    myWishRefs: myWishRefs,
     PRIZE: PRIZE,
     fetchPrizeTop: fetchPrizeTop,
     leaderList: leaderList,

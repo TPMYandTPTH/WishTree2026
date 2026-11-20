@@ -5,7 +5,8 @@
 --
 -- What is stored, and nothing more:
 --   Employees: first name (or nickname), BMS, the wish (words, site, language, tag colour and charm),
---              the consent tick and the approval status. No emails, no phone numbers, no IP addresses.
+--              the consent tick, the approval status and a random code for the device that sent it.
+--              No emails, no phone numbers, no IP addresses.
 --   Likes:     the BMS of the person who liked and a random code for their device.
 --   Leaders:   the name and title they give, their message and an optional small photo.
 --   Connection codes: wishes, likes and leader messages keep a scrambled code made from the visitor's
@@ -314,6 +315,10 @@ alter table public.wishes add column if not exists conn_code text;
 alter table public.wishes add column if not exists edit_count int not null default 0;
 -- Who approved or set it aside (the name typed on the Approvals page)
 alter table public.wishes add column if not exists reviewer text;
+-- A random code for the browser that sent it (the same code = the same phone or laptop). The Approvals page
+-- flags wishes that came from the same device, so the team can spot one person using several BMS numbers.
+alter table public.wishes add column if not exists device_id text;
+create index if not exists wishes_device_idx on public.wishes (device_id) where device_id is not null;
 
 alter table public.wishes drop constraint if exists wishes_bms_check;
 alter table public.wishes add constraint wishes_bms_check check (char_length(bms) between 1 and 20) not valid;
@@ -540,9 +545,10 @@ $$;
 -- Answers result 'ok', 'bms_taken' or 'slow_down' (answers, not errors, so the rate limits still count the attempt).
 drop function if exists public.submit_wish(text, text, text, text, text, text, text, text, boolean, text);
 drop function if exists public.submit_wish(text, text, text, text, text, text, text, boolean, text);
+drop function if exists public.submit_wish(text, text, text, text, text, text, text, boolean, text, text);
 create function public.submit_wish(
   p_bms text, p_name text, p_message text, p_site text, p_lang text,
-  p_tag_color text, p_charm text, p_consent boolean, p_edit_key text default null)
+  p_tag_color text, p_charm text, p_consent boolean, p_edit_key text default null, p_device text default null)
 returns table (result text, wish_id uuid, edit_key text, is_new boolean)
 language plpgsql security definer set search_path = '' as $$
 declare
@@ -550,6 +556,7 @@ declare
   v_bms text := regexp_replace(coalesce(p_bms, ''), '[[:space:]]+', '', 'g');
   v_name text := btrim(regexp_replace(coalesce(p_name, ''), '[[:space:]]+', ' ', 'g'));
   v_msg text := btrim(coalesce(p_message, ''));
+  v_dev text := case when btrim(coalesce(p_device, '')) ~ '^[A-Za-z0-9-]{16,64}$' then btrim(p_device) end;
   v_conn text := public.conn_code();
   v_id uuid;
   v_hash text;
@@ -580,7 +587,8 @@ begin
          set message = v_msg, first_name = v_name, site = p_site, lang = p_lang,
              tag_color = p_tag_color, charm = p_charm, consent = true,
              status = 'pending', reviewed_at = null, approved_at = null,
-             flags = public.wish_flags(v_msg), updated_at = now(), edit_count = w.edit_count + 1, conn_code = v_conn
+             flags = public.wish_flags(v_msg), updated_at = now(), edit_count = w.edit_count + 1, conn_code = v_conn,
+             device_id = coalesce(v_dev, w.device_id)
        where w.id = v_id;
     exception when check_violation or not_null_violation then
       raise exception 'bad_input';   -- a plain message, so no row details go back to the browser
@@ -591,9 +599,9 @@ begin
 
   v_key := encode(extensions.gen_random_bytes(24), 'hex');
   begin
-    insert into public.wishes (bms, first_name, message, site, lang, tag_color, charm, consent, flags, edit_key_hash, conn_code)
+    insert into public.wishes (bms, first_name, message, site, lang, tag_color, charm, consent, flags, edit_key_hash, conn_code, device_id)
     values (v_bms, v_name, v_msg, p_site, p_lang, p_tag_color, p_charm, true, public.wish_flags(v_msg),
-            encode(sha256(convert_to(v_key, 'UTF8')), 'hex'), v_conn)
+            encode(sha256(convert_to(v_key, 'UTF8')), 'hex'), v_conn, v_dev)
     returning id into v_id;
   exception
     when unique_violation then
@@ -788,7 +796,11 @@ begin
     'wishes', coalesce((select json_agg(x) from (
       select w.id, w.created_at, w.updated_at, w.message, w.first_name, w.bms, w.site, w.lang, w.tag_color, w.charm,
              w.status, w.flags, w.reviewed_at, w.approved_at, w.edit_count, w.reviewer,
-             (select count(*) from public.likes l where l.kind = 'wish' and l.target_id = w.id)::int as like_count
+             (select count(*) from public.likes l where l.kind = 'wish' and l.target_id = w.id)::int as like_count,
+             -- other wishes sent from the same phone or laptop, e.g. 'Ali (BMS 12345)'
+             (select string_agg(o.first_name || ' (BMS ' || o.bms || ')', ', ' order by o.created_at)
+                from public.wishes o
+               where w.device_id is not null and o.device_id = w.device_id and o.id <> w.id) as same_device
       from public.wishes w order by w.created_at desc limit 5000) x), '[]'::json),
     -- photos of approved messages come from get_leader_photos; the others come here, to be checked
     'leaders', coalesce((select json_agg(x) from (
@@ -1089,7 +1101,7 @@ grant execute on function public.get_approved_wishes() to anon, authenticated;
 grant execute on function public.get_leader_messages() to anon, authenticated;
 grant execute on function public.get_leader_photos(uuid[]) to anon, authenticated;
 grant execute on function public.get_settings() to anon, authenticated;
-grant execute on function public.submit_wish(text, text, text, text, text, text, text, boolean, text) to anon, authenticated;
+grant execute on function public.submit_wish(text, text, text, text, text, text, text, boolean, text, text) to anon, authenticated;
 grant execute on function public.get_my_wish(text, text) to anon, authenticated;
 grant execute on function public.set_like(text, uuid, text, boolean, text) to anon, authenticated;
 grant execute on function public.get_device_likes(text) to anon, authenticated;

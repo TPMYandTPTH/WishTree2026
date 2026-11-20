@@ -319,7 +319,7 @@ a{color:var(--slate)}
           <div class="rule"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00AF9B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Free of client or account names</div>
           <div class="rule"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00AF9B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Free of phone numbers, emails or other personal details</div>
           <div class="rule"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00AF9B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Nothing confidential about work</div>
-          <div class="small">Orange flags are automatic checks for phone numbers and emails. A person always decides. Use Edit to change anything (name, words, site, title, photo, place in the list) and approve in one step.</div>
+          <div class="small">Orange flags are automatic checks: phone numbers or emails, a BMS that looks made up, and wishes sent from the same phone. A person always decides, and "Approve all" skips flagged wishes. Use Edit to change anything (name, words, site, title, photo, place in the list) and approve in one step.</div>
         </div>
 
         <div class="box" id="prizeBox">
@@ -503,9 +503,18 @@ a{color:var(--slate)}
     renderList();
   }
 
+  // Orange flags on a wish: phone numbers or emails in the words (checked when it was sent), a BMS that looks
+  // made up, and other wishes sent from the same phone or laptop
+  function wishFlags(w) {
+    var flags = w.flags && w.flags.length ? w.flags.slice() : [];
+    if (w.bms && !C.bmsLooksReal(w.bms)) flags.push("BMS looks made up: this wish can't win");
+    if (w.same_device) flags.push('Same phone as ' + w.same_device + '. Fine if they share a phone; check it if it looks like one person');
+    return flags;
+  }
+
   function renderBulk() {
     var clean = S.kind === 'wish' && S.status === 'pending'
-      ? filtered().filter(function (w) { return !(w.flags && w.flags.length); }) : [];
+      ? filtered().filter(function (w) { return !wishFlags(w).length; }) : [];
     $('bulk').hidden = clean.length < 2;
     if (clean.length < 2) { S.bulkArmed = false; return; }
     $('bulkText').textContent = clean.length + ' waiting wishes have no flags.';
@@ -520,8 +529,7 @@ a{color:var(--slate)}
     var status = x.status || 'pending';
     var editing = S.editing === key;
     var busy = !!S.busy[key];
-    var flags = isW && x.flags && x.flags.length ? x.flags.slice() : [];
-    if (isW && x.bms && !C.bmsLooksReal(x.bms)) flags.push("BMS looks made up: this wish can't win");
+    var flags = isW ? wishFlags(x) : [];
     var name = isW ? (x.first_name || 'Anonymous') : (x.display_name || 'Leader');
     var where = isW ? C.displayWhere(x) : (x.title || '');
     var when = isW ? x.created_at : (x.updated_at || x.created_at);
@@ -1003,7 +1011,7 @@ a{color:var(--slate)}
   }
 
   function bulkApprove() {
-    var clean = filtered().filter(function (w) { return !(w.flags && w.flags.length); });
+    var clean = filtered().filter(function (w) { return !wishFlags(w).length; });
     if (!S.bulkArmed) {
       S.bulkArmed = true;
       renderBulk();
