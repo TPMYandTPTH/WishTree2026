@@ -513,19 +513,7 @@ revoke all on public.app_settings, public.private_salt, public.rate_events, publ
 
 -- 9. What the pages can do -------------------------------------
 
--- Tree and TV pages: approved wishes only, only the fields shown on screen, with like counts
-drop function if exists public.get_approved_wishes();
-create function public.get_approved_wishes()
-returns table (id uuid, message text, display_name text, site text, lang text, tag_color text, charm text,
-               approved_at timestamptz, like_count int)
-language sql stable security definer set search_path = '' as $$
-  select w.id, w.message, w.first_name, w.site, w.lang, w.tag_color, w.charm, w.approved_at,
-         (select count(*) from public.likes l where l.kind = 'wish' and l.target_id = w.id)::int
-  from public.wishes w
-  where w.status = 'approved'
-  order by w.approved_at desc nulls last
-  limit 5000
-$$;
+-- Tree and TV pages: get_approved_wishes is in section 9b (it leaves out winners not announced yet)
 
 -- Tree and TV pages: approved leaders' messages. Photos come separately (get_leader_photos) and only when
 -- photo_version changes, so the pages don't download them every minute.
@@ -1131,7 +1119,6 @@ revoke execute on function public.session_role(text) from public, anon, authenti
 revoke execute on function public.session_who(text) from public, anon, authenticated;
 revoke execute on function public.set_access_password(text, text) from public, anon, authenticated;
 -- Everyone (each checks a password token or only shows approved things)
-grant execute on function public.get_approved_wishes() to anon, authenticated;
 grant execute on function public.get_leader_messages() to anon, authenticated;
 grant execute on function public.get_leader_photos(uuid[]) to anon, authenticated;
 grant execute on function public.get_settings() to anon, authenticated;
@@ -1222,6 +1209,10 @@ where p.pool is null;
 update public.prize_winners p
 set prize = case when p.country = 'TH' then 'THB 250' else 'RM 50' end
 where p.pool = 'early' and p.prize is null;
+-- ...and they're announced with the first daily winners: 9 am on 1 December
+update public.prize_winners
+set live_at = '2026-12-01 09:00:00+08'
+where pool = 'early' and status in ('picked', 'approved') and live_at < '2026-12-01 09:00:00+08';
 
 -- Days already drawn, per country (days are drawn in order)
 create table if not exists public.prize_draw_days (
@@ -1739,6 +1730,23 @@ begin
 end
 $$;
 
+-- Tree and TV pages: approved wishes with like counts. A wish that has been drawn as a winner but isn't announced
+-- yet (before 9 am on its day) is left out, so it's off the tree and the lists until it shows on the Winners tab.
+create or replace function public.get_approved_wishes()
+returns table (id uuid, message text, display_name text, site text, lang text, tag_color text, charm text,
+               approved_at timestamptz, like_count int)
+language sql stable security definer set search_path = '' as $$
+  select w.id, w.message, w.first_name, w.site, w.lang, w.tag_color, w.charm, w.approved_at,
+         (select count(*) from public.likes l where l.kind = 'wish' and l.target_id = w.id)::int
+  from public.wishes w
+  where w.status = 'approved'
+    and not exists (select 1 from public.prize_winners p
+                    where p.wish_id = w.id and p.status <> 'redrawn'
+                      and (p.status = 'picked' or coalesce(p.live_at, p.created_at) > now()))
+  order by w.approved_at desc nulls last
+  limit 5000
+$$;
+
 -- Winners on the site: only once they're live (9 am on their day). Likers show as the last 4 digits of their BMS.
 create or replace function public.get_winners()
 returns table (wish_id uuid, kind text, bms_end text, prize text, reason text, won_at timestamptz)
@@ -1814,6 +1822,7 @@ grant execute on function public.admin_prize_remove_codes(text, text, text) to a
 grant execute on function public.admin_prize_show_code(text, bigint) to anon, authenticated;
 grant execute on function public.my_prizes(text, json) to anon, authenticated;
 grant execute on function public.reveal_prize(text, json, bigint) to anon, authenticated;
+grant execute on function public.get_approved_wishes() to anon, authenticated;
 grant execute on function public.get_winners() to anon, authenticated;
 grant execute on function public.admin_set_winner(text, uuid, boolean, text, text) to anon, authenticated;
 grant execute on function public.admin_delete(text, text, uuid) to anon, authenticated;
