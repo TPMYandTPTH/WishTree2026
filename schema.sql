@@ -1203,6 +1203,9 @@ alter table public.prize_winners add column if not exists redraw_reason text;
 alter table public.prize_winners add column if not exists redrawn_at timestamptz;
 alter table public.prize_winners add column if not exists redrawn_by text;
 alter table public.prize_winners add column if not exists replaces bigint;
+-- Before approving, someone on the team checks the BMS is a real person (from the day's list); the whole team sees it
+alter table public.prize_winners add column if not exists bms_checked_at timestamptz;
+alter table public.prize_winners add column if not exists bms_checked_by text;
 -- The winners picked by hand before the daily draw: RM 50 (THB 250 in Thailand), live since they were picked
 update public.prize_winners p
 set country = coalesce((select public.wish_country(w.site, w.lang) from public.wishes w where w.id = p.wish_id), 'MY'),
@@ -1393,8 +1396,9 @@ begin
 end
 $$;
 
--- Approvals: draw the winners for one day in one country. Days go in order from today (up to 4 days ahead, so on
--- Friday you can draw Saturday to Monday). Drawing a day again only fills what's missing.
+-- Approvals: draw the winners for one day in one country (one click = one day's winners). Days go in order from
+-- today, up to a week ahead, so the team has time to check every BMS before approving. Drawing a day again only fills
+-- what's missing.
 -- Answers {result: 'ok', drawn: {top, random, liker}, short: {...}} or {result: 'name_required' | 'bad_day' |
 -- 'earlier_day_first' (with day) | 'nothing_to_draw'}.
 create or replace function public.admin_prize_draw(p_token text, p_country text, p_day date) returns json
@@ -1414,7 +1418,7 @@ begin
   if v_who is null then return json_build_object('result', 'name_required'); end if;
   if p_country not in ('MY', 'TH') then raise exception 'bad_country'; end if;
   select min(pp.first_day) into v_first from public.prize_plan pp where pp.country = p_country;
-  if p_day is null or v_first is null or p_day < v_today or p_day > v_today + 4 or p_day < v_first then
+  if p_day is null or v_first is null or p_day < v_today or p_day > v_today + 7 or p_day < v_first then
     return json_build_object('result', 'bad_day');
   end if;
   perform 1 from public.prize_plan pp where pp.country = p_country for update;
@@ -1448,7 +1452,8 @@ end
 $$;
 
 -- Approvals: approve drawn winners. Each gets a code set aside and goes live at 9 am on their day (now, if that's
--- passed). Answers {approved, without_code, skipped (wishes no longer approved)}.
+-- passed). Only winners whose BMS was checked are approved. Answers {approved, without_code, skipped (wishes no
+-- longer approved), unchecked (BMS not checked yet)}.
 create or replace function public.admin_prize_approve(p_token text, p_ids bigint[]) returns json
 language plpgsql security definer set search_path = '' as $$
 declare
@@ -1457,11 +1462,16 @@ declare
   n int := 0;
   m int := 0;
   k int := 0;
+  u int := 0;
 begin
   if public.session_role(p_token) is distinct from 'admin' then raise exception 'not_allowed'; end if;
   if v_who is null then return json_build_object('result', 'name_required'); end if;
-  for r in select p.id, p.draw_day, p.kind, p.wish_id from public.prize_winners p
+  for r in select p.id, p.draw_day, p.kind, p.wish_id, p.bms_checked_at from public.prize_winners p
            where p.id = any(coalesce(p_ids, '{}')) and p.status = 'picked' order by p.id for update loop
+    if r.bms_checked_at is null then
+      u := u + 1;
+      continue;
+    end if;
     -- a wish that was set aside or edited back to waiting since the draw can't be approved: redraw it
     if r.kind = 'wish' and not exists (select 1 from public.wishes w where w.id = r.wish_id and w.status = 'approved') then
       k := k + 1;
@@ -1475,7 +1485,31 @@ begin
     n := n + 1;
     if public.prize_assign_code(r.id) is null then m := m + 1; end if;
   end loop;
-  return json_build_object('result', 'ok', 'approved', n, 'without_code', m, 'skipped', k);
+  return json_build_object('result', 'ok', 'approved', n, 'without_code', m, 'skipped', k, 'unchecked', u);
+end
+$$;
+
+-- Approvals: mark drawn winners as "BMS checked" (or take the mark off), before approving them. Logged.
+create or replace function public.admin_prize_check(p_token text, p_ids bigint[], p_on boolean) returns json
+language plpgsql security definer set search_path = '' as $$
+declare
+  v_who text := public.session_who(p_token);
+  n int := 0;
+  r record;
+begin
+  if public.session_role(p_token) is distinct from 'admin' then raise exception 'not_allowed'; end if;
+  if v_who is null then return json_build_object('result', 'name_required'); end if;
+  for r in select p.id from public.prize_winners p
+           where p.id = any(coalesce(p_ids, '{}')) and p.status = 'picked'
+             and (case when p_on then p.bms_checked_at is null else p.bms_checked_at is not null end)
+           order by p.id for update loop
+    update public.prize_winners p
+    set bms_checked_at = case when p_on then now() end, bms_checked_by = case when p_on then v_who end
+    where p.id = r.id;
+    insert into public.prize_log (who, action, winner_id) values (v_who, case when p_on then 'bms_checked' else 'bms_unchecked' end, r.id);
+    n := n + 1;
+  end loop;
+  return json_build_object('result', 'ok', 'changed', n);
 end
 $$;
 
@@ -1557,7 +1591,7 @@ begin
     'winners', coalesce((select json_agg(x order by x.draw_day nulls first, x.id) from (
       select p.id, p.kind, p.wish_id, p.bms, p.prize, p.reason, p.status, p.country, p.pool, p.draw_day, p.live_at,
              p.likes_at_draw, p.created_at, p.created_by, p.approved_at, p.approved_by,
-             p.redraw_reason, p.redrawn_at, p.redrawn_by, p.replaces,
+             p.redraw_reason, p.redrawn_at, p.redrawn_by, p.replaces, p.bms_checked_at, p.bms_checked_by,
              coalesce(array_length(p.devices, 1), 0) as device_count,
              w.first_name, w.site, w.lang, w.message,
              (select count(*) from public.likes l where l.kind = 'wish' and l.target_id = w.id)::int as like_count,
@@ -1857,6 +1891,7 @@ revoke execute on function public.prize_draw_pool(text, text, date, int, text, b
 revoke execute on function public.prize_owner(bigint, text, json) from public, anon, authenticated;
 grant execute on function public.admin_prize_draw(text, text, date) to anon, authenticated;
 grant execute on function public.admin_prize_approve(text, bigint[]) to anon, authenticated;
+grant execute on function public.admin_prize_check(text, bigint[], boolean) to anon, authenticated;
 grant execute on function public.admin_prize_redraw(text, bigint, text) to anon, authenticated;
 grant execute on function public.admin_prize_state(text) to anon, authenticated;
 grant execute on function public.admin_prize_pool(text) to anon, authenticated;

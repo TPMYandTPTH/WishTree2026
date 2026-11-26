@@ -253,6 +253,17 @@ a{color:var(--slate)}
 .codes-box .stock li{border-color:#E7D2A6}
 .btn-gold{background:#B18854;color:#241C14}
 .btn-gold:hover{background:#C29863}
+.chk{display:inline-flex;align-items:center;gap:8px;min-height:38px;padding:0 12px;border:1.5px solid var(--orange-line);border-radius:8px;background:#fff;color:var(--ink);font-size:14px;font-weight:700;cursor:pointer}
+.chk input{width:18px;height:18px;margin:0;accent-color:var(--teal-dark);cursor:pointer}
+.chk.on{border-color:var(--teal-dark);background:var(--teal-soft);color:var(--teal-dark)}
+.chk.on span{font-weight:500}
+.day-tools{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.day-tools .btn{min-height:38px;font-size:14px}
+.quick{display:flex;flex-wrap:wrap;gap:6px}
+.quick button{min-height:32px;padding:0 10px;border:1px solid var(--line-2);border-radius:999px;background:#fff;color:var(--slate);font-size:13px;cursor:pointer}
+.quick button:hover{background:#F4EEE3}
+#drawWhat{margin:0}
+#drawWhat:empty{display:none}
 .pw .gold-note{padding:10px 12px;border-radius:10px;background:#FBF3E2;border:1px solid #E7D2A6;color:#7A5418;font-size:13px;font-weight:700;line-height:1.45}
 .codes-form textarea{width:100%;min-height:130px;padding:10px 12px;border:1.5px solid var(--line-2);border-radius:10px;color:var(--ink);font-family:ui-monospace,Menlo,Consolas,monospace;font-size:14px;line-height:1.5;resize:vertical}
 .codes-form .fld input,.codes-form .fld select{height:42px}
@@ -272,9 +283,9 @@ a{color:var(--slate)}
   .likes{width:100%}
 }
 </style>
-<script src="../vendor/supabase.js?v=2026112609"></script>
-<script src="../config.js?v=2026112609"></script>
-<script src="../wishtree.js?v=2026112609"></script>
+<script src="../vendor/supabase.js?v=2026112610"></script>
+<script src="../config.js?v=2026112610"></script>
+<script src="../wishtree.js?v=2026112610"></script>
 </head>
 <body>
 <div id="demoBar" class="demo-bar" role="status" hidden><span class="pv">PREVIEW</span>Sample messages only; your decisions stay on this device. Any password opens it here. Once the Wish Tree opens, only the Approvals password does.</div>
@@ -449,11 +460,12 @@ a{color:var(--slate)}
         <section class="dv-main" aria-label="Winners">
           <div class="box">
             <h2>Draw winners</h2>
-            <p class="small">Draw the evening before: you can draw today and up to 4 days ahead, one day after another (on Friday, draw Saturday, Sunday and Monday). Approved winners show on the tree at <b>9 am Malaysia time</b> on their day, and each one gets a Grab code that only their own phone can open.</p>
+            <p class="small">One click gives <b>one day's winners</b> for this country. Draw ahead (today and up to a week ahead, one day after another), so the team has time to check them: use <b>Copy list</b> or <b>Download list</b> on that day, check every BMS is real, tick <b>BMS checked</b>, then approve. Approved winners show on the tree at <b>9 am Malaysia time</b> on their day, and each gets a Grab code that only their own phone can open.</p>
             <div class="draw-row">
               <select id="drawDay" aria-label="Day to draw"></select>
               <button type="button" id="drawBtn" class="btn btn-slate">Draw</button>
             </div>
+            <p id="drawWhat" class="small"></p>
             <p id="drawMsg" class="small" role="status"></p>
           </div>
           <div id="dayList" style="display:flex;flex-direction:column;gap:12px"></div>
@@ -1193,6 +1205,7 @@ a{color:var(--slate)}
   var POOL = { top: 'Most liked', random: 'Lucky draw', liker: 'Lucky liker', early: 'Picked before the draw', manual: 'Picked by hand' };
   var POOL_ORDER = { top: 1, random: 2, liker: 3, early: 4, manual: 5 };
   var KL = 'Asia/Kuala_Lumpur';
+  var PRIZE_START = '2026-12-01';
   function klDate(iso, withTime) {
     if (!iso) return '';
     var o = { timeZone: KL, weekday: 'short', day: 'numeric', month: 'short' };
@@ -1201,6 +1214,64 @@ a{color:var(--slate)}
   }
   function dayLabel(ymd) { return ymd ? new Date(ymd + 'T12:00:00+08:00').toLocaleDateString('en-GB', { timeZone: KL, weekday: 'short', day: 'numeric', month: 'short' }) : ''; }
   function addDays(ymd, n) { var d = new Date(ymd + 'T12:00:00Z'); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); }
+  function dayDiff(a, b) { return Math.round((new Date(b + 'T12:00:00Z') - new Date(a + 'T12:00:00Z')) / 864e5); }
+  var QUICK = ['BMS not found', 'Left TP', 'Leader or organizer', 'Not opened in 3 days'];
+  var COUNTRY = { MY: 'Malaysia', TH: 'Thailand' };
+
+  // What one click on Draw gives for that day (same sums as the database: that day's share plus anything
+  // left over from earlier days, never more than the plan's total)
+  function needFor(country, day) {
+    var by = [], total = 0;
+    var ws = winnersOf(country);
+    ((D.data && D.data.plan) || []).filter(function (p) { return p.country === country; }).forEach(function (pl) {
+      var tot = pl.per_day * (dayDiff(pl.first_day, pl.last_day) + 1);
+      var cum = day < pl.first_day ? 0 : pl.per_day * (dayDiff(pl.first_day, day < pl.last_day ? day : pl.last_day) + 1);
+      var upto = 0, all = 0;
+      ws.forEach(function (w) {
+        if (w.pool !== pl.pool || w.status === 'redrawn') return;
+        all++;
+        if (w.draw_day && w.draw_day <= day) upto++;
+      });
+      var n = Math.max(0, Math.min(cum - upto, tot - all));
+      if (n) by.push(fmt(n) + ' ' + POOL[pl.pool].toLowerCase() + ' (' + pl.prize + ')');
+      total += n;
+    });
+    return { total: total, by: by };
+  }
+  function drawLabel() {
+    var day = $('drawDay').value;
+    var btn = $('drawBtn');
+    if (!day || !D.data) { btn.textContent = 'Draw'; $('drawWhat').textContent = ''; return; }
+    var first = ((D.data.plan || []).filter(function (p) { return p.country === D.country; })
+      .reduce(function (m, p) { return !m || p.first_day < m ? p.first_day : m; }, ''));
+    var done = {};
+    (D.data.days || []).forEach(function (x) { if (x.country === D.country) done[x.day] = 1; });
+    for (var dd = first > D.data.today ? first : D.data.today; dd < day; dd = addDays(dd, 1)) {
+      if (!done[dd]) { btn.textContent = 'Draw ' + dayLabel(dd) + ' first'; btn.disabled = true; $('drawWhat').textContent = 'Days go in order: pick ' + dayLabel(dd) + ' above.'; return; }
+    }
+    var n = needFor(D.country, day);
+    btn.textContent = n.total ? 'Draw ' + dayLabel(day) + ': ' + fmt(n.total) + (n.total === 1 ? ' winner' : ' winners') : dayLabel(day) + ' has all its winners';
+    btn.disabled = D.busy || !n.total;
+    $('drawWhat').textContent = n.total ? 'One click draws ' + dayLabel(day) + ' only: ' + n.by.join(', ') + '. Nobody sees them until you approve, and then only from 9 am that day.' : '';
+  }
+  // The day's list for the team to check every BMS (never the codes)
+  function dayWinners(day) {
+    return winnersOf(D.country).filter(function (w) { return (w.draw_day || 'early') === day && w.status !== 'redrawn'; })
+      .sort(function (a, b) { return (POOL_ORDER[a.pool] || 9) - (POOL_ORDER[b.pool] || 9) || a.id - b.id; });
+  }
+  function dayTitle(day) { return day === 'early' ? 'Picked before the draw (shows ' + dayLabel(PRIZE_START) + ')' : dayLabel(day); }
+  function copyDay(day) {
+    var ws = dayWinners(day);
+    var t = ['Wish Tree winners to check · ' + COUNTRY[D.country] + ' · ' + dayTitle(day),
+      'Please check each BMS is a real, current TP employee and the name matches. Reply with any that are not.', ''];
+    ws.forEach(function (w, i) {
+      t.push((i + 1) + '. ' + w.prize + ' · ' + (POOL[w.pool] || '') + ' · ' +
+        (w.kind === 'liker' ? 'Liker (no name)' : (w.first_name || 'Wish')) + ' · BMS ' + w.bms +
+        (w.site ? ' · ' + C.siteName(w.site) : '') + (w.status === 'picked' ? (w.bms_checked_at ? ' · checked' : '') : ' · approved'));
+    });
+    return copyText(t.join('\n'));
+  }
+  function downloadDay(day) { downloadDraw(dayWinners(day), 'wish-tree-winners-' + D.country.toLowerCase() + '-' + (day === 'early' ? 'before-the-draw' : day) + '.csv'); }
 
   function loadDraw() {
     if (C.demo) { renderDraw(); return Promise.resolve(); }
@@ -1217,7 +1288,7 @@ a{color:var(--slate)}
   // Don't redraw the page while someone is typing in it
   function typingInDraw() {
     var a = document.activeElement;
-    return !!(a && $('drawView').contains(a) && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName));
+    return !!(a && $('drawView').contains(a) && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) && a.type !== 'checkbox');
   }
   function setView(v) {
     D.view = v;
@@ -1233,7 +1304,9 @@ a{color:var(--slate)}
   function wStatus(w) {
     var now = Date.now();
     if (w.status === 'redrawn') return { cls: '', text: 'Redrawn by ' + (w.redrawn_by || 'an admin') + ', ' + klDate(w.redrawn_at, true) + ': ' + (w.redraw_reason || '') };
-    if (w.status === 'picked') return { cls: 'warn', text: 'Drawn by ' + (w.created_by || 'an admin') + ' · waiting for approval' };
+    if (w.status === 'picked') return w.bms_checked_at
+      ? { cls: 'ok', text: 'Drawn by ' + (w.created_by || 'an admin') + ' · BMS checked by ' + (w.bms_checked_by || 'an admin') + ' ' + klDate(w.bms_checked_at, true) + ' · ready to approve' }
+      : { cls: 'warn', text: 'Drawn by ' + (w.created_by || 'an admin') + ' · check the BMS is real, tick it, then approve' };
     var by = w.approved_by ? 'Approved by ' + w.approved_by + ' · ' : '';
     if (w.live_at && new Date(w.live_at).getTime() > now) return { cls: 'ok', text: by + 'shows on the tree ' + klDate(w.live_at, true) + (w.has_code ? ' · code set aside' : ' · no code set aside yet') };
     if (w.given_at) return { cls: 'ok', text: (w.given_how === 'whatsapp' ? 'Code shown on this page (for WhatsApp) ' : 'Opened on their phone ') + klDate(w.given_at, true) + (w.views > 1 ? ' · seen ' + w.views + ' times' : '') };
@@ -1273,7 +1346,8 @@ a{color:var(--slate)}
       var undo = w.pool === 'early' || w.pool === 'manual';
       h += '<div class="inline"><input type="text" data-dv-reason="' + esc(id) + '" maxlength="200" placeholder="Why? e.g. leader or organizer, not opened in 3 days" value="' + esc(D.redraw[id]) + '" aria-label="Reason">' +
         '<button type="button" class="btn btn-reject" data-dv="redraw-go" data-id="' + esc(id) + '"' + dis + '>' + (undo ? 'Undo winner' : 'Redraw') + '</button>' +
-        '<button type="button" class="btn btn-ghost" data-dv="redraw-cancel" data-id="' + esc(id) + '">Cancel</button></div>';
+        '<button type="button" class="btn btn-ghost" data-dv="redraw-cancel" data-id="' + esc(id) + '">Cancel</button></div>' +
+        '<div class="quick">' + QUICK.map(function (q) { return '<button type="button" data-dv="reason" data-id="' + esc(id) + '" data-r="' + esc(q) + '">' + esc(q) + '</button>'; }).join('') + '</div>';
     } else if (D.ask[id]) {
       h += '<div class="gold-note">Only for a winner who can\'t open it on their phone. Once you see it, it counts as given, and your name is logged.</div>' +
         '<div class="inline">' +
@@ -1282,7 +1356,12 @@ a{color:var(--slate)}
     } else {
       var live = w.live_at && new Date(w.live_at).getTime() <= Date.now();
       h += '<div class="actions">';
-      if (w.status === 'picked') h += '<button type="button" class="btn btn-approve" data-dv="approve" data-id="' + esc(id) + '"' + dis + '>' + checkIcon() + 'Approve</button>';
+      if (w.status === 'picked') {
+        h += '<label class="chk' + (w.bms_checked_at ? ' on' : '') + '"><input type="checkbox" data-dv-check="' + esc(id) + '"' + (w.bms_checked_at ? ' checked' : '') + dis + '>BMS checked' +
+          (w.bms_checked_at ? ' <span>by ' + esc(w.bms_checked_by || '') + '</span>' : '') + '</label>';
+        h += '<button type="button" class="btn btn-approve" data-dv="approve" data-id="' + esc(id) + '"' + (D.busy || !w.bms_checked_at ? ' disabled' : '') +
+          (w.bms_checked_at ? '' : ' title="Tick BMS checked first"') + '>' + checkIcon() + 'Approve</button>';
+      }
       if (!w.given_at) h += '<button type="button" class="btn btn-reject" data-dv="redraw" data-id="' + esc(id) + '"' + dis + '>' + (w.pool === 'early' || w.pool === 'manual' ? 'Undo winner' : 'Redraw') + '</button>';
       if (live && w.has_code && !D.shown[id]) h += '<button type="button" class="btn btn-gold" data-dv="show" data-id="' + esc(id) + '"' + dis + '>Show code</button>';
       h += '</div>';
@@ -1356,12 +1435,12 @@ a{color:var(--slate)}
       sel.setAttribute('data-country', country);
     }
 
-    // Days that can be drawn: today and up to 4 days ahead, from the first day of the plan
+    // Days that can be drawn: today and up to a week ahead, from the first day of the plan
     var first = plan.reduce(function (m, p) { return !m || p.first_day < m ? p.first_day : m; }, '');
     var drawn = {};
     (d.days || []).forEach(function (x) { if (x.country === country) drawn[x.day] = x; });
     var opts = [];
-    for (var i = 0; i <= 4; i++) {
+    for (var i = 0; i <= 7; i++) {
       var day = addDays(d.today, i);
       if (first && day >= first) opts.push(day);
     }
@@ -1371,12 +1450,12 @@ a{color:var(--slate)}
     opts.forEach(function (day) { if (!next && !drawn[day]) next = day; });
     dsel.innerHTML = opts.length ? opts.map(function (day) {
       return '<option value="' + day + '">' + esc(dayLabel(day)) + (drawn[day] ? ' (drawn, fill what\'s missing)' : '') + '</option>';
-    }).join('') : '<option value="">The first draw is for ' + esc(dayLabel(first)) + '. It opens on ' + esc(dayLabel(addDays(first, -4))) + '.</option>';
+    }).join('') : '<option value="">The first draw is for ' + esc(dayLabel(first)) + '. It opens on ' + esc(dayLabel(addDays(first, -7))) + '.</option>';
     dsel.value = (keep && opts.indexOf(keep) !== -1 && dsel.getAttribute('data-country') === country) ? keep : (next || opts[0] || '');
     dsel.setAttribute('data-country', country);
     dsel.disabled = !opts.length;
     $('drawBtn').disabled = !opts.length || D.busy;
-    $('drawBtn').textContent = dsel.value ? 'Draw winners for ' + dayLabel(dsel.value) : 'Draw';
+    drawLabel();
 
     // Winners by day, latest day first; picked by hand before the draw at the end
     var list = winnersOf(country);
@@ -1388,12 +1467,19 @@ a{color:var(--slate)}
         return (a.status === 'redrawn') - (b.status === 'redrawn') || (POOL_ORDER[a.pool] || 9) - (POOL_ORDER[b.pool] || 9) || a.id - b.id;
       });
       var nPicked = ws.filter(function (w) { return w.status === 'picked'; }).length;
+      var nChecked = ws.filter(function (w) { return w.status === 'picked' && w.bms_checked_at; }).length;
       var nLive = ws.filter(function (w) { return w.status !== 'redrawn'; }).length;
       var nOpened = ws.filter(function (w) { return w.status !== 'redrawn' && w.given_at; }).length;
+      var bz = D.busy ? ' disabled' : '';
       var head = '<div class="day-head"><div><h3>' + esc(k === 'early' ? 'Picked before the draw' : dayLabel(k)) + '</h3>' +
-        '<p class="small">' + fmt(nLive) + (nLive === 1 ? ' winner' : ' winners') + ' · ' + fmt(nOpened) + ' opened' +
+        '<p class="small">' + fmt(nLive) + (nLive === 1 ? ' winner' : ' winners') +
+        (nPicked ? ' · ' + fmt(nChecked) + ' of ' + fmt(nPicked) + ' BMS checked' : '') + ' · ' + fmt(nOpened) + ' opened' +
         (k !== 'early' && drawn[k] ? ' · drawn by ' + esc(drawn[k].who || '') : '') + '</p></div>' +
-        (nPicked ? '<button type="button" class="btn btn-approve" data-dv="approve-day" data-day="' + esc(k) + '"' + (D.busy ? ' disabled' : '') + '>' + checkIcon() + 'Approve all ' + fmt(nPicked) + '</button>' : '') + '</div>';
+        '<div class="day-tools">' +
+        (nLive ? '<button type="button" class="btn btn-ghost" data-dv="copy-day" data-day="' + esc(k) + '">Copy list</button>' +
+          '<button type="button" class="btn btn-ghost" data-dv="csv-day" data-day="' + esc(k) + '">Download list</button>' : '') +
+        (nPicked ? '<button type="button" class="btn btn-approve" data-dv="approve-day" data-day="' + esc(k) + '"' + (D.busy || !nChecked ? ' disabled' : '') + '>' + checkIcon() +
+          (nChecked ? 'Approve ' + fmt(nChecked) + ' checked' : 'Tick BMS checked to approve') + '</button>' : '') + '</div></div>';
       return '<div class="day">' + head + ws.map(winnerHtml).join('') + '</div>';
     }).join('') : '<div class="empty">No winners drawn yet for ' + (country === 'MY' ? 'Malaysia' : 'Thailand') + '.</div>';
   }
@@ -1419,7 +1505,7 @@ a{color:var(--slate)}
     drawCall('admin_prize_draw', { p_country: D.country, p_day: day }).then(function (r) {
       r = r || {};
       if (r.result === 'earlier_day_first') { $('drawMsg').textContent = 'Draw ' + dayLabel(r.day) + ' first. Days go in order.'; }
-      else if (r.result === 'bad_day') { $('drawMsg').textContent = 'You can draw today and up to 4 days ahead, from the first day of the plan.'; }
+      else if (r.result === 'bad_day') { $('drawMsg').textContent = 'You can draw today and up to a week ahead, from the first day of the plan.'; }
       else if (r.result === 'name_required') { $('drawMsg').textContent = 'Save your name at the top first.'; }
       else if (r.result === 'nothing_to_draw') { $('drawMsg').textContent = dayLabel(day) + ' already has all its winners.'; }
       else {
@@ -1444,10 +1530,19 @@ a{color:var(--slate)}
       else {
         var msg = 'Approved ' + fmt(r.approved) + '.';
         if (r.without_code) msg += ' ' + fmt(r.without_code) + ' still need a code: add codes and they get one straight away.';
+        if (r.unchecked) msg += ' ' + fmt(r.unchecked) + ' not approved: tick BMS checked first.';
         if (r.skipped) msg += ' ' + fmt(r.skipped) + (r.skipped === 1 ? ' wish isn\'t' : ' wishes aren\'t') + ' approved any more, so ' + (r.skipped === 1 ? 'it was' : 'they were') + ' skipped: redraw ' + (r.skipped === 1 ? 'it' : 'them') + '.';
         $('drawMsg').textContent = msg;
         C.track('prize_approve', { count: r.approved || 0 });
       }
+      return loadDraw();
+    }).catch(function () {});
+  }
+  function setChecked(ids, on) {
+    if (!ids.length) return;
+    drawCall('admin_prize_check', { p_ids: ids.map(Number), p_on: !!on }).then(function (r) {
+      r = r || {};
+      if (r.result === 'name_required') $('drawErr').textContent = 'Save your name at the top first.';
       return loadDraw();
     }).catch(function () {});
   }
@@ -1547,27 +1642,31 @@ a{color:var(--slate)}
       $('acMsg').textContent = r.result === 'name_required' ? 'Save your name at the top first.' : 'Nothing was removed.';
     }).catch(function (err) { if (signedOut(err)) return; console.error(err); $('acMsg').textContent = 'Could not remove the codes.'; });
   }
-  function downloadDraw() {
-    var lines = [['Country', 'Day', 'Prize', 'How', 'Name', 'BMS', 'Site', 'Likes got', 'Likes given', 'Status', 'Drawn by', 'Approved by', 'Shows from', 'Code', 'Redraw reason'].map(csvCell).join(',')];
-    ((D.data && D.data.winners) || []).forEach(function (w) {
+  function downloadDraw(list, file) {
+    var lines = [['Country', 'Day', 'Prize', 'How', 'Name', 'BMS', 'Site', 'Likes got', 'Likes given', 'Status', 'Drawn by', 'BMS checked by', 'Approved by', 'Shows from', 'Code', 'Redraw reason'].map(csvCell).join(',')];
+    (Array.isArray(list) ? list : ((D.data && D.data.winners) || [])).forEach(function (w) {
       var code = w.given_at ? (w.given_how === 'whatsapp' ? 'Shown for WhatsApp ' : 'Opened on phone ') + new Date(w.given_at).toLocaleString('en-GB', { timeZone: KL })
         : w.has_code ? 'Set aside, not opened' : 'No code yet';
       lines.push([w.country, w.draw_day || 'Before the draw', w.prize, POOL[w.pool] || '', w.kind === 'liker' ? 'Liker' : (w.first_name || ''), w.bms,
         w.site ? C.siteName(w.site) : '', w.kind === 'liker' ? '' : (w.likes_at_draw != null ? w.likes_at_draw : w.like_count), w.likes_given || 0, w.status === 'picked' ? 'Waiting for approval' : w.status === 'redrawn' ? 'Redrawn' : 'Approved',
-        w.created_by || '', w.approved_by || '', w.live_at ? new Date(w.live_at).toLocaleString('en-GB', { timeZone: KL }) : '', w.status === 'redrawn' ? '' : code, w.redraw_reason || ''].map(csvCell).join(','));
+        w.created_by || '', w.bms_checked_by || (w.status === 'picked' ? 'Not yet' : ''), w.approved_by || '', w.live_at ? new Date(w.live_at).toLocaleString('en-GB', { timeZone: KL }) : '', w.status === 'redrawn' ? '' : code, w.redraw_reason || ''].map(csvCell).join(','));
     });
-    saveCsv(lines, 'wish-tree-prize-winners.csv');
+    saveCsv(lines, file || 'wish-tree-prize-winners.csv');
   }
 
   qsa('.vbtn').forEach(function (b) { b.addEventListener('click', function () { setView(b.getAttribute('data-view')); }); });
   qsa('.ctab').forEach(function (b) {
     b.addEventListener('click', function () { D.country = b.getAttribute('data-country'); $('drawMsg').textContent = ''; $('acMsg').textContent = ''; $('drawErr').textContent = ''; renderDraw(); });
   });
-  $('drawDay').addEventListener('change', function () { $('drawBtn').textContent = 'Draw winners for ' + dayLabel($('drawDay').value); });
+  $('drawDay').addEventListener('change', drawLabel);
+  $('dayList').addEventListener('change', function (e) {
+    var id = e.target.getAttribute('data-dv-check');
+    if (id) { $('drawErr').textContent = ''; setChecked([id], e.target.checked); }
+  });
   $('drawBtn').addEventListener('click', doDraw);
   $('codesForm').addEventListener('submit', addCodes);
   $('rmCodesBtn').addEventListener('click', removeCodes);
-  $('drawCsv').addEventListener('click', downloadDraw);
+  $('drawCsv').addEventListener('click', function () { downloadDraw(); });
   $('dayList').addEventListener('input', function (e) {
     var id = e.target.getAttribute('data-dv-reason');
     if (id) D.redraw[id] = e.target.value;
@@ -1585,8 +1684,11 @@ a{color:var(--slate)}
     if (act === 'approve') approveIds([id]);
     else if (act === 'approve-day') {
       var day = b.getAttribute('data-day');
-      approveIds(winnersOf(D.country).filter(function (w) { return w.status === 'picked' && (w.draw_day || 'early') === day; }).map(function (w) { return w.id; }));
+      approveIds(winnersOf(D.country).filter(function (w) { return w.status === 'picked' && w.bms_checked_at && (w.draw_day || 'early') === day; }).map(function (w) { return w.id; }));
     }
+    else if (act === 'copy-day') { copyDay(b.getAttribute('data-day')).then(function () { b.textContent = 'Copied'; setTimeout(function () { b.textContent = 'Copy list'; }, 2500); }); }
+    else if (act === 'csv-day') downloadDay(b.getAttribute('data-day'));
+    else if (act === 'reason') { D.redraw[id] = b.getAttribute('data-r'); renderDraw(); var rf = document.querySelector('[data-dv-reason="' + id + '"]'); if (rf) rf.focus(); }
     else if (act === 'redraw') { D.redraw[id] = ''; delete D.ask[id]; renderDraw(); var f = document.querySelector('[data-dv-reason="' + id + '"]'); if (f) f.focus(); }
     else if (act === 'redraw-cancel') { delete D.redraw[id]; renderDraw(); }
     else if (act === 'redraw-go') doRedraw(id);
