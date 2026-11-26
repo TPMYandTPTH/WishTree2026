@@ -152,12 +152,12 @@ window.WISH_CFG = {
     // The Grab vouchers, shown big on the prize card (tree page) and the prize slide (TVs). Keep them in line with
     // the prize_plan table.
     vouchers: [
-      { country: 'Malaysia', when: '1 to 18 December, every day', items: [
+      { country: 'Malaysia', code: 'MY', when: '1 to 18 December, every day', items: [
         { amount: 'RM 50', who: '3 most-liked wishes' },
         { amount: 'RM 20', who: '3 random wishes' },
         { amount: 'RM 20', who: '1 random liker' }
       ] },
-      { country: 'Thailand', when: '1 to 16 December, every day', items: [
+      { country: 'Thailand', code: 'TH', when: '1 to 16 December, every day', items: [
         { amount: 'THB 250', who: 'The most-liked Thai wish' },
         { amount: 'THB 250', who: '1 random Thai wish' },
         { amount: 'THB 250', who: '1 random liker' }
@@ -165,12 +165,13 @@ window.WISH_CFG = {
     ],
     // Used only if vouchers is empty
     text: 'Every day from 1 December, wishes and likers win Grab vouchers.',
-    // The grand prizes: shown after the vouchers, and one of them (or a voucher) pops out of the big gift when it opens.
+    // The grand prizes: listed after the vouchers, and each has its own gift in the middle under the tree (the Grab
+    // vouchers have a gift with each country's flag). short: on the gift; line1/line2: on the card that rises out.
     // icon: watch, bag, hotel or voucher (simple drawings, no logos).
     grand: [
-      { name: 'Hotel staycation for 2', short: 'Hotel stay', line2: 'for 2', count: 2, icon: 'hotel' },
-      { name: 'Apple Watch SE', short: 'Apple Watch', line2: 'SE', count: 2, icon: 'watch' },
-      { name: 'CK backpack', short: 'CK backpack', line2: '', count: 2, icon: 'bag' }
+      { name: 'Marriott staycation for 2', short: 'Marriott', line1: 'Marriott', line2: 'Staycation for 2', count: 2, icon: 'hotel' },
+      { name: 'Apple Watch SE', short: 'Apple Watch', line1: 'Apple Watch SE', line2: 'Grand prize', count: 2, icon: 'watch' },
+      { name: 'CK backpack', short: 'CK backpack', line1: 'CK backpack', line2: 'Grand prize', count: 2, icon: 'bag' }
     ],
     grandWhen: 'Winners at the end',
     tvDeadline: 'New winners every day. One prize per person.',

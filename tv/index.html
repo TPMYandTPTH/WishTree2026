@@ -210,10 +210,10 @@ body.pointer .fs{opacity:1;pointer-events:auto}
   .live .dot{animation:none}
 }
 </style>
-<script src="../vendor/supabase.js?v=2026112605"></script>
-<script src="../vendor/qrcode.min.js?v=2026112605"></script>
-<script src="../config.js?v=2026112605"></script>
-<script src="../wishtree.js?v=2026112605"></script>
+<script src="../vendor/supabase.js?v=2026112606"></script>
+<script src="../vendor/qrcode.min.js?v=2026112606"></script>
+<script src="../config.js?v=2026112606"></script>
+<script src="../wishtree.js?v=2026112606"></script>
 </head>
 <body>
 <div class="backdrop" aria-hidden="true"></div>
@@ -488,7 +488,7 @@ body.pointer .fs{opacity:1;pointer-events:auto}
     S.sincePrize++;
     if (PRIZE_ON && hasW && S.sincePrize >= PRIZE_EVERY) {
       S.sincePrize = 0;
-      return { kind: 'prize', id: 'prize' };
+      return { kind: 'prize', id: C.randomPrizeGift() };   // a different prize gift opens each time
     }
     if (hasL && (!hasW || S.sinceLeader >= LEADER_EVERY)) {
       S.sinceLeader = 0;

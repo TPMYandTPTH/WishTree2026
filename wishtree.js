@@ -1034,7 +1034,29 @@
     }
     return h;
   }
-  // Every prize there is, for the big gift on the 3D tree to show one at random: the grand prizes and each Grab amount
+  // The prize gifts under the tree: one Grab gift per country (with its flag) and one gift per grand prize.
+  // id is what a gift is selected by ({ kind: 'prize', id }); card is what rises out of it when it opens.
+  function prizeGifts() {
+    var out = [];
+    (Array.isArray(PRIZE.vouchers) ? PRIZE.vouchers : []).forEach(function (g) {
+      var code = String(g.code || (/thai/i.test(g.country || '') ? 'TH' : 'MY')).toUpperCase();
+      var amounts = [];
+      (g.items || []).forEach(function (it) { if (it.amount && amounts.indexOf(it.amount) === -1) amounts.push(it.amount); });
+      out.push({ id: code.toLowerCase(), flag: code, label: 'Grab vouchers',
+        card: { icon: 'voucher', line1: amounts.join(' · '), line2: 'Grab · ' + (g.country || '') } });
+    });
+    (Array.isArray(PRIZE.grand) ? PRIZE.grand : []).forEach(function (g, i) {
+      out.push({ id: g.id || g.icon || 'grand' + i, icon: g.icon || 'voucher', label: g.short || g.name || '',
+        card: { icon: g.icon || 'voucher', line1: g.line1 || g.short || g.name || '', line2: g.line2 || 'Grand prize' } });
+    });
+    return out;
+  }
+  // A prize gift at random (the TVs open a different one each time; the prize link on the tree page too)
+  function randomPrizeGift() {
+    var list = prizeGifts();
+    return list.length ? list[Math.floor(Math.random() * list.length)].id : 'prize';
+  }
+  // Every prize there is: the grand prizes and each Grab amount
   function prizePool() {
     var out = [];
     (Array.isArray(PRIZE.grand) ? PRIZE.grand : []).forEach(function (g) {
@@ -1516,10 +1538,30 @@
     '.wt-gift-gold .wt-gift-lid{transform-origin:90% 100%}',
     '.wt-gift-gold:hover .wt-gift-lid{transform:rotate(8deg)}',
     '.wt-gift-gold[aria-pressed="true"] .wt-gift-lid{transform:rotate(38deg) translateY(-30%)}',
-    '.wt-gift-green{left:52%;top:89%;width:6.5%;--box:#343F37;--lid:#3D493F;--rib:#B18854}',
-    '.wt-gift-cream{left:38%;top:89.5%;width:6%;--box:#F4EEE3;--lid:#FBF7EF;--rib:#6C151E}',
+    '.wt-gift-green{left:18%;top:84.5%;width:5%;--box:#343F37;--lid:#3D493F;--rib:#B18854}',
+    '.wt-gift-cream{left:75%;top:84.5%;width:5%;--box:#F4EEE3;--lid:#FBF7EF;--rib:#6C151E}',
     /* the prize gift: big, on the right, always moving a little */
-    '.wt-gift-prize{left:72%;top:84.5%;width:14%;aspect-ratio:1/0.92;z-index:3;--box:#6C151E;--lid:#7D1C26;--rib:#C99A55;animation:wt-hop 3s ease-in-out infinite;transform-origin:50% 100%}',
+    '.wt-gift-prize{left:72%;top:84.5%;width:14%;aspect-ratio:1/0.92;z-index:3;--box:#6C151E;--lid:#7D1C26;--rib:#C99A55;animation:wt-hop 6.5s ease-in-out infinite;transform-origin:50% 100%}',
+    '.wt-gift-flag{top:84%;width:12%}',
+    '.wt-flag-my{left:6%}',
+    '.wt-flag-th{left:82%;animation-delay:-3.2s}',
+    '.wt-flag-my .wt-gift-box{background:linear-gradient(90deg,#010066 0 50%,transparent 50%) 0 0/100% 57% no-repeat,repeating-linear-gradient(180deg,#CC0001 0 7.14%,#FFFFFF 7.14% 14.28%)}',
+    '.wt-flag-my .wt-gift-box::after{content:"";position:absolute;left:12%;top:12%;width:14%;aspect-ratio:1;border-radius:50%;box-shadow:inset .5cqw 0 0 #FFCC00}',
+    '.wt-flag-th .wt-gift-box{background:linear-gradient(180deg,#A51931 0 16.66%,#F4F5F8 16.66% 33.33%,#2D2A4A 33.33% 66.66%,#F4F5F8 66.66% 83.33%,#A51931 83.33%)}',
+    '.wt-gift-mid{top:89%;width:7.5%;aspect-ratio:1/0.9}',
+    '.wt-mid-2{left:36%;--box:#343F37;--lid:#3D493F;--rib:#B18854;animation-delay:-1.3s}',
+    '.wt-mid-3{left:46.5%;top:90%;--box:#F4EEE3;--lid:#FBF7EF;--rib:#6C151E;animation-delay:-2.6s}',
+    '.wt-mid-4{left:57%;--box:#B18854;--lid:#BE9663;--rib:#6C151E;animation-delay:-3.9s}',
+    '.wt-gift-ic{position:absolute;left:50%;top:50%;width:46%;transform:translate(-50%,-40%);color:#F4EEE3;line-height:0}',
+    '.wt-mid-3 .wt-gift-ic{color:#6C151E}',
+    '.wt-gift-ic svg{width:100%;height:auto}',
+    '.wt-gift-mid .wt-gift-label{display:none}',
+    '.wt-gift-flag .wt-gift-label{bottom:-14%;font-size:1.4cqw}',
+    '.wt-ginger{top:86%;width:4%;aspect-ratio:1/1.5;animation:none}',
+    '.wt-ginger-red{left:27%}',
+    '.wt-ginger-gold{left:68%}',
+    '.wt-ginger svg{width:100%;height:100%;display:block;filter:drop-shadow(0 3px 3px rgba(0,0,0,.3));transition:transform .3s cubic-bezier(.3,1.5,.5,1)}',
+    '.wt-ginger:hover svg,.wt-ginger[aria-pressed="true"] svg{transform:translateY(-12%) rotate(-6deg)}',
     '.wt-gift-prize .wt-gift-box{height:70%;box-shadow:0 8px 14px rgba(0,0,0,.3)}',
     '.wt-gift-prize .wt-gift-lid{top:16%;height:18%}',
     '.wt-gift-bow{position:absolute;left:50%;top:2%;width:44%;height:18%;transform:translateX(-50%);pointer-events:none;transition:transform .5s cubic-bezier(.3,1.5,.5,1)}',
@@ -1540,6 +1582,16 @@
     '.wt-leader[aria-pressed="true"] .wt-lball{box-shadow:inset 0 0 0 calc(var(--d) * .06) #D2AE78,0 0 0 3px #F4EEE3,0 0 0 8px rgba(201,154,85,.55),0 8px 18px rgba(0,0,0,.4)}',
     '@media (prefers-reduced-motion:reduce){.wt-tag,.wt-body{transition:none}.wt-tag.wt-new,.wt-light,.wt-halo,.wt-leader,.wt-swing,.wt-tag:hover .wt-swing,.wt-gift-prize{animation:none}}'
   ].join('\n');
+
+  // A little gingerbread figure for the flat tree (the 3D tree builds its own)
+  var GINGER_SVG = '<svg viewBox="0 0 40 60" aria-hidden="true">' +
+    '<g fill="#9C5A2A"><circle cx="20" cy="11" r="9"/><rect x="11" y="18" width="18" height="22" rx="8"/>' +
+    '<rect x="1" y="21" width="16" height="7" rx="3.5" transform="rotate(-20 9 24)"/><rect x="23" y="21" width="16" height="7" rx="3.5" transform="rotate(20 31 24)"/>' +
+    '<rect x="10" y="34" width="8" height="22" rx="4" transform="rotate(12 14 45)"/><rect x="22" y="34" width="8" height="22" rx="4" transform="rotate(-12 26 45)"/></g>' +
+    '<g fill="#2A1A10"><circle cx="17" cy="10" r="1.4"/><circle cx="23" cy="10" r="1.4"/></g>' +
+    '<path d="M16 14q4 3 8 0" fill="none" stroke="#FAF3E6" stroke-width="1.4" stroke-linecap="round"/>' +
+    '<g fill="#FAF3E6"><circle cx="20" cy="26" r="1.6"/><circle cx="20" cy="32" r="1.6"/></g>' +
+    '<rect x="13" y="18" width="14" height="3.5" rx="1.7" fill="#6C151E"/></svg>';
 
   function ensureCss() {
     if (document.getElementById('wt-css')) return;
@@ -1574,12 +1626,17 @@
         '<svg class="wt-art" viewBox="0 0 620 760" aria-hidden="true">' + TREE_SVG + '</svg>' +
         '<div class="wt-crown" role="group" aria-label="Messages from our leaders"></div>' +
         '<div class="wt-tags" role="group" aria-label="Wishes on the tree"></div>' +
+        // two little gingerbread figures hold the hidden wishes
         (o.secrets || []).map(function (id) {
-          return '<button type="button" class="wt-gift wt-gift-' + esc(id) + '" data-kind="secret" data-id="' + esc(id) + '" aria-label="A gift under the tree"><span class="wt-gift-lid"></span><span class="wt-gift-box"></span></button>';
+          return '<button type="button" class="wt-gift wt-ginger wt-ginger-' + esc(id) + '" data-kind="secret" data-id="' + esc(id) + '" aria-label="A gingerbread figure under the tree">' + GINGER_SVG + '</button>';
         }).join('') +
-        (o.prize ? '<button type="button" class="wt-gift wt-gift-prize" data-kind="prize" data-id="prize" aria-label="' + esc(o.prizeLabel || 'Prize for the most-liked wishes') + '">' +
-          '<span class="wt-gift-bow"></span><span class="wt-gift-lid"></span><span class="wt-gift-box"></span>' +
-          '<span class="wt-gift-label">' + esc(o.prizeTag || PRIZE.tag || (PRIZE.winners + ' x ' + PRIZE.amount)) + '</span></button>' : '') +
+        // the prize gifts: a Grab gift with each country's flag, and the grand prizes in the middle
+        (o.prize ? prizeGifts().map(function (pg, i) {
+          var cls = pg.flag ? 'wt-gift-flag wt-flag-' + esc(pg.flag.toLowerCase()) : 'wt-gift-mid wt-mid-' + i;
+          return '<button type="button" class="wt-gift wt-gift-prize ' + cls + '" data-kind="prize" data-id="' + esc(pg.id) + '" aria-label="' + esc('Prize: ' + (pg.flag ? pg.label + ', ' + pg.card.line2 : pg.card.line1)) + '">' +
+            '<span class="wt-gift-bow"></span><span class="wt-gift-lid"></span><span class="wt-gift-box">' + (pg.flag ? '' : '<span class="wt-gift-ic">' + iconSvgPath(pg.icon, 24) + '</span>') + '</span>' +
+            '<span class="wt-gift-label">' + esc(pg.label) + '</span></button>';
+        }).join('') : '') +
         '<span class="wt-lgifts"></span>' +
         '</div>';
       container._wt = { seen: {}, first: true, onSelect: null };
@@ -1731,6 +1788,8 @@
     likerWinners: likerWinners,
     voucherHtml: voucherHtml,
     prizePool: prizePool,
+    prizeGifts: prizeGifts,
+    randomPrizeGift: randomPrizeGift,
     PRIZE_ICONS: PRIZE_ICONS,
     fetchMyPrizes: fetchMyPrizes,
     revealPrize: revealPrize,

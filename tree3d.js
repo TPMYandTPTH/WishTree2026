@@ -139,6 +139,86 @@ function drawPrizeCard(p) {
   return cv;
 }
 
+// Small flags for the Grab gifts (drawn simply: Malaysia's stripes, canton, crescent and star; Thailand's stripes)
+function drawFlag(x, code, X, Y, W, H) {
+  if (code === 'TH') {
+    const bands = [['#A51931', 1], ['#F4F5F8', 1], ['#2D2A4A', 2], ['#F4F5F8', 1], ['#A51931', 1]];
+    let y = Y;
+    bands.forEach(([c, n]) => { x.fillStyle = c; x.fillRect(X, y, W, (H * n) / 6 + 0.5); y += (H * n) / 6; });
+    return;
+  }
+  const sh = H / 14;
+  for (let i = 0; i < 14; i++) { x.fillStyle = i % 2 ? '#FFFFFF' : '#CC0001'; x.fillRect(X, Y + i * sh, W, sh + 0.5); }
+  const cw = W / 2, ch = sh * 8;
+  x.fillStyle = '#010066';
+  x.fillRect(X, Y, cw, ch);
+  const cy = Y + ch / 2, r = ch * 0.36, cx = X + cw * 0.38;
+  x.fillStyle = '#FFCC00';
+  x.beginPath(); x.arc(cx, cy, r, 0, TAU); x.fill();
+  x.fillStyle = '#010066';
+  x.beginPath(); x.arc(cx + r * 0.28, cy, r * 0.82, 0, TAU); x.fill();
+  // 14-point star
+  const sx = X + cw * 0.72, sr = ch * 0.3;
+  x.fillStyle = '#FFCC00';
+  x.beginPath();
+  for (let i = 0; i < 28; i++) {
+    const rr = i % 2 ? sr * 0.45 : sr;
+    const a = -Math.PI / 2 + (i * Math.PI) / 14;
+    x.lineTo(sx + Math.cos(a) * rr, cy + Math.sin(a) * rr);
+  }
+  x.closePath(); x.fill();
+}
+// The front of a Grab gift: the flag, with "Grab vouchers" under it
+function drawFlagLabel(code, text) {
+  const W = 320, H = 240;
+  const cv = makeCanvas(W, H);
+  const x = cv.getContext('2d');
+  x.fillStyle = '#F4EEE3';
+  x.fillRect(0, 0, W, H);
+  x.strokeStyle = '#B18854';
+  x.lineWidth = 8;
+  x.strokeRect(4, 4, W - 8, H - 8);
+  drawFlag(x, code, 18, 18, W - 36, 150);
+  x.strokeStyle = 'rgba(0,0,0,0.25)';
+  x.lineWidth = 2;
+  x.strokeRect(18, 18, W - 36, 150);
+  x.fillStyle = '#6C151E';
+  x.font = '700 40px "TP Sans","Noto Sans",system-ui,sans-serif';
+  x.textAlign = 'center';
+  x.textBaseline = 'middle';
+  x.fillText(text || 'Grab vouchers', W / 2, 204, W - 30);
+  return cv;
+}
+// The front of a grand-prize gift: a simple drawing and the prize's short name
+function drawIconLabel(icon, text) {
+  const W = 320, H = 128;
+  const cv = makeCanvas(W, H);
+  const x = cv.getContext('2d');
+  x.fillStyle = '#F4EEE3';
+  x.fillRect(0, 0, W, H);
+  x.strokeStyle = '#B18854';
+  x.lineWidth = 8;
+  x.strokeRect(6, 6, W - 12, H - 12);
+  const d = (C.PRIZE_ICONS || {})[icon];
+  if (d && typeof Path2D === 'function') {
+    x.save();
+    x.translate(18, 22);
+    x.scale(3.5, 3.5);
+    x.strokeStyle = '#6C151E';
+    x.lineWidth = 1.7;
+    x.lineCap = 'round';
+    x.lineJoin = 'round';
+    x.stroke(new Path2D(d));
+    x.restore();
+  }
+  x.fillStyle = '#6C151E';
+  x.font = '700 38px "TP Sans","Noto Sans",system-ui,sans-serif';
+  x.textAlign = 'left';
+  x.textBaseline = 'middle';
+  x.fillText(text || '', 112, H / 2 + 2, W - 126);
+  return cv;
+}
+
 // The label on the front of the prize gift
 function drawPrizeLabel(text) {
   const W = 320, H = 128;
@@ -527,6 +607,46 @@ export function createTree3D(container, opts = {}) {
     b2.rotation.z = -Math.PI / 4;
     [b1, b2].forEach((m) => { m.userData = tag || {}; g.add(m); giftMeshes.push(m); });
   }
+  // A little gingerbread figure (about as tall as the small gifts), with icing and a scarf in its colour
+  function makeGinger(g, tag, scarfColor) {
+    const brown = new THREE.MeshStandardMaterial({ color: 0x9c5a2a, roughness: 0.85 });
+    const icing = new THREE.MeshStandardMaterial({ color: 0xfaf3e6, roughness: 0.45 });
+    const dark = new THREE.MeshStandardMaterial({ color: 0x2a1a10, roughness: 0.6 });
+    const scarf = new THREE.MeshStandardMaterial({ color: scarfColor, roughness: 0.6 });
+    const parts = [];
+    const add = (geo, mat, x, y, z, rz, sz) => {
+      const m = new THREE.Mesh(geo, mat);
+      m.position.set(x, y, z);
+      if (rz) m.rotation.z = rz;
+      if (sz) m.scale.z = sz;
+      parts.push(m);
+      return m;
+    };
+    const limb = new THREE.CapsuleGeometry(0.048, 0.13, 4, 10);
+    add(limb, brown, -0.065, 0.11, 0, 0.22, 0.65);
+    add(limb, brown, 0.065, 0.11, 0, -0.22, 0.65);
+    add(new THREE.CapsuleGeometry(0.085, 0.12, 4, 14), brown, 0, 0.3, 0, 0, 0.6);
+    add(limb, brown, -0.13, 0.34, 0, 1.05, 0.65);
+    add(limb, brown, 0.13, 0.34, 0, -1.05, 0.65);
+    add(new THREE.SphereGeometry(0.088, 18, 14), brown, 0, 0.5, 0, 0, 0.62);
+    const eye = new THREE.SphereGeometry(0.013, 8, 6);
+    add(eye, dark, -0.03, 0.52, 0.052);
+    add(eye, dark, 0.03, 0.52, 0.052);
+    const smile = add(new THREE.TorusGeometry(0.03, 0.006, 6, 14, Math.PI), icing, 0, 0.49, 0.054);
+    smile.rotation.z = Math.PI;
+    const button = new THREE.SphereGeometry(0.016, 8, 6);
+    add(button, icing, 0, 0.33, 0.052);
+    add(button, icing, 0, 0.27, 0.052);
+    const cuff = new THREE.TorusGeometry(0.03, 0.006, 6, 14);
+    [[-0.2, 0.39, 1.05], [0.2, 0.39, -1.05], [-0.09, 0.03, 0.22], [0.09, 0.03, -0.22]].forEach(([x, y, r]) => {
+      const m = add(cuff, icing, x, y, 0.02);
+      m.rotation.set(Math.PI / 2, 0, r);
+    });
+    const sc = add(new THREE.TorusGeometry(0.06, 0.02, 8, 18), scarf, 0, 0.415, 0);
+    sc.rotation.x = Math.PI / 2;
+    sc.scale.set(1, 0.7, 1);
+    parts.forEach((m) => { m.userData = tag; g.add(m); giftMeshes.push(m); });
+  }
   function gift(x, z, w, h, d, color, ribbon, rotY) {
     const g = new THREE.Group();
     const boxMat = new THREE.MeshStandardMaterial({ color, roughness: 0.6 });
@@ -537,19 +657,36 @@ export function createTree3D(container, opts = {}) {
     g.rotation.y = rotY;
     ground.add(g);
   }
-  // Gifts that can hide something. The small pair on the left holds the hidden wishes (opts.secrets: 'red', 'gold');
-  // the big one on the right is the prize for the most-liked wishes (opts.prize), and it keeps moving a little;
-  // the two small ones in front hold leaders' messages if any are set to 'gift'. They open when the mouse rests
-  // on them or when they're tapped; until something is put inside, they're ordinary gifts.
-  const PRIZE_CFG = Object.assign({ winners: 5, amount: 'RM 100' }, (C.PRIZE || {}));
-  const prizeTag = opts.prizeTag || PRIZE_CFG.tag || (PRIZE_CFG.winners + ' x ' + PRIZE_CFG.amount);
+  // Things under the tree that open when the mouse rests on them or when they're tapped:
+  //  - the prize gifts (opts.prize): a Grab gift with the Malaysian flag on the left and one with the Thai flag on the
+  //    right (same size), and the grand prizes (C.prizeGifts) as three smaller gifts in the middle. Each shows its own
+  //    prize when it opens. They hop now and then, taking turns.
+  //  - two little gingerbread figures (opts.secrets: 'red', 'gold') that hold Amr's and Maszy's hidden wishes.
+  //  - two small gifts at the sides that hold leaders' messages if any are set to 'gift'.
+  // Until something is put inside, each is just a decoration.
+  const prizeList = typeof C.prizeGifts === 'function' ? C.prizeGifts() : [];
+  const FLAG_SPOTS = [{ x: -2.08, z: 1.0, rot: -0.3 }, { x: 2.08, z: 1.0, rot: 0.3 }];
+  const MID_SPOTS = [{ x: -0.8, z: 2.02, rot: 0.28 }, { x: 0.05, z: 2.28, rot: -0.12 }, { x: 0.88, z: 2.02, rot: -0.3 }];
+  const MID_COLORS = [[0x343f37, 0xb18854], [0xf4eee3, 0x6c151e], [0xb18854, 0x6c151e]];
   const GIFT_SLOTS = {
-    red: { x: -1.75, z: 1.6, rot: -0.35, W: 0.62, H: 0.5, D: 0.56, color: 0x6c151e, ribbon: 0xb18854, words: ['A wish', 'for you'] },
-    gold: { x: -2.45, z: 0.7, rot: -0.6, W: 0.5, H: 0.58, D: 0.48, color: 0xb18854, ribbon: 0x6c151e, words: ['Where it', 'all began'] },
-    prize: { x: 2.0, z: 1.2, rot: 0.38, W: 1.25, H: 0.98, D: 1.1, color: 0x6c151e, ribbon: 0xc99a55, words: [prizeTag, 'Grab vouchers'], prize: true },
-    green: { x: 0.2, z: 2.1, rot: 0.9, W: 0.5, H: 0.42, D: 0.5, color: 0x343f37, ribbon: 0xb18854, words: ['A message', 'for you'] },
-    cream: { x: -0.8, z: 2.2, rot: 0.7, W: 0.42, H: 0.36, D: 0.42, color: 0xf4eee3, ribbon: 0x6c151e, words: ['A message', 'for you'] }
+    red: { x: -1.36, z: 2.3, rot: 0.3, W: 0.34, H: 0.62, D: 0.2, color: 0x6c151e, words: ['A wish', 'for you'], ginger: true },
+    gold: { x: 1.42, z: 2.3, rot: -0.3, W: 0.34, H: 0.62, D: 0.2, color: 0xb18854, words: ['Where it', 'all began'], ginger: true },
+    green: { x: -2.5, z: 0.05, rot: -0.6, W: 0.48, H: 0.42, D: 0.48, color: 0x343f37, ribbon: 0xb18854, words: ['A message', 'for you'] },
+    cream: { x: 2.55, z: 0.1, rot: 0.6, W: 0.44, H: 0.38, D: 0.44, color: 0xf4eee3, ribbon: 0x6c151e, words: ['A message', 'for you'] }
   };
+  let flagN = 0, midN = 0;
+  prizeList.forEach((pg) => {
+    if (pg.flag && flagN < FLAG_SPOTS.length) {
+      const sp = FLAG_SPOTS[flagN++];
+      GIFT_SLOTS[pg.id] = Object.assign({}, sp, { W: 1.02, H: 0.84, D: 0.9, color: 0x6c151e, ribbon: 0xc99a55, prize: true, flag: pg.flag,
+        label: pg.label, card: pg.card, words: ['', ''] });
+    } else if (!pg.flag && midN < MID_SPOTS.length) {
+      const sp = MID_SPOTS[midN];
+      const col = MID_COLORS[midN++];
+      GIFT_SLOTS[pg.id] = Object.assign({}, sp, { W: 0.62, H: 0.52, D: 0.56, color: col[0], ribbon: col[1], prize: true, icon: pg.icon,
+        label: pg.label, card: pg.card, words: ['', ''] });
+    }
+  });
   const LEADER_GIFT_SLOTS = ['green', 'cream'];
   const wanted = Array.isArray(opts.secrets) ? opts.secrets : (opts.secret ? ['red'] : []);
   const gifts = new Map();   // slot -> gift
@@ -557,43 +694,46 @@ export function createTree3D(container, opts = {}) {
     // one shared tag on every part of the gift: changing it changes what the gift holds
     const tag = { kind: '', id: '', slot };
     const { W, H, D } = c;
-    const LID = 0.15;
+    const LID = c.ginger ? 0 : 0.15;
     const g = new THREE.Group();
-    const boxMat = new THREE.MeshStandardMaterial({ color: c.color, roughness: 0.55 });
-    const ribMat = new THREE.MeshStandardMaterial({ color: c.ribbon, roughness: 0.35, metalness: 0.45 });
-    ribbonBox(g, W, H - LID, D, 0, boxMat, ribMat, tag);
     // warm light inside, seen when the lid opens
     const inner = new THREE.Mesh(new THREE.PlaneGeometry(W * 0.92, D * 0.92), new THREE.MeshBasicMaterial({ color: 0xffd98a, transparent: true, opacity: 0 }));
     inner.rotation.x = -Math.PI / 2;
     inner.position.y = H - LID + 0.002;
-    g.add(inner);
-    // the lid hinges at the back edge
+    // the lid hinges at the back edge (a gingerbread figure has none)
     const lid = new THREE.Group();
     lid.position.set(0, H - LID, -D / 2 - 0.02);
     const lidInner = new THREE.Group();
     lidInner.position.set(0, 0, D / 2 + 0.02);
     lid.add(lidInner);
-    ribbonBox(lidInner, W + 0.05, LID, D + 0.05, 0, boxMat, ribMat, tag);
-    bow(lidInner, LID, ribMat, tag, c.prize ? 2.4 : 1.35);
-    g.add(lid);
+    if (c.ginger) {
+      makeGinger(g, tag, c.color);
+    } else {
+      const boxMat = new THREE.MeshStandardMaterial({ color: c.color, roughness: 0.55 });
+      const ribMat = new THREE.MeshStandardMaterial({ color: c.ribbon, roughness: 0.35, metalness: 0.45 });
+      ribbonBox(g, W, H - LID, D, 0, boxMat, ribMat, tag);
+      g.add(inner);
+      ribbonBox(lidInner, W + 0.05, LID, D + 0.05, 0, boxMat, ribMat, tag);
+      bow(lidInner, LID, ribMat, tag, c.prize ? (c.flag ? 2.1 : 1.5) : 1.35);
+      g.add(lid);
+    }
     if (c.prize) {
-      // "5 x RM 100" on the front, so it reads as the prize from across the room
-      const label = new THREE.Mesh(new THREE.PlaneGeometry(W * 0.62, W * 0.62 * 0.4),
-        new THREE.MeshStandardMaterial({ map: toTex(drawPrizeLabel(prizeTag)), roughness: 0.6 }));
-      label.position.set(0, (H - LID) * 0.48, D / 2 + 0.012);
+      // on the front: the flag (Grab gifts) or a drawing and the prize's name (grand prizes), readable from afar
+      const lw = W * (c.flag ? 0.72 : 0.8);
+      const label = new THREE.Mesh(new THREE.PlaneGeometry(lw, lw * (c.flag ? 0.75 : 0.4)),
+        new THREE.MeshStandardMaterial({ map: toTex(c.flag ? drawFlagLabel(c.flag, c.label) : drawIconLabel(c.icon, c.label)), roughness: 0.6 }));
+      label.position.set(0, (H - LID) * 0.5, D / 2 + 0.012);
       label.userData = tag;
       g.add(label);
       giftMeshes.push(label);
     }
-    // the card that rises out
-    const cardMat = new THREE.MeshStandardMaterial({ map: toTex(drawGiftCard(c.words)), roughness: 0.7, side: THREE.DoubleSide, emissive: 0x3a2a10, emissiveIntensity: 0.6 });
+    // the card that rises out: the prize itself (prize gifts) or a few words
+    const cardMat = new THREE.MeshStandardMaterial({ map: toTex(c.prize && c.card ? drawPrizeCard(c.card) : drawGiftCard(c.words)), roughness: 0.7, side: THREE.DoubleSide, emissive: 0x3a2a10, emissiveIntensity: 0.6 });
     const card = new THREE.Mesh(new THREE.PlaneGeometry(c.prize ? 0.8 : 0.64, c.prize ? 1.0 : 0.8), cardMat);
-    if (c.prize) {
-      // the prize that rises out is always seen, even where the tree's tags hang in front of it
-      cardMat.depthTest = false;
-      cardMat.transparent = true;   // drawn last, after the glow, so the glow doesn't wash it out
-      card.renderOrder = 20;
-    }
+    // what rises out is always seen, even where the tree's tags hang in front of it
+    cardMat.depthTest = false;
+    cardMat.transparent = true;   // drawn last, after the glow, so the glow doesn't wash it out
+    card.renderOrder = 20;
     card.userData = tag;
     card.visible = false;
     g.add(card);
@@ -609,19 +749,19 @@ export function createTree3D(container, opts = {}) {
     spark.position.set(W * 0.38, H - LID + 0.02, D * 0.42);
     spark.scale.set(0.34, 0.34, 1);
     g.add(spark);
-    const light = new THREE.PointLight(0xffd98a, 0, 2.6, 2);
-    light.position.set(0, H + 0.15, 0);
-    g.add(light);
     g.position.set(c.x, 0, c.z);
     g.rotation.y = c.rot;
     ground.add(g);
     // sparkles take turns, so two gifts never flash together
-    return { slot, tag, words: c.words.join('|'), g, lid, card, cardMat, inner, glowMat, sparkMat, light, H, LID,
-      open: 0, target: 0, wig: 0, wigVel: 0, sparkOffset: n * 2.25, prize: !!c.prize, baseY: 0 };
+    return { slot, tag, words: c.words.join('|'), g, lid, card, cardMat, inner, glowMat, sparkMat, H, LID,
+      open: 0, target: 0, wig: 0, wigVel: 0, sparkOffset: n * 2.25, prize: !!c.prize, ginger: !!c.ginger, hopOffset: n * 1.3, baseY: 0 };
   }
   Object.keys(GIFT_SLOTS).forEach((slot, n) => gifts.set(slot, makeGiftSlot(slot, GIFT_SLOTS[slot], n)));
+  // one warm light, moved to whichever gift is open (one light per gift would slow the tree down)
+  const giftLight = new THREE.PointLight(0xffd98a, 0, 2.6, 2);
+  ground.add(giftLight);
   wanted.forEach((id) => { const gg = gifts.get(id); if (gg) { gg.tag.kind = 'secret'; gg.tag.id = id; } });
-  if (opts.prize) { const pg = gifts.get('prize'); pg.tag.kind = 'prize'; pg.tag.id = 'prize'; }
+  if (opts.prize) gifts.forEach((gg, slot) => { if (gg.prize) { gg.tag.kind = 'prize'; gg.tag.id = slot; } });
   function giftFor(kind, id) {
     if (!kind) return null;
     for (const gg of gifts.values()) if (gg.tag.kind === kind && gg.tag.id === String(id)) return gg;
@@ -648,18 +788,6 @@ export function createTree3D(container, opts = {}) {
   }
   gift(-0.95, -1.45, 0.65, 0.5, 0.55, 0x343f37, 0xb18854, 0.2);
   gift(1.2, -1.6, 0.5, 0.62, 0.5, 0xf4eee3, 0x343f37, -0.6);
-  let lastPrize = -1;
-  function showRandomPrize(gg) {
-    const pool = typeof C.prizePool === 'function' ? C.prizePool() : [];
-    if (!pool.length) return;
-    let n = Math.floor(Math.random() * pool.length);
-    if (pool.length > 1 && n === lastPrize) n = (n + 1) % pool.length;
-    lastPrize = n;
-    const old = gg.cardMat.map;
-    gg.cardMat.map = toTex(drawPrizeCard(pool[n]));
-    gg.cardMat.needsUpdate = true;
-    if (old) old.dispose();
-  }
   function nudgeGift(gg, strength) {
     if (gg) gg.wigVel += (Math.random() < 0.5 ? -1 : 1) * strength;
   }
@@ -1199,6 +1327,7 @@ export function createTree3D(container, opts = {}) {
     if (!reduce) star.rotation.y = 0.35 * Math.sin(t * 0.8);
 
     // the hidden gifts: wobble when touched, open to show their card, sparkle now and then
+    let lightOpen = 0, lightGift = null;
     gifts.forEach((sg) => {
       sg.open += (sg.target - sg.open) * Math.min(1, dt * (sg.target ? 3.2 : 5));
       sg.wigVel += (-55 * sg.wig - 5 * sg.wigVel) * dt;
@@ -1206,17 +1335,19 @@ export function createTree3D(container, opts = {}) {
       const o = sg.open;
       const ease = 1 - Math.pow(1 - o, 3);
       sg.g.rotation.z = sg.wig * 0.06;
+      if (sg.ginger && !reduce) {
+        // a gingerbread figure sways a little, and bounces while its wish is open
+        sg.g.position.y = 0.07 * Math.abs(Math.sin(t * 5.5)) * o;
+        sg.g.rotation.z += 0.04 * Math.sin(t * 1.3 + sg.hopOffset) * (1 - o) + 0.12 * Math.sin(t * 5.5) * o;
+      }
       if (sg.prize && sg.tag.kind && !reduce) {
-        // the prize gift hops and wiggles every few seconds while it's closed
-        const ph = (t % 3.2) / 3.2;
-        const hop = ph > 0.62 && ph < 0.9 ? Math.sin(((ph - 0.62) / 0.28) * Math.PI) : 0;
+        // the prize gifts hop and wiggle now and then while they're closed, taking turns
+        const ph = ((t + sg.hopOffset) % 6.5) / 6.5;
+        const hop = ph > 0.86 ? Math.sin(((ph - 0.86) / 0.14) * Math.PI) : 0;
         const still = 1 - Math.min(1, o * 1.5);
         sg.g.position.y = (0.16 * hop + 0.015 * Math.sin(t * 2.1)) * still;
         sg.g.rotation.z += (0.07 * hop * Math.sin(t * 18) + 0.02 * Math.sin(t * 1.7)) * still;
       }
-      // each time the prize gift opens, a different prize rises out of it
-      if (sg.prize && sg.target && !sg.picked) { sg.picked = true; showRandomPrize(sg); }
-      if (sg.prize && !sg.target && o < 0.03) sg.picked = false;
       sg.lid.rotation.x = -1.95 * ease - Math.abs(sg.wig) * 0.12;
       sg.card.visible = o > 0.03;
       // the card rises up and a little forward, tilted towards you
@@ -1224,10 +1355,12 @@ export function createTree3D(container, opts = {}) {
       sg.card.rotation.set(-0.2 * ease, reduce ? 0 : 0.16 * Math.sin(t * 1.1) * ease - 0.32 * ease, 0);
       sg.inner.material.opacity = 0.85 * o;
       sg.glowMat.opacity = 0.75 * o * (reduce ? 1 : 0.85 + 0.15 * Math.sin(t * 2.2));
-      sg.light.intensity = 5 * o;
+      if (o > lightOpen) { lightOpen = o; lightGift = sg; }
       const hintT = (t + sg.sparkOffset) % 9;
       sg.sparkMat.opacity = sg.tag.kind && !reduce && o < 0.05 && hintT < 0.9 ? 0.9 * Math.sin((Math.PI * hintT) / 0.9) : 0;
     });
+    giftLight.intensity = 5 * lightOpen;
+    if (lightGift) giftLight.position.set(lightGift.g.position.x, lightGift.H + 0.15, lightGift.g.position.z);
 
     // snow
     if (SNOW) {

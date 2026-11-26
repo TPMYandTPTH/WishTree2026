@@ -478,10 +478,10 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
 }
 @media (prefers-reduced-motion:reduce){.dot{animation:none}.wish-card{transition:none}.spin-out #treeMount,.spin-in #treeMount{animation:none}}
 </style>
-<script src="vendor/supabase.js?v=2026112605"></script>
-<script src="vendor/qrcode.min.js?v=2026112605"></script>
-<script src="config.js?v=2026112605"></script>
-<script src="wishtree.js?v=2026112605"></script>
+<script src="vendor/supabase.js?v=2026112606"></script>
+<script src="vendor/qrcode.min.js?v=2026112606"></script>
+<script src="config.js?v=2026112606"></script>
+<script src="wishtree.js?v=2026112606"></script>
 </head>
 <body>
 <a class="skip" href="#tree">Skip to the tree</a>
@@ -1556,7 +1556,7 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
   }
   el('allList').addEventListener('click', onListClick);
   el('prizeLink').addEventListener('click', function () {
-    select({ kind: 'prize', id: 'prize' }, true);
+    select({ kind: 'prize', id: C.randomPrizeGift() }, true);
     var target = window.innerWidth <= 820 ? el('cardWrap') : el('tree');
     try { target.scrollIntoView({ behavior: REDUCE ? 'auto' : 'smooth', block: 'center' }); } catch (err) { target.scrollIntoView(); }
   });
