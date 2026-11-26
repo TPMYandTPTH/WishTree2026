@@ -1557,7 +1557,7 @@
     '.wt-gift-ic svg{width:100%;height:auto}',
     '.wt-gift-mid .wt-gift-label{display:none}',
     '.wt-gift-flag .wt-gift-label{bottom:-14%;font-size:1.4cqw}',
-    '.wt-ginger{top:86%;width:4%;aspect-ratio:1/1.5;animation:none}',
+    '.wt-ginger{top:85.5%;width:4.6%;aspect-ratio:52/64;animation:none}',
     '.wt-ginger-red{left:27%}',
     '.wt-ginger-gold{left:68%}',
     '.wt-ginger svg{width:100%;height:100%;display:block;filter:drop-shadow(0 3px 3px rgba(0,0,0,.3));transition:transform .3s cubic-bezier(.3,1.5,.5,1)}',
@@ -1584,14 +1584,13 @@
   ].join('\n');
 
   // A little gingerbread figure for the flat tree (the 3D tree builds its own)
-  var GINGER_SVG = '<svg viewBox="0 0 40 60" aria-hidden="true">' +
-    '<g fill="#9C5A2A"><circle cx="20" cy="11" r="9"/><rect x="11" y="18" width="18" height="22" rx="8"/>' +
-    '<rect x="1" y="21" width="16" height="7" rx="3.5" transform="rotate(-20 9 24)"/><rect x="23" y="21" width="16" height="7" rx="3.5" transform="rotate(20 31 24)"/>' +
-    '<rect x="10" y="34" width="8" height="22" rx="4" transform="rotate(12 14 45)"/><rect x="22" y="34" width="8" height="22" rx="4" transform="rotate(-12 26 45)"/></g>' +
-    '<g fill="#2A1A10"><circle cx="17" cy="10" r="1.4"/><circle cx="23" cy="10" r="1.4"/></g>' +
-    '<path d="M16 14q4 3 8 0" fill="none" stroke="#FAF3E6" stroke-width="1.4" stroke-linecap="round"/>' +
-    '<g fill="#FAF3E6"><circle cx="20" cy="26" r="1.6"/><circle cx="20" cy="32" r="1.6"/></g>' +
-    '<rect x="13" y="18" width="14" height="3.5" rx="1.7" fill="#6C151E"/></svg>';
+  var GINGER_SVG = '<svg viewBox="0 0 52 64" aria-hidden="true">' +
+    '<polygon points="26.0,49.5 26.7,49.6 27.4,49.7 28.0,50.0 28.6,50.4 29.2,50.9 29.7,51.5 30.1,52.2 30.5,53.0 31.3,59.7 31.3,59.7 31.8,60.8 32.6,61.7 33.6,62.4 34.7,62.8 35.9,63.0 37.1,62.9 38.2,62.5 39.2,61.8 40.0,61.0 40.6,59.9 40.9,58.8 41.0,57.6 40.7,56.4 40.2,55.3 39.5,54.4 38.5,53.7 38.0,46.0 37.4,44.5 36.9,42.9 36.4,41.2 36.0,39.5 35.7,37.7 35.4,35.9 35.2,34.0 35.0,32.0 46.0,31.9 46.5,31.9 47.4,31.8 48.2,31.6 49.0,31.1 49.7,30.6 50.2,29.9 50.7,29.1 50.9,28.3 51.0,27.4 50.9,26.5 50.7,25.7 50.2,24.9 49.7,24.2 49.0,23.7 48.2,23.2 47.4,23.0 46.5,22.9 34.0,22.8 33.4,22.7 32.9,22.6 32.5,22.5 32.1,22.3 31.9,22.2 31.7,22.0 31.5,21.7 31.5,21.5 31.7,21.8 33.1,20.7 34.3,19.4 35.3,17.9 36.0,16.2 36.4,14.5 36.5,12.7 36.3,10.9 35.8,9.2 35.0,7.6 33.9,6.1 32.6,4.9 31.2,3.9 29.5,3.1 27.8,2.7 26.0,2.5 24.2,2.7 22.5,3.1 20.8,3.9 19.4,4.9 18.1,6.1 17.0,7.6 16.2,9.2 15.7,10.9 15.5,12.7 15.6,14.5 16.0,16.2 16.7,17.9 17.7,19.4 18.9,20.7 20.3,21.8 20.3,22.0 20.2,22.1 20.1,22.3 19.8,22.4 19.5,22.5 19.1,22.6 18.6,22.7 18.0,22.8 5.5,22.9 5.5,22.9 4.6,23.0 3.8,23.2 3.0,23.7 2.3,24.2 1.8,24.9 1.3,25.7 1.1,26.5 1.0,27.4 1.1,28.3 1.3,29.1 1.8,29.9 2.3,30.6 3.0,31.1 3.8,31.6 4.6,31.8 5.5,31.9 17.0,32.0 16.8,34.0 16.6,35.9 16.3,37.7 16.0,39.5 15.6,41.2 15.1,42.9 14.6,44.5 14.0,46.0 13.5,53.7 13.5,53.7 12.6,54.4 11.8,55.3 11.3,56.4 11.0,57.5 11.1,58.7 11.4,59.9 12.0,60.9 12.8,61.8 13.8,62.5 14.9,62.9 16.1,63.0 17.3,62.8 18.4,62.4 19.4,61.7 20.1,60.8 20.7,59.7 21.5,53.0 21.9,52.2 22.3,51.5 22.8,50.9 23.4,50.4 24.0,50.0 24.6,49.7 25.3,49.6 26.0,49.5" fill="#B8733A" stroke="#86491F" stroke-width="1.6" stroke-linejoin="round"/>' +
+    '<g fill="none" stroke="#FFFAF0" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"><polyline points="22.3,15.4 22.9,16.4 23.8,17.1 24.9,17.5 26.0,17.7 27.1,17.5 28.2,17.1 29.1,16.4 29.7,15.4"/><polyline points="42.6,31.2 40.4,29.2 42.6,27.3 40.4,25.4 42.6,23.4"/><polyline points="11.6,31.2 9.4,29.2 11.6,27.3 9.4,25.4 11.6,23.4"/><polyline points="32.9,54.8 34.1,52.3 36.5,53.8 37.7,51.3 40.1,52.8"/><polyline points="19.7,52.8 17.3,54.3 16.1,51.8 13.7,53.3 12.5,50.8"/></g>' +
+    '<g fill="#2A1A10"><circle cx="22.4" cy="11.0" r="1.5"/><circle cx="29.6" cy="11.0" r="1.5"/></g>' +
+    '<g fill="#E58A8A" opacity=".8"><circle cx="19.7" cy="14.5" r="1.8"/><circle cx="32.3" cy="14.5" r="1.8"/></g>' +
+    '<g fill="#FFFAF0"><circle cx="26" cy="30.0" r="1.3"/><circle cx="26" cy="36.0" r="1.3"/><circle cx="26" cy="42.0" r="1.3"/></g>' +
+    '<rect x="19.5" y="20.0" width="13" height="3.4" rx="1.7" fill="#6C151E"/><rect x="29" y="22.0" width="3.2" height="8" rx="1" fill="#6C151E" transform="rotate(-20 30.6 22.0)"/></svg>';
 
   function ensureCss() {
     if (document.getElementById('wt-css')) return;

@@ -478,10 +478,10 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
 }
 @media (prefers-reduced-motion:reduce){.dot{animation:none}.wish-card{transition:none}.spin-out #treeMount,.spin-in #treeMount{animation:none}}
 </style>
-<script src="vendor/supabase.js?v=2026112606"></script>
-<script src="vendor/qrcode.min.js?v=2026112606"></script>
-<script src="config.js?v=2026112606"></script>
-<script src="wishtree.js?v=2026112606"></script>
+<script src="vendor/supabase.js?v=2026112607"></script>
+<script src="vendor/qrcode.min.js?v=2026112607"></script>
+<script src="config.js?v=2026112607"></script>
+<script src="wishtree.js?v=2026112607"></script>
 </head>
 <body>
 <a class="skip" href="#tree">Skip to the tree</a>
@@ -728,6 +728,13 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
     return v.length && v.length < C.LANGUAGES.length ? v : null;
   }
   var LIST_PAGE = 24;
+  // The list is a grid; show whole rows only (5 across: 25, 4 or 3 across: 24 ...)
+  function listCols() {
+    var cols = 0;
+    try { cols = String(getComputedStyle(el('allList')).gridTemplateColumns || '').split(' ').filter(Boolean).length; } catch (e) { /* ignore */ }
+    return cols > 0 && cols < 20 ? cols : 1;
+  }
+  function wholeRows(n) { var c = listCols(); return Math.ceil(n / c) * c; }
 
   var state = {
     wishes: [],        // approved wishes, newest first
@@ -1066,7 +1073,7 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
     el('leaderList').hidden = !state.leaders.length && !team.length;
 
     var list = listWishes();
-    var shown = list.slice(0, state.shown);
+    var shown = list.slice(0, wholeRows(state.shown));
     var likers = state.sort === 'winners' && state.site === 'all' && !state.q.trim() ? C.likerWinners() : [];
     var likerHtml = likers.map(function (x) {
       var day = x.won_at ? new Date(x.won_at).toLocaleDateString('en-GB', { timeZone: 'Asia/Kuala_Lumpur', weekday: 'short', day: 'numeric', month: 'short' }) : '';
@@ -1095,8 +1102,9 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
         '<div class="li-who" lang="en"><b>' + C.esc(C.displayName(w)) + '</b><span>' + C.esc(C.displayWhere(w)) + '</span></div>' +
         likeBtnHtml('wish', w) + '</div></article>';
     }).join('') + likerHtml : '<div class="all-empty">' + (state.q ? 'No wishes match your search.' : state.sort === 'winners' ? (state.wishes.some(function (w) { return w.won; }) || C.likerWinners().length ? 'No winners from here yet.' : 'Winners show here from 1 December, once the Wish Tree team approves them.') : 'No wishes here yet in the languages you picked.') + '</div>';
-    el('moreBtn').hidden = list.length <= state.shown;
-    el('moreBtn').textContent = 'Show more (' + fmt(list.length - Math.min(list.length, state.shown)) + ' left)';
+    el('moreBtn').hidden = list.length <= shown.length;
+    el('moreBtn').textContent = 'Show more (' + fmt(list.length - shown.length) + ' left)';
+    state.listCols = listCols();
   }
 
   // how = { hover: true } when the mouse rested on it (then the tree doesn't turn)
@@ -1572,7 +1580,13 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
       C.track('wish_sort', { sort: sort });
     });
   });
-  el('moreBtn').addEventListener('click', function () { state.shown += LIST_PAGE; renderList(); });
+  el('moreBtn').addEventListener('click', function () { state.shown = wholeRows(state.shown) + wholeRows(LIST_PAGE); renderList(); });
+  // when the window gets wider or narrower, keep the last row full
+  var colsTimer = 0;
+  window.addEventListener('resize', function () {
+    clearTimeout(colsTimer);
+    colsTimer = setTimeout(function () { if (state.listCols && listCols() !== state.listCols) renderList(); }, 200);
+  });
   el('langList').addEventListener('change', function () {
     var picked = Array.prototype.map.call(el('langList').querySelectorAll('input:checked'), function (i) { return i.value; });
     if (!picked.length) {

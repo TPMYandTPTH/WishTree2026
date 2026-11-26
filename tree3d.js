@@ -607,44 +607,87 @@ export function createTree3D(container, opts = {}) {
     b2.rotation.z = -Math.PI / 4;
     [b1, b2].forEach((m) => { m.userData = tag || {}; g.add(m); giftMeshes.push(m); });
   }
-  // A little gingerbread figure (about as tall as the small gifts), with icing and a scarf in its colour
+  // A little gingerbread cookie (about as tall as the small gifts): a cookie-cutter shape with baked edges, piped
+  // white icing at the wrists and ankles, a smile, rosy cheeks, icing buttons and a scarf in its colour
+  function gingerShape() {
+    const sh = new THREE.Shape();
+    sh.moveTo(0, 0.135);
+    sh.quadraticCurveTo(0.03, 0.135, 0.045, 0.1);
+    sh.lineTo(0.053, 0.033);
+    sh.absarc(0.1, 0.05, 0.05, 3.49, 7.33, false);           // right foot
+    sh.lineTo(0.12, 0.17);
+    sh.quadraticCurveTo(0.095, 0.23, 0.09, 0.31);
+    sh.lineTo(0.2, 0.311);
+    sh.absarc(0.205, 0.356, 0.045, -Math.PI / 2, Math.PI / 2, false);   // right hand
+    sh.lineTo(0.08, 0.402);
+    sh.quadraticCurveTo(0.055, 0.405, 0.055, 0.415);
+    sh.absarc(0, 0.5, 0.105, -0.997, 4.138, false);           // head
+    sh.quadraticCurveTo(-0.055, 0.405, -0.08, 0.402);
+    sh.lineTo(-0.205, 0.401);
+    sh.absarc(-0.205, 0.356, 0.045, Math.PI / 2, Math.PI * 1.5, false); // left hand
+    sh.lineTo(-0.09, 0.31);
+    sh.quadraticCurveTo(-0.095, 0.23, -0.12, 0.17);
+    sh.lineTo(-0.125, 0.093);
+    sh.absarc(-0.1, 0.05, 0.05, 2.09, 5.93, false);           // left foot
+    sh.lineTo(-0.045, 0.1);
+    sh.quadraticCurveTo(-0.03, 0.135, 0, 0.135);
+    return sh;
+  }
+  const gingerGeo = (() => {
+    const geo = new THREE.ExtrudeGeometry(gingerShape(), { depth: 0.04, bevelEnabled: true, bevelThickness: 0.013, bevelSize: 0.011, bevelSegments: 3, curveSegments: 18 });
+    geo.translate(0, 0, -0.02);
+    geo.computeVertexNormals();
+    return geo;
+  })();
+  function icingLine(points, mat, r) {
+    const curve = new THREE.CatmullRomCurve3(points.map(([x, y]) => new THREE.Vector3(x, y, 0.035)));
+    return new THREE.Mesh(new THREE.TubeGeometry(curve, points.length * 6, r || 0.0055, 6, false), mat);
+  }
   function makeGinger(g, tag, scarfColor) {
-    const brown = new THREE.MeshStandardMaterial({ color: 0x9c5a2a, roughness: 0.85 });
-    const icing = new THREE.MeshStandardMaterial({ color: 0xfaf3e6, roughness: 0.45 });
-    const dark = new THREE.MeshStandardMaterial({ color: 0x2a1a10, roughness: 0.6 });
+    const face = new THREE.MeshStandardMaterial({ color: 0xb8733a, roughness: 0.78 });
+    const edge = new THREE.MeshStandardMaterial({ color: 0x86491f, roughness: 0.85 });
+    const icing = new THREE.MeshStandardMaterial({ color: 0xfffaf0, roughness: 0.35, emissive: 0x3a3a3a, emissiveIntensity: 0.25 });
+    const dark = new THREE.MeshStandardMaterial({ color: 0x2a1a10, roughness: 0.5 });
+    const cheek = new THREE.MeshBasicMaterial({ color: 0xe58a8a, transparent: true, opacity: 0.8 });
     const scarf = new THREE.MeshStandardMaterial({ color: scarfColor, roughness: 0.6 });
-    const parts = [];
-    const add = (geo, mat, x, y, z, rz, sz) => {
+    const parts = [new THREE.Mesh(gingerGeo, [face, edge])];
+    const dot = new THREE.SphereGeometry(1, 12, 8);
+    const put = (geo, mat, x, y, z, s, sz) => {
       const m = new THREE.Mesh(geo, mat);
       m.position.set(x, y, z);
-      if (rz) m.rotation.z = rz;
-      if (sz) m.scale.z = sz;
+      if (s) m.scale.set(s, s, sz || s);
       parts.push(m);
       return m;
     };
-    const limb = new THREE.CapsuleGeometry(0.048, 0.13, 4, 10);
-    add(limb, brown, -0.065, 0.11, 0, 0.22, 0.65);
-    add(limb, brown, 0.065, 0.11, 0, -0.22, 0.65);
-    add(new THREE.CapsuleGeometry(0.085, 0.12, 4, 14), brown, 0, 0.3, 0, 0, 0.6);
-    add(limb, brown, -0.13, 0.34, 0, 1.05, 0.65);
-    add(limb, brown, 0.13, 0.34, 0, -1.05, 0.65);
-    add(new THREE.SphereGeometry(0.088, 18, 14), brown, 0, 0.5, 0, 0, 0.62);
-    const eye = new THREE.SphereGeometry(0.013, 8, 6);
-    add(eye, dark, -0.03, 0.52, 0.052);
-    add(eye, dark, 0.03, 0.52, 0.052);
-    const smile = add(new THREE.TorusGeometry(0.03, 0.006, 6, 14, Math.PI), icing, 0, 0.49, 0.054);
-    smile.rotation.z = Math.PI;
-    const button = new THREE.SphereGeometry(0.016, 8, 6);
-    add(button, icing, 0, 0.33, 0.052);
-    add(button, icing, 0, 0.27, 0.052);
-    const cuff = new THREE.TorusGeometry(0.03, 0.006, 6, 14);
-    [[-0.2, 0.39, 1.05], [0.2, 0.39, -1.05], [-0.09, 0.03, 0.22], [0.09, 0.03, -0.22]].forEach(([x, y, r]) => {
-      const m = add(cuff, icing, x, y, 0.02);
-      m.rotation.set(Math.PI / 2, 0, r);
-    });
-    const sc = add(new THREE.TorusGeometry(0.06, 0.02, 8, 18), scarf, 0, 0.415, 0);
+    put(dot, dark, -0.036, 0.52, 0.034, 0.014, 0.006);            // eyes
+    put(dot, dark, 0.036, 0.52, 0.034, 0.014, 0.006);
+    put(dot, icing, -0.032, 0.526, 0.04, 0.004, 0.003);           // a glint in each eye
+    put(dot, icing, 0.04, 0.526, 0.04, 0.004, 0.003);
+    const cheekGeo = new THREE.CircleGeometry(0.017, 16);
+    put(cheekGeo, cheek, -0.063, 0.485, 0.034);
+    put(cheekGeo, cheek, 0.063, 0.485, 0.034);
+    const smile = [];
+    for (let i = 0; i <= 8; i++) { const a = Math.PI * (1.15 + 0.7 * (i / 8)); smile.push([Math.cos(a) * 0.042, 0.495 + Math.sin(a) * 0.042]); }
+    parts.push(icingLine(smile, icing));
+    [0.33, 0.27, 0.21].forEach((y) => put(dot, icing, 0, y, 0.035, 0.013, 0.007));   // icing buttons
+    const zig = (x0, y0, x1, y1, n, amp) => {
+      const pts = [];
+      for (let i = 0; i <= n; i++) {
+        const f = i / n, nx = -(y1 - y0), ny = x1 - x0, l = Math.hypot(nx, ny) || 1;
+        const k = (i % 2 ? 1 : -1) * amp;
+        pts.push([x0 + (x1 - x0) * f + (nx / l) * k, y0 + (y1 - y0) * f + (ny / l) * k]);
+      }
+      return pts;
+    };
+    parts.push(icingLine(zig(0.155, 0.318, 0.155, 0.396, 4, 0.011), icing));        // wrists
+    parts.push(icingLine(zig(-0.155, 0.318, -0.155, 0.396, 4, 0.011), icing));
+    parts.push(icingLine(zig(0.066, 0.092, 0.138, 0.112, 4, 0.01), icing));         // ankles
+    parts.push(icingLine(zig(-0.066, 0.092, -0.138, 0.112, 4, 0.01), icing));
+    const sc = put(new THREE.TorusGeometry(0.058, 0.017, 8, 20), scarf, 0, 0.412, 0);
     sc.rotation.x = Math.PI / 2;
-    sc.scale.set(1, 0.7, 1);
+    sc.scale.set(1.05, 0.75, 1);
+    const tail = put(new THREE.BoxGeometry(0.032, 0.085, 0.014), scarf, 0.045, 0.37, 0.04);
+    tail.rotation.z = 0.35;
     parts.forEach((m) => { m.userData = tag; g.add(m); giftMeshes.push(m); });
   }
   function gift(x, z, w, h, d, color, ribbon, rotY) {
