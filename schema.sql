@@ -1206,6 +1206,28 @@ alter table public.prize_winners add column if not exists replaces bigint;
 -- Before approving, someone on the team checks the BMS is a real person (from the day's list); the whole team sees it
 alter table public.prize_winners add column if not exists bms_checked_at timestamptz;
 alter table public.prize_winners add column if not exists bms_checked_by text;
+-- Grand prize winners have their own pool
+alter table public.prize_winners drop constraint if exists prize_winners_pool_check;
+alter table public.prize_winners add constraint prize_winners_pool_check
+  check (pool in ('early', 'manual', 'top', 'random', 'liker', 'grand'));
+
+-- The grand prizes: one lucky draw at the end, among everyone with an approved wish who hasn't won anything (leaders
+-- and organizers can't win). It opens on draw_from, once the last daily draw of each country is done. No codes: the
+-- Wish Tree team contacts each winner. Keep in line with PRIZE.grand in config.js.
+create table if not exists public.prize_grand (
+  prize text primary key,
+  how_many int not null check (how_many between 0 and 20),
+  sort int not null default 0,
+  countries text[] not null default '{MY,TH}',
+  draw_from date not null default '2026-12-19'
+);
+insert into public.prize_grand (prize, how_many, sort) values
+  ('Marriott staycation for 2', 2, 1),
+  ('Apple Watch SE',            2, 2),
+  ('CK backpack',               2, 3)
+on conflict (prize) do nothing;
+alter table public.prize_grand enable row level security;
+revoke all on public.prize_grand from anon, authenticated;
 -- The winners picked by hand before the daily draw: RM 50 (THB 250 in Thailand), live since they were picked
 update public.prize_winners p
 set country = coalesce((select public.wish_country(w.site, w.lang) from public.wishes w where w.id = p.wish_id), 'MY'),
@@ -1221,11 +1243,6 @@ where p.pool = 'early' and p.prize is null;
 update public.prize_winners
 set live_at = '2026-12-01 09:00:00+08'
 where pool = 'early' and status in ('picked', 'approved') and live_at < '2026-12-01 09:00:00+08';
--- ...once an admin approves them on the Prize draw page, like every other winner
-update public.prize_winners
-set status = 'picked', approved_at = null, approved_by = null
-where pool = 'early' and status = 'approved' and approved_at = created_at
-  and not exists (select 1 from public.prize_codes c where c.winner_id = prize_winners.id);
 
 -- Days already drawn, per country (days are drawn in order)
 create table if not exists public.prize_draw_days (
@@ -1274,6 +1291,12 @@ alter table public.prize_log enable row level security;
 -- No policies on purpose: only the functions below reach these tables
 revoke all on public.prize_plan, public.prize_draw_days, public.prize_codes, public.prize_log
   from anon, authenticated;
+
+-- The winners picked before the draw need an admin's approval on the Prize draw page, like every other winner
+update public.prize_winners
+set status = 'picked', approved_at = null, approved_by = null
+where pool = 'early' and status = 'approved' and approved_at = created_at
+  and not exists (select 1 from public.prize_codes c where c.winner_id = prize_winners.id);
 
 -- Wishes that can still win in a country: approved, a real-looking BMS, not excluded, never drawn before
 create or replace function public.prize_wish_pool(p_country text)
@@ -1396,6 +1419,81 @@ begin
 end
 $$;
 
+-- Countries whose daily draws aren't finished: the last day isn't drawn yet and hasn't passed (the grand draw waits)
+create or replace function public.prize_daily_left()
+returns table (country text, last_day date)
+language sql stable security definer set search_path = '' as $$
+  select pp.country, max(pp.last_day)
+  from public.prize_plan pp
+  group by pp.country
+  having max(pp.last_day) >= (now() at time zone 'Asia/Kuala_Lumpur')::date
+     and not exists (select 1 from public.prize_draw_days d where d.country = pp.country and d.day = max(pp.last_day))
+$$;
+
+-- Draw grand prize winners: anyone in the grand prize's countries who can still win, by lucky draw. Answers how
+-- many were drawn.
+create or replace function public.prize_draw_grand(p_prize text, p_n int, p_who text, p_day date,
+                                                   p_replaces bigint default null)
+returns int
+language plpgsql security definer set search_path = '' as $$
+declare
+  g public.prize_grand;
+  n int := 0;
+  r record;
+begin
+  if coalesce(p_n, 0) < 1 then return 0; end if;
+  select * into g from public.prize_grand x where x.prize = p_prize;
+  if not found then return 0; end if;
+  for r in select q.id, q.bms, q.like_count, c.c
+           from unnest(g.countries) c(c) cross join lateral public.prize_wish_pool(c.c) q
+           order by gen_random_uuid() limit p_n loop
+    insert into public.prize_winners (kind, wish_id, bms, prize, reason, status, created_by, country, pool, draw_day, likes_at_draw, replaces)
+    values ('wish', r.id, r.bms, g.prize, 'Grand prize draw', 'picked', p_who, r.c, 'grand', p_day, r.like_count, p_replaces);
+    n := n + 1;
+  end loop;
+  if n > 0 then
+    insert into public.prize_log (who, action, detail) values (p_who, 'drawn', 'grand ' || g.prize || ': ' || n);
+  end if;
+  return n;
+end
+$$;
+
+-- Approvals: draw the grand prizes (all of them in one click). Opens on draw_from, once the daily draws are done.
+-- Drawing again only fills what's missing. Answers {result: 'ok', drawn: {prize: n}, short: {prize: n}} or
+-- {result: 'name_required' | 'too_early' (with day) | 'daily_first' (with country, day) | 'nothing_to_draw'}.
+create or replace function public.admin_prize_draw_grand(p_token text) returns json
+language plpgsql security definer set search_path = '' as $$
+declare
+  v_who text := public.session_who(p_token);
+  v_today date := (now() at time zone 'Asia/Kuala_Lumpur')::date;
+  v_from date;
+  v_left record;
+  g record;
+  v_need int; v_got int;
+  v_drawn jsonb := '{}'::jsonb;
+  v_short jsonb := '{}'::jsonb;
+  v_any boolean := false;
+begin
+  if public.session_role(p_token) is distinct from 'admin' then raise exception 'not_allowed'; end if;
+  if v_who is null then return json_build_object('result', 'name_required'); end if;
+  select min(x.draw_from) into v_from from public.prize_grand x;
+  if v_from is null or v_today < v_from then return json_build_object('result', 'too_early', 'day', v_from); end if;
+  select * into v_left from public.prize_daily_left() l order by l.last_day limit 1;
+  if found then return json_build_object('result', 'daily_first', 'country', v_left.country, 'day', v_left.last_day); end if;
+  perform 1 from public.prize_grand x for update;
+  for g in select x.* from public.prize_grand x order by x.sort, x.prize loop
+    select greatest(0, g.how_many - count(*)) into v_need from public.prize_winners p
+    where p.pool = 'grand' and p.prize = g.prize and p.status <> 'redrawn';
+    v_got := public.prize_draw_grand(g.prize, v_need, v_who, v_from);
+    if v_need > 0 then v_any := true; end if;
+    v_drawn := v_drawn || jsonb_build_object(g.prize, v_got);
+    v_short := v_short || jsonb_build_object(g.prize, v_need - v_got);
+  end loop;
+  return json_build_object('result', case when v_any then 'ok' else 'nothing_to_draw' end,
+                           'drawn', v_drawn, 'short', v_short);
+end
+$$;
+
 -- Approvals: draw the winners for one day in one country (one click = one day's winners). Days go in order from
 -- today, up to a week ahead, so the team has time to check every BMS before approving. Drawing a day again only fills
 -- what's missing.
@@ -1466,7 +1564,7 @@ declare
 begin
   if public.session_role(p_token) is distinct from 'admin' then raise exception 'not_allowed'; end if;
   if v_who is null then return json_build_object('result', 'name_required'); end if;
-  for r in select p.id, p.draw_day, p.kind, p.wish_id, p.bms_checked_at from public.prize_winners p
+  for r in select p.id, p.draw_day, p.kind, p.wish_id, p.pool, p.bms_checked_at from public.prize_winners p
            where p.id = any(coalesce(p_ids, '{}')) and p.status = 'picked' order by p.id for update loop
     if r.bms_checked_at is null then
       u := u + 1;
@@ -1483,7 +1581,8 @@ begin
     where p.id = r.id;
     insert into public.prize_log (who, action, winner_id) values (v_who, 'approved', r.id);
     n := n + 1;
-    if public.prize_assign_code(r.id) is null then m := m + 1; end if;
+    -- grand prizes have no code: the team contacts the winner
+    if r.pool <> 'grand' and public.prize_assign_code(r.id) is null then m := m + 1; end if;
   end loop;
   return json_build_object('result', 'ok', 'approved', n, 'without_code', m, 'skipped', k, 'unchecked', u);
 end
@@ -1541,6 +1640,10 @@ begin
   insert into public.prize_log (who, action, winner_id, detail) values (v_who, 'redrawn', w.id, v_reason);
   if w.pool in ('top', 'random', 'liker') then
     v_got := public.prize_draw_pool(w.country, w.pool, w.draw_day, 1, v_who, w.id);
+  elsif w.pool = 'grand' then
+    v_got := public.prize_draw_grand(w.prize, 1, v_who, w.draw_day, w.id);
+  end if;
+  if w.pool in ('top', 'random', 'liker', 'grand') then
     if v_got > 0 then
       select p.id into v_new from public.prize_winners p where p.replaces = w.id order by p.id desc limit 1;
     end if;
@@ -1555,7 +1658,7 @@ create or replace function public.admin_prize_pool(p_token text) returns json
 language plpgsql stable security definer set search_path = '' as $$
 begin
   if public.session_role(p_token) is distinct from 'admin' then raise exception 'not_allowed'; end if;
-  return (select json_object_agg(c.country, json_build_object(
+  return ((select jsonb_object_agg(c.country, json_build_object(
       'wishes', (select count(*) from public.prize_wish_pool(c.country)),
       'with_likes', (select count(*) from public.prize_wish_pool(c.country) q where q.like_count >= 1),
       'skip_top', coalesce((select pp.skip_top from public.prize_plan pp where pp.country = c.country and pp.pool = 'random'), 0),
@@ -1565,7 +1668,9 @@ begin
         select w.first_name, w.site, q.like_count as likes
         from public.prize_wish_pool(c.country) q join public.wishes w on w.id = q.id
         where q.like_count >= 1 order by q.like_count desc, q.approved_at asc limit 5) x), '[]'::json)))
-    from (values ('MY'), ('TH')) c(country));
+    from (values ('MY'), ('TH')) c(country)) || jsonb_build_object('GRAND', json_build_object(
+      'wishes', (select count(*) from (select distinct unnest(g.countries) as c from public.prize_grand g) cs
+                 cross join lateral public.prize_wish_pool(cs.c) q))))::json;
 end
 $$;
 
@@ -1588,6 +1693,12 @@ begin
       from public.prize_plan pp) x), '[]'::json),
     'days', coalesce((select json_agg(x order by x.day) from (
       select d.country, d.day, d.at, d.who from public.prize_draw_days d) x), '[]'::json),
+    'grand', coalesce((select json_agg(x order by x.sort, x.prize) from (
+      select g.prize, g.how_many, g.sort, g.countries, g.draw_from,
+             (select count(*) from public.prize_winners p where p.pool = 'grand' and p.prize = g.prize and p.status <> 'redrawn')::int as drawn,
+             (select count(*) from public.prize_winners p where p.pool = 'grand' and p.prize = g.prize and p.status in ('approved', 'sent'))::int as approved
+      from public.prize_grand g) x), '[]'::json),
+    'daily_left', coalesce((select json_agg(x order by x.last_day) from public.prize_daily_left() x), '[]'::json),
     'winners', coalesce((select json_agg(x order by x.draw_day nulls first, x.id) from (
       select p.id, p.kind, p.wish_id, p.bms, p.prize, p.reason, p.status, p.country, p.pool, p.draw_day, p.live_at,
              p.likes_at_draw, p.created_at, p.created_by, p.approved_at, p.approved_by,
@@ -1813,7 +1924,7 @@ language sql stable security definer set search_path = '' as $$
 $$;
 
 -- Wishes whose likes are paused: the winners picked before the daily draw, until they're announced on 1 December.
--- The pages keep them off the tree and at the end of Most liked, and show "Likes paused" instead of the like button.
+-- The pages keep them off the tree (in their real place in Most liked) and show "Likes paused" instead of the like button.
 -- (Wishes drawn in the daily draw stay as they are until 9 am on their day; their new likes just don't count.)
 create or replace function public.get_paused_wishes()
 returns table (wish_id uuid)
@@ -1889,6 +2000,9 @@ revoke execute on function public.prize_liker_pool(text) from public, anon, auth
 revoke execute on function public.prize_assign_code(bigint) from public, anon, authenticated;
 revoke execute on function public.prize_draw_pool(text, text, date, int, text, bigint) from public, anon, authenticated;
 revoke execute on function public.prize_owner(bigint, text, json) from public, anon, authenticated;
+revoke execute on function public.prize_daily_left() from public, anon, authenticated;
+revoke execute on function public.prize_draw_grand(text, int, text, date, bigint) from public, anon, authenticated;
+grant execute on function public.admin_prize_draw_grand(text) to anon, authenticated;
 grant execute on function public.admin_prize_draw(text, text, date) to anon, authenticated;
 grant execute on function public.admin_prize_approve(text, bigint[]) to anon, authenticated;
 grant execute on function public.admin_prize_check(text, bigint[], boolean) to anon, authenticated;

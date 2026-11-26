@@ -173,7 +173,10 @@ window.WISH_CFG = {
       { name: 'Apple Watch SE', short: 'Apple Watch', line1: 'Apple Watch SE', line2: 'Grand prize', count: 2, icon: 'watch' },
       { name: 'CK backpack', short: 'CK backpack', line1: 'CK backpack', line2: 'Grand prize', count: 2, icon: 'bag' }
     ],
-    grandWhen: 'Winners at the end',
+    grandWhen: 'Lucky draw at the end',
+    // Where a winner can get help (the Wish Tree team's WhatsApp link, for example). Shown on the "You won" card and
+    // under the Winners tab once it's set; leave url empty to hide it. Must start with https://
+    contact: { url: '', label: 'Contact the Wish Tree team' },
     tvDeadline: 'New winners every day. One prize per person.',
     deadline: 'New winners show here every day. If you win, open the Wish Tree on the phone you used for your wish or your likes to get your Grab code.',
     // How to win, shown as a short list on the prize card (label, then the words)
@@ -181,6 +184,7 @@ window.WISH_CFG = {
       ['Give likes', 'Every like you give is your way in: every day a lucky liker wins a Grab voucher.'],
       ['Get likes', 'The most-liked wishes win every day. Share your wish so colleagues can like it.'],
       ['Lucky draw every day', 'Every approved wish has a chance, however few likes it has. The 10 most-liked are left out of it: they can win Most liked.'],
+      ['Grand prizes', 'At the end, a lucky draw among every wish that hasn\'t won yet picks the Marriott staycations, Apple Watches and CK backpacks.'],
       ['Fair play', 'One prize per person. Leaders and organizers can\'t win. Likes count until 11:59 pm on 18 December (Malaysia time).']
     ],
     // Used only if ruleList is empty

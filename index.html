@@ -399,6 +399,8 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
 .li .like{min-height:38px;min-width:58px;padding:0 10px;font-size:14px;border-color:rgba(108,21,30,.25);color:var(--cream)}
 .all-empty{grid-column:1/-1;padding:40px 20px;border:1px dashed rgba(108,21,30,.2);border-radius:12px;text-align:center;color:var(--cream-3)}
 .more-row{display:flex;justify-content:center;margin-top:20px}
+.win-help{margin:16px 0 0;text-align:center;font-size:14px;color:var(--cream-3)}
+.win-help a{color:inherit;font-weight:700}
 .avatar img{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block}
 .avatar img.tp-mark,.li-mark img.tp-mark{width:auto;height:50%;border-radius:0;object-fit:contain}
 .li-mark{flex:none;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;background:var(--bg-mark);box-shadow:0 0 0 1px rgba(108,21,30,.2)}
@@ -478,10 +480,10 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
 }
 @media (prefers-reduced-motion:reduce){.dot{animation:none}.wish-card{transition:none}.spin-out #treeMount,.spin-in #treeMount{animation:none}}
 </style>
-<script src="vendor/supabase.js?v=2026112610"></script>
-<script src="vendor/qrcode.min.js?v=2026112610"></script>
-<script src="config.js?v=2026112610"></script>
-<script src="wishtree.js?v=2026112610"></script>
+<script src="vendor/supabase.js?v=2026112611"></script>
+<script src="vendor/qrcode.min.js?v=2026112611"></script>
+<script src="config.js?v=2026112611"></script>
+<script src="wishtree.js?v=2026112611"></script>
 </head>
 <body>
 <a class="skip" href="#tree">Skip to the tree</a>
@@ -667,6 +669,7 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
     <div id="leaderList" class="leader-list" aria-label="Leaders' messages"></div>
     <div id="allList" class="all-list"></div>
     <div class="more-row"><button type="button" id="moreBtn" class="btn-ghost" hidden>Show more</button></div>
+    <p class="win-help" id="winHelp" hidden></p>
   </section>
 
   <dialog id="bmsDialog" class="bms-dialog" aria-labelledby="bmsTitle">
@@ -974,9 +977,9 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
       return list.sort(function (a, b) { return (shuffleRank(a.id) - shuffleRank(b.id)) || (String(a.id) < String(b.id) ? -1 : 1); });
     }
     // Most liked: most likes first; same likes, the one approved first (the same order the daily draw uses).
-    // Paused wishes come last, so they don't sit at the top.
+    // Paused wishes (picked before the draw) keep their real place, with "Likes paused" instead of the like button.
     return list.sort(state.sort === 'likes'
-      ? function (a, b) { return ((a.paused ? 1 : 0) - (b.paused ? 1 : 0)) || ((b.like_count || 0) - (a.like_count || 0)) || (String(a.approved_at) < String(b.approved_at) ? -1 : 1); }
+      ? function (a, b) { return ((b.like_count || 0) - (a.like_count || 0)) || (String(a.approved_at) < String(b.approved_at) ? -1 : 1); }
       : function (a, b) { return String(a.approved_at) < String(b.approved_at) ? 1 : -1; });
   }
   function newSeed() {
@@ -1103,6 +1106,10 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
         likeBtnHtml('wish', w) + '</div></article>';
     }).join('') + likerHtml : '<div class="all-empty">' + (state.q ? 'No wishes match your search.' : state.sort === 'winners' ? (state.wishes.some(function (w) { return w.won; }) || C.likerWinners().length ? 'No winners from here yet.' : 'Winners show here from 1 December, once the Wish Tree team approves them.') : 'No wishes here yet in the languages you picked.') + '</div>';
     el('moreBtn').hidden = list.length <= shown.length;
+    // Winners tab: where to go if the prize isn't on your phone (once the team's link is in config.js)
+    var cUrl = C.prizeContactUrl ? C.prizeContactUrl() : '';
+    el('winHelp').hidden = !(state.sort === 'winners' && cUrl && (shown.length || likerHtml));
+    if (!el('winHelp').hidden) el('winHelp').innerHTML = 'Is one of these yours, but the prize isn\'t on your phone? <a href="' + C.esc(cUrl) + '" target="_blank" rel="noopener noreferrer">' + C.esc((PRIZE.contact && PRIZE.contact.label) || 'Contact the Wish Tree team') + '</a> with your BMS.';
     el('moreBtn').textContent = 'Show more (' + fmt(list.length - shown.length) + ' left)';
     state.listCols = listCols();
   }

@@ -227,6 +227,7 @@ a{color:var(--slate)}
 .pool.random{background:var(--teal-soft);color:var(--teal-dark)}
 .pool.liker{background:var(--carmine-soft);color:var(--carmine)}
 .pool.early,.pool.manual{background:var(--violet-soft);color:var(--slate)}
+.pool.grand{background:#B18854;color:#241C14}
 .pw .msg{font-size:15px}
 .st{font-size:13px;line-height:1.45;color:var(--muted)}
 .st.ok{color:var(--teal-dark)}
@@ -283,9 +284,9 @@ a{color:var(--slate)}
   .likes{width:100%}
 }
 </style>
-<script src="../vendor/supabase.js?v=2026112610"></script>
-<script src="../config.js?v=2026112610"></script>
-<script src="../wishtree.js?v=2026112610"></script>
+<script src="../vendor/supabase.js?v=2026112611"></script>
+<script src="../config.js?v=2026112611"></script>
+<script src="../wishtree.js?v=2026112611"></script>
 </head>
 <body>
 <div id="demoBar" class="demo-bar" role="status" hidden><span class="pv">PREVIEW</span>Sample messages only; your decisions stay on this device. Any password opens it here. Once the Wish Tree opens, only the Approvals password does.</div>
@@ -454,13 +455,14 @@ a{color:var(--slate)}
         <div class="tabs" role="tablist" aria-label="Country">
           <button type="button" class="tab ctab" role="tab" data-country="MY" aria-selected="true">Malaysia <span class="badge" id="cMY">0</span></button>
           <button type="button" class="tab ctab" role="tab" data-country="TH" aria-selected="false">Thailand <span class="badge" id="cTH">0</span></button>
+          <button type="button" class="tab ctab" role="tab" data-country="GRAND" aria-selected="false">Grand prizes <span class="badge" id="cGR">0</span></button>
         </div>
       </div>
       <div class="dv">
         <section class="dv-main" aria-label="Winners">
           <div class="box">
             <h2>Draw winners</h2>
-            <p class="small">One click gives <b>one day's winners</b> for this country. Draw ahead (today and up to a week ahead, one day after another), so the team has time to check them: use <b>Copy list</b> or <b>Download list</b> on that day, check every BMS is real, tick <b>BMS checked</b>, then approve. Approved winners show on the tree at <b>9 am Malaysia time</b> on their day, and each gets a Grab code that only their own phone can open.</p>
+            <p class="small" id="drawHelp">One click gives <b>one day's winners</b> for this country. Draw ahead (today and up to a week ahead, one day after another), so the team has time to check them: use <b>Copy list</b> or <b>Download list</b> on that day, check every BMS is real, tick <b>BMS checked</b>, then approve. Approved winners show on the tree at <b>9 am Malaysia time</b> on their day, and each gets a Grab code that only their own phone can open.</p>
             <div class="draw-row">
               <select id="drawDay" aria-label="Day to draw"></select>
               <button type="button" id="drawBtn" class="btn btn-slate">Draw</button>
@@ -481,10 +483,10 @@ a{color:var(--slate)}
           <div class="box">
             <h2>The plan</h2>
             <ul id="planRows" class="plan"></ul>
-            <p class="small">A day with too few people carries its prizes to the next draw. No one wins twice: anyone drawn once (also when redrawn) is out of later draws. <b>Most liked</b> is the top of the Most liked list when you press Draw (at least 1 like; same likes, the one approved first).</p>
+            <p class="small" id="planNote">A day with too few people carries its prizes to the next draw. No one wins twice: anyone drawn once (also when redrawn) is out of later draws. <b>Most liked</b> is the top of the Most liked list when you press Draw (at least 1 like; same likes, the one approved first).</p>
           </div>
 
-          <div class="box codes-box">
+          <div class="box codes-box" id="codesBox">
             <h2>Grab codes</h2>
             <ul id="stockRows" class="stock"></ul>
             <details id="codesAdd">
@@ -507,7 +509,7 @@ a{color:var(--slate)}
             <p class="small">Codes are kept locked in the database: only the winner's phone can open one, or an approver who presses <b>Show code</b> (logged with their name, at most 20 an hour). A code that was opened is never given to anyone else.</p>
           </div>
 
-          <div class="box">
+          <div class="box" id="helpBox">
             <h2>When a winner can't open it</h2>
             <p class="small">The code opens on the phone they used for the wish or the likes. On a new phone or after clearing the browser, they can't open it. Check their BMS on WhatsApp, then use <b>Show code</b> and send it to them. It then counts as given, and your name is logged.</p>
             <p class="small"><b>Redraw</b> replaces a winner with a new draw from the same pool, for example a leader or organizer, or a code not opened after 3 days. It needs a reason, and it isn't possible once the code was opened.</p>
@@ -1202,8 +1204,10 @@ a{color:var(--slate)}
     shown: {},         // winner id -> code details, hidden again after 2 minutes
     rmArmed: ''
   };
-  var POOL = { top: 'Most liked', random: 'Lucky draw', liker: 'Lucky liker', early: 'Picked before the draw', manual: 'Picked by hand' };
-  var POOL_ORDER = { top: 1, random: 2, liker: 3, early: 4, manual: 5 };
+  var POOL = { top: 'Most liked', random: 'Lucky draw', liker: 'Lucky liker', early: 'Picked before the draw', manual: 'Picked by hand', grand: 'Grand prize' };
+  var POOL_ORDER = { top: 1, random: 2, liker: 3, early: 4, manual: 5, grand: 6 };
+  var HELP_DAILY = '';  // the draw box's text for Malaysia and Thailand (kept from the page)
+  var PLAN_DAILY = '';
   var KL = 'Asia/Kuala_Lumpur';
   var PRIZE_START = '2026-12-01';
   function klDate(iso, withTime) {
@@ -1216,7 +1220,13 @@ a{color:var(--slate)}
   function addDays(ymd, n) { var d = new Date(ymd + 'T12:00:00Z'); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); }
   function dayDiff(a, b) { return Math.round((new Date(b + 'T12:00:00Z') - new Date(a + 'T12:00:00Z')) / 864e5); }
   var QUICK = ['BMS not found', 'Left TP', 'Leader or organizer', 'Not opened in 3 days'];
-  var COUNTRY = { MY: 'Malaysia', TH: 'Thailand' };
+  var COUNTRY = { MY: 'Malaysia', TH: 'Thailand', GRAND: 'Grand prizes' };
+  // Which list a winner sits in: grand prizes together; the others by the day they were drawn for
+  function groupKey(w) { return w.pool === 'grand' ? 'grand' : (w.draw_day || 'early'); }
+  function grandOrder(prize) {
+    var i = ((D.data && D.data.grand) || []).map(function (g) { return g.prize; }).indexOf(prize);
+    return i === -1 ? 99 : i;
+  }
 
   // What one click on Draw gives for that day (same sums as the database: that day's share plus anything
   // left over from earlier days, never more than the plan's total)
@@ -1241,6 +1251,7 @@ a{color:var(--slate)}
   function drawLabel() {
     var day = $('drawDay').value;
     var btn = $('drawBtn');
+    if (D.country === 'GRAND') { grandLabel(); return; }
     if (!day || !D.data) { btn.textContent = 'Draw'; $('drawWhat').textContent = ''; return; }
     var first = ((D.data.plan || []).filter(function (p) { return p.country === D.country; })
       .reduce(function (m, p) { return !m || p.first_day < m ? p.first_day : m; }, ''));
@@ -1254,24 +1265,40 @@ a{color:var(--slate)}
     btn.disabled = D.busy || !n.total;
     $('drawWhat').textContent = n.total ? 'One click draws ' + dayLabel(day) + ' only: ' + n.by.join(', ') + '. Nobody sees them until you approve, and then only from 9 am that day.' : '';
   }
+  // The grand prizes: one click draws all of them, once the daily draws are done
+  function grandLabel() {
+    var btn = $('drawBtn'), d = D.data;
+    if (!d) { btn.textContent = 'Draw'; return; }
+    var rows = d.grand || [];
+    var from = rows.reduce(function (m, g) { return !m || g.draw_from < m ? g.draw_from : m; }, '');
+    var need = 0, by = [];
+    rows.forEach(function (g) { var n = Math.max(0, g.how_many - g.drawn); need += n; if (n) by.push(fmt(n) + ' × ' + g.prize); });
+    var left = d.daily_left || [];
+    var block = '';
+    if (!from || d.today < from) block = 'The grand prize draw opens on ' + dayLabel(from) + ', after the last daily draw.';
+    else if (left.length) block = 'Draw the last daily winners first: ' + left.map(function (x) { return COUNTRY[x.country] + ' ' + dayLabel(x.last_day); }).join(', ') + '.';
+    btn.textContent = need ? 'Draw the grand prizes: ' + fmt(need) + (need === 1 ? ' winner' : ' winners') : 'All grand prizes are drawn';
+    btn.disabled = D.busy || !need || !!block;
+    $('drawWhat').textContent = block || (need ? 'One click draws ' + by.join(', ') + ', by lucky draw among everyone with an approved wish who hasn\'t won yet. Nobody sees them until you approve.' : '');
+  }
   // The day's list for the team to check every BMS (never the codes)
   function dayWinners(day) {
-    return winnersOf(D.country).filter(function (w) { return (w.draw_day || 'early') === day && w.status !== 'redrawn'; })
-      .sort(function (a, b) { return (POOL_ORDER[a.pool] || 9) - (POOL_ORDER[b.pool] || 9) || a.id - b.id; });
+    return winnersOf(D.country).filter(function (w) { return groupKey(w) === day && w.status !== 'redrawn'; })
+      .sort(function (a, b) { return (POOL_ORDER[a.pool] || 9) - (POOL_ORDER[b.pool] || 9) || grandOrder(a.prize) - grandOrder(b.prize) || a.id - b.id; });
   }
-  function dayTitle(day) { return day === 'early' ? 'Picked before the draw (shows ' + dayLabel(PRIZE_START) + ')' : dayLabel(day); }
+  function dayTitle(day) { return day === 'grand' ? 'Grand prize draw' : day === 'early' ? 'Picked before the draw (shows ' + dayLabel(PRIZE_START) + ')' : dayLabel(day); }
   function copyDay(day) {
     var ws = dayWinners(day);
-    var t = ['Wish Tree winners to check · ' + COUNTRY[D.country] + ' · ' + dayTitle(day),
+    var t = ['Wish Tree winners to check · ' + (day === 'grand' ? 'Grand prizes' : COUNTRY[D.country] + ' · ' + dayTitle(day)),
       'Please check each BMS is a real, current TP employee and the name matches. Reply with any that are not.', ''];
     ws.forEach(function (w, i) {
-      t.push((i + 1) + '. ' + w.prize + ' · ' + (POOL[w.pool] || '') + ' · ' +
+      t.push((i + 1) + '. ' + w.prize + ' · ' + (w.pool === 'grand' ? COUNTRY[w.country] : (POOL[w.pool] || '')) + ' · ' +
         (w.kind === 'liker' ? 'Liker (no name)' : (w.first_name || 'Wish')) + ' · BMS ' + w.bms +
         (w.site ? ' · ' + C.siteName(w.site) : '') + (w.status === 'picked' ? (w.bms_checked_at ? ' · checked' : '') : ' · approved'));
     });
     return copyText(t.join('\n'));
   }
-  function downloadDay(day) { downloadDraw(dayWinners(day), 'wish-tree-winners-' + D.country.toLowerCase() + '-' + (day === 'early' ? 'before-the-draw' : day) + '.csv'); }
+  function downloadDay(day) { downloadDraw(dayWinners(day), day === 'grand' ? 'wish-tree-grand-prize-winners.csv' : 'wish-tree-winners-' + D.country.toLowerCase() + '-' + (day === 'early' ? 'before-the-draw' : day) + '.csv'); }
 
   function loadDraw() {
     if (C.demo) { renderDraw(); return Promise.resolve(); }
@@ -1299,7 +1326,9 @@ a{color:var(--slate)}
   }
 
   function winnersOf(country) {
-    return ((D.data && D.data.winners) || []).filter(function (w) { return w.country === country; });
+    return ((D.data && D.data.winners) || []).filter(function (w) {
+      return country === 'GRAND' ? w.pool === 'grand' : (w.country === country && w.pool !== 'grand');
+    });
   }
   function wStatus(w) {
     var now = Date.now();
@@ -1308,6 +1337,10 @@ a{color:var(--slate)}
       ? { cls: 'ok', text: 'Drawn by ' + (w.created_by || 'an admin') + ' · BMS checked by ' + (w.bms_checked_by || 'an admin') + ' ' + klDate(w.bms_checked_at, true) + ' · ready to approve' }
       : { cls: 'warn', text: 'Drawn by ' + (w.created_by || 'an admin') + ' · check the BMS is real, tick it, then approve' };
     var by = w.approved_by ? 'Approved by ' + w.approved_by + ' · ' : '';
+    if (w.pool === 'grand') {
+      if (w.live_at && new Date(w.live_at).getTime() > now) return { cls: 'ok', text: by + 'shows on the tree ' + klDate(w.live_at, true) + ' · no code: contact them about the prize' };
+      return { cls: 'ok', text: by + 'live since ' + klDate(w.live_at, true) + ' · no code: contact them about the prize' };
+    }
     if (w.live_at && new Date(w.live_at).getTime() > now) return { cls: 'ok', text: by + 'shows on the tree ' + klDate(w.live_at, true) + (w.has_code ? ' · code set aside' : ' · no code set aside yet') };
     if (w.given_at) return { cls: 'ok', text: (w.given_how === 'whatsapp' ? 'Code shown on this page (for WhatsApp) ' : 'Opened on their phone ') + klDate(w.given_at, true) + (w.views > 1 ? ' · seen ' + w.views + ' times' : '') };
     if (!w.has_code) return { cls: 'warn', text: by + 'live · no code yet: add ' + w.prize + ' codes' };
@@ -1373,6 +1406,11 @@ a{color:var(--slate)}
   function renderPool() {
     var p = D.pool && D.pool[D.country];
     if (!p) { $('poolBox').textContent = D.pool ? 'Nobody yet.' : 'Loading…'; return; }
+    if (D.country === 'GRAND') {
+      $('poolBox').innerHTML = '<ul class="plan"><li><div><b>' + fmt(p.wishes) + ' wishes</b> can win a grand prize</div>' +
+        '<div class="small">Everyone with an approved wish who hasn\'t won anything yet, in Malaysia and Thailand. Leaders and organizers can\'t win.</div></li></ul>';
+      return;
+    }
     var next = (p.next || []).map(function (x) { return esc(x.first_name || '') + ' <span>(' + fmt(x.likes) + ')</span>'; });
     $('poolBox').innerHTML =
       '<ul class="plan">' +
@@ -1386,18 +1424,43 @@ a{color:var(--slate)}
   function renderDraw() {
     renderPool();
     var d = D.data;
-    var picked = { MY: 0, TH: 0 };
-    ((d && d.winners) || []).forEach(function (w) { if (w.status === 'picked' && picked[w.country] != null) picked[w.country]++; });
+    var picked = { MY: 0, TH: 0, GRAND: 0 };
+    ((d && d.winners) || []).forEach(function (w) {
+      var k = w.pool === 'grand' ? 'GRAND' : w.country;
+      if (w.status === 'picked' && picked[k] != null) picked[k]++;
+    });
     $('cMY').textContent = fmt(picked.MY);
     $('cTH').textContent = fmt(picked.TH);
-    $('vDraw').textContent = fmt(picked.MY + picked.TH);
-    $('vDraw').classList.toggle('hot', picked.MY + picked.TH > 0);
+    $('cGR').textContent = fmt(picked.GRAND);
+    var allPicked = picked.MY + picked.TH + picked.GRAND;
+    $('vDraw').textContent = fmt(allPicked);
+    $('vDraw').classList.toggle('hot', allPicked > 0);
     qsa('.ctab').forEach(function (b) { b.setAttribute('aria-selected', b.getAttribute('data-country') === D.country ? 'true' : 'false'); });
     if (!d) {
       $('dayList').innerHTML = '<div class="empty">' + (C.demo ? 'Preview: the prize draw works once the Wish Tree is connected to its database.' : 'Loading…') + '</div>';
       return;
     }
     var country = D.country;
+    var grand = country === 'GRAND';
+    if (!HELP_DAILY) { HELP_DAILY = $('drawHelp').innerHTML; PLAN_DAILY = $('planNote').innerHTML; }
+    $('codesBox').hidden = grand;
+    $('helpBox').hidden = grand;
+    $('drawDay').hidden = grand;
+    if (grand) {
+      $('drawHelp').innerHTML = 'One click draws <b>all the grand prizes</b>, by lucky draw among everyone with an approved wish who hasn\'t won yet. It opens after the last daily draw. Check every BMS with <b>Copy list</b> or <b>Download list</b>, tick <b>BMS checked</b>, then approve: winners show on the tree from then. There are no codes: contact each winner about their prize.';
+      $('planNote').innerHTML = 'No one wins twice: daily winners can\'t win a grand prize, and anyone redrawn is out. <b>Redraw</b> needs a reason, for example BMS not found or can\'t be reached.';
+      $('planRows').innerHTML = (d.grand || []).map(function (g) {
+        var pct = g.how_many ? Math.min(100, Math.round(g.approved / g.how_many * 100)) : 0;
+        return '<li><div><b>' + esc(g.prize) + '</b> · ' + fmt(g.how_many) + (g.how_many === 1 ? ' winner' : ' winners') + ', drawn from ' + esc(dayLabel(g.draw_from)) + '</div>' +
+          '<div class="meter" aria-hidden="true"><i style="width:' + pct + '%"></i></div>' +
+          '<div class="small">' + fmt(g.approved) + ' approved of ' + fmt(g.how_many) + (g.drawn > g.approved ? ' · ' + fmt(g.drawn - g.approved) + ' waiting for approval' : '') + '</div></li>';
+      }).join('');
+      grandLabel();
+      renderDayList(country, {});
+      return;
+    }
+    $('drawHelp').innerHTML = HELP_DAILY;
+    $('planNote').innerHTML = PLAN_DAILY;
     var plan = (d.plan || []).filter(function (p) { return p.country === country; });
 
     // The plan
@@ -1456,24 +1519,27 @@ a{color:var(--slate)}
     dsel.disabled = !opts.length;
     $('drawBtn').disabled = !opts.length || D.busy;
     drawLabel();
+    renderDayList(country, drawn);
+  }
 
-    // Winners by day, latest day first; picked by hand before the draw at the end
+  // Winners by day, latest day first; picked by hand before the draw at the end (grand prizes: one list)
+  function renderDayList(country, drawn) {
     var list = winnersOf(country);
     var days = {};
-    list.forEach(function (w) { var k = w.draw_day || 'early'; (days[k] = days[k] || []).push(w); });
+    list.forEach(function (w) { var k = groupKey(w); (days[k] = days[k] || []).push(w); });
     var keys = Object.keys(days).sort(function (a, b) { return a === 'early' ? 1 : b === 'early' ? -1 : (a < b ? 1 : -1); });
     $('dayList').innerHTML = keys.length ? keys.map(function (k) {
       var ws = days[k].sort(function (a, b) {
-        return (a.status === 'redrawn') - (b.status === 'redrawn') || (POOL_ORDER[a.pool] || 9) - (POOL_ORDER[b.pool] || 9) || a.id - b.id;
+        return (a.status === 'redrawn') - (b.status === 'redrawn') || (POOL_ORDER[a.pool] || 9) - (POOL_ORDER[b.pool] || 9) || grandOrder(a.prize) - grandOrder(b.prize) || a.id - b.id;
       });
       var nPicked = ws.filter(function (w) { return w.status === 'picked'; }).length;
       var nChecked = ws.filter(function (w) { return w.status === 'picked' && w.bms_checked_at; }).length;
       var nLive = ws.filter(function (w) { return w.status !== 'redrawn'; }).length;
       var nOpened = ws.filter(function (w) { return w.status !== 'redrawn' && w.given_at; }).length;
       var bz = D.busy ? ' disabled' : '';
-      var head = '<div class="day-head"><div><h3>' + esc(k === 'early' ? 'Picked before the draw' : dayLabel(k)) + '</h3>' +
+      var head = '<div class="day-head"><div><h3>' + esc(k === 'early' ? 'Picked before the draw' : k === 'grand' ? 'Grand prize winners' : dayLabel(k)) + '</h3>' +
         '<p class="small">' + fmt(nLive) + (nLive === 1 ? ' winner' : ' winners') +
-        (nPicked ? ' · ' + fmt(nChecked) + ' of ' + fmt(nPicked) + ' BMS checked' : '') + ' · ' + fmt(nOpened) + ' opened' +
+        (nPicked ? ' · ' + fmt(nChecked) + ' of ' + fmt(nPicked) + ' BMS checked' : '') + (k === 'grand' ? '' : ' · ' + fmt(nOpened) + ' opened') +
         (k !== 'early' && drawn[k] ? ' · drawn by ' + esc(drawn[k].who || '') : '') + '</p></div>' +
         '<div class="day-tools">' +
         (nLive ? '<button type="button" class="btn btn-ghost" data-dv="copy-day" data-day="' + esc(k) + '">Copy list</button>' +
@@ -1481,7 +1547,7 @@ a{color:var(--slate)}
         (nPicked ? '<button type="button" class="btn btn-approve" data-dv="approve-day" data-day="' + esc(k) + '"' + (D.busy || !nChecked ? ' disabled' : '') + '>' + checkIcon() +
           (nChecked ? 'Approve ' + fmt(nChecked) + ' checked' : 'Tick BMS checked to approve') + '</button>' : '') + '</div></div>';
       return '<div class="day">' + head + ws.map(winnerHtml).join('') + '</div>';
-    }).join('') : '<div class="empty">No winners drawn yet for ' + (country === 'MY' ? 'Malaysia' : 'Thailand') + '.</div>';
+    }).join('') : '<div class="empty">' + (country === 'GRAND' ? 'No grand prize winners drawn yet.' : 'No winners drawn yet for ' + COUNTRY[country] + '.') + '</div>';
   }
 
   function drawCall(name, args) {
@@ -1499,6 +1565,7 @@ a{color:var(--slate)}
     });
   }
   function doDraw() {
+    if (D.country === 'GRAND') { doDrawGrand(); return; }
     var day = $('drawDay').value;
     if (!day) return;
     $('drawMsg').textContent = 'Drawing…';
@@ -1518,6 +1585,26 @@ a{color:var(--slate)}
         $('drawMsg').textContent = (parts.length ? 'Drew ' + parts.join(', ') + ' for ' + dayLabel(day) + '. Check each one, then approve.' : 'Nobody new could be drawn.') +
           (miss.length ? ' Not enough people for ' + miss.join(', ') + ': ' + (miss.length === 1 && miss[0].indexOf('1 ') === 0 ? 'it moves' : 'they move') + ' to the next draw.' : '');
         C.track('prize_draw', { country: D.country });
+      }
+      return loadDraw();
+    }).catch(function () { $('drawMsg').textContent = ''; });
+  }
+  function doDrawGrand() {
+    $('drawMsg').textContent = 'Drawing…';
+    drawCall('admin_prize_draw_grand', {}).then(function (r) {
+      r = r || {};
+      if (r.result === 'too_early') $('drawMsg').textContent = 'The grand prize draw opens on ' + dayLabel(r.day) + '.';
+      else if (r.result === 'daily_first') $('drawMsg').textContent = 'Draw the last daily winners for ' + COUNTRY[r.country] + ' (' + dayLabel(r.day) + ') first.';
+      else if (r.result === 'name_required') $('drawMsg').textContent = 'Save your name at the top first.';
+      else if (r.result === 'nothing_to_draw') $('drawMsg').textContent = 'All grand prizes are drawn.';
+      else {
+        var got = r.drawn || {}, short = r.short || {};
+        var keys = Object.keys(got).sort(function (a, b) { return grandOrder(a) - grandOrder(b); });
+        var parts = keys.filter(function (k) { return got[k]; }).map(function (k) { return fmt(got[k]) + ' × ' + k; });
+        var miss = keys.filter(function (k) { return short[k] > 0; }).map(function (k) { return fmt(short[k]) + ' × ' + k; });
+        $('drawMsg').textContent = (parts.length ? 'Drew ' + parts.join(', ') + '. Check each BMS, then approve.' : 'Nobody new could be drawn.') +
+          (miss.length ? ' Not enough people for ' + miss.join(', ') + '.' : '');
+        C.track('prize_draw', { country: 'grand' });
       }
       return loadDraw();
     }).catch(function () { $('drawMsg').textContent = ''; });
@@ -1645,9 +1732,10 @@ a{color:var(--slate)}
   function downloadDraw(list, file) {
     var lines = [['Country', 'Day', 'Prize', 'How', 'Name', 'BMS', 'Site', 'Likes got', 'Likes given', 'Status', 'Drawn by', 'BMS checked by', 'Approved by', 'Shows from', 'Code', 'Redraw reason'].map(csvCell).join(',')];
     (Array.isArray(list) ? list : ((D.data && D.data.winners) || [])).forEach(function (w) {
-      var code = w.given_at ? (w.given_how === 'whatsapp' ? 'Shown for WhatsApp ' : 'Opened on phone ') + new Date(w.given_at).toLocaleString('en-GB', { timeZone: KL })
+      var code = w.pool === 'grand' ? 'No code (contact them)'
+        : w.given_at ? (w.given_how === 'whatsapp' ? 'Shown for WhatsApp ' : 'Opened on phone ') + new Date(w.given_at).toLocaleString('en-GB', { timeZone: KL })
         : w.has_code ? 'Set aside, not opened' : 'No code yet';
-      lines.push([w.country, w.draw_day || 'Before the draw', w.prize, POOL[w.pool] || '', w.kind === 'liker' ? 'Liker' : (w.first_name || ''), w.bms,
+      lines.push([w.country, w.pool === 'grand' ? 'Grand prize draw' : (w.draw_day || 'Before the draw'), w.prize, POOL[w.pool] || '', w.kind === 'liker' ? 'Liker' : (w.first_name || ''), w.bms,
         w.site ? C.siteName(w.site) : '', w.kind === 'liker' ? '' : (w.likes_at_draw != null ? w.likes_at_draw : w.like_count), w.likes_given || 0, w.status === 'picked' ? 'Waiting for approval' : w.status === 'redrawn' ? 'Redrawn' : 'Approved',
         w.created_by || '', w.bms_checked_by || (w.status === 'picked' ? 'Not yet' : ''), w.approved_by || '', w.live_at ? new Date(w.live_at).toLocaleString('en-GB', { timeZone: KL }) : '', w.status === 'redrawn' ? '' : code, w.redraw_reason || ''].map(csvCell).join(','));
     });
@@ -1684,7 +1772,7 @@ a{color:var(--slate)}
     if (act === 'approve') approveIds([id]);
     else if (act === 'approve-day') {
       var day = b.getAttribute('data-day');
-      approveIds(winnersOf(D.country).filter(function (w) { return w.status === 'picked' && w.bms_checked_at && (w.draw_day || 'early') === day; }).map(function (w) { return w.id; }));
+      approveIds(winnersOf(D.country).filter(function (w) { return w.status === 'picked' && w.bms_checked_at && groupKey(w) === day; }).map(function (w) { return w.id; }));
     }
     else if (act === 'copy-day') { copyDay(b.getAttribute('data-day')).then(function () { b.textContent = 'Copied'; setTimeout(function () { b.textContent = 'Copy list'; }, 2500); }); }
     else if (act === 'csv-day') downloadDay(b.getAttribute('data-day'));

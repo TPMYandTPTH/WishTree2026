@@ -862,7 +862,9 @@
       notYours: 'This prize opens only on the phone that won it. If you changed phones or cleared your browser, contact the Wish Tree team with your BMS.',
       slow: 'Too many tries. Wait a few minutes, then try again.', err: 'Could not load your code. Check your connection and try again.',
       close: 'Close', help: 'Trouble with your code? Contact the Wish Tree team with your BMS.',
-      top: 'Most liked wish', random: 'Lucky draw wish', liker: 'Lucky liker', early: 'Most liked wish', manual: 'Winner'
+      top: 'Most liked wish', random: 'Lucky draw wish', liker: 'Lucky liker', early: 'Most liked wish', manual: 'Winner',
+      grand: 'Grand prize draw', wonGrand: 'You won the {prize}!', details: 'See details',
+      grandNext: 'The Wish Tree team will contact you about your prize. Keep your BMS handy.', contact: 'Contact the Wish Tree team'
     },
     ms: {
       won: 'Anda memenangi baucar Grab {prize}!', sub: 'Tahniah daripada pasukan Wish Tree.', open: 'Dapatkan kod saya', mine: 'Baucar Grab saya',
@@ -871,7 +873,9 @@
       notYours: 'Hadiah ini hanya boleh dibuka pada telefon yang memenanginya. Jika anda menukar telefon atau mengosongkan pelayar, hubungi pasukan Wish Tree dengan BMS anda.',
       slow: 'Terlalu banyak cubaan. Tunggu beberapa minit, kemudian cuba lagi.', err: 'Kod anda tidak dapat dimuatkan. Semak sambungan anda dan cuba lagi.',
       close: 'Tutup', help: 'Masalah dengan kod anda? Hubungi pasukan Wish Tree dengan BMS anda.',
-      top: 'Hajat paling disukai', random: 'Hajat cabutan bertuah', liker: 'Penyuka bertuah', early: 'Hajat paling disukai', manual: 'Pemenang'
+      top: 'Hajat paling disukai', random: 'Hajat cabutan bertuah', liker: 'Penyuka bertuah', early: 'Hajat paling disukai', manual: 'Pemenang',
+      grand: 'Cabutan hadiah utama', wonGrand: 'Anda memenangi {prize}!', details: 'Lihat butiran',
+      grandNext: 'Pasukan Wish Tree akan menghubungi anda tentang hadiah anda. Sediakan BMS anda.', contact: 'Hubungi pasukan Wish Tree'
     },
     th: {
       won: 'คุณได้รับบัตรกำนัล Grab มูลค่า {prize}!', sub: 'ขอแสดงความยินดีจากทีม Wish Tree', open: 'รับรหัสของฉัน', mine: 'บัตรกำนัล Grab ของฉัน',
@@ -880,7 +884,9 @@
       notYours: 'รางวัลนี้เปิดได้เฉพาะบนโทรศัพท์ที่ได้รับรางวัลเท่านั้น หากคุณเปลี่ยนโทรศัพท์หรือล้างข้อมูลเบราว์เซอร์ โปรดติดต่อทีม Wish Tree พร้อมหมายเลข BMS ของคุณ',
       slow: 'ลองหลายครั้งเกินไป โปรดรอสักครู่แล้วลองอีกครั้ง', err: 'ไม่สามารถโหลดรหัสของคุณได้ โปรดตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง',
       close: 'ปิด', help: 'มีปัญหากับรหัส? โปรดติดต่อทีม Wish Tree พร้อมหมายเลข BMS ของคุณ',
-      top: 'คำอวยพรที่ได้รับถูกใจมากที่สุด', random: 'คำอวยพรผู้โชคดี', liker: 'ผู้กดถูกใจผู้โชคดี', early: 'คำอวยพรที่ได้รับถูกใจมากที่สุด', manual: 'ผู้ได้รับรางวัล'
+      top: 'คำอวยพรที่ได้รับถูกใจมากที่สุด', random: 'คำอวยพรผู้โชคดี', liker: 'ผู้กดถูกใจผู้โชคดี', early: 'คำอวยพรที่ได้รับถูกใจมากที่สุด', manual: 'ผู้ได้รับรางวัล',
+      grand: 'จับรางวัลใหญ่', wonGrand: 'คุณได้รับ {prize}!', details: 'ดูรายละเอียด',
+      grandNext: 'ทีม Wish Tree จะติดต่อคุณเกี่ยวกับรางวัล โปรดเตรียมหมายเลข BMS ของคุณไว้', contact: 'ติดต่อทีม Wish Tree'
     }
   };
   var WON_CSS = '.wtp-bar{position:fixed;left:50%;bottom:16px;z-index:9000;transform:translateX(-50%);width:min(560px,calc(100% - 24px));display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;padding:14px 16px;border-radius:16px;background:#343F37;color:#F4EEE3;border:2px solid #B18854;box-shadow:0 14px 40px rgba(0,0,0,.35);font-family:inherit}' +
@@ -898,6 +904,11 @@
     '.wtp-row{display:flex;flex-wrap:wrap;gap:8px}.wtp-card .wtp-btn.ghost{color:#343F37;border-color:#8E8467}' +
     '.wtp-note{font-size:13px!important;color:#5E5650}.wtp-err{padding:10px 12px;border-radius:10px;background:#F3DADC;color:#7E1F28}';
   var GIFT_SVG = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M12 8v13M3 12h18M12 8c-2-4-6-4-6-1.5S9 8 12 8zm0 0c2-4 6-4 6-1.5S15 8 12 8z"/></svg>';
+  // The Wish Tree team's contact link (PRIZE.contact in config.js), or '' until it's set
+  function prizeContactUrl() {
+    var u = PRIZE.contact && PRIZE.contact.url;
+    return typeof u === 'string' && /^https:\/\/[^\s<>"']+$/.test(u) ? u : '';
+  }
   // Shows the banner when this phone has a live prize. Call once on the tree page and the wish page.
   function showMyPrizes() {
     var lang = WON_T[storageGet('wt-lang')] ? storageGet('wt-lang') : 'en';
@@ -922,8 +933,8 @@
       bar.setAttribute('aria-label', tt('mine'));
       bar.innerHTML = allOpened
         ? '<button type="button" class="wtp-btn" data-wtp="open">' + GIFT_SVG + esc(tt('mine')) + '</button>'
-        : '<span class="wtp-ic">' + GIFT_SVG + '</span><div class="wtp-txt"><b>' + esc(tt('won', { prize: p.prize })) + '</b><span>' + esc(tt('sub')) + '</span></div>' +
-          '<button type="button" class="wtp-btn" data-wtp="open">' + esc(tt('open')) + '</button>' +
+        : '<span class="wtp-ic">' + GIFT_SVG + '</span><div class="wtp-txt"><b>' + esc(tt(p.pool === 'grand' ? 'wonGrand' : 'won', { prize: p.prize })) + '</b><span>' + esc(tt('sub')) + '</span></div>' +
+          '<button type="button" class="wtp-btn" data-wtp="open">' + esc(tt(p.pool === 'grand' ? 'details' : 'open')) + '</button>' +
           '<button type="button" class="wtp-btn ghost" data-wtp="later">' + esc(tt('later')) + '</button>';
       document.body.appendChild(bar);
       track('prize_banner', { pool: p.pool || '' });
@@ -937,7 +948,7 @@
       function onKey(e) { if (e.key === 'Escape') closeDlg(); }
       function cardHtml(x, body) {
         return '<div class="wtp-why">' + esc(tt(x.pool) || '') + (x.draw_day ? ' · ' + esc(dateOf(x.draw_day)) : '') + '</div>' +
-          '<h2 id="wtpTitle">' + esc(tt('won', { prize: x.prize })) + '</h2>' + body;
+          '<h2 id="wtpTitle">' + esc(tt(x.pool === 'grand' ? 'wonGrand' : 'won', { prize: x.prize })) + '</h2>' + body;
       }
       function openDlg(x) {
         lastFocus = document.activeElement;
@@ -948,8 +959,11 @@
         document.body.appendChild(d);
         var card = d.firstChild;
         var paint = function (body) { card.innerHTML = cardHtml(x, body); };
-        var closeBtn = '<div class="wtp-row"><button type="button" class="wtp-btn ghost" data-wtp="close">' + esc(tt('close')) + '</button></div>';
-        paint(x.has_code
+        var cUrl = prizeContactUrl();
+        var contactLink = cUrl ? '<a class="wtp-btn ghost" href="' + esc(cUrl) + '" target="_blank" rel="noopener noreferrer">' + esc(tt('contact')) + '</a>' : '';
+        var closeBtn = '<div class="wtp-row">' + contactLink + '<button type="button" class="wtp-btn ghost" data-wtp="close">' + esc(tt('close')) + '</button></div>';
+        if (x.pool === 'grand') { paint('<p>' + esc(tt('grandNext')) + '</p>' + closeBtn); track('prize_grand_seen', {}); }
+        else paint(x.has_code
           ? '<p>' + esc(tt('keep')) + '</p><div class="wtp-row"><button type="button" class="wtp-btn" data-wtp="reveal">' + esc(tt('show')) + '</button>' +
             '<button type="button" class="wtp-btn ghost" data-wtp="close">' + esc(tt('close')) + '</button></div>'
           : '<p>' + esc(tt('noCode')) + '</p>' + closeBtn);
@@ -1796,6 +1810,7 @@
     fetchMyPrizes: fetchMyPrizes,
     revealPrize: revealPrize,
     showMyPrizes: showMyPrizes,
+    prizeContactUrl: prizeContactUrl,
     TREE_ROTATE_MINUTES: TREE_ROTATE_MINUTES,
     COUNTRY_LABEL: COUNTRY_LABEL,
     SITES: SITES,
