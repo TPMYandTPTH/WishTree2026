@@ -1183,6 +1183,11 @@ insert into public.prize_plan (country, pool, prize, per_day, first_day, last_da
   ('TH', 'random', 'THB 250', 1, '2026-12-01', '2026-12-16'),
   ('TH', 'liker',  'THB 250', 1, '2026-12-01', '2026-12-16')
 on conflict (country, pool) do nothing;
+-- The lucky draw (pool 'random') leaves out the most-liked wishes still in the race: they got their likes partly by
+-- hanging on the tree, and they can win Most liked anyway. Malaysia: the top 10; Thailand (few wishes): the top 3.
+alter table public.prize_plan add column if not exists skip_top int not null default 0 check (skip_top between 0 and 50);
+update public.prize_plan set skip_top = case when country = 'MY' then 10 else 3 end
+where pool = 'random' and skip_top = 0;
 
 -- Winners get a country, a pool (early = picked by hand before the daily draw), the day they go live, and for
 -- likers the phones (device codes) their likes came from when they were drawn
@@ -1213,6 +1218,11 @@ where p.pool = 'early' and p.prize is null;
 update public.prize_winners
 set live_at = '2026-12-01 09:00:00+08'
 where pool = 'early' and status in ('picked', 'approved') and live_at < '2026-12-01 09:00:00+08';
+-- ...once an admin approves them on the Prize draw page, like every other winner
+update public.prize_winners
+set status = 'picked', approved_at = null, approved_by = null
+where pool = 'early' and status = 'approved' and approved_at = created_at
+  and not exists (select 1 from public.prize_codes c where c.winner_id = prize_winners.id);
 
 -- Days already drawn, per country (days are drawn in order)
 create table if not exists public.prize_draw_days (
@@ -1340,6 +1350,7 @@ language plpgsql security definer set search_path = '' as $$
 declare
   v_prize text;
   v_reason text;
+  v_skip int := 0;
   n int := 0;
   r record;
 begin
@@ -1356,7 +1367,11 @@ begin
       n := n + 1;
     end loop;
   elsif p_pool = 'random' then
+    -- the lucky draw leaves out the top of the Most liked list (prize_plan.skip_top)
+    select coalesce(pp.skip_top, 0) into v_skip from public.prize_plan pp where pp.country = p_country and pp.pool = 'random';
     for r in select q.id, q.bms, q.like_count from public.prize_wish_pool(p_country) q
+             where q.id not in (select t.id from public.prize_wish_pool(p_country) t where t.like_count >= 1
+                                order by t.like_count desc, t.approved_at asc limit coalesce(v_skip, 0))
              order by gen_random_uuid() limit p_n loop
       insert into public.prize_winners (kind, wish_id, bms, prize, reason, status, created_by, country, pool, draw_day, likes_at_draw, replaces)
       values ('wish', r.id, r.bms, v_prize, v_reason, 'picked', p_who, p_country, p_pool, p_day, r.like_count, p_replaces);
@@ -1454,7 +1469,7 @@ begin
     end if;
     update public.prize_winners p
     set status = 'approved', approved_at = now(), approved_by = v_who,
-        live_at = greatest(coalesce((r.draw_day + time '09:00') at time zone 'Asia/Kuala_Lumpur', now()), now())
+        live_at = greatest(coalesce((r.draw_day + time '09:00') at time zone 'Asia/Kuala_Lumpur', p.live_at, now()), now())
     where p.id = r.id;
     insert into public.prize_log (who, action, winner_id) values (v_who, 'approved', r.id);
     n := n + 1;
@@ -1511,7 +1526,7 @@ begin
     'today', v_today,
     'now', now(),
     'plan', coalesce((select json_agg(x order by x.country, x.sort) from (
-      select pp.country, pp.pool, pp.prize, pp.per_day, pp.first_day, pp.last_day,
+      select pp.country, pp.pool, pp.prize, pp.per_day, pp.first_day, pp.last_day, pp.skip_top,
              case pp.pool when 'top' then 1 when 'random' then 2 else 3 end as sort,
              pp.per_day * (pp.last_day - pp.first_day + 1) as total,
              (select count(*) from public.prize_winners p where p.country = pp.country and p.pool = pp.pool and p.status <> 'redrawn')::int as drawn,

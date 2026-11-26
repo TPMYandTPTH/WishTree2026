@@ -478,10 +478,10 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
 }
 @media (prefers-reduced-motion:reduce){.dot{animation:none}.wish-card{transition:none}.spin-out #treeMount,.spin-in #treeMount{animation:none}}
 </style>
-<script src="vendor/supabase.js?v=2026112604"></script>
-<script src="vendor/qrcode.min.js?v=2026112604"></script>
-<script src="config.js?v=2026112604"></script>
-<script src="wishtree.js?v=2026112604"></script>
+<script src="vendor/supabase.js?v=2026112605"></script>
+<script src="vendor/qrcode.min.js?v=2026112605"></script>
+<script src="config.js?v=2026112605"></script>
+<script src="wishtree.js?v=2026112605"></script>
 </head>
 <body>
 <a class="skip" href="#tree">Skip to the tree</a>
@@ -1109,7 +1109,7 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
     el('treeFull').hidden = !full;
     el('allLink').hidden = !total;
     el('allRow').hidden = !total;
-    el('treeFull').textContent = full ? 'The tree holds ' + cap() + ' wishes at a time. They take turns every ' + C.TREE_ROTATE_MINUTES + ' minutes, so every wish gets its moment.' : '';
+    el('treeFull').textContent = full ? 'The tree holds ' + cap() + ' wishes at a time. A new wish hangs for its first day, then every wish takes turns every ' + C.TREE_ROTATE_MINUTES + ' minutes, so everyone gets a moment.' : '';
     el('allLink').textContent = full ? 'See all ' + fmt(total) + ' in the list' : 'See them as a list';
     if (view3d) {
       view3d.setData({ wishes: state.onTree, leaders: crown(), giftLeaders: giftLeaders(), selected: state.selected });

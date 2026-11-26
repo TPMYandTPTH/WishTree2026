@@ -1327,21 +1327,29 @@
   }
 
   // More wishes than spots: the most-liked go on the tree (ties go to the newest). Returns oldest first, like pickForTree.
-  // Which wishes hang on the tree (returned oldest first). Winners never hang. When there are more wishes than
-  // room, the newest quarter always hang (so a new wish shows up soon after it's approved) and the rest take
-  // turns: every TREE_ROTATE_MINUTES a different random set, the same for everyone at the same time. Likes play
-  // no part, so a popular wish can't keep its place and pull in more likes just by being seen more.
+  // Which wishes hang on the tree (returned oldest first). Winners and paused wishes never hang. When there are more
+  // wishes than room, wishes approved in the last TREE_FRESH_HOURS hang (up to a quarter of the tree, so a new wish
+  // shows up soon after it's approved) and the rest take turns: every TREE_ROTATE_MINUTES a different random set, the
+  // same for everyone at the same time. Nobody stays on the tree for more than a day. Likes play no part, so a
+  // popular wish can't keep its place and pull in more likes just by being seen more.
   var TREE_ROTATE_MINUTES = 15;
+  var TREE_FRESH_HOURS = 24;   // a new wish hangs for its first day at most, then takes turns like the rest
   function rankForTree(list, cap) {
     list = list.filter(function (w) { return !w.won && !w.paused; });
     if (list.length <= cap) return list.slice().sort(newestFirst).reverse();
     var byNew = list.slice().sort(newestFirst);
-    var fresh = Math.max(1, Math.round(cap * 0.25));
+    var since = Date.now() - TREE_FRESH_HOURS * 3600000;
+    var fresh = byNew.filter(function (w) {
+      var t = new Date(w.approved_at || w.created_at || 0).getTime();
+      return t > since;
+    }).slice(0, Math.max(1, Math.round(cap * 0.25)));
+    var isFresh = {};
+    fresh.forEach(function (w) { isFresh[String(w.id)] = true; });
     var slot = Math.floor(Date.now() / (TREE_ROTATE_MINUTES * 60000));
-    var turns = byNew.slice(fresh).sort(function (a, b) {
+    var turns = byNew.filter(function (w) { return !isFresh[String(w.id)]; }).sort(function (a, b) {
       return hash('turn:' + slot + ':' + a.id) - hash('turn:' + slot + ':' + b.id);
     });
-    return byNew.slice(0, fresh).concat(turns.slice(0, cap - fresh)).sort(newestFirst).reverse();
+    return fresh.concat(turns.slice(0, cap - fresh.length)).sort(newestFirst).reverse();
   }
 
   /* ---------- The tree ---------- */

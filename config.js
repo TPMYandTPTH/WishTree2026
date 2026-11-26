@@ -179,7 +179,7 @@ window.WISH_CFG = {
     ruleList: [
       ['Give likes', 'Every like you give is your way in: every day a lucky liker wins a Grab voucher.'],
       ['Get likes', 'The most-liked wishes win every day. Share your wish so colleagues can like it.'],
-      ['Lucky draw every day', 'Anyone with an approved wish can win, however many likes it has.'],
+      ['Lucky draw every day', 'Every approved wish has a chance, however few likes it has. The 10 most-liked are left out of it: they can win Most liked.'],
       ['Fair play', 'One prize per person. Leaders and organizers can\'t win. Likes count until 11:59 pm on 18 December (Malaysia time).']
     ],
     // Used only if ruleList is empty
