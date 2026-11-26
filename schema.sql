@@ -1163,8 +1163,8 @@ grant execute on function public.update_settings(text, boolean) to anon, authent
 -- ('liker'), as set in prize_plan. On the Approvals page an admin draws a day's winners (the evening before) and
 -- approves them. Approved winners go live at 9 am Malaysia time on their day, and each one gets the next unused
 -- Grab code. Only the phone that made the winning wish (or the winning likes) can open that code.
--- The codes are added on the Approvals page with the prize password, which only the prize owner has (set it in
--- section 10). Nobody can read a code except the winner's phone, or the prize owner with the prize password.
+-- The codes are added on the Approvals page. Nobody can read a code except the winner's phone, or an approver who
+-- presses Show code for a winner whose phone can't open it (logged with their name, at most 20 an hour for everyone).
 -- Rules: one prize per person (BMS). Anyone drawn once is out of later draws, also when they were redrawn.
 
 -- Which country a wish counts for: Singha Complex is Thailand; work from home counts as Thailand when the wish is
@@ -1263,66 +1263,13 @@ create table if not exists public.prize_log (
 );
 create index if not exists prize_log_winner_idx on public.prize_log (winner_id);
 
--- The prize password (only a scrambled version is kept). Needed to add or remove codes and to see a code.
-create table if not exists public.prize_vault (
-  id int primary key check (id = 1),
-  pass_hash text not null,
-  updated_at timestamptz not null default now()
-);
-
 alter table public.prize_plan enable row level security;
 alter table public.prize_draw_days enable row level security;
 alter table public.prize_codes enable row level security;
 alter table public.prize_log enable row level security;
-alter table public.prize_vault enable row level security;
 -- No policies on purpose: only the functions below reach these tables
-revoke all on public.prize_plan, public.prize_draw_days, public.prize_codes, public.prize_log, public.prize_vault
+revoke all on public.prize_plan, public.prize_draw_days, public.prize_codes, public.prize_log
   from anon, authenticated;
-
--- Run from the SQL Editor only (section 10)
-create or replace function public.set_prize_password(p_password text) returns text
-language plpgsql security definer set search_path = '' as $$
-declare
-  v_admin text;
-begin
-  if char_length(coalesce(p_password, '')) < 12 then
-    raise exception 'Use a prize password of at least 12 characters';
-  end if;
-  select a.pass_hash into v_admin from public.access_passwords a where a.role = 'admin';
-  if v_admin is not null and extensions.crypt(p_password, v_admin) = v_admin then
-    raise exception 'Use a different password from the Approvals page password';
-  end if;
-  insert into public.prize_vault (id, pass_hash, updated_at)
-  values (1, extensions.crypt(p_password, extensions.gen_salt('bf', 10)), now())
-  on conflict (id) do update set pass_hash = excluded.pass_hash, updated_at = now();
-  return 'Prize password set. Only someone with it can add codes or see a code on the Approvals page.';
-end
-$$;
-
--- Is this the prize password? Answers 'ok', 'wrong', 'slow_down' or 'not_set'. 5 wrong tries from one connection
--- lock it for 15 minutes, 20 wrong tries an hour from anywhere lock it for everyone. Wrong tries are logged.
-create or replace function public.prize_vault_check(p_password text, p_who text) returns text
-language plpgsql security definer set search_path = '' as $$
-declare
-  v_conn text := public.conn_code();
-  v_hash text;
-  n int;
-begin
-  select count(*) into n from public.rate_events e
-  where e.action = 'vault_fail' and e.key = v_conn and e.at > now() - interval '15 minutes';
-  if n >= 5 then return 'slow_down'; end if;
-  select count(*) into n from public.rate_events e where e.action = 'vault_fail' and e.at > now() - interval '1 hour';
-  if n >= 20 then return 'slow_down'; end if;
-  select v.pass_hash into v_hash from public.prize_vault v where v.id = 1;
-  if v_hash is null then return 'not_set'; end if;
-  if extensions.crypt(coalesce(p_password, ''), v_hash) <> v_hash then
-    insert into public.rate_events (action, key) values ('vault_fail', v_conn);
-    insert into public.prize_log (who, action, conn) values (p_who, 'wrong_prize_password', v_conn);
-    return 'wrong';
-  end if;
-  return 'ok';
-end
-$$;
 
 -- Wishes that can still win in a country: approved, a real-looking BMS, not excluded, never drawn before
 create or replace function public.prize_wish_pool(p_country text)
@@ -1572,7 +1519,6 @@ begin
   return json_build_object(
     'today', v_today,
     'now', now(),
-    'vault_set', exists (select 1 from public.prize_vault v where v.id = 1),
     'plan', coalesce((select json_agg(x order by x.country, x.sort) from (
       select pp.country, pp.pool, pp.prize, pp.per_day, pp.first_day, pp.last_day,
              case pp.pool when 'top' then 1 when 'random' then 2 else 3 end as sort,
@@ -1609,16 +1555,15 @@ begin
 end
 $$;
 
--- Approvals (prize password): add Grab codes or links, one per line. Codes that are already there are skipped.
+-- Approvals: add Grab codes or links, one per line. Codes that are already there are skipped.
 -- Approved winners still waiting for a code get one straight away. Answers counts and the line numbers that
 -- didn't look like a code or a link (never the codes).
-create or replace function public.admin_prize_add_codes(p_token text, p_password text, p_country text, p_prize text,
+create or replace function public.admin_prize_add_codes(p_token text, p_country text, p_prize text,
                                                         p_codes text, p_expires date)
 returns json
 language plpgsql security definer set search_path = '' as $$
 declare
   v_who text := public.session_who(p_token);
-  v_check text;
   v_line text;
   v_no int := 0;
   v_bad int[] := '{}';
@@ -1628,8 +1573,7 @@ declare
   r record;
 begin
   if public.session_role(p_token) is distinct from 'admin' then raise exception 'not_allowed'; end if;
-  v_check := public.prize_vault_check(p_password, v_who);
-  if v_check <> 'ok' then return json_build_object('result', v_check); end if;
+  if v_who is null then return json_build_object('result', 'name_required'); end if;
   if not exists (select 1 from public.prize_plan pp where pp.country = p_country and pp.prize = p_prize)
      and not (p_country = 'MY' and p_prize = 'RM 50') then
     return json_build_object('result', 'bad_prize');
@@ -1669,19 +1613,17 @@ begin
 end
 $$;
 
--- Approvals (prize password): remove the unused codes of one prize (for a wrong batch). Codes set aside for a
--- winner or already shown stay.
-create or replace function public.admin_prize_remove_codes(p_token text, p_password text, p_country text, p_prize text)
+-- Approvals: remove the unused codes of one prize (for a wrong batch). Codes set aside for a winner or already
+-- shown stay.
+create or replace function public.admin_prize_remove_codes(p_token text, p_country text, p_prize text)
 returns json
 language plpgsql security definer set search_path = '' as $$
 declare
   v_who text := public.session_who(p_token);
-  v_check text;
   n int;
 begin
   if public.session_role(p_token) is distinct from 'admin' then raise exception 'not_allowed'; end if;
-  v_check := public.prize_vault_check(p_password, v_who);
-  if v_check <> 'ok' then return json_build_object('result', v_check); end if;
+  if v_who is null then return json_build_object('result', 'name_required'); end if;
   delete from public.prize_codes c
   where c.country = p_country and c.prize = p_prize and c.winner_id is null and c.given_at is null;
   get diagnostics n = row_count;
@@ -1690,24 +1632,23 @@ begin
 end
 $$;
 
--- Approvals (prize password): see a live winner's code, to send it by WhatsApp when their phone can't open it
--- (new phone, cleared browser). The code then counts as given.
-create or replace function public.admin_prize_show_code(p_token text, p_password text, p_id bigint) returns json
+-- Approvals: see a live winner's code, to send it by WhatsApp when their phone can't open it (new phone, cleared
+-- browser). The code then counts as given. Logged with the approver's name; at most 20 an hour for everyone.
+create or replace function public.admin_prize_show_code(p_token text, p_id bigint) returns json
 language plpgsql security definer set search_path = '' as $$
 declare
   v_who text := public.session_who(p_token);
-  v_check text;
   w public.prize_winners;
   c public.prize_codes;
 begin
   if public.session_role(p_token) is distinct from 'admin' then raise exception 'not_allowed'; end if;
-  v_check := public.prize_vault_check(p_password, v_who);
-  if v_check <> 'ok' then return json_build_object('result', v_check); end if;
+  if v_who is null then return json_build_object('result', 'name_required'); end if;
   select * into w from public.prize_winners p where p.id = p_id;
   if not found or w.status not in ('approved', 'sent') then return json_build_object('result', 'not_found'); end if;
   if w.live_at > now() then return json_build_object('result', 'not_live_yet'); end if;
   select * into c from public.prize_codes x where x.winner_id = w.id for update;
   if not found then return json_build_object('result', 'no_code'); end if;
+  if not public.rate_hit('show_code', 'all', 20, interval '1 hour') then return json_build_object('result', 'slow_down'); end if;
   update public.prize_codes x
   set given_at = coalesce(x.given_at, now()), given_how = coalesce(x.given_how, 'whatsapp'), views = x.views + 1
   where x.id = c.id;
@@ -1859,8 +1800,6 @@ $$;
 
 -- Function rights for the draw
 revoke execute on function public.wish_country(text, text) from public, anon, authenticated;
-revoke execute on function public.set_prize_password(text) from public, anon, authenticated;
-revoke execute on function public.prize_vault_check(text, text) from public, anon, authenticated;
 revoke execute on function public.prize_wish_pool(text) from public, anon, authenticated;
 revoke execute on function public.prize_liker_pool(text) from public, anon, authenticated;
 revoke execute on function public.prize_assign_code(bigint) from public, anon, authenticated;
@@ -1870,9 +1809,9 @@ grant execute on function public.admin_prize_draw(text, text, date) to anon, aut
 grant execute on function public.admin_prize_approve(text, bigint[]) to anon, authenticated;
 grant execute on function public.admin_prize_redraw(text, bigint, text) to anon, authenticated;
 grant execute on function public.admin_prize_state(text) to anon, authenticated;
-grant execute on function public.admin_prize_add_codes(text, text, text, text, text, date) to anon, authenticated;
-grant execute on function public.admin_prize_remove_codes(text, text, text, text) to anon, authenticated;
-grant execute on function public.admin_prize_show_code(text, text, bigint) to anon, authenticated;
+grant execute on function public.admin_prize_add_codes(text, text, text, text, date) to anon, authenticated;
+grant execute on function public.admin_prize_remove_codes(text, text, text) to anon, authenticated;
+grant execute on function public.admin_prize_show_code(text, bigint) to anon, authenticated;
 grant execute on function public.my_prizes(text, json) to anon, authenticated;
 grant execute on function public.reveal_prize(text, json, bigint) to anon, authenticated;
 grant execute on function public.get_winners() to anon, authenticated;
@@ -1887,11 +1826,6 @@ grant execute on function public.admin_delete(text, text, uuid) to anon, authent
 --
 -- select public.set_access_password('leader', 'the leaders password');
 -- select public.set_access_password('admin', 'the approvals password');
---
--- The prize password (at least 12 characters, not the same as the Approvals one) is needed on the Approvals page to
--- add Grab codes and to see a winner's code. Keep it to yourself: approvers don't need it.
---
--- select public.set_prize_password('the prize password');
 --
 -- People who can't win a prize (Amr, Maszy, the Wish Tree team): add their BMS numbers in
 -- Table Editor > prize_excluded (bms, note). Don't write real BMS numbers in this file: the repo is public.

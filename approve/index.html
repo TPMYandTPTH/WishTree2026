@@ -247,6 +247,13 @@ a{color:var(--slate)}
 .plan .meter{height:6px;border-radius:999px;background:var(--line);overflow:hidden}
 .plan .meter i{display:block;height:100%;background:var(--teal-dark)}
 .codes-form{display:flex;flex-direction:column;gap:10px}
+/* Grab codes: gold, so it's clear this part handles real vouchers */
+.box.codes-box{background:#FBF3E2;border:1.5px solid #C99A45}
+.box.codes-box h2{color:#7A5418}
+.codes-box .stock li{border-color:#E7D2A6}
+.btn-gold{background:#B18854;color:#241C14}
+.btn-gold:hover{background:#C29863}
+.pw .gold-note{padding:10px 12px;border-radius:10px;background:#FBF3E2;border:1px solid #E7D2A6;color:#7A5418;font-size:13px;font-weight:700;line-height:1.45}
 .codes-form textarea{width:100%;min-height:130px;padding:10px 12px;border:1.5px solid var(--line-2);border-radius:10px;color:var(--ink);font-family:ui-monospace,Menlo,Consolas,monospace;font-size:14px;line-height:1.5;resize:vertical}
 .codes-form .fld input,.codes-form .fld select{height:42px}
 
@@ -460,10 +467,9 @@ a{color:var(--slate)}
             <p class="small">A day with too few people carries its prizes to the next draw. No one wins twice: anyone drawn once (also when redrawn) is out of later draws. <b>Most liked</b> is the top of the Most liked list when you press Draw (at least 1 like; same likes, the one approved first).</p>
           </div>
 
-          <div class="box">
+          <div class="box codes-box">
             <h2>Grab codes</h2>
             <ul id="stockRows" class="stock"></ul>
-            <p id="vaultNote" class="small"></p>
             <details id="codesAdd">
               <summary style="cursor:pointer;font-weight:700;font-size:14px">Add codes</summary>
               <form id="codesForm" class="codes-form" novalidate autocomplete="off" style="margin-top:12px">
@@ -474,20 +480,19 @@ a{color:var(--slate)}
                 <label class="fld">Codes or links, one per line
                   <textarea id="acCodes" spellcheck="false" autocomplete="off" placeholder="GRAB-XXXX-XXXX&#10;https://..."></textarea>
                 </label>
-                <label class="fld">Prize password<input id="acPw" type="password" autocomplete="new-password"></label>
                 <div class="pz-tools">
-                  <button type="submit" id="acBtn" class="btn btn-approve">Add codes</button>
+                  <button type="submit" id="acBtn" class="btn btn-gold">Add codes</button>
                   <button type="button" id="rmCodesBtn" class="btn btn-reject">Remove unused codes</button>
                 </div>
                 <p id="acMsg" class="small" role="status"></p>
               </form>
             </details>
-            <p class="small">Codes are kept locked in the database: only the winner's phone, or someone with the prize password on this page, can see one. A code that was opened is never given to anyone else.</p>
+            <p class="small">Codes are kept locked in the database: only the winner's phone can open one, or an approver who presses <b>Show code</b> (logged with their name, at most 20 an hour). A code that was opened is never given to anyone else.</p>
           </div>
 
           <div class="box">
             <h2>When a winner can't open it</h2>
-            <p class="small">The code opens on the phone they used for the wish or the likes. On a new phone or after clearing the browser, they can't open it. Check their BMS on WhatsApp, then use <b>Show code</b> (prize password) and send it to them. It then counts as given.</p>
+            <p class="small">The code opens on the phone they used for the wish or the likes. On a new phone or after clearing the browser, they can't open it. Check their BMS on WhatsApp, then use <b>Show code</b> and send it to them. It then counts as given, and your name is logged.</p>
             <p class="small"><b>Redraw</b> replaces a winner with a new draw from the same pool, for example a leader or organizer, or a code not opened after 3 days. It needs a reason, and it isn't possible once the code was opened.</p>
             <div class="pz-tools"><button type="button" id="drawCsv" class="btn btn-ghost">Download winners list</button></div>
           </div>
@@ -1171,14 +1176,14 @@ a{color:var(--slate)}
   }
 
   /* ---------- Prize draw ---------- */
-  // Everything comes from admin_prize_state (never the codes). Codes are only shown one at a time with the prize
-  // password, which stays in this page's memory for 10 minutes and is never saved.
+  // Everything comes from admin_prize_state (never the codes). A code is only shown one at a time, after a second
+  // click, and the database logs who saw it.
   var D = {
     data: null, country: 'MY', view: 'msgs', busy: false,
     redraw: {},        // winner id -> reason being typed (open when present)
-    ask: {},           // winner id -> true while the prize password field is open for Show code
+    ask: {},           // winner id -> true while "Show code" waits for the second click
     shown: {},         // winner id -> code details, hidden again after 2 minutes
-    pw: '', pwUntil: 0, rmArmed: ''
+    rmArmed: ''
   };
   var POOL = { top: 'Most liked', random: 'Lucky draw', liker: 'Lucky liker', early: 'Picked before the draw', manual: 'Picked by hand' };
   var POOL_ORDER = { top: 1, random: 2, liker: 3, early: 4, manual: 5 };
@@ -1191,14 +1196,6 @@ a{color:var(--slate)}
   }
   function dayLabel(ymd) { return ymd ? new Date(ymd + 'T12:00:00+08:00').toLocaleDateString('en-GB', { timeZone: KL, weekday: 'short', day: 'numeric', month: 'short' }) : ''; }
   function addDays(ymd, n) { var d = new Date(ymd + 'T12:00:00Z'); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); }
-  function vaultPw() { return D.pwUntil > Date.now() ? D.pw : ''; }
-  function keepPw(pw) { D.pw = pw; D.pwUntil = Date.now() + 10 * 60000; }
-  function forgetPw() { D.pw = ''; D.pwUntil = 0; }
-  function vaultError(r) {
-    return r === 'wrong' ? 'That prize password isn\'t right.'
-      : r === 'slow_down' ? 'Too many wrong prize passwords. Wait 15 minutes, then try again.'
-      : r === 'not_set' ? 'The prize password hasn\'t been set yet (schema.sql, section 10).' : '';
-  }
 
   function loadDraw() {
     if (C.demo) { renderDraw(); return Promise.resolve(); }
@@ -1271,16 +1268,16 @@ a{color:var(--slate)}
         '<button type="button" class="btn btn-reject" data-dv="redraw-go" data-id="' + esc(id) + '"' + dis + '>' + (undo ? 'Undo winner' : 'Redraw') + '</button>' +
         '<button type="button" class="btn btn-ghost" data-dv="redraw-cancel" data-id="' + esc(id) + '">Cancel</button></div>';
     } else if (D.ask[id]) {
-      h += '<div class="st warn">Only for a winner who can\'t open it on their phone. Once you see it, it counts as given.</div>' +
-        '<div class="inline">' + (vaultPw() ? '' : '<input type="password" data-dv-pw="' + esc(id) + '" autocomplete="new-password" placeholder="Prize password" aria-label="Prize password">') +
-        '<button type="button" class="btn btn-slate" data-dv="show-go" data-id="' + esc(id) + '"' + dis + '>Show code</button>' +
+      h += '<div class="gold-note">Only for a winner who can\'t open it on their phone. Once you see it, it counts as given, and your name is logged.</div>' +
+        '<div class="inline">' +
+        '<button type="button" class="btn btn-gold" data-dv="show-go" data-id="' + esc(id) + '"' + dis + '>Show the code</button>' +
         '<button type="button" class="btn btn-ghost" data-dv="show-cancel" data-id="' + esc(id) + '">Cancel</button></div>';
     } else {
       var live = w.live_at && new Date(w.live_at).getTime() <= Date.now();
       h += '<div class="actions">';
       if (w.status === 'picked') h += '<button type="button" class="btn btn-approve" data-dv="approve" data-id="' + esc(id) + '"' + dis + '>' + checkIcon() + 'Approve</button>';
       if (!w.given_at) h += '<button type="button" class="btn btn-reject" data-dv="redraw" data-id="' + esc(id) + '"' + dis + '>' + (w.pool === 'early' || w.pool === 'manual' ? 'Undo winner' : 'Redraw') + '</button>';
-      if (live && w.has_code && !D.shown[id]) h += '<button type="button" class="btn btn-ghost" data-dv="show" data-id="' + esc(id) + '"' + dis + '>Show code</button>';
+      if (live && w.has_code && !D.shown[id]) h += '<button type="button" class="btn btn-gold" data-dv="show" data-id="' + esc(id) + '"' + dis + '>Show code</button>';
       h += '</div>';
     }
     return h + '</article>';
@@ -1330,7 +1327,6 @@ a{color:var(--slate)}
         (c.expired ? ' · ' + fmt(c.expired) + ' expired' : '') + (c.soonest_expiry ? ' · first expiry ' + esc(dayLabel(c.soonest_expiry)) : '') + '</span>' +
         (waiting[pz] ? '<span class="small"><b>' + fmt(waiting[pz]) + ' approved ' + (waiting[pz] === 1 ? 'winner is' : 'winners are') + ' waiting for a code.</b> Add codes and they get one straight away.</span>' : '') + '</li>';
     }).join('');
-    $('vaultNote').textContent = d.vault_set ? '' : 'The prize password isn\'t set yet. Set it in Supabase (schema.sql, section 10) before adding codes.';
     var sel = $('acPrize');
     if (sel.getAttribute('data-country') !== country) {
       sel.innerHTML = prizes.map(function (pz) { return '<option value="' + esc(pz) + '">' + esc(pz) + '</option>'; }).join('');
@@ -1455,25 +1451,18 @@ a{color:var(--slate)}
     D.ask[id] = true;
     delete D.redraw[id];
     renderDraw();
-    var f = document.querySelector('[data-dv-pw="' + id + '"]');
-    if (f) f.focus();
   }
-  function doShowCode(id, typed) {
-    var pw = typed || vaultPw();
-    if (!pw) { askShowCode(id); return; }
-    drawCall('admin_prize_show_code', { p_password: pw, p_id: Number(id) }).then(function (r) {
+  function doShowCode(id) {
+    drawCall('admin_prize_show_code', { p_id: Number(id) }).then(function (r) {
       r = r || {};
+      delete D.ask[id];
       if (r.result === 'ok') {
-        keepPw(pw);
-        delete D.ask[id];
         D.shown[id] = { code: r.code, is_link: r.is_link, expires_on: r.expires_on, bms: r.bms };
         setTimeout(function () { delete D.shown[id]; if (!typingInDraw()) renderDraw(); }, 120000);
-      } else if (vaultError(r.result)) {
-        forgetPw();
-        D.ask[id] = true;
-        $('drawErr').textContent = vaultError(r.result);
       } else {
-        $('drawErr').textContent = r.result === 'not_live_yet' ? 'This winner isn\'t live yet (9 am on their day).'
+        $('drawErr').textContent = r.result === 'slow_down' ? 'That\'s 20 codes shown in the last hour. Wait a while, then try again.'
+          : r.result === 'name_required' ? 'Save your name at the top first.'
+          : r.result === 'not_live_yet' ? 'This winner isn\'t live yet (9 am on their day).'
           : r.result === 'no_code' ? 'No code is set aside for this winner yet. Add codes first.' : 'That winner has changed. Refresh to see the latest.';
       }
       return loadDraw();
@@ -1490,19 +1479,15 @@ a{color:var(--slate)}
   }
   function addCodes(e) {
     e.preventDefault();
-    var pw = $('acPw').value || vaultPw();
     var text = $('acCodes').value;
     $('acMsg').textContent = '';
     if (!text.trim()) { $('acMsg').textContent = 'Paste the codes or links first, one per line.'; return; }
-    if (!pw) { $('acMsg').textContent = 'Type the prize password.'; $('acPw').focus(); return; }
     if (C.demo) { $('acMsg').textContent = 'Preview: codes can only be added once the Wish Tree is connected.'; return; }
     $('acBtn').disabled = true;
-    adminRpc('admin_prize_add_codes', { p_password: pw, p_country: D.country, p_prize: $('acPrize').value, p_codes: text, p_expires: $('acExp').value || null }).then(function (r) {
+    adminRpc('admin_prize_add_codes', { p_country: D.country, p_prize: $('acPrize').value, p_codes: text, p_expires: $('acExp').value || null }).then(function (r) {
       $('acBtn').disabled = false;
       r = r || {};
       if (r.result === 'ok') {
-        keepPw(pw);
-        $('acPw').value = '';
         $('acCodes').value = '';
         var msg = 'Added ' + fmt(r.added) + ' ' + $('acPrize').value + (r.added === 1 ? ' code.' : ' codes.');
         if (r.already_there) msg += ' ' + fmt(r.already_there) + ' were already there.';
@@ -1513,8 +1498,7 @@ a{color:var(--slate)}
         loadDraw();
         return;
       }
-      if (vaultError(r.result)) forgetPw();
-      $('acMsg').textContent = vaultError(r.result) || (r.result === 'expired' ? 'That expiry date has passed.'
+      $('acMsg').textContent = r.result === 'name_required' ? 'Save your name at the top first.' : (r.result === 'expired' ? 'That expiry date has passed.'
         : r.result === 'too_many' ? 'That\'s too many at once. Add them in smaller batches.' : 'That prize doesn\'t fit this country.');
     }).catch(function (err) {
       $('acBtn').disabled = false;
@@ -1525,8 +1509,6 @@ a{color:var(--slate)}
   }
   function removeCodes() {
     var pz = $('acPrize').value;
-    var pw = $('acPw').value || vaultPw();
-    if (!pw) { $('acMsg').textContent = 'Type the prize password first.'; $('acPw').focus(); return; }
     if (D.rmArmed !== pz) {
       D.rmArmed = pz;
       $('rmCodesBtn').textContent = 'Click again to remove';
@@ -1536,11 +1518,10 @@ a{color:var(--slate)}
     }
     D.rmArmed = '';
     $('rmCodesBtn').textContent = 'Remove unused codes';
-    adminRpc('admin_prize_remove_codes', { p_password: pw, p_country: D.country, p_prize: pz }).then(function (r) {
+    adminRpc('admin_prize_remove_codes', { p_country: D.country, p_prize: pz }).then(function (r) {
       r = r || {};
-      if (r.result === 'ok') { keepPw(pw); $('acPw').value = ''; $('acMsg').textContent = 'Removed ' + fmt(r.removed) + ' unused ' + pz + ' codes.'; loadDraw(); return; }
-      if (vaultError(r.result)) forgetPw();
-      $('acMsg').textContent = vaultError(r.result) || 'Nothing was removed.';
+      if (r.result === 'ok') { $('acMsg').textContent = 'Removed ' + fmt(r.removed) + ' unused ' + pz + ' codes.'; loadDraw(); return; }
+      $('acMsg').textContent = r.result === 'name_required' ? 'Save your name at the top first.' : 'Nothing was removed.';
     }).catch(function (err) { if (signedOut(err)) return; console.error(err); $('acMsg').textContent = 'Could not remove the codes.'; });
   }
   function downloadDraw() {
@@ -1570,9 +1551,8 @@ a{color:var(--slate)}
   });
   $('dayList').addEventListener('keydown', function (e) {
     if (e.key !== 'Enter') return;
-    var r = e.target.getAttribute('data-dv-reason'), p = e.target.getAttribute('data-dv-pw');
+    var r = e.target.getAttribute('data-dv-reason');
     if (r) { e.preventDefault(); doRedraw(r); }
-    if (p) { e.preventDefault(); doShowCode(p, e.target.value); }
   });
   $('dayList').addEventListener('click', function (e) {
     var b = e.target.closest ? e.target.closest('[data-dv]') : null;
@@ -1589,7 +1569,7 @@ a{color:var(--slate)}
     else if (act === 'redraw-go') doRedraw(id);
     else if (act === 'show') askShowCode(id);
     else if (act === 'show-cancel') { delete D.ask[id]; renderDraw(); }
-    else if (act === 'show-go') { var inp = document.querySelector('[data-dv-pw="' + id + '"]'); doShowCode(id, inp ? inp.value : ''); }
+    else if (act === 'show-go') doShowCode(id);
     else if (act === 'copy') { var c = D.shown[id]; if (c) copyText(c.code).then(function () { b.textContent = 'Copied'; }); }
     else if (act === 'hide-code') { delete D.shown[id]; renderDraw(); }
   });
