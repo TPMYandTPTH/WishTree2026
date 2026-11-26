@@ -165,8 +165,16 @@ window.WISH_CFG = {
     ],
     // Used only if vouchers is empty
     text: 'Every day from 1 December, wishes and likers win Grab vouchers.',
-    tvDeadline: 'Winners show at 9 am every day. One prize per person.',
-    deadline: 'New winners show here at 9 am every day. If you win, open the Wish Tree on the phone you used for your wish or your likes to get your Grab code.',
+    // The grand prizes: shown after the vouchers, and one of them (or a voucher) pops out of the big gift when it opens.
+    // icon: watch, bag, hotel or voucher (simple drawings, no logos).
+    grand: [
+      { name: 'Hotel staycation for 2', short: 'Hotel stay', line2: 'for 2', count: 2, icon: 'hotel' },
+      { name: 'Apple Watch SE', short: 'Apple Watch', line2: 'SE', count: 2, icon: 'watch' },
+      { name: 'CK backpack', short: 'CK backpack', line2: '', count: 2, icon: 'bag' }
+    ],
+    grandWhen: 'Winners at the end',
+    tvDeadline: 'New winners every day. One prize per person.',
+    deadline: 'New winners show here every day. If you win, open the Wish Tree on the phone you used for your wish or your likes to get your Grab code.',
     rules: 'One prize per person. Leaders and organizers can\'t win. A winning wish leaves the like race. The Wish Tree team checks every winner before they show here. Likes count until 11:59 pm on 18 December (Malaysia time).'
     // The database stops counting likes at app_settings.likes_close_at (18 Dec 2026, 23:59 Malaysia time).
   },

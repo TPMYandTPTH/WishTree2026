@@ -212,12 +212,19 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
 .pz-v-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px}
 .pz-v-head b{font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#E2BF85}
 .pz-v-head span{font-size:13px;color:var(--card-sub)}
-.pz-v-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-.pz-v{display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-width:0;padding:12px 12px 11px;border-radius:12px;background:rgba(244,238,227,.1);border:1px solid rgba(226,191,133,.45)}
-.pz-v-amt{font-size:28px;font-weight:700;line-height:1.05;letter-spacing:-.01em;color:#F4EEE3;white-space:nowrap}
-.pz-v-grab{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#E2BF85}
-.pz-v-who{margin-top:4px;font-size:13px;line-height:1.3;color:var(--card-ink)}
-@media (max-width:560px){.pz-v{padding:10px 9px}.pz-v-amt{font-size:21px}.pz-v-who{font-size:12px}}
+.pz-v-row,.pz-g-row{display:flex;flex-direction:column;gap:6px}
+/* one voucher a line: the amount big on the left, who wins on the right */
+.pz-v{display:flex;align-items:center;gap:12px;min-width:0;padding:8px 14px;border-radius:12px;background:rgba(244,238,227,.1);border:1px solid rgba(226,191,133,.45)}
+.pz-v-amt{flex:none;min-width:104px;font-size:26px;font-weight:700;line-height:1.1;letter-spacing:-.01em;color:#F4EEE3;white-space:nowrap}
+.pz-v-grab{display:none}
+.pz-v-who{min-width:0;font-size:14px;line-height:1.3;color:var(--card-ink)}
+/* grand prizes */
+.pz-g{display:flex;align-items:center;gap:12px;min-width:0;padding:8px 14px;border-radius:12px;background:rgba(36,28,20,.22);border:1px dashed rgba(226,191,133,.55)}
+.pz-g-ic{flex:none;color:#E2BF85;line-height:0}
+.pz-g-name{flex:1;min-width:0;font-size:15px;font-weight:700;line-height:1.25;color:#F4EEE3}
+.pz-g-n{flex:none;font-size:12px;color:var(--card-sub)}
+.pz-short{display:none}
+@media (max-width:340px){.pz-v-amt{min-width:92px;font-size:22px}.pz-v,.pz-g{padding:8px 10px;gap:10px}}
 @keyframes giftIn{from{transform:translateY(14px) scale(.97);opacity:0}to{transform:none;opacity:1}}
 @media (prefers-reduced-motion: reduce){.wish-card[data-kind="secret"]{animation:none}}
 .hole{position:absolute;top:14px;left:50%;width:10px;height:10px;margin-left:-5px;border-radius:50%;background:#343F37;opacity:.55}
@@ -464,10 +471,10 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
 }
 @media (prefers-reduced-motion:reduce){.dot{animation:none}.wish-card{transition:none}.spin-out #treeMount,.spin-in #treeMount{animation:none}}
 </style>
-<script src="vendor/supabase.js?v=2026112602"></script>
-<script src="vendor/qrcode.min.js?v=2026112602"></script>
-<script src="config.js?v=2026112602"></script>
-<script src="wishtree.js?v=2026112602"></script>
+<script src="vendor/supabase.js?v=2026112603"></script>
+<script src="vendor/qrcode.min.js?v=2026112603"></script>
+<script src="config.js?v=2026112603"></script>
+<script src="wishtree.js?v=2026112603"></script>
 </head>
 <body>
 <a class="skip" href="#tree">Skip to the tree</a>
@@ -975,10 +982,10 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
     var total = all.length + winners.length;
     var nWon = winners.length + (state.site === 'all' ? C.likerWinners().length : 0);
     el('allSub').textContent = state.sort === 'winners'
-      ? (nWon ? fmt(nWon) + (nWon === 1 ? ' winner' : ' winners') + ' · ' + where + ' · ' + langSummary() : 'Coming soon: from 9 am on 1 December')
+      ? (nWon ? fmt(nWon) + (nWon === 1 ? ' winner' : ' winners') + ' · ' + where + ' · ' + langSummary() : 'Coming soon: from 1 December')
       : fmt(total) + (total === 1 ? ' wish' : ' wishes') + ' · ' + where + ' · ' + langSummary() +
         (all.length > cap() ? ' · ' + cap() + ' hang on the tree at a time, taking turns' : '');
-    // The Winners tab is always there; "Soon" until the first winners are announced (9 am, 1 December)
+    // The Winners tab is always there; "Soon" until the first winners are announced (1 December)
     var anyWon = state.wishes.some(function (w) { return w.won; }) || C.likerWinners().length > 0;
     el('winnersSoon').hidden = anyWon;
     Array.prototype.forEach.call(document.querySelectorAll('.sort button'), function (b) {
@@ -1072,7 +1079,7 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
         '<div class="li-foot"><span class="li-mark" style="--bg-mark:' + pal.bg + '" aria-hidden="true">' + C.tpMarkHtml(w.tag_color !== 'red') + '</span>' +
         '<div class="li-who" lang="en"><b>' + C.esc(C.displayName(w)) + '</b><span>' + C.esc(C.displayWhere(w)) + '</span></div>' +
         likeBtnHtml('wish', w) + '</div></article>';
-    }).join('') + likerHtml : '<div class="all-empty">' + (state.q ? 'No wishes match your search.' : state.sort === 'winners' ? (state.wishes.some(function (w) { return w.won; }) || C.likerWinners().length ? 'No winners from here yet.' : 'Winners show here from 9 am on 1 December, once the Wish Tree team approves them.') : 'No wishes here yet in the languages you picked.') + '</div>';
+    }).join('') + likerHtml : '<div class="all-empty">' + (state.q ? 'No wishes match your search.' : state.sort === 'winners' ? (state.wishes.some(function (w) { return w.won; }) || C.likerWinners().length ? 'No winners from here yet.' : 'Winners show here from 1 December, once the Wish Tree team approves them.') : 'No wishes here yet in the languages you picked.') + '</div>';
     el('moreBtn').hidden = list.length <= state.shown;
     el('moreBtn').textContent = 'Show more (' + fmt(list.length - Math.min(list.length, state.shown)) + ' left)';
   }

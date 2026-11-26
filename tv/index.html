@@ -131,6 +131,15 @@ html.portrait .tree-box{height:49rem}
 .pz-v-grab{display:none}
 .pz-v-who{min-width:0;font-size:1.35rem;line-height:1.25;color:var(--card-ink)}
 html.portrait .pz-vouchers{grid-template-columns:1fr}
+.pz-g-group{grid-column:1/-1}
+.pz-g-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.9rem}
+.pz-g{display:flex;align-items:center;gap:.8rem;min-width:0;padding:.35rem 1rem;border-radius:.8rem;background:rgba(36,28,20,.22);border:1px dashed rgba(226,191,133,.55)}
+.pz-g-ic{flex:none;color:#E2BF85;line-height:0}
+.pz-g-ic svg{width:2rem;height:2rem}
+.pz-g-name{flex:1;min-width:0;font-size:1.4rem;font-weight:700;color:#F4EEE3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pz-g-n{flex:none;font-size:1.15rem;color:var(--card-sub)}
+.pz-long{display:none}
+.prize-tv.has-vouchers .pz-deadline{display:none}
 html.portrait .pz-title{font-size:2.6rem}
 html.portrait .pz-text,html.portrait .pz-deadline{font-size:1.8rem}
 html.portrait .pz-how{display:none}
@@ -201,10 +210,10 @@ body.pointer .fs{opacity:1;pointer-events:auto}
   .live .dot{animation:none}
 }
 </style>
-<script src="../vendor/supabase.js?v=2026112602"></script>
-<script src="../vendor/qrcode.min.js?v=2026112602"></script>
-<script src="../config.js?v=2026112602"></script>
-<script src="../wishtree.js?v=2026112602"></script>
+<script src="../vendor/supabase.js?v=2026112603"></script>
+<script src="../vendor/qrcode.min.js?v=2026112603"></script>
+<script src="../config.js?v=2026112603"></script>
+<script src="../wishtree.js?v=2026112603"></script>
 </head>
 <body>
 <div class="backdrop" aria-hidden="true"></div>
@@ -582,6 +591,7 @@ body.pointer .fs{opacity:1;pointer-events:auto}
     if (vouchers) $('pzText').innerHTML = '<div class="pz-vouchers">' + vouchers + '</div>';
     else $('pzText').textContent = PRIZE.tvText || PRIZE.text || '';
     $('prizeTv').classList.toggle('has-vouchers', !!vouchers);
+    if (vouchers) $('kicker').textContent = 'WISHES AND LIKERS WIN EVERY DAY · ONE PRIZE PER PERSON';
     $('pzDeadline').textContent = PRIZE.tvDeadline || PRIZE.deadline || '';
     $('pzHow').textContent = 'Like the wishes you love on the tree. One prize per person. Leaders and organizers can\'t win.';
     return true;

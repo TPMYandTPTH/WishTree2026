@@ -105,6 +105,40 @@ function drawGiftCard(lines) {
   return cv;
 }
 
+// The card that rises out of the prize gift: one prize, drawn simply (icon from C.PRIZE_ICONS), with its name
+function drawPrizeCard(p) {
+  const W = 256, H = 320;
+  const cv = makeCanvas(W, H);
+  const x = cv.getContext('2d');
+  x.fillStyle = '#F4EEE3';
+  x.fillRect(0, 0, W, H);
+  x.strokeStyle = '#B18854';
+  x.lineWidth = 10;
+  x.strokeRect(14, 14, W - 28, H - 28);
+  x.fillStyle = 'rgba(52,63,55,0.55)';
+  x.beginPath(); x.arc(W / 2, 40, 9, 0, TAU); x.fill();
+  const d = (C.PRIZE_ICONS || {})[p.icon];
+  if (d && typeof Path2D === 'function') {
+    x.save();
+    x.translate(W / 2 - 54, 66);
+    x.scale(4.5, 4.5);
+    x.strokeStyle = '#6C151E';
+    x.lineWidth = 1.6;
+    x.lineCap = 'round';
+    x.lineJoin = 'round';
+    x.stroke(new Path2D(d));
+    x.restore();
+  }
+  x.fillStyle = '#6C151E';
+  x.textAlign = 'center';
+  x.font = '700 34px "TP Sans","Noto Sans",system-ui,sans-serif';
+  x.fillText(p.line1 || '', W / 2, 228, W - 44);
+  x.fillStyle = '#7A5418';
+  x.font = '700 24px "TP Sans","Noto Sans",system-ui,sans-serif';
+  x.fillText(p.line2 || '', W / 2, 266, W - 44);
+  return cv;
+}
+
 // The label on the front of the prize gift
 function drawPrizeLabel(text) {
   const W = 320, H = 128;
@@ -554,6 +588,12 @@ export function createTree3D(container, opts = {}) {
     // the card that rises out
     const cardMat = new THREE.MeshStandardMaterial({ map: toTex(drawGiftCard(c.words)), roughness: 0.7, side: THREE.DoubleSide, emissive: 0x3a2a10, emissiveIntensity: 0.6 });
     const card = new THREE.Mesh(new THREE.PlaneGeometry(c.prize ? 0.8 : 0.64, c.prize ? 1.0 : 0.8), cardMat);
+    if (c.prize) {
+      // the prize that rises out is always seen, even where the tree's tags hang in front of it
+      cardMat.depthTest = false;
+      cardMat.transparent = true;   // drawn last, after the glow, so the glow doesn't wash it out
+      card.renderOrder = 20;
+    }
     card.userData = tag;
     card.visible = false;
     g.add(card);
@@ -608,6 +648,18 @@ export function createTree3D(container, opts = {}) {
   }
   gift(-0.95, -1.45, 0.65, 0.5, 0.55, 0x343f37, 0xb18854, 0.2);
   gift(1.2, -1.6, 0.5, 0.62, 0.5, 0xf4eee3, 0x343f37, -0.6);
+  let lastPrize = -1;
+  function showRandomPrize(gg) {
+    const pool = typeof C.prizePool === 'function' ? C.prizePool() : [];
+    if (!pool.length) return;
+    let n = Math.floor(Math.random() * pool.length);
+    if (pool.length > 1 && n === lastPrize) n = (n + 1) % pool.length;
+    lastPrize = n;
+    const old = gg.cardMat.map;
+    gg.cardMat.map = toTex(drawPrizeCard(pool[n]));
+    gg.cardMat.needsUpdate = true;
+    if (old) old.dispose();
+  }
   function nudgeGift(gg, strength) {
     if (gg) gg.wigVel += (Math.random() < 0.5 ? -1 : 1) * strength;
   }
@@ -1162,10 +1214,13 @@ export function createTree3D(container, opts = {}) {
         sg.g.position.y = (0.16 * hop + 0.015 * Math.sin(t * 2.1)) * still;
         sg.g.rotation.z += (0.07 * hop * Math.sin(t * 18) + 0.02 * Math.sin(t * 1.7)) * still;
       }
+      // each time the prize gift opens, a different prize rises out of it
+      if (sg.prize && sg.target && !sg.picked) { sg.picked = true; showRandomPrize(sg); }
+      if (sg.prize && !sg.target && o < 0.03) sg.picked = false;
       sg.lid.rotation.x = -1.95 * ease - Math.abs(sg.wig) * 0.12;
       sg.card.visible = o > 0.03;
       // the card rises up and a little forward, tilted towards you
-      sg.card.position.set(0, sg.H - sg.LID - 0.42 + 1.25 * ease, 0.34 * ease);
+      sg.card.position.set(0, sg.H - sg.LID - 0.42 + 1.25 * ease, (sg.prize ? 0.6 : 0.34) * ease);
       sg.card.rotation.set(-0.2 * ease, reduce ? 0 : 0.16 * Math.sin(t * 1.1) * ease - 0.32 * ease, 0);
       sg.inner.material.opacity = 0.85 * o;
       sg.glowMat.opacity = 0.75 * o * (reduce ? 1 : 0.85 + 0.15 * Math.sin(t * 2.2));

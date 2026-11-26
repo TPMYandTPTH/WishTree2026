@@ -1002,16 +1002,51 @@
 
   /* ---------- Prize: the most-liked wishes ---------- */
   var PRIZE = Object.assign({ enabled: true, winners: 5, amount: 'RM 100' }, CFG.PRIZE || {});
-  // The Grab vouchers in big type, per country (PRIZE.vouchers in config.js). Styles come from the page (.pz-v-*).
+  // Simple line drawings for the prizes (24 x 24, drawn with a stroke; no logos). Used in the page and the 3D gift.
+  var PRIZE_ICONS = {
+    watch: 'M9 2h6v4H9z M9 18h6v4H9z M8 6h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z M12 9v3l2 1.5 M18 10.5h1.5v3H18',
+    bag: 'M7 9a5 5 0 0 1 10 0v10a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2z M10 4.5V3h4v1.5 M9 14h6v4H9z M7 11.5h10',
+    hotel: 'M2 20v-8a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v8 M2 16h20 M5 10V7.5A1.5 1.5 0 0 1 6.5 6h3A1.5 1.5 0 0 1 11 7.5V10 M13 10V7.5A1.5 1.5 0 0 1 14.5 6h3A1.5 1.5 0 0 1 19 7.5V10',
+    voucher: 'M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v3a2 2 0 0 0 0 4v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-3a2 2 0 0 0 0-4z M15 5v2 M15 11v2 M15 17v2'
+  };
+  function iconSvgPath(name, size) {
+    var d = PRIZE_ICONS[name] || PRIZE_ICONS.voucher;
+    return '<svg width="' + (size || 24) + '" height="' + (size || 24) + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="' + d + '"/></svg>';
+  }
+  // The Grab vouchers in big type, per country (PRIZE.vouchers in config.js), then the grand prizes (PRIZE.grand).
+  // Styles come from the page (.pz-v-*, .pz-g-*).
   function voucherHtml() {
     var groups = Array.isArray(PRIZE.vouchers) ? PRIZE.vouchers : [];
-    return groups.map(function (g) {
+    var grand = Array.isArray(PRIZE.grand) ? PRIZE.grand : [];
+    var h = groups.map(function (g) {
       return '<div class="pz-v-group"><div class="pz-v-head"><b>' + esc(g.country || '') + '</b><span>' + esc(g.when || '') + '</span></div>' +
         '<div class="pz-v-row">' + (g.items || []).map(function (it) {
           return '<div class="pz-v"><span class="pz-v-amt">' + esc(it.amount || '').replace(/ /g, '&nbsp;') + '</span>' +
             '<span class="pz-v-grab">Grab voucher</span><span class="pz-v-who">' + esc(it.who || '') + '</span></div>';
         }).join('') + '</div></div>';
     }).join('');
+    if (grand.length) {
+      h += '<div class="pz-v-group pz-g-group"><div class="pz-v-head"><b>Grand prizes</b><span>' + esc(PRIZE.grandWhen || '') + '</span></div>' +
+        '<div class="pz-g-row">' + grand.map(function (g) {
+          return '<div class="pz-g"><span class="pz-g-ic">' + iconSvgPath(g.icon, 26) + '</span><span class="pz-g-name"><span class="pz-long">' + esc(g.name || '') + '</span><span class="pz-short">' + esc(g.short || g.name || '') + '</span></span>' +
+            (g.count ? '<span class="pz-g-n">' + esc(String(g.count)) + ' to win</span>' : '') + '</div>';
+        }).join('') + '</div></div>';
+    }
+    return h;
+  }
+  // Every prize there is, for the big gift on the 3D tree to show one at random: the grand prizes and each Grab amount
+  function prizePool() {
+    var out = [];
+    (Array.isArray(PRIZE.grand) ? PRIZE.grand : []).forEach(function (g) {
+      out.push({ icon: g.icon || 'voucher', line1: g.short || g.name || '', line2: g.line2 || 'Grand prize' });
+    });
+    var seen = {};
+    (Array.isArray(PRIZE.vouchers) ? PRIZE.vouchers : []).forEach(function (g) {
+      (g.items || []).forEach(function (it) {
+        if (it.amount && !seen[it.amount]) { seen[it.amount] = 1; out.push({ icon: 'voucher', line1: it.amount, line2: 'Grab voucher' }); }
+      });
+    });
+    return out;
   }
   // Preview mode only (the Approvals page reads the real standings from the database)
   // Preview mode only (the Approvals page uses get_prize_check when live; the public pages show no standings)
@@ -1679,6 +1714,8 @@
     fetchWinners: fetchWinners,
     likerWinners: likerWinners,
     voucherHtml: voucherHtml,
+    prizePool: prizePool,
+    PRIZE_ICONS: PRIZE_ICONS,
     fetchMyPrizes: fetchMyPrizes,
     revealPrize: revealPrize,
     showMyPrizes: showMyPrizes,
