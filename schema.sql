@@ -111,32 +111,12 @@ language sql immutable set search_path = '' as $$
   select public.bms_looks_real(p_bms)
 $$;
 
--- BMS numbers that can't win the RM 100 prize (Amr, Maszy, the Wish Tree team).
+-- BMS numbers that can't win a prize (Amr, Maszy, the Wish Tree team).
 -- Add them in Table Editor > prize_excluded. Leaders' messages never count anyway.
 create table if not exists public.prize_excluded (
   bms text primary key check (bms ~ '^[0-9]{4,7}$'),
   note text
 );
-
--- Winners. One prize per BMS: a person who has won can't win again (wisher or liker). A winning wish leaves the
--- like race: it comes off the tree and the lists, shows on the Winners tab, and its likes stop counting.
--- status: 'picked' (drawn, not checked yet), 'approved' (public), 'sent' (voucher sent), 'redrawn' (replaced).
-create table if not exists public.prize_winners (
-  id bigint generated always as identity primary key,
-  kind text not null check (kind in ('wish', 'liker')),
-  wish_id uuid references public.wishes(id) on delete cascade,
-  bms text not null,
-  prize text,
-  reason text,
-  status text not null default 'approved' check (status in ('picked', 'approved', 'sent', 'redrawn')),
-  created_at timestamptz not null default now(),
-  created_by text,
-  sent_at timestamptz,
-  sent_by text,
-  check (kind <> 'wish' or wish_id is not null)
-);
-create unique index if not exists prize_winners_bms_key on public.prize_winners (bms) where status <> 'redrawn';
-create unique index if not exists prize_winners_wish_key on public.prize_winners (wish_id) where wish_id is not null and status <> 'redrawn';
 
 -- Automatic flags shown to approvers (phone numbers, emails in the wish text)
 create or replace function public.wish_flags(p_message text) returns text[]
@@ -362,6 +342,26 @@ alter table public.wishes drop constraint if exists wishes_status_check;
 alter table public.wishes add constraint wishes_status_check check (status in ('pending', 'approved', 'rejected'));
 create index if not exists wishes_status_idx on public.wishes (status, approved_at desc);
 create unique index if not exists wishes_bms_key on public.wishes (bms);
+
+-- Winners. One prize per BMS: a person who has won can't win again (wisher or liker). A winning wish leaves the
+-- like race: it comes off the tree and the lists, shows on the Winners tab, and its likes stop counting.
+-- status: 'picked' (drawn, not checked yet), 'approved' (public), 'sent' (voucher sent), 'redrawn' (replaced).
+create table if not exists public.prize_winners (
+  id bigint generated always as identity primary key,
+  kind text not null check (kind in ('wish', 'liker')),
+  wish_id uuid references public.wishes(id) on delete cascade,
+  bms text not null,
+  prize text,
+  reason text,
+  status text not null default 'approved' check (status in ('picked', 'approved', 'sent', 'redrawn')),
+  created_at timestamptz not null default now(),
+  created_by text,
+  sent_at timestamptz,
+  sent_by text,
+  check (kind <> 'wish' or wish_id is not null)
+);
+create unique index if not exists prize_winners_bms_key on public.prize_winners (bms) where status <> 'redrawn';
+create unique index if not exists prize_winners_wish_key on public.prize_winners (wish_id) where wish_id is not null and status <> 'redrawn';
 
 
 -- 6. Leaders' messages (one per name, approved before they show) --
@@ -1030,30 +1030,6 @@ begin
 end
 $$;
 
--- Delete for good: a wish (so its BMS can hang a new one) or a leader message (so the name is free again)
-drop function if exists public.admin_delete(text, text, uuid);
-create function public.admin_delete(p_token text, p_kind text, p_id uuid) returns boolean
-language plpgsql security definer set search_path = '' as $$
-declare
-  v_id uuid;
-  v_since timestamptz;
-begin
-  if public.session_role(p_token) is distinct from 'admin' then raise exception 'not_allowed'; end if;
-  if p_kind = 'wish' then
-    delete from public.wishes w where w.id = p_id returning w.id, coalesce(w.updated_at, w.created_at) into v_id, v_since;
-  elsif p_kind = 'leader' then
-    delete from public.leader_messages m where m.id = p_id returning m.id, m.updated_at into v_id, v_since;
-  else
-    raise exception 'bad_kind';
-  end if;
-  delete from public.likes l where l.kind = p_kind and l.target_id = p_id;
-  if v_id is null then return false; end if;
-  insert into public.admin_log (who, action, kind, target_id, wait_secs)
-  values (public.session_who(p_token), 'deleted', p_kind, p_id, greatest(0, extract(epoch from now() - v_since))::int);
-  return true;
-end
-$$;
-
 -- The team's numbers: per admin name and per kind, how many wishes or messages they reviewed (approved, set aside
 -- or deleted), accepted, set aside, edited and deleted, how long things waited on average before they decided,
 -- and when they last did something
@@ -1076,41 +1052,6 @@ begin
   from public.admin_log l
   group by 1, 2
   order by 3 desc, 1;
-end
-$$;
-
--- Tree and TV pages: the public winners (wish winners by wish; liker winners by the last 4 digits of the BMS)
-create or replace function public.get_winners()
-returns table (wish_id uuid, kind text, bms_end text, prize text, reason text, won_at timestamptz)
-language sql stable security definer set search_path = '' as $$
-  select p.wish_id, p.kind, case when p.kind = 'liker' then right(p.bms, 4) end, p.prize, p.reason, p.created_at
-  from public.prize_winners p
-  where p.status in ('approved', 'sent')
-  order by p.created_at desc
-$$;
-
--- Approvals: make an approved wish a winner (it leaves the like race), or undo that before the prize is sent
-create or replace function public.admin_set_winner(p_token text, p_wish_id uuid, p_on boolean,
-                                                   p_prize text default null, p_reason text default null)
-returns text
-language plpgsql security definer set search_path = '' as $$
-declare
-  v_bms text;
-begin
-  if public.session_role(p_token) is distinct from 'admin' then raise exception 'not_allowed'; end if;
-  select w.bms into v_bms from public.wishes w where w.id = p_wish_id;
-  if not found then return 'not_found'; end if;
-  if coalesce(p_on, false) then
-    if not exists (select 1 from public.wishes w where w.id = p_wish_id and w.status = 'approved') then return 'not_approved'; end if;
-    if exists (select 1 from public.prize_winners p where p.bms = v_bms and p.status <> 'redrawn') then return 'already_won'; end if;
-    insert into public.prize_winners (kind, wish_id, bms, prize, reason, status, created_by)
-    values ('wish', p_wish_id, v_bms, nullif(btrim(coalesce(p_prize, '')), ''), nullif(btrim(coalesce(p_reason, '')), ''),
-            'approved', public.session_who(p_token));
-    return 'ok';
-  end if;
-  if exists (select 1 from public.prize_winners p where p.wish_id = p_wish_id and p.status = 'sent') then return 'already_sent'; end if;
-  delete from public.prize_winners p where p.wish_id = p_wish_id and p.status in ('picked', 'approved');
-  return 'ok';
 end
 $$;
 
@@ -1194,7 +1135,6 @@ grant execute on function public.get_approved_wishes() to anon, authenticated;
 grant execute on function public.get_leader_messages() to anon, authenticated;
 grant execute on function public.get_leader_photos(uuid[]) to anon, authenticated;
 grant execute on function public.get_settings() to anon, authenticated;
-grant execute on function public.get_winners() to anon, authenticated;
 grant execute on function public.submit_wish(text, text, text, text, text, text, text, boolean, text, text) to anon, authenticated;
 grant execute on function public.get_my_wish(text, text) to anon, authenticated;
 grant execute on function public.set_like(text, uuid, text, boolean, text) to anon, authenticated;
@@ -1206,13 +1146,11 @@ grant execute on function public.leader_save(text, text, text, text, text, boole
 grant execute on function public.leader_get_mine(text, text) to anon, authenticated;
 grant execute on function public.leader_delete_mine(text, text) to anon, authenticated;
 grant execute on function public.admin_queue(text) to anon, authenticated;
-grant execute on function public.admin_set_winner(text, uuid, boolean, text, text) to anon, authenticated;
 grant execute on function public.admin_set_name(text, text) to anon, authenticated;
 grant execute on function public.admin_set_status(text, text, uuid[], text) to anon, authenticated;
 grant execute on function public.admin_edit_message(text, text, uuid, text) to anon, authenticated;
 grant execute on function public.admin_edit_wish(text, uuid, text, text, text, text, text, text) to anon, authenticated;
 grant execute on function public.admin_edit_leader(text, uuid, text, text, text, text, boolean, int) to anon, authenticated;
-grant execute on function public.admin_delete(text, text, uuid) to anon, authenticated;
 grant execute on function public.admin_kpi(text) to anon, authenticated;
 grant execute on function public.get_prize_check(text, int) to anon, authenticated;
 grant execute on function public.get_wish_likes(text, uuid) to anon, authenticated;
@@ -1220,7 +1158,729 @@ grant execute on function public.remove_likes_by_bms(text, text) to anon, authen
 grant execute on function public.update_settings(text, boolean) to anon, authenticated;
 
 
--- 10. Set the two passwords -----------------------------------
+-- 9b. Daily Grab voucher draw ---------------------------------
+-- Every day from 1 December each country has winners by likes ('top'), random wishes ('random') and random likers
+-- ('liker'), as set in prize_plan. On the Approvals page an admin draws a day's winners (the evening before) and
+-- approves them. Approved winners go live at 9 am Malaysia time on their day, and each one gets the next unused
+-- Grab code. Only the phone that made the winning wish (or the winning likes) can open that code.
+-- The codes are added on the Approvals page with the prize password, which only the prize owner has (set it in
+-- section 10). Nobody can read a code except the winner's phone, or the prize owner with the prize password.
+-- Rules: one prize per person (BMS). Anyone drawn once is out of later draws, also when they were redrawn.
+
+-- Which country a wish counts for: Singha Complex is Thailand; work from home counts as Thailand when the wish is
+-- in Thai. Everything else is Malaysia. (Change this if you add a site in Thailand.)
+create or replace function public.wish_country(p_site text, p_lang text) returns text
+language sql immutable set search_path = '' as $$
+  select case when p_site = 'singha' then 'TH'
+              when p_site = 'wfh' and p_lang = 'th' then 'TH'
+              else 'MY' end
+$$;
+
+-- The plan: how many winners a day, for which prize, from which day to which day.
+-- Days that weren't drawn, or had too few people, carry over to the next draw.
+create table if not exists public.prize_plan (
+  country text not null check (country in ('MY', 'TH')),
+  pool text not null check (pool in ('top', 'random', 'liker')),
+  prize text not null,
+  per_day int not null check (per_day between 0 and 20),
+  first_day date not null,
+  last_day date not null,
+  primary key (country, pool),
+  check (last_day >= first_day)
+);
+insert into public.prize_plan (country, pool, prize, per_day, first_day, last_day) values
+  ('MY', 'top',    'RM 50',   3, '2026-12-01', '2026-12-18'),
+  ('MY', 'random', 'RM 20',   3, '2026-12-01', '2026-12-18'),
+  ('MY', 'liker',  'RM 20',   1, '2026-12-01', '2026-12-18'),
+  ('TH', 'top',    'THB 250', 1, '2026-12-01', '2026-12-16'),
+  ('TH', 'random', 'THB 250', 1, '2026-12-01', '2026-12-16'),
+  ('TH', 'liker',  'THB 250', 1, '2026-12-01', '2026-12-16')
+on conflict (country, pool) do nothing;
+
+-- Winners get a country, a pool (early = picked by hand before the daily draw), the day they go live, and for
+-- likers the phones (device codes) their likes came from when they were drawn
+alter table public.prize_winners add column if not exists country text check (country in ('MY', 'TH'));
+alter table public.prize_winners add column if not exists pool text check (pool in ('early', 'manual', 'top', 'random', 'liker'));
+alter table public.prize_winners add column if not exists draw_day date;
+alter table public.prize_winners add column if not exists live_at timestamptz;
+alter table public.prize_winners add column if not exists devices text[];
+alter table public.prize_winners add column if not exists likes_at_draw int;
+alter table public.prize_winners add column if not exists approved_at timestamptz;
+alter table public.prize_winners add column if not exists approved_by text;
+alter table public.prize_winners add column if not exists redraw_reason text;
+alter table public.prize_winners add column if not exists redrawn_at timestamptz;
+alter table public.prize_winners add column if not exists redrawn_by text;
+alter table public.prize_winners add column if not exists replaces bigint;
+-- The winners picked by hand before the daily draw: RM 50 (THB 250 in Thailand), live since they were picked
+update public.prize_winners p
+set country = coalesce((select public.wish_country(w.site, w.lang) from public.wishes w where w.id = p.wish_id), 'MY'),
+    pool = 'early',
+    live_at = coalesce(p.live_at, p.created_at),
+    approved_at = coalesce(p.approved_at, case when p.status in ('approved', 'sent') then p.created_at end),
+    approved_by = coalesce(p.approved_by, p.created_by)
+where p.pool is null;
+update public.prize_winners p
+set prize = case when p.country = 'TH' then 'THB 250' else 'RM 50' end
+where p.pool = 'early' and p.prize is null;
+
+-- Days already drawn, per country (days are drawn in order)
+create table if not exists public.prize_draw_days (
+  country text not null check (country in ('MY', 'TH')),
+  day date not null,
+  at timestamptz not null default now(),
+  who text,
+  primary key (country, day)
+);
+
+-- The Grab codes (or links). winner_id: who it's set aside for. given_at: the first time it was shown (to the
+-- winner's phone, or to the prize owner to send by WhatsApp). A code that was shown is never given to anyone else.
+create table if not exists public.prize_codes (
+  id bigint generated always as identity primary key,
+  country text not null check (country in ('MY', 'TH')),
+  prize text not null,
+  code text not null unique check (char_length(code) between 4 and 500),
+  expires_on date,
+  added_at timestamptz not null default now(),
+  added_by text,
+  winner_id bigint unique references public.prize_winners(id) on delete set null,
+  assigned_at timestamptz,
+  given_at timestamptz,
+  given_how text check (given_how in ('phone', 'whatsapp')),
+  views int not null default 0
+);
+create index if not exists prize_codes_free_idx on public.prize_codes (country, prize) where winner_id is null and given_at is null;
+
+-- Everything that happens to a prize or a code (never the code itself)
+create table if not exists public.prize_log (
+  id bigint generated always as identity primary key,
+  at timestamptz not null default now(),
+  who text,
+  action text not null,
+  winner_id bigint,
+  code_id bigint,
+  detail text,
+  conn text
+);
+create index if not exists prize_log_winner_idx on public.prize_log (winner_id);
+
+-- The prize password (only a scrambled version is kept). Needed to add or remove codes and to see a code.
+create table if not exists public.prize_vault (
+  id int primary key check (id = 1),
+  pass_hash text not null,
+  updated_at timestamptz not null default now()
+);
+
+alter table public.prize_plan enable row level security;
+alter table public.prize_draw_days enable row level security;
+alter table public.prize_codes enable row level security;
+alter table public.prize_log enable row level security;
+alter table public.prize_vault enable row level security;
+-- No policies on purpose: only the functions below reach these tables
+revoke all on public.prize_plan, public.prize_draw_days, public.prize_codes, public.prize_log, public.prize_vault
+  from anon, authenticated;
+
+-- Run from the SQL Editor only (section 10)
+create or replace function public.set_prize_password(p_password text) returns text
+language plpgsql security definer set search_path = '' as $$
+declare
+  v_admin text;
+begin
+  if char_length(coalesce(p_password, '')) < 12 then
+    raise exception 'Use a prize password of at least 12 characters';
+  end if;
+  select a.pass_hash into v_admin from public.access_passwords a where a.role = 'admin';
+  if v_admin is not null and extensions.crypt(p_password, v_admin) = v_admin then
+    raise exception 'Use a different password from the Approvals page password';
+  end if;
+  insert into public.prize_vault (id, pass_hash, updated_at)
+  values (1, extensions.crypt(p_password, extensions.gen_salt('bf', 10)), now())
+  on conflict (id) do update set pass_hash = excluded.pass_hash, updated_at = now();
+  return 'Prize password set. Only someone with it can add codes or see a code on the Approvals page.';
+end
+$$;
+
+-- Is this the prize password? Answers 'ok', 'wrong', 'slow_down' or 'not_set'. 5 wrong tries from one connection
+-- lock it for 15 minutes, 20 wrong tries an hour from anywhere lock it for everyone. Wrong tries are logged.
+create or replace function public.prize_vault_check(p_password text, p_who text) returns text
+language plpgsql security definer set search_path = '' as $$
+declare
+  v_conn text := public.conn_code();
+  v_hash text;
+  n int;
+begin
+  select count(*) into n from public.rate_events e
+  where e.action = 'vault_fail' and e.key = v_conn and e.at > now() - interval '15 minutes';
+  if n >= 5 then return 'slow_down'; end if;
+  select count(*) into n from public.rate_events e where e.action = 'vault_fail' and e.at > now() - interval '1 hour';
+  if n >= 20 then return 'slow_down'; end if;
+  select v.pass_hash into v_hash from public.prize_vault v where v.id = 1;
+  if v_hash is null then return 'not_set'; end if;
+  if extensions.crypt(coalesce(p_password, ''), v_hash) <> v_hash then
+    insert into public.rate_events (action, key) values ('vault_fail', v_conn);
+    insert into public.prize_log (who, action, conn) values (p_who, 'wrong_prize_password', v_conn);
+    return 'wrong';
+  end if;
+  return 'ok';
+end
+$$;
+
+-- Wishes that can still win in a country: approved, a real-looking BMS, not excluded, never drawn before
+create or replace function public.prize_wish_pool(p_country text)
+returns table (id uuid, bms text, like_count int, approved_at timestamptz)
+language sql stable security definer set search_path = '' as $$
+  select w.id, w.bms,
+         (select count(*) from public.likes l where l.kind = 'wish' and l.target_id = w.id)::int,
+         w.approved_at
+  from public.wishes w
+  where w.status = 'approved'
+    and public.wish_country(w.site, w.lang) = p_country
+    and public.bms_ok(w.bms)
+    and not exists (select 1 from public.prize_excluded e where e.bms = w.bms)
+    and not exists (select 1 from public.prize_winners p where p.bms = w.bms or p.wish_id = w.id)
+$$;
+
+-- Likers who can still win in a country, with the phones they liked from. A liker counts for the country of their
+-- own wish, or (no wish) the country most of their likes went to. Phones used with more than one BMS are left out,
+-- and so is everyone who liked from such a phone.
+create or replace function public.prize_liker_pool(p_country text)
+returns table (bms text, devices text[])
+language sql stable security definer set search_path = '' as $$
+  with lk as (
+    select l.bms, l.device_id, l.kind, l.target_id from public.likes l where public.bms_ok(l.bms)
+  ), shared as (
+    select l.device_id from public.likes l where l.device_id is not null
+    group by l.device_id having count(distinct l.bms) > 1
+  ), cand as (
+    select lk.bms, array_agg(distinct lk.device_id) filter (where lk.device_id is not null) as devs
+    from lk
+    group by lk.bms
+    having count(lk.device_id) > 0
+       and not bool_or(coalesce(lk.device_id in (select s.device_id from shared s), false))
+  ), own as (
+    select distinct on (w.bms) w.bms, public.wish_country(w.site, w.lang) as c
+    from public.wishes w order by w.bms, (w.status = 'approved') desc, w.created_at
+  ), lc as (
+    select lk.bms, count(*) filter (where public.wish_country(w.site, w.lang) = 'TH') as th, count(*) as n
+    from lk join public.wishes w on lk.kind = 'wish' and w.id = lk.target_id
+    group by lk.bms
+  )
+  select c.bms, c.devs
+  from cand c left join own o on o.bms = c.bms left join lc on lc.bms = c.bms
+  where coalesce(o.c, case when coalesce(lc.th, 0) * 2 > coalesce(lc.n, 0) then 'TH' else 'MY' end) = p_country
+    and not exists (select 1 from public.prize_excluded e where e.bms = c.bms)
+    and not exists (select 1 from public.prize_winners p where p.bms = c.bms)
+$$;
+
+-- Set aside the next unused code for an approved winner (soonest to expire first). Answers the code's id or null.
+create or replace function public.prize_assign_code(p_winner_id bigint) returns bigint
+language plpgsql security definer set search_path = '' as $$
+declare
+  w public.prize_winners;
+  v_code bigint;
+begin
+  select * into w from public.prize_winners p where p.id = p_winner_id;
+  if not found or w.status not in ('approved', 'sent') then return null; end if;
+  select c.id into v_code from public.prize_codes c where c.winner_id = w.id;
+  if v_code is not null then return v_code; end if;
+  select c.id into v_code from public.prize_codes c
+  where c.winner_id is null and c.given_at is null and c.country = w.country and c.prize = w.prize
+    and (c.expires_on is null or c.expires_on >= (now() at time zone 'Asia/Kuala_Lumpur')::date)
+  order by c.expires_on nulls last, c.id
+  limit 1 for update skip locked;
+  if v_code is null then return null; end if;
+  update public.prize_codes c set winner_id = w.id, assigned_at = now() where c.id = v_code;
+  insert into public.prize_log (who, action, winner_id, code_id) values ('system', 'code_set_aside', w.id, v_code);
+  return v_code;
+end
+$$;
+
+-- Draw winners for one pool of one day (used by the draw and by a redraw). Answers how many were drawn.
+create or replace function public.prize_draw_pool(p_country text, p_pool text, p_day date, p_n int, p_who text,
+                                                  p_replaces bigint default null)
+returns int
+language plpgsql security definer set search_path = '' as $$
+declare
+  v_prize text;
+  v_reason text;
+  n int := 0;
+  r record;
+begin
+  if coalesce(p_n, 0) < 1 then return 0; end if;
+  select pp.prize into v_prize from public.prize_plan pp where pp.country = p_country and pp.pool = p_pool;
+  if v_prize is null then return 0; end if;
+  v_reason := case p_pool when 'top' then 'Most liked' when 'random' then 'Lucky draw' else 'Lucky liker' end;
+  if p_pool = 'top' then
+    -- The top of the Most liked list: most likes first; same likes, the one approved first. At least 1 like.
+    for r in select q.id, q.bms, q.like_count from public.prize_wish_pool(p_country) q
+             where q.like_count >= 1 order by q.like_count desc, q.approved_at asc limit p_n loop
+      insert into public.prize_winners (kind, wish_id, bms, prize, reason, status, created_by, country, pool, draw_day, likes_at_draw, replaces)
+      values ('wish', r.id, r.bms, v_prize, v_reason, 'picked', p_who, p_country, p_pool, p_day, r.like_count, p_replaces);
+      n := n + 1;
+    end loop;
+  elsif p_pool = 'random' then
+    for r in select q.id, q.bms, q.like_count from public.prize_wish_pool(p_country) q
+             order by gen_random_uuid() limit p_n loop
+      insert into public.prize_winners (kind, wish_id, bms, prize, reason, status, created_by, country, pool, draw_day, likes_at_draw, replaces)
+      values ('wish', r.id, r.bms, v_prize, v_reason, 'picked', p_who, p_country, p_pool, p_day, r.like_count, p_replaces);
+      n := n + 1;
+    end loop;
+  elsif p_pool = 'liker' then
+    for r in select q.bms, q.devices from public.prize_liker_pool(p_country) q
+             order by gen_random_uuid() limit p_n loop
+      insert into public.prize_winners (kind, wish_id, bms, prize, reason, status, created_by, country, pool, draw_day, devices, replaces)
+      values ('liker', null, r.bms, v_prize, v_reason, 'picked', p_who, p_country, p_pool, p_day, r.devices, p_replaces);
+      n := n + 1;
+    end loop;
+  end if;
+  if n > 0 then
+    insert into public.prize_log (who, action, detail)
+    values (p_who, 'drawn', p_country || ' ' || p_pool || ' ' || p_day || ': ' || n);
+  end if;
+  return n;
+end
+$$;
+
+-- Approvals: draw the winners for one day in one country. Days go in order from today (up to 4 days ahead, so on
+-- Friday you can draw Saturday to Monday). Drawing a day again only fills what's missing.
+-- Answers {result: 'ok', drawn: {top, random, liker}, short: {...}} or {result: 'name_required' | 'bad_day' |
+-- 'earlier_day_first' (with day) | 'nothing_to_draw'}.
+create or replace function public.admin_prize_draw(p_token text, p_country text, p_day date) returns json
+language plpgsql security definer set search_path = '' as $$
+declare
+  v_who text := public.session_who(p_token);
+  v_today date := (now() at time zone 'Asia/Kuala_Lumpur')::date;
+  v_first date;
+  v_missing date;
+  pl record;
+  v_cum int; v_total int; v_upto int; v_all int; v_need int; v_got int;
+  v_drawn json := '{}'::json;
+  v_short json := '{}'::json;
+  v_any boolean := false;
+begin
+  if public.session_role(p_token) is distinct from 'admin' then raise exception 'not_allowed'; end if;
+  if v_who is null then return json_build_object('result', 'name_required'); end if;
+  if p_country not in ('MY', 'TH') then raise exception 'bad_country'; end if;
+  select min(pp.first_day) into v_first from public.prize_plan pp where pp.country = p_country;
+  if p_day is null or v_first is null or p_day < v_today or p_day > v_today + 4 or p_day < v_first then
+    return json_build_object('result', 'bad_day');
+  end if;
+  perform 1 from public.prize_plan pp where pp.country = p_country for update;
+  select d::date into v_missing
+  from generate_series(greatest(v_today, v_first), p_day - 1, interval '1 day') d
+  where not exists (select 1 from public.prize_draw_days x where x.country = p_country and x.day = d::date)
+  order by d limit 1;
+  if v_missing is not null then
+    return json_build_object('result', 'earlier_day_first', 'day', v_missing);
+  end if;
+
+  for pl in select * from public.prize_plan pp where pp.country = p_country
+            order by case pp.pool when 'top' then 1 when 'random' then 2 else 3 end loop
+    v_total := pl.per_day * (pl.last_day - pl.first_day + 1);
+    v_cum := case when p_day < pl.first_day then 0
+                  else pl.per_day * (least(p_day, pl.last_day) - pl.first_day + 1) end;
+    select count(*) filter (where p.draw_day <= p_day), count(*) into v_upto, v_all
+    from public.prize_winners p where p.country = p_country and p.pool = pl.pool and p.status <> 'redrawn';
+    v_need := greatest(0, least(v_cum - v_upto, v_total - v_all));
+    v_got := public.prize_draw_pool(p_country, pl.pool, p_day, v_need, v_who);
+    if v_need > 0 then v_any := true; end if;
+    v_drawn := (v_drawn::jsonb || jsonb_build_object(pl.pool, v_got))::json;
+    v_short := (v_short::jsonb || jsonb_build_object(pl.pool, v_need - v_got))::json;
+  end loop;
+
+  insert into public.prize_draw_days (country, day, who) values (p_country, p_day, v_who)
+  on conflict (country, day) do update set at = now(), who = excluded.who;
+  return json_build_object('result', case when v_any then 'ok' else 'nothing_to_draw' end,
+                           'drawn', v_drawn, 'short', v_short);
+end
+$$;
+
+-- Approvals: approve drawn winners. Each gets a code set aside and goes live at 9 am on their day (now, if that's
+-- passed). Answers {approved, without_code, skipped (wishes no longer approved)}.
+create or replace function public.admin_prize_approve(p_token text, p_ids bigint[]) returns json
+language plpgsql security definer set search_path = '' as $$
+declare
+  v_who text := public.session_who(p_token);
+  r record;
+  n int := 0;
+  m int := 0;
+  k int := 0;
+begin
+  if public.session_role(p_token) is distinct from 'admin' then raise exception 'not_allowed'; end if;
+  if v_who is null then return json_build_object('result', 'name_required'); end if;
+  for r in select p.id, p.draw_day, p.kind, p.wish_id from public.prize_winners p
+           where p.id = any(coalesce(p_ids, '{}')) and p.status = 'picked' order by p.id for update loop
+    -- a wish that was set aside or edited back to waiting since the draw can't be approved: redraw it
+    if r.kind = 'wish' and not exists (select 1 from public.wishes w where w.id = r.wish_id and w.status = 'approved') then
+      k := k + 1;
+      continue;
+    end if;
+    update public.prize_winners p
+    set status = 'approved', approved_at = now(), approved_by = v_who,
+        live_at = greatest(coalesce((r.draw_day + time '09:00') at time zone 'Asia/Kuala_Lumpur', now()), now())
+    where p.id = r.id;
+    insert into public.prize_log (who, action, winner_id) values (v_who, 'approved', r.id);
+    n := n + 1;
+    if public.prize_assign_code(r.id) is null then m := m + 1; end if;
+  end loop;
+  return json_build_object('result', 'ok', 'approved', n, 'without_code', m, 'skipped', k);
+end
+$$;
+
+-- Approvals: replace a winner (not once their code was shown). A reason is required and kept. A new winner is drawn
+-- from the same pool for the same day; the old one is out of later draws.
+create or replace function public.admin_prize_redraw(p_token text, p_id bigint, p_reason text) returns json
+language plpgsql security definer set search_path = '' as $$
+declare
+  v_who text := public.session_who(p_token);
+  v_reason text := btrim(regexp_replace(coalesce(p_reason, ''), '[[:space:]]+', ' ', 'g'));
+  w public.prize_winners;
+  v_got int := 0;
+  v_new bigint;
+begin
+  if public.session_role(p_token) is distinct from 'admin' then raise exception 'not_allowed'; end if;
+  if v_who is null then return json_build_object('result', 'name_required'); end if;
+  if char_length(v_reason) not between 3 and 200 or v_reason ~ '[<>]' then
+    return json_build_object('result', 'reason_required');
+  end if;
+  select * into w from public.prize_winners p where p.id = p_id for update;
+  if not found or w.status not in ('picked', 'approved', 'sent') then return json_build_object('result', 'not_found'); end if;
+  if w.status = 'sent' or exists (select 1 from public.prize_codes c where c.winner_id = w.id and c.given_at is not null) then
+    return json_build_object('result', 'already_opened');
+  end if;
+  update public.prize_winners p
+  set status = 'redrawn', redraw_reason = v_reason, redrawn_at = now(), redrawn_by = v_who
+  where p.id = w.id;
+  update public.prize_codes c set winner_id = null, assigned_at = null where c.winner_id = w.id and c.given_at is null;
+  insert into public.prize_log (who, action, winner_id, detail) values (v_who, 'redrawn', w.id, v_reason);
+  if w.pool in ('top', 'random', 'liker') then
+    v_got := public.prize_draw_pool(w.country, w.pool, w.draw_day, 1, v_who, w.id);
+    if v_got > 0 then
+      select p.id into v_new from public.prize_winners p where p.replaces = w.id order by p.id desc limit 1;
+    end if;
+  end if;
+  return json_build_object('result', 'ok', 'new_id', v_new);
+end
+$$;
+
+-- Approvals: everything on the Winners tabs (never the codes themselves)
+create or replace function public.admin_prize_state(p_token text) returns json
+language plpgsql stable security definer set search_path = '' as $$
+declare
+  v_today date := (now() at time zone 'Asia/Kuala_Lumpur')::date;
+begin
+  if public.session_role(p_token) is distinct from 'admin' then raise exception 'not_allowed'; end if;
+  return json_build_object(
+    'today', v_today,
+    'now', now(),
+    'vault_set', exists (select 1 from public.prize_vault v where v.id = 1),
+    'plan', coalesce((select json_agg(x order by x.country, x.sort) from (
+      select pp.country, pp.pool, pp.prize, pp.per_day, pp.first_day, pp.last_day,
+             case pp.pool when 'top' then 1 when 'random' then 2 else 3 end as sort,
+             pp.per_day * (pp.last_day - pp.first_day + 1) as total,
+             (select count(*) from public.prize_winners p where p.country = pp.country and p.pool = pp.pool and p.status <> 'redrawn')::int as drawn,
+             (select count(*) from public.prize_winners p where p.country = pp.country and p.pool = pp.pool and p.status in ('approved', 'sent'))::int as approved
+      from public.prize_plan pp) x), '[]'::json),
+    'days', coalesce((select json_agg(x order by x.day) from (
+      select d.country, d.day, d.at, d.who from public.prize_draw_days d) x), '[]'::json),
+    'winners', coalesce((select json_agg(x order by x.draw_day nulls first, x.id) from (
+      select p.id, p.kind, p.wish_id, p.bms, p.prize, p.reason, p.status, p.country, p.pool, p.draw_day, p.live_at,
+             p.likes_at_draw, p.created_at, p.created_by, p.approved_at, p.approved_by,
+             p.redraw_reason, p.redrawn_at, p.redrawn_by, p.replaces,
+             coalesce(array_length(p.devices, 1), 0) as device_count,
+             w.first_name, w.site, w.lang, w.message,
+             (select count(*) from public.likes l where l.kind = 'wish' and l.target_id = w.id)::int as like_count,
+             (select string_agg('BMS ' || o.bms, ', ' order by o.created_at) from public.wishes o
+               where w.device_id is not null and o.device_id = w.device_id and o.id <> w.id) as same_device,
+             (select count(*) from public.likes l where l.bms = p.bms)::int as likes_given,
+             c.id is not null as has_code, c.expires_on, c.given_at, c.given_how, coalesce(c.views, 0) as views
+      from public.prize_winners p
+      left join public.wishes w on w.id = p.wish_id
+      left join public.prize_codes c on c.winner_id = p.id) x), '[]'::json),
+    'codes', coalesce((select json_agg(x order by x.country, x.prize) from (
+      select c.country, c.prize, count(*)::int as total,
+             count(*) filter (where c.given_at is not null)::int as opened,
+             count(*) filter (where c.winner_id is not null and c.given_at is null)::int as set_aside,
+             count(*) filter (where c.winner_id is null and c.given_at is null
+                                and (c.expires_on is null or c.expires_on >= v_today))::int as free,
+             count(*) filter (where c.winner_id is null and c.given_at is null and c.expires_on < v_today)::int as expired,
+             min(c.expires_on) filter (where c.given_at is null) as soonest_expiry
+      from public.prize_codes c group by c.country, c.prize) x), '[]'::json)
+  );
+end
+$$;
+
+-- Approvals (prize password): add Grab codes or links, one per line. Codes that are already there are skipped.
+-- Approved winners still waiting for a code get one straight away. Answers counts and the line numbers that
+-- didn't look like a code or a link (never the codes).
+create or replace function public.admin_prize_add_codes(p_token text, p_password text, p_country text, p_prize text,
+                                                        p_codes text, p_expires date)
+returns json
+language plpgsql security definer set search_path = '' as $$
+declare
+  v_who text := public.session_who(p_token);
+  v_check text;
+  v_line text;
+  v_no int := 0;
+  v_bad int[] := '{}';
+  v_valid int := 0;
+  v_added int := 0;
+  v_assigned int := 0;
+  r record;
+begin
+  if public.session_role(p_token) is distinct from 'admin' then raise exception 'not_allowed'; end if;
+  v_check := public.prize_vault_check(p_password, v_who);
+  if v_check <> 'ok' then return json_build_object('result', v_check); end if;
+  if not exists (select 1 from public.prize_plan pp where pp.country = p_country and pp.prize = p_prize)
+     and not (p_country = 'MY' and p_prize = 'RM 50') then
+    return json_build_object('result', 'bad_prize');
+  end if;
+  if p_expires is not null and p_expires < (now() at time zone 'Asia/Kuala_Lumpur')::date then
+    return json_build_object('result', 'expired');
+  end if;
+  if char_length(coalesce(p_codes, '')) > 200000 then return json_build_object('result', 'too_many'); end if;
+  for v_line in select regexp_split_to_table(coalesce(p_codes, ''), E'\\r?\\n') loop
+    v_no := v_no + 1;
+    v_line := btrim(v_line);
+    continue when v_line = '';
+    if char_length(v_line) <= 500
+       and (v_line ~ '^https://[^[:space:]<>"'']{6,}$' or v_line ~ '^[A-Za-z0-9][A-Za-z0-9_-]{3,99}$') then
+      v_valid := v_valid + 1;
+      insert into public.prize_codes (country, prize, code, expires_on, added_by)
+      values (p_country, p_prize, v_line, p_expires, v_who)
+      on conflict (code) do nothing;
+      if found then v_added := v_added + 1; end if;
+    else
+      v_bad := array_append(v_bad, v_no);
+    end if;
+  end loop;
+  if v_added > 0 then
+    insert into public.prize_log (who, action, detail)
+    values (v_who, 'codes_added', p_country || ' ' || p_prize || ': ' || v_added);
+  end if;
+  for r in select p.id from public.prize_winners p
+           where p.status in ('approved', 'sent') and p.country = p_country and p.prize = p_prize
+             and not exists (select 1 from public.prize_codes c where c.winner_id = p.id)
+           order by p.live_at nulls first, p.id loop
+    if public.prize_assign_code(r.id) is not null then v_assigned := v_assigned + 1; end if;
+  end loop;
+  return json_build_object('result', 'ok', 'added', v_added, 'already_there', v_valid - v_added,
+                           'bad_lines', to_json(v_bad[1:20]), 'bad_count', coalesce(array_length(v_bad, 1), 0),
+                           'given_to_waiting_winners', v_assigned);
+end
+$$;
+
+-- Approvals (prize password): remove the unused codes of one prize (for a wrong batch). Codes set aside for a
+-- winner or already shown stay.
+create or replace function public.admin_prize_remove_codes(p_token text, p_password text, p_country text, p_prize text)
+returns json
+language plpgsql security definer set search_path = '' as $$
+declare
+  v_who text := public.session_who(p_token);
+  v_check text;
+  n int;
+begin
+  if public.session_role(p_token) is distinct from 'admin' then raise exception 'not_allowed'; end if;
+  v_check := public.prize_vault_check(p_password, v_who);
+  if v_check <> 'ok' then return json_build_object('result', v_check); end if;
+  delete from public.prize_codes c
+  where c.country = p_country and c.prize = p_prize and c.winner_id is null and c.given_at is null;
+  get diagnostics n = row_count;
+  insert into public.prize_log (who, action, detail) values (v_who, 'codes_removed', p_country || ' ' || p_prize || ': ' || n);
+  return json_build_object('result', 'ok', 'removed', n);
+end
+$$;
+
+-- Approvals (prize password): see a live winner's code, to send it by WhatsApp when their phone can't open it
+-- (new phone, cleared browser). The code then counts as given.
+create or replace function public.admin_prize_show_code(p_token text, p_password text, p_id bigint) returns json
+language plpgsql security definer set search_path = '' as $$
+declare
+  v_who text := public.session_who(p_token);
+  v_check text;
+  w public.prize_winners;
+  c public.prize_codes;
+begin
+  if public.session_role(p_token) is distinct from 'admin' then raise exception 'not_allowed'; end if;
+  v_check := public.prize_vault_check(p_password, v_who);
+  if v_check <> 'ok' then return json_build_object('result', v_check); end if;
+  select * into w from public.prize_winners p where p.id = p_id;
+  if not found or w.status not in ('approved', 'sent') then return json_build_object('result', 'not_found'); end if;
+  if w.live_at > now() then return json_build_object('result', 'not_live_yet'); end if;
+  select * into c from public.prize_codes x where x.winner_id = w.id for update;
+  if not found then return json_build_object('result', 'no_code'); end if;
+  update public.prize_codes x
+  set given_at = coalesce(x.given_at, now()), given_how = coalesce(x.given_how, 'whatsapp'), views = x.views + 1
+  where x.id = c.id;
+  update public.prize_winners p set status = 'sent', sent_at = coalesce(p.sent_at, now()), sent_by = coalesce(p.sent_by, v_who)
+  where p.id = w.id;
+  insert into public.prize_log (who, action, winner_id, code_id, conn) values (v_who, 'code_shown_to_admin', w.id, c.id, public.conn_code());
+  return json_build_object('result', 'ok', 'code', c.code, 'prize', w.prize, 'expires_on', c.expires_on,
+                           'bms', w.bms, 'is_link', c.code ~ '^https://');
+end
+$$;
+
+-- Is this phone the winner's? Wishes: the phone the wish was first sent from, or the wish's edit key (kept on the
+-- phone that sent it). Likers: one of the phones their likes came from when they were drawn. A BMS alone is never
+-- enough. p_keys: [{"bms": "...", "key": "..."}] from this phone (at most 10).
+create or replace function public.prize_owner(p_id bigint, p_device text, p_keys json) returns boolean
+language plpgsql stable security definer set search_path = '' as $$
+declare
+  w public.prize_winners;
+  v_dev boolean := coalesce(p_device, '') ~ '^[A-Za-z0-9-]{16,64}$';
+begin
+  select * into w from public.prize_winners p where p.id = p_id;
+  if not found then return false; end if;
+  if w.kind = 'liker' then
+    return v_dev and p_device = any(coalesce(w.devices, '{}'));
+  end if;
+  return exists (
+    select 1 from public.wishes x
+    where x.id = w.wish_id and x.bms = w.bms
+      and ((v_dev and x.device_id = p_device)
+           or (x.edit_key_hash is not null and x.edit_key_hash in (
+                 select encode(sha256(convert_to(k ->> 'key', 'UTF8')), 'hex')
+                 from (select k from json_array_elements(
+                         case when json_typeof(p_keys) = 'array' then p_keys else '[]'::json end) k limit 10) q
+                 where k ->> 'bms' = x.bms and coalesce(k ->> 'key', '') ~ '^[0-9a-f]{32,96}$'))));
+end
+$$;
+
+-- This phone's prizes that are live (no codes here). Answers {result: 'ok', prizes: [...]} or 'slow_down'.
+create or replace function public.my_prizes(p_device text, p_keys json) returns json
+language plpgsql security definer set search_path = '' as $$
+declare
+  v_out json;
+begin
+  if not public.rate_hit('prize_check', public.conn_code(), 120, interval '15 minutes') then
+    return json_build_object('result', 'slow_down');
+  end if;
+  select coalesce(json_agg(x order by x.live_at desc), '[]'::json) into v_out from (
+    select p.id, p.kind, p.prize, p.pool, p.reason, p.draw_day, p.live_at,
+           c.id is not null as has_code, c.expires_on, c.given_at is not null as opened
+    from public.prize_winners p
+    left join public.prize_codes c on c.winner_id = p.id
+    where p.status in ('approved', 'sent') and p.live_at <= now()
+      and public.prize_owner(p.id, p_device, p_keys)) x;
+  return json_build_object('result', 'ok', 'prizes', v_out);
+end
+$$;
+
+-- Open a prize on the winner's phone. Answers {result: 'ok', code, is_link, prize, expires_on} or
+-- 'not_found' | 'not_yours' | 'no_code_yet' | 'slow_down'. Every try is logged.
+create or replace function public.reveal_prize(p_device text, p_keys json, p_id bigint) returns json
+language plpgsql security definer set search_path = '' as $$
+declare
+  v_conn text := public.conn_code();
+  w public.prize_winners;
+  c public.prize_codes;
+begin
+  if not public.rate_hit('prize_reveal', v_conn, 30, interval '15 minutes') then
+    return json_build_object('result', 'slow_down');
+  end if;
+  select * into w from public.prize_winners p where p.id = p_id;
+  if not found or w.status not in ('approved', 'sent') or w.live_at > now() then
+    return json_build_object('result', 'not_found');
+  end if;
+  if not public.prize_owner(w.id, p_device, p_keys) then
+    insert into public.prize_log (who, action, winner_id, conn) values ('phone', 'open_refused', w.id, v_conn);
+    return json_build_object('result', 'not_yours');
+  end if;
+  select * into c from public.prize_codes x where x.winner_id = w.id for update;
+  if not found then return json_build_object('result', 'no_code_yet', 'prize', w.prize); end if;
+  update public.prize_codes x
+  set given_at = coalesce(x.given_at, now()), given_how = coalesce(x.given_how, 'phone'), views = x.views + 1
+  where x.id = c.id;
+  update public.prize_winners p set status = 'sent', sent_at = coalesce(p.sent_at, now()), sent_by = coalesce(p.sent_by, 'their phone')
+  where p.id = w.id;
+  insert into public.prize_log (who, action, winner_id, code_id, conn) values ('phone', 'code_opened', w.id, c.id, v_conn);
+  return json_build_object('result', 'ok', 'code', c.code, 'is_link', c.code ~ '^https://', 'prize', w.prize,
+                           'expires_on', c.expires_on);
+end
+$$;
+
+-- Winners on the site: only once they're live (9 am on their day). Likers show as the last 4 digits of their BMS.
+create or replace function public.get_winners()
+returns table (wish_id uuid, kind text, bms_end text, prize text, reason text, won_at timestamptz)
+language sql stable security definer set search_path = '' as $$
+  select p.wish_id, p.kind, case when p.kind = 'liker' then right(p.bms, 4) end, p.prize, p.reason,
+         coalesce(p.live_at, p.created_at)
+  from public.prize_winners p
+  where p.status in ('approved', 'sent') and coalesce(p.live_at, p.created_at) <= now()
+  order by coalesce(p.live_at, p.created_at) desc
+$$;
+
+-- Approvals: winners now come from the daily draw only (a winner picked by hand could be anyone's friend).
+-- Undo still works for the early winners until their code is shown.
+create or replace function public.admin_set_winner(p_token text, p_wish_id uuid, p_on boolean,
+                                                   p_prize text default null, p_reason text default null)
+returns text
+language plpgsql security definer set search_path = '' as $$
+declare
+  v_id bigint;
+begin
+  if public.session_role(p_token) is distinct from 'admin' then raise exception 'not_allowed'; end if;
+  if coalesce(p_on, false) then return 'use_draw'; end if;
+  select p.id into v_id from public.prize_winners p
+  where p.wish_id = p_wish_id and p.status in ('picked', 'approved', 'sent') and p.pool in ('early', 'manual');
+  if v_id is null then return 'not_found'; end if;
+  if exists (select 1 from public.prize_codes c where c.winner_id = v_id and c.given_at is not null) then return 'already_sent'; end if;
+  update public.prize_codes c set winner_id = null, assigned_at = null where c.winner_id = v_id;
+  delete from public.prize_winners p where p.id = v_id;
+  insert into public.prize_log (who, action, detail) values (public.session_who(p_token), 'winner_undone', 'wish ' || p_wish_id);
+  return 'ok';
+end
+$$;
+
+-- A wish that has won can't be deleted (redraw it first), so no prize goes missing
+create or replace function public.admin_delete(p_token text, p_kind text, p_id uuid) returns boolean
+language plpgsql security definer set search_path = '' as $$
+declare
+  v_id uuid;
+  v_since timestamptz;
+begin
+  if public.session_role(p_token) is distinct from 'admin' then raise exception 'not_allowed'; end if;
+  if p_kind = 'wish' and exists (select 1 from public.prize_winners p where p.wish_id = p_id and p.status <> 'redrawn') then
+    raise exception 'is_winner';
+  end if;
+  if p_kind = 'wish' then
+    delete from public.wishes w where w.id = p_id returning w.id, coalesce(w.updated_at, w.created_at) into v_id, v_since;
+  elsif p_kind = 'leader' then
+    delete from public.leader_messages m where m.id = p_id returning m.id, m.updated_at into v_id, v_since;
+  else
+    raise exception 'bad_kind';
+  end if;
+  delete from public.likes l where l.kind = p_kind and l.target_id = p_id;
+  if v_id is null then return false; end if;
+  insert into public.admin_log (who, action, kind, target_id, wait_secs)
+  values (public.session_who(p_token), 'deleted', p_kind, p_id, greatest(0, extract(epoch from now() - v_since))::int);
+  return true;
+end
+$$;
+
+-- Function rights for the draw
+revoke execute on function public.wish_country(text, text) from public, anon, authenticated;
+revoke execute on function public.set_prize_password(text) from public, anon, authenticated;
+revoke execute on function public.prize_vault_check(text, text) from public, anon, authenticated;
+revoke execute on function public.prize_wish_pool(text) from public, anon, authenticated;
+revoke execute on function public.prize_liker_pool(text) from public, anon, authenticated;
+revoke execute on function public.prize_assign_code(bigint) from public, anon, authenticated;
+revoke execute on function public.prize_draw_pool(text, text, date, int, text, bigint) from public, anon, authenticated;
+revoke execute on function public.prize_owner(bigint, text, json) from public, anon, authenticated;
+grant execute on function public.admin_prize_draw(text, text, date) to anon, authenticated;
+grant execute on function public.admin_prize_approve(text, bigint[]) to anon, authenticated;
+grant execute on function public.admin_prize_redraw(text, bigint, text) to anon, authenticated;
+grant execute on function public.admin_prize_state(text) to anon, authenticated;
+grant execute on function public.admin_prize_add_codes(text, text, text, text, text, date) to anon, authenticated;
+grant execute on function public.admin_prize_remove_codes(text, text, text, text) to anon, authenticated;
+grant execute on function public.admin_prize_show_code(text, text, bigint) to anon, authenticated;
+grant execute on function public.my_prizes(text, json) to anon, authenticated;
+grant execute on function public.reveal_prize(text, json, bigint) to anon, authenticated;
+grant execute on function public.get_winners() to anon, authenticated;
+grant execute on function public.admin_set_winner(text, uuid, boolean, text, text) to anon, authenticated;
+grant execute on function public.admin_delete(text, text, uuid) to anon, authenticated;
+
+
+-- 10. Set the passwords ---------------------------------------
 -- Run these two lines on their own (remove the leading "--" first), with your own passwords of at least
 -- 10 characters. Use a different, longer one for the Approvals page. Run a line again to change a password:
 -- everyone using the old one has to enter the new one.
@@ -1228,5 +1888,10 @@ grant execute on function public.update_settings(text, boolean) to anon, authent
 -- select public.set_access_password('leader', 'the leaders password');
 -- select public.set_access_password('admin', 'the approvals password');
 --
--- People who can't win the RM 100 prize (Amr, Maszy, the Wish Tree team): add their BMS numbers in
+-- The prize password (at least 12 characters, not the same as the Approvals one) is needed on the Approvals page to
+-- add Grab codes and to see a winner's code. Keep it to yourself: approvers don't need it.
+--
+-- select public.set_prize_password('the prize password');
+--
+-- People who can't win a prize (Amr, Maszy, the Wish Tree team): add their BMS numbers in
 -- Table Editor > prize_excluded (bms, note). Don't write real BMS numbers in this file: the repo is public.

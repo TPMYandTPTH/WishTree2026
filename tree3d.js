@@ -508,7 +508,7 @@ export function createTree3D(container, opts = {}) {
   // the two small ones in front hold leaders' messages if any are set to 'gift'. They open when the mouse rests
   // on them or when they're tapped; until something is put inside, they're ordinary gifts.
   const PRIZE_CFG = Object.assign({ winners: 5, amount: 'RM 100' }, (C.PRIZE || {}));
-  const prizeTag = opts.prizeTag || (PRIZE_CFG.winners + ' x ' + PRIZE_CFG.amount);
+  const prizeTag = opts.prizeTag || PRIZE_CFG.tag || (PRIZE_CFG.winners + ' x ' + PRIZE_CFG.amount);
   const GIFT_SLOTS = {
     red: { x: -1.75, z: 1.6, rot: -0.35, W: 0.62, H: 0.5, D: 0.56, color: 0x6c151e, ribbon: 0xb18854, words: ['A wish', 'for you'] },
     gold: { x: -2.45, z: 0.7, rot: -0.6, W: 0.5, H: 0.58, D: 0.48, color: 0xb18854, ribbon: 0x6c151e, words: ['Where it', 'all began'] },

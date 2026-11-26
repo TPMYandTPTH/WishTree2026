@@ -11,7 +11,7 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="TP Wish Tree 2026">
 <meta property="og:title" content="Hang your wish · TP Wish Tree 2026">
-<meta property="og:description" content="Write a Christmas wish and hang it on the shared TP Malaysia and Thailand tree. The 5 most-liked wishes win a RM 100 Grab voucher.">
+<meta property="og:description" content="Write a Christmas wish and hang it on the shared TP Malaysia and Thailand tree. Daily Grab voucher draws from 1 December.">
 <meta property="og:url" content="https://tpmyandtpth.github.io/WishTree2026/wish.html">
 <meta property="og:image" content="https://tpmyandtpth.github.io/WishTree2026/assets/share.jpg?v=1">
 <meta property="og:image:width" content="1200">
@@ -19,7 +19,7 @@
 <meta property="og:image:alt" content="The TP Wish Tree 2026: a Christmas tree full of wishes, with One TP. Many Wishes. One Christmas Together.">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Hang your wish · TP Wish Tree 2026">
-<meta name="twitter:description" content="Write a Christmas wish and hang it on the shared TP Malaysia and Thailand tree. The 5 most-liked wishes win a RM 100 Grab voucher.">
+<meta name="twitter:description" content="Write a Christmas wish and hang it on the shared TP Malaysia and Thailand tree. Daily Grab voucher draws from 1 December.">
 <meta name="twitter:image" content="https://tpmyandtpth.github.io/WishTree2026/assets/share.jpg?v=1">
 <meta name="theme-color" content="#CFC3B0">
 <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32.png">
@@ -236,9 +236,9 @@ button,input,select,textarea{font-family:inherit}
 @media (max-width:360px){ .opt-grid.three{grid-template-columns:minmax(0,1fr)} .two{grid-template-columns:minmax(0,1fr)} .tag.big{width:100%} }
 @media (prefers-reduced-motion:reduce){ .spinner{animation:none} .tag{transition:none} }
 </style>
-<script src="vendor/supabase.js?v=2026112004"></script>
-<script src="config.js?v=2026112004"></script>
-<script src="wishtree.js?v=2026112004"></script>
+<script src="vendor/supabase.js?v=2026112601"></script>
+<script src="config.js?v=2026112601"></script>
+<script src="wishtree.js?v=2026112601"></script>
 </head>
 <body>
 <div class="app">
@@ -584,7 +584,7 @@ button,input,select,textarea{font-family:inherit}
       nextTitle: 'WHAT HAPPENS NEXT',
       next1: 'Talent Engagement checks your wish, usually within a day.',
       next2: 'Your tag goes up on the shared tree and the site screens.',
-      next3: 'Colleagues can like it: the {n} most-liked wishes win a {amount} Grab voucher.',
+      next3: 'Colleagues can like it. From 1 December there are Grab voucher draws every day: the most-liked wishes and random wishes win.',
       next3plain: 'Look for it on the tree once it is approved.',
       hangBtn: 'Hang it on the tree',
       saveBtn: 'Save my changes',
@@ -594,7 +594,7 @@ button,input,select,textarea{font-family:inherit}
       doneEditTitle: 'Your changes are on their way',
       doneText: 'The tree lights up for everyone on {reveal}.',
       reviewNote: 'Quick reminder: every wish is reviewed first, so yours may take a little while to show up on the tree.',
-      donePrize: 'The {n} most-liked wishes each win a {amount} Grab voucher. Share the tree so colleagues can like yours.',
+      donePrize: 'From 1 December, the most-liked wishes, random wishes and random likers win Grab vouchers every day. If you win, your code opens on this phone. Share the tree so colleagues can like yours.',
       inviteTitle: 'Invite your team',
       inviteSub: 'The more wishes, the fuller the tree.',
       copyLink: 'Share link',
@@ -665,7 +665,7 @@ button,input,select,textarea{font-family:inherit}
       nextTitle: 'APA SETERUSNYA',
       next1: 'Pasukan Talent Engagement akan menyemak hajat anda, biasanya dalam masa sehari.',
       next2: 'Tag anda akan digantung di pokok bersama dan skrin di lokasi.',
-      next3: 'Rakan sekerja boleh menyukainya: {n} hajat yang paling banyak disukai memenangi baucar Grab {amount}.',
+      next3: 'Rakan sekerja boleh menyukainya. Mulai 1 Disember ada cabutan baucar Grab setiap hari: hajat paling banyak disukai dan hajat rawak menang.',
       next3plain: 'Cari tag anda di pokok selepas ia diluluskan.',
       hangBtn: 'Gantung di pokok',
       saveBtn: 'Simpan perubahan',
@@ -675,7 +675,7 @@ button,input,select,textarea{font-family:inherit}
       doneEditTitle: 'Perubahan anda sedang dihantar',
       doneText: 'Pokok akan menyala untuk semua pada {reveal}.',
       reviewNote: 'Peringatan: setiap hajat disemak dahulu, jadi hajat anda mungkin mengambil sedikit masa untuk muncul di pokok.',
-      donePrize: '{n} hajat yang paling banyak disukai masing-masing memenangi baucar Grab {amount}. Kongsi pokok supaya rakan sekerja boleh menyukai hajat anda.',
+      donePrize: 'Mulai 1 Disember, hajat paling banyak disukai, hajat rawak dan penyuka rawak memenangi baucar Grab setiap hari. Jika anda menang, kod anda dibuka pada telefon ini. Kongsi pokok supaya rakan sekerja boleh menyukai hajat anda.',
       inviteTitle: 'Ajak pasukan anda',
       inviteSub: 'Lebih banyak hajat, lebih meriah pokoknya.',
       copyLink: 'Kongsi pautan',
@@ -746,7 +746,7 @@ button,input,select,textarea{font-family:inherit}
       nextTitle: 'ขั้นตอนถัดไป',
       next1: 'ทีม Talent Engagement จะตรวจสอบคำอวยพรของคุณ โดยปกติภายในหนึ่งวัน',
       next2: 'ป้ายของคุณจะถูกแขวนบนต้นไม้และหน้าจอในสาขา',
-      next3: 'เพื่อนร่วมงานกดถูกใจได้ คำอวยพร {n} อันดับที่ได้รับถูกใจมากที่สุดจะได้รับบัตรกำนัล Grab มูลค่า {amount}',
+      next3: 'เพื่อนร่วมงานกดถูกใจได้ ตั้งแต่ 1 ธันวาคม มีการจับรางวัลบัตรกำนัล Grab ทุกวัน คำอวยพรที่ได้รับถูกใจมากที่สุดและคำอวยพรที่สุ่มได้จะได้รับรางวัล',
       next3plain: 'มองหาป้ายของคุณบนต้นไม้เมื่อได้รับการอนุมัติ',
       hangBtn: 'แขวนบนต้นไม้',
       saveBtn: 'บันทึกการแก้ไข',
@@ -756,7 +756,7 @@ button,input,select,textarea{font-family:inherit}
       doneEditTitle: 'การแก้ไขของคุณกำลังถูกส่ง',
       doneText: 'ต้นไม้จะเปิดไฟให้ทุกคนชมในวันที่ {reveal}',
       reviewNote: 'ขอเตือน: ทุกคำอวยพรต้องผ่านการตรวจสอบก่อน คำอวยพรของคุณจึงอาจใช้เวลาสักครู่กว่าจะขึ้นบนต้นไม้',
-      donePrize: 'คำอวยพร {n} อันดับที่ได้รับถูกใจมากที่สุดจะได้รับบัตรกำนัล Grab มูลค่า {amount} แชร์ต้นไม้เพื่อให้เพื่อนร่วมงานกดถูกใจคำอวยพรของคุณ',
+      donePrize: 'ตั้งแต่ 1 ธันวาคม คำอวยพรที่ได้รับถูกใจมากที่สุด คำอวยพรที่สุ่มได้ และผู้กดถูกใจที่สุ่มได้ จะได้รับบัตรกำนัล Grab ทุกวัน หากคุณได้รับรางวัล รหัสจะเปิดได้บนโทรศัพท์เครื่องนี้ แชร์ต้นไม้เพื่อให้เพื่อนร่วมงานกดถูกใจคำอวยพรของคุณ',
       inviteTitle: 'ชวนทีมของคุณ',
       inviteSub: 'ยิ่งมีคำอวยพรมาก ต้นไม้ก็ยิ่งสวย',
       copyLink: 'แชร์ลิงก์',
@@ -1212,7 +1212,7 @@ button,input,select,textarea{font-family:inherit}
     }).catch(function (err) {
       console.error(err);
       show('write');
-    });
+    }).then(function () { C.showMyPrizes(); });
   }
 
   if (C.demo) {

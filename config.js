@@ -137,19 +137,25 @@ window.WISH_CFG = {
     }
   ],
 
-  // The prize: the big gift on the right of the tree. The most-liked wishes win; leaders' messages and the
-  // BMS numbers in the prize_excluded table (Amr, Maszy, the Wish Tree team) don't count. Set enabled: false to hide it.
+  // The prize: the big gift on the right of the tree and the prize slide on the TVs. Winners are drawn every day on
+  // the Approvals page (Prize draw); the numbers per day are in the prize_plan table (schema.sql, section 9b).
+  // Leaders' messages and the BMS numbers in the prize_excluded table (Amr, Maszy, the Wish Tree team) can't win.
+  // Set enabled: false to hide it.
   PRIZE: {
     enabled: true,
-    winners: 5,
-    amount: 'RM 100',
+    winners: 3,
+    amount: 'RM 50',
     reward: 'Grab voucher',
-    title: '5 x RM 100 Grab vouchers',
-    text: 'The 5 most-liked wishes each win a RM 100 Grab voucher. Each person can like a wish once.',
-    deadline: 'Likes count until 11:59 pm on 18 December 2026 (Malaysia time). Winners are announced on 22 December.',
-    rules: 'Leaders and organizers can\'t win. The Wish Tree team checks every like before the winners are announced. If two wishes have the same likes, the one that got there first ranks higher.'
+    tag: 'Grab vouchers',     // the label on the big gift
+    short: 'Daily Grab voucher draws from 1 December',
+    title: 'Daily Grab voucher draws',
+    text: 'Every day from 1 December, wishes and likers win Grab vouchers. Malaysia, 1 to 18 December: the 3 most-liked wishes win RM\u00a050 each, 3 random wishes win RM\u00a020 and 1 random liker wins RM\u00a020. Thailand, 1 to 16 December: the most-liked Thai wish, 1 random Thai wish and 1 random liker each win THB\u00a0250.',
+    // Shorter words for the prize slide on the TVs
+    tvText: 'Every day from 1 December. Malaysia: the 3 most-liked wishes win RM\u00a050, and 3 random wishes and 1 random liker win RM\u00a020. Thailand: the most-liked wish, 1 random wish and 1 random liker win THB\u00a0250.',
+    tvDeadline: 'New winners show on the tree at 9 am every day.',
+    deadline: 'New winners show here at 9 am every day. If you win, open the Wish Tree on the phone you used for your wish or your likes to get your Grab code.',
+    rules: 'One prize per person. Leaders and organizers can\'t win. A winning wish leaves the like race. The Wish Tree team checks every winner before they show here. Likes count until 11:59 pm on 18 December (Malaysia time).'
     // The database stops counting likes at app_settings.likes_close_at (18 Dec 2026, 23:59 Malaysia time).
-    // Wishes can still be hung until CLOSE_DATE (31 Dec); they just can't collect likes for the prize after the 18th.
   },
 
   // Christmas music: an MP3 in assets/music/ (royalty-free, or one TP may play in its offices).

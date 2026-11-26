@@ -186,10 +186,10 @@ body.pointer .fs{opacity:1;pointer-events:auto}
   .live .dot{animation:none}
 }
 </style>
-<script src="../vendor/supabase.js?v=2026112004"></script>
-<script src="../vendor/qrcode.min.js?v=2026112004"></script>
-<script src="../config.js?v=2026112004"></script>
-<script src="../wishtree.js?v=2026112004"></script>
+<script src="../vendor/supabase.js?v=2026112601"></script>
+<script src="../vendor/qrcode.min.js?v=2026112601"></script>
+<script src="../config.js?v=2026112601"></script>
+<script src="../wishtree.js?v=2026112601"></script>
 </head>
 <body>
 <div class="backdrop" aria-hidden="true"></div>
@@ -556,16 +556,16 @@ body.pointer .fs{opacity:1;pointer-events:auto}
     card.setAttribute('data-color', 'prize');
     card.setAttribute('lang', 'en');
     $('badgeText').textContent = 'THE WISH TREE PRIZE';
-    $('kicker').textContent = 'THE MOST-LIKED WISHES WIN';
+    $('kicker').textContent = 'WISHES AND LIKERS WIN EVERY DAY';
     $('fresh').hidden = true;
     $('sampleTag').hidden = !C.demo;
     $('textBox').hidden = true;
     $('foot').hidden = true;
     $('prizeTv').hidden = false;
     $('pzTitle').textContent = PRIZE.title || '';
-    $('pzText').textContent = PRIZE.text || ('The ' + (PRIZE.winners || 5) + ' most-liked wishes win.');
-    $('pzDeadline').textContent = PRIZE.deadline || '';
-    $('pzHow').textContent = 'Like the wishes you love on the tree. Leaders and organizers can\'t win.';
+    $('pzText').textContent = PRIZE.tvText || PRIZE.text || '';
+    $('pzDeadline').textContent = PRIZE.tvDeadline || PRIZE.deadline || '';
+    $('pzHow').textContent = 'Like the wishes you love on the tree. One prize per person. Leaders and organizers can\'t win.';
     return true;
   }
   function fillCard(sel) {

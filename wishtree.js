@@ -16,6 +16,10 @@
     } catch (e) { /* ignore */ }
     return new URL('./', window.location.href).href;
   })();
+  // This script's version tag (?v=...), passed on to the 3D tree so it updates with the rest of the site
+  var VER = (function () {
+    try { var s = document.currentScript && document.currentScript.src; return s && s.indexOf('?') !== -1 ? s.slice(s.indexOf('?') + 1) : ''; } catch (e) { return ''; }
+  })();
   function url(path) {
     if (!path) return BASE;
     if (/^(https?:)?\/\//i.test(path) || path.charAt(0) === '/') return path;
@@ -247,7 +251,7 @@
     var slowTimer = setTimeout(slow, opts.slowMs || 6000);
     function attempt() {
       var n = tries++;
-      import(url('tree3d.js') + (n ? '?retry=' + n : '')).then(function (mod) {
+      import(url('tree3d.js') + '?' + [VER, n ? 'retry=' + n : ''].filter(Boolean).join('&')).then(function (mod) {
         return (typeof mod.load === 'function' ? mod.load(n) : Promise.resolve()).then(function () { return mod; });
       }).then(function (mod) {
         finished = true;
@@ -830,6 +834,172 @@
     })).then(function (list) { return list.filter(Boolean); });
   }
 
+  /* ---------- My prizes: the "You won" banner and the Grab code ---------- */
+  // A prize opens only on the phone that won it: the phone the wish was sent from (or that keeps its edit key), or
+  // the phone the winning likes came from. The code is asked for only when the winner taps "Show my code".
+  function prizeKeys() {
+    return myWishRefs().slice(0, 10).map(function (r) { return { bms: r.bms, key: r.key }; });
+  }
+  function fetchMyPrizes() {
+    if (DEMO) return Promise.resolve([]);
+    if (!storageGet('wt-device') && !myWishRefs().length) return Promise.resolve([]);
+    return getClient().rpc('my_prizes', { p_device: deviceId(), p_keys: prizeKeys() }).then(function (res) {
+      if (res.error) throw res.error;
+      return (res.data && res.data.result === 'ok' && res.data.prizes) || [];
+    });
+  }
+  function revealPrize(id) {
+    return getClient().rpc('reveal_prize', { p_device: deviceId(), p_keys: prizeKeys(), p_id: Number(id) }).then(function (res) {
+      if (res.error) throw res.error;
+      return res.data || {};
+    });
+  }
+  var WON_T = {
+    en: {
+      won: 'You won a {prize} Grab voucher!', sub: 'Congratulations from the Wish Tree team.', open: 'Get my code', mine: 'My Grab voucher',
+      later: 'Later', show: 'Show my code', copy: 'Copy', copied: 'Copied', openGrab: 'Open in Grab', expires: 'Use it by {date}.',
+      keep: 'Keep it to yourself: anyone with this code can use it.', noCode: 'Your code is on its way. Check back here later today.',
+      notYours: 'This prize opens only on the phone that won it. If you changed phones or cleared your browser, contact the Wish Tree team with your BMS.',
+      slow: 'Too many tries. Wait a few minutes, then try again.', err: 'Could not load your code. Check your connection and try again.',
+      close: 'Close', help: 'Trouble with your code? Contact the Wish Tree team with your BMS.',
+      top: 'Most liked wish', random: 'Lucky draw wish', liker: 'Lucky liker', early: 'Most liked wish', manual: 'Winner'
+    },
+    ms: {
+      won: 'Anda memenangi baucar Grab {prize}!', sub: 'Tahniah daripada pasukan Wish Tree.', open: 'Dapatkan kod saya', mine: 'Baucar Grab saya',
+      later: 'Nanti', show: 'Tunjukkan kod saya', copy: 'Salin', copied: 'Disalin', openGrab: 'Buka dalam Grab', expires: 'Gunakan sebelum {date}.',
+      keep: 'Simpan untuk diri sendiri: sesiapa yang ada kod ini boleh menggunakannya.', noCode: 'Kod anda sedang disediakan. Semak semula di sini nanti hari ini.',
+      notYours: 'Hadiah ini hanya boleh dibuka pada telefon yang memenanginya. Jika anda menukar telefon atau mengosongkan pelayar, hubungi pasukan Wish Tree dengan BMS anda.',
+      slow: 'Terlalu banyak cubaan. Tunggu beberapa minit, kemudian cuba lagi.', err: 'Kod anda tidak dapat dimuatkan. Semak sambungan anda dan cuba lagi.',
+      close: 'Tutup', help: 'Masalah dengan kod anda? Hubungi pasukan Wish Tree dengan BMS anda.',
+      top: 'Hajat paling disukai', random: 'Hajat cabutan bertuah', liker: 'Penyuka bertuah', early: 'Hajat paling disukai', manual: 'Pemenang'
+    },
+    th: {
+      won: 'คุณได้รับบัตรกำนัล Grab มูลค่า {prize}!', sub: 'ขอแสดงความยินดีจากทีม Wish Tree', open: 'รับรหัสของฉัน', mine: 'บัตรกำนัล Grab ของฉัน',
+      later: 'ไว้ทีหลัง', show: 'แสดงรหัสของฉัน', copy: 'คัดลอก', copied: 'คัดลอกแล้ว', openGrab: 'เปิดใน Grab', expires: 'ใช้ได้ถึง {date}',
+      keep: 'โปรดเก็บไว้เป็นความลับ ใครก็ตามที่มีรหัสนี้สามารถใช้ได้', noCode: 'รหัสของคุณกำลังจะมา กลับมาตรวจสอบที่นี่อีกครั้งในวันนี้',
+      notYours: 'รางวัลนี้เปิดได้เฉพาะบนโทรศัพท์ที่ได้รับรางวัลเท่านั้น หากคุณเปลี่ยนโทรศัพท์หรือล้างข้อมูลเบราว์เซอร์ โปรดติดต่อทีม Wish Tree พร้อมหมายเลข BMS ของคุณ',
+      slow: 'ลองหลายครั้งเกินไป โปรดรอสักครู่แล้วลองอีกครั้ง', err: 'ไม่สามารถโหลดรหัสของคุณได้ โปรดตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง',
+      close: 'ปิด', help: 'มีปัญหากับรหัส? โปรดติดต่อทีม Wish Tree พร้อมหมายเลข BMS ของคุณ',
+      top: 'คำอวยพรที่ได้รับถูกใจมากที่สุด', random: 'คำอวยพรผู้โชคดี', liker: 'ผู้กดถูกใจผู้โชคดี', early: 'คำอวยพรที่ได้รับถูกใจมากที่สุด', manual: 'ผู้ได้รับรางวัล'
+    }
+  };
+  var WON_CSS = '.wtp-bar{position:fixed;left:50%;bottom:16px;z-index:9000;transform:translateX(-50%);width:min(560px,calc(100% - 24px));display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;padding:14px 16px;border-radius:16px;background:#343F37;color:#F4EEE3;border:2px solid #B18854;box-shadow:0 14px 40px rgba(0,0,0,.35);font-family:inherit}' +
+    '.wtp-bar.small{left:auto;right:16px;transform:none;width:auto;padding:8px 10px}' +
+    '.wtp-ic{flex:none;display:flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:50%;background:#B18854;color:#241C14}' +
+    '.wtp-txt{flex:1 1 200px;min-width:0}.wtp-txt b{display:block;font-size:16px;line-height:1.3}.wtp-txt span{display:block;margin-top:2px;font-size:13px;color:#CFC3B0}' +
+    '.wtp-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;border-radius:999px;border:0;background:#B18854;color:#241C14;font:inherit;font-size:15px;font-weight:700;cursor:pointer;text-decoration:none}' +
+    '.wtp-btn.ghost{background:transparent;color:#F4EEE3;border:1px solid rgba(244,238,227,.45);font-weight:500}' +
+    '.wtp-dlg{position:fixed;inset:0;z-index:9001;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(20,24,21,.6)}' +
+    '.wtp-card{width:min(440px,100%);max-height:calc(100% - 32px);overflow:auto;display:flex;flex-direction:column;gap:14px;padding:24px 22px;border-radius:18px;background:#F4EEE3;color:#343F37;border:2px solid #B18854;box-shadow:0 24px 60px rgba(0,0,0,.4);font-family:inherit}' +
+    '.wtp-card h2{margin:0;font-size:22px;font-weight:500;line-height:1.25;color:#6C151E}.wtp-card p{margin:0;font-size:14px;line-height:1.5}' +
+    '.wtp-why{font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#7A5418}' +
+    '.wtp-code{display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:12px;background:#fff;border:1.5px dashed #B18854}' +
+    '.wtp-code code{font-size:20px;font-weight:700;letter-spacing:.04em;overflow-wrap:anywhere;user-select:all;color:#241C14}' +
+    '.wtp-row{display:flex;flex-wrap:wrap;gap:8px}.wtp-card .wtp-btn.ghost{color:#343F37;border-color:#8E8467}' +
+    '.wtp-note{font-size:13px!important;color:#5E5650}.wtp-err{padding:10px 12px;border-radius:10px;background:#F3DADC;color:#7E1F28}';
+  var GIFT_SVG = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M12 8v13M3 12h18M12 8c-2-4-6-4-6-1.5S9 8 12 8zm0 0c2-4 6-4 6-1.5S15 8 12 8z"/></svg>';
+  // Shows the banner when this phone has a live prize. Call once on the tree page and the wish page.
+  function showMyPrizes() {
+    var lang = WON_T[storageGet('wt-lang')] ? storageGet('wt-lang') : 'en';
+    var T = WON_T[lang];
+    var tt = function (k, v) { return String(T[k] || WON_T.en[k] || '').replace(/\{(\w+)\}/g, function (m, n) { return v && v[n] != null ? v[n] : m; }); };
+    var locale = lang === 'th' ? 'th-TH' : lang === 'ms' ? 'ms-MY' : 'en-GB';
+    var dateOf = function (ymd) { return ymd ? new Date(ymd + 'T12:00:00+08:00').toLocaleDateString(locale, { timeZone: 'Asia/Kuala_Lumpur', day: 'numeric', month: 'long', year: 'numeric' }) : ''; };
+    return fetchMyPrizes().then(function (list) {
+      if (!list.length || document.getElementById('wtpBar')) return list;
+      if (!document.getElementById('wtpCss')) {
+        var st = document.createElement('style');
+        st.id = 'wtpCss';
+        st.textContent = WON_CSS;
+        document.head.appendChild(st);
+      }
+      var p = list[0];
+      var allOpened = list.every(function (x) { return x.opened; });
+      var bar = document.createElement('div');
+      bar.id = 'wtpBar';
+      bar.className = 'wtp-bar' + (allOpened ? ' small' : '');
+      bar.setAttribute('role', 'region');
+      bar.setAttribute('aria-label', tt('mine'));
+      bar.innerHTML = allOpened
+        ? '<button type="button" class="wtp-btn" data-wtp="open">' + GIFT_SVG + esc(tt('mine')) + '</button>'
+        : '<span class="wtp-ic">' + GIFT_SVG + '</span><div class="wtp-txt"><b>' + esc(tt('won', { prize: p.prize })) + '</b><span>' + esc(tt('sub')) + '</span></div>' +
+          '<button type="button" class="wtp-btn" data-wtp="open">' + esc(tt('open')) + '</button>' +
+          '<button type="button" class="wtp-btn ghost" data-wtp="later">' + esc(tt('later')) + '</button>';
+      document.body.appendChild(bar);
+      track('prize_banner', { pool: p.pool || '' });
+      var lastFocus = null;
+      function closeDlg() {
+        var d = document.getElementById('wtpDlg');
+        if (d) d.remove();
+        document.removeEventListener('keydown', onKey);
+        if (lastFocus && lastFocus.focus) lastFocus.focus();
+      }
+      function onKey(e) { if (e.key === 'Escape') closeDlg(); }
+      function cardHtml(x, body) {
+        return '<div class="wtp-why">' + esc(tt(x.pool) || '') + (x.draw_day ? ' · ' + esc(dateOf(x.draw_day)) : '') + '</div>' +
+          '<h2 id="wtpTitle">' + esc(tt('won', { prize: x.prize })) + '</h2>' + body;
+      }
+      function openDlg(x) {
+        lastFocus = document.activeElement;
+        var d = document.createElement('div');
+        d.id = 'wtpDlg';
+        d.className = 'wtp-dlg';
+        d.innerHTML = '<div class="wtp-card" role="dialog" aria-modal="true" aria-labelledby="wtpTitle" tabindex="-1"></div>';
+        document.body.appendChild(d);
+        var card = d.firstChild;
+        var paint = function (body) { card.innerHTML = cardHtml(x, body); };
+        var closeBtn = '<div class="wtp-row"><button type="button" class="wtp-btn ghost" data-wtp="close">' + esc(tt('close')) + '</button></div>';
+        paint(x.has_code
+          ? '<p>' + esc(tt('keep')) + '</p><div class="wtp-row"><button type="button" class="wtp-btn" data-wtp="reveal">' + esc(tt('show')) + '</button>' +
+            '<button type="button" class="wtp-btn ghost" data-wtp="close">' + esc(tt('close')) + '</button></div>'
+          : '<p>' + esc(tt('noCode')) + '</p>' + closeBtn);
+        d.addEventListener('click', function (e) {
+          if (e.target === d) { closeDlg(); return; }
+          var b = e.target.closest ? e.target.closest('[data-wtp]') : null;
+          if (!b) return;
+          var act = b.getAttribute('data-wtp');
+          if (act === 'close') closeDlg();
+          if (act === 'copy') {
+            var code = card.querySelector('code').textContent;
+            var done = function () { b.textContent = tt('copied'); };
+            if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(code).then(done, function () {});
+            else done();
+          }
+          if (act === 'reveal') {
+            b.disabled = true;
+            revealPrize(x.id).then(function (r) {
+              if (r.result === 'ok') {
+                x.opened = true;
+                var link = r.is_link && /^https:\/\//.test(r.code);
+                paint('<div class="wtp-code"><code>' + esc(r.code) + '</code><div class="wtp-row">' +
+                  (link ? '<a class="wtp-btn" href="' + esc(r.code) + '" target="_blank" rel="noopener noreferrer">' + esc(tt('openGrab')) + '</a>' : '') +
+                  '<button type="button" class="wtp-btn' + (link ? ' ghost' : '') + '" data-wtp="copy">' + esc(tt('copy')) + '</button></div></div>' +
+                  (r.expires_on ? '<p><b>' + esc(tt('expires', { date: dateOf(r.expires_on) })) + '</b></p>' : '') +
+                  '<p class="wtp-note">' + esc(tt('keep')) + ' ' + esc(tt('help')) + '</p>' + closeBtn);
+                track('prize_opened', { pool: x.pool || '' });
+                return;
+              }
+              var msg = r.result === 'no_code_yet' ? tt('noCode') : r.result === 'slow_down' ? tt('slow') : r.result === 'not_yours' ? tt('notYours') : tt('err');
+              paint('<p class="wtp-err" role="alert">' + esc(msg) + '</p>' + closeBtn);
+            }).catch(function (err) {
+              console.error(err);
+              paint('<p class="wtp-err" role="alert">' + esc(tt('err')) + '</p>' + closeBtn);
+            });
+          }
+        });
+        document.addEventListener('keydown', onKey);
+        card.focus();
+      }
+      bar.addEventListener('click', function (e) {
+        var b = e.target.closest ? e.target.closest('[data-wtp]') : null;
+        if (!b) return;
+        if (b.getAttribute('data-wtp') === 'later') { bar.remove(); return; }
+        if (b.getAttribute('data-wtp') === 'open') openDlg(p);
+      });
+      return list;
+    }).catch(function (err) { console.error(err); return []; });
+  }
+
   /* ---------- Prize: the most-liked wishes ---------- */
   var PRIZE = Object.assign({ enabled: true, winners: 5, amount: 'RM 100' }, CFG.PRIZE || {});
   // Preview mode only (the Approvals page reads the real standings from the database)
@@ -862,12 +1032,16 @@
       // A winning wish leaves the like race: it's marked here, then kept off the tree and out of the lists
       var won = {};
       r[1].forEach(function (x) { if (x.wish_id) won[String(x.wish_id)] = x; });
+      likerWinnerList = r[1].filter(function (x) { return x.kind === 'liker'; });
       return r[0].map(function (w) {
         var x = won[String(w.id)];
         return x ? Object.assign({}, w, { won: true, won_prize: x.prize || '', won_reason: x.reason || '', won_at: x.won_at }) : w;
       });
     });
   }
+  // Liker winners from the last load (BMS shown as its last 4 digits only), newest first
+  var likerWinnerList = [];
+  function likerWinners() { return likerWinnerList.slice(); }
   // The public winners: wish winners (by wish) and liker winners (by the last 4 digits of the BMS), newest first
   function fetchWinners() {
     if (DEMO) return Promise.resolve([]);
@@ -1343,7 +1517,7 @@
         }).join('') +
         (o.prize ? '<button type="button" class="wt-gift wt-gift-prize" data-kind="prize" data-id="prize" aria-label="' + esc(o.prizeLabel || 'Prize for the most-liked wishes') + '">' +
           '<span class="wt-gift-bow"></span><span class="wt-gift-lid"></span><span class="wt-gift-box"></span>' +
-          '<span class="wt-gift-label">' + esc(o.prizeTag || (PRIZE.winners + ' x ' + PRIZE.amount)) + '</span></button>' : '') +
+          '<span class="wt-gift-label">' + esc(o.prizeTag || PRIZE.tag || (PRIZE.winners + ' x ' + PRIZE.amount)) + '</span></button>' : '') +
         '<span class="wt-lgifts"></span>' +
         '</div>';
       container._wt = { seen: {}, first: true, onSelect: null };
@@ -1492,6 +1666,10 @@
     safePhoto: safePhoto,
     rankForTree: rankForTree,
     fetchWinners: fetchWinners,
+    likerWinners: likerWinners,
+    fetchMyPrizes: fetchMyPrizes,
+    revealPrize: revealPrize,
+    showMyPrizes: showMyPrizes,
     TREE_ROTATE_MINUTES: TREE_ROTATE_MINUTES,
     COUNTRY_LABEL: COUNTRY_LABEL,
     SITES: SITES,
