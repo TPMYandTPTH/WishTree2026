@@ -272,9 +272,9 @@ a{color:var(--slate)}
   .likes{width:100%}
 }
 </style>
-<script src="../vendor/supabase.js?v=2026112607"></script>
-<script src="../config.js?v=2026112607"></script>
-<script src="../wishtree.js?v=2026112607"></script>
+<script src="../vendor/supabase.js?v=2026112608"></script>
+<script src="../config.js?v=2026112608"></script>
+<script src="../wishtree.js?v=2026112608"></script>
 </head>
 <body>
 <div id="demoBar" class="demo-bar" role="status" hidden><span class="pv">PREVIEW</span>Sample messages only; your decisions stay on this device. Any password opens it here. Once the Wish Tree opens, only the Approvals password does.</div>
@@ -461,6 +461,11 @@ a{color:var(--slate)}
         </section>
 
         <aside class="side">
+          <div class="box">
+            <h2>In the draw now</h2>
+            <div id="poolBox" class="small">Loading…</div>
+          </div>
+
           <div class="box">
             <h2>The plan</h2>
             <ul id="planRows" class="plan"></ul>
@@ -1199,6 +1204,7 @@ a{color:var(--slate)}
 
   function loadDraw() {
     if (C.demo) { renderDraw(); return Promise.resolve(); }
+    adminRpc('admin_prize_pool', {}).then(function (p) { D.pool = p || null; renderPool(); }, function (err) { if (!signedOut(err)) console.error(err); });
     return adminRpc('admin_prize_state', {}).then(function (d) {
       D.data = d || null;
       renderDraw();
@@ -1284,7 +1290,22 @@ a{color:var(--slate)}
     return h + '</article>';
   }
 
+  // Who can win right now in this country (so an empty tab before the first draw still says something)
+  function renderPool() {
+    var p = D.pool && D.pool[D.country];
+    if (!p) { $('poolBox').textContent = D.pool ? 'Nobody yet.' : 'Loading…'; return; }
+    var next = (p.next || []).map(function (x) { return esc(x.first_name || '') + ' <span>(' + fmt(x.likes) + ')</span>'; });
+    $('poolBox').innerHTML =
+      '<ul class="plan">' +
+      '<li><div><b>' + fmt(p.wishes) + ' wishes</b> can win (' + fmt(p.with_likes) + ' with likes)</div>' +
+        '<div class="small">Lucky draw: ' + fmt(Math.max(0, p.wishes - Math.min(p.skip_top || 0, p.with_likes))) + ' of them, without the ' + fmt(Math.min(p.skip_top || 0, p.with_likes)) + ' most-liked</div></li>' +
+      '<li><div><b>' + fmt(p.likers) + ' likers</b> in the liker draw</div></li>' +
+      (next.length ? '<li><div><b>Next for Most liked</b></div><div class="small">' + next.join(', ') + '</div></li>' : '') +
+      (p.waiting ? '<li><div><b>' + fmt(p.waiting) + (p.waiting === 1 ? ' wish' : ' wishes') + '</b> still waiting for approval</div></li>' : '') +
+      '</ul>';
+  }
   function renderDraw() {
+    renderPool();
     var d = D.data;
     var picked = { MY: 0, TH: 0 };
     ((d && d.winners) || []).forEach(function (w) { if (w.status === 'picked' && picked[w.country] != null) picked[w.country]++; });

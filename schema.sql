@@ -1515,6 +1515,26 @@ begin
 end
 $$;
 
+-- Approvals: who can win right now, per country: how many wishes and likers are in the draw, how many wishes are
+-- still waiting for approval, and the next in line for Most liked
+create or replace function public.admin_prize_pool(p_token text) returns json
+language plpgsql stable security definer set search_path = '' as $$
+begin
+  if public.session_role(p_token) is distinct from 'admin' then raise exception 'not_allowed'; end if;
+  return (select json_object_agg(c.country, json_build_object(
+      'wishes', (select count(*) from public.prize_wish_pool(c.country)),
+      'with_likes', (select count(*) from public.prize_wish_pool(c.country) q where q.like_count >= 1),
+      'skip_top', coalesce((select pp.skip_top from public.prize_plan pp where pp.country = c.country and pp.pool = 'random'), 0),
+      'likers', (select count(*) from public.prize_liker_pool(c.country)),
+      'waiting', (select count(*) from public.wishes w where w.status = 'pending' and public.wish_country(w.site, w.lang) = c.country),
+      'next', coalesce((select json_agg(x) from (
+        select w.first_name, w.site, q.like_count as likes
+        from public.prize_wish_pool(c.country) q join public.wishes w on w.id = q.id
+        where q.like_count >= 1 order by q.like_count desc, q.approved_at asc limit 5) x), '[]'::json)))
+    from (values ('MY'), ('TH')) c(country));
+end
+$$;
+
 -- Approvals: everything on the Winners tabs (never the codes themselves)
 create or replace function public.admin_prize_state(p_token text) returns json
 language plpgsql stable security definer set search_path = '' as $$
@@ -1839,6 +1859,7 @@ grant execute on function public.admin_prize_draw(text, text, date) to anon, aut
 grant execute on function public.admin_prize_approve(text, bigint[]) to anon, authenticated;
 grant execute on function public.admin_prize_redraw(text, bigint, text) to anon, authenticated;
 grant execute on function public.admin_prize_state(text) to anon, authenticated;
+grant execute on function public.admin_prize_pool(text) to anon, authenticated;
 grant execute on function public.admin_prize_add_codes(text, text, text, text, date) to anon, authenticated;
 grant execute on function public.admin_prize_remove_codes(text, text, text) to anon, authenticated;
 grant execute on function public.admin_prize_show_code(text, bigint) to anon, authenticated;
