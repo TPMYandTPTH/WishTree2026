@@ -175,6 +175,14 @@ window.WISH_CFG = {
     grandWhen: 'Winners at the end',
     tvDeadline: 'New winners every day. One prize per person.',
     deadline: 'New winners show here every day. If you win, open the Wish Tree on the phone you used for your wish or your likes to get your Grab code.',
+    // How to win, shown as a short list on the prize card (label, then the words)
+    ruleList: [
+      ['Give likes', 'Every like you give is your way in: every day a lucky liker wins a Grab voucher.'],
+      ['Get likes', 'The most-liked wishes win every day. Share your wish so colleagues can like it.'],
+      ['Lucky draw every day', 'Anyone with an approved wish can win, however many likes it has.'],
+      ['Fair play', 'One prize per person. Leaders and organizers can\'t win. Likes count until 11:59 pm on 18 December (Malaysia time).']
+    ],
+    // Used only if ruleList is empty
     rules: 'One prize per person. Leaders and organizers can\'t win. A winning wish leaves the like race. The Wish Tree team checks every winner before they show here. Likes count until 11:59 pm on 18 December (Malaysia time).'
     // The database stops counting likes at app_settings.likes_close_at (18 Dec 2026, 23:59 Malaysia time).
   },

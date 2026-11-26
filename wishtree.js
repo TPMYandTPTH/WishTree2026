@@ -1073,15 +1073,23 @@
         if (res.error) throw res.error;
         return res.data || [];
       }),
-      fetchWinners().catch(function (err) { console.error(err); return []; })
+      fetchWinners().catch(function (err) { console.error(err); return []; }),
+      getClient().rpc('get_paused_wishes').then(function (res) { return res.error ? [] : (res.data || []); }, function () { return []; })
     ]).then(function (r) {
-      // A winning wish leaves the like race: it's marked here, then kept off the tree and out of the lists
-      var won = {};
+      // A winning wish leaves the like race: it's marked here, then kept off the tree and out of the lists.
+      // A paused wish (picked before the daily draw, announced later) stays in the lists, off the tree, and its
+      // likes don't count any more.
+      var won = {}, paused = {};
       r[1].forEach(function (x) { if (x.wish_id) won[String(x.wish_id)] = x; });
+      r[2].forEach(function (x) {
+        var id = x && typeof x === 'object' ? (x.wish_id || x.get_paused_wishes) : x;   // a row or a bare id
+        if (id) paused[String(id)] = true;
+      });
       likerWinnerList = r[1].filter(function (x) { return x.kind === 'liker'; });
       return r[0].map(function (w) {
         var x = won[String(w.id)];
-        return x ? Object.assign({}, w, { won: true, won_prize: x.prize || '', won_reason: x.reason || '', won_at: x.won_at }) : w;
+        if (x) return Object.assign({}, w, { won: true, won_prize: x.prize || '', won_reason: x.reason || '', won_at: x.won_at });
+        return paused[String(w.id)] ? Object.assign({}, w, { paused: true }) : w;
       });
     });
   }
@@ -1325,7 +1333,7 @@
   // no part, so a popular wish can't keep its place and pull in more likes just by being seen more.
   var TREE_ROTATE_MINUTES = 15;
   function rankForTree(list, cap) {
-    list = list.filter(function (w) { return !w.won; });
+    list = list.filter(function (w) { return !w.won && !w.paused; });
     if (list.length <= cap) return list.slice().sort(newestFirst).reverse();
     var byNew = list.slice().sort(newestFirst);
     var fresh = Math.max(1, Math.round(cap * 0.25));

@@ -1730,8 +1730,7 @@ begin
 end
 $$;
 
--- Tree and TV pages: approved wishes with like counts. A wish that has been drawn as a winner but isn't announced
--- yet (before 9 am on its day) is left out, so it's off the tree and the lists until it shows on the Winners tab.
+-- Tree and TV pages: every approved wish, with like counts
 create or replace function public.get_approved_wishes()
 returns table (id uuid, message text, display_name text, site text, lang text, tag_color text, charm text,
                approved_at timestamptz, like_count int)
@@ -1740,11 +1739,19 @@ language sql stable security definer set search_path = '' as $$
          (select count(*) from public.likes l where l.kind = 'wish' and l.target_id = w.id)::int
   from public.wishes w
   where w.status = 'approved'
-    and not exists (select 1 from public.prize_winners p
-                    where p.wish_id = w.id and p.status <> 'redrawn'
-                      and (p.status = 'picked' or coalesce(p.live_at, p.created_at) > now()))
   order by w.approved_at desc nulls last
   limit 5000
+$$;
+
+-- Wishes whose likes are paused: the winners picked before the daily draw, until they're announced on 1 December.
+-- The pages keep them off the tree and at the end of Most liked, and show "Likes paused" instead of the like button.
+-- (Wishes drawn in the daily draw stay as they are until 9 am on their day; their new likes just don't count.)
+create or replace function public.get_paused_wishes()
+returns table (wish_id uuid)
+language sql stable security definer set search_path = '' as $$
+  select p.wish_id from public.prize_winners p
+  where p.pool in ('early', 'manual') and p.wish_id is not null
+    and p.status in ('picked', 'approved') and coalesce(p.live_at, p.created_at) > now()
 $$;
 
 -- Winners on the site: only once they're live (9 am on their day). Likers show as the last 4 digits of their BMS.
@@ -1823,6 +1830,7 @@ grant execute on function public.admin_prize_show_code(text, bigint) to anon, au
 grant execute on function public.my_prizes(text, json) to anon, authenticated;
 grant execute on function public.reveal_prize(text, json, bigint) to anon, authenticated;
 grant execute on function public.get_approved_wishes() to anon, authenticated;
+grant execute on function public.get_paused_wishes() to anon, authenticated;
 grant execute on function public.get_winners() to anon, authenticated;
 grant execute on function public.admin_set_winner(text, uuid, boolean, text, text) to anon, authenticated;
 grant execute on function public.admin_delete(text, text, uuid) to anon, authenticated;

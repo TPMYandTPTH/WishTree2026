@@ -272,9 +272,9 @@ a{color:var(--slate)}
   .likes{width:100%}
 }
 </style>
-<script src="../vendor/supabase.js?v=2026112603"></script>
-<script src="../config.js?v=2026112603"></script>
-<script src="../wishtree.js?v=2026112603"></script>
+<script src="../vendor/supabase.js?v=2026112604"></script>
+<script src="../config.js?v=2026112604"></script>
+<script src="../wishtree.js?v=2026112604"></script>
 </head>
 <body>
 <div id="demoBar" class="demo-bar" role="status" hidden><span class="pv">PREVIEW</span>Sample messages only; your decisions stay on this device. Any password opens it here. Once the Wish Tree opens, only the Approvals password does.</div>
@@ -1245,7 +1245,8 @@ a{color:var(--slate)}
         ' from ' + fmt(w.device_count) + (w.device_count === 1 ? ' phone' : ' phones');
     } else {
       who = '<b>' + esc(w.first_name || 'Wish') + '</b> · BMS <span class="bms">' + esc(w.bms) + '</span> · ' + esc(C.siteName(w.site) || '') +
-        ' · ' + fmt(w.likes_at_draw != null ? w.likes_at_draw : w.like_count) + ' likes' + (w.likes_at_draw != null ? ' when drawn' : '');
+        ' · got ' + fmt(w.likes_at_draw != null ? w.likes_at_draw : w.like_count) + ' likes' + (w.likes_at_draw != null ? ' when drawn' : '') +
+        ' · gave ' + fmt(w.likes_given) + (w.likes_given === 1 ? ' like' : ' likes');
     }
     var h = '<article class="pw ' + esc(w.status) + '" data-wid="' + esc(id) + '">';
     h += '<div class="pw-top"><span class="pool ' + esc(w.pool || 'early') + '">' + esc((POOL[w.pool] || 'Winner') + ' · ' + (w.prize || '')) + '</span>' + who + '</div>';
@@ -1525,12 +1526,12 @@ a{color:var(--slate)}
     }).catch(function (err) { if (signedOut(err)) return; console.error(err); $('acMsg').textContent = 'Could not remove the codes.'; });
   }
   function downloadDraw() {
-    var lines = [['Country', 'Day', 'Prize', 'How', 'Name', 'BMS', 'Site', 'Likes when drawn', 'Status', 'Drawn by', 'Approved by', 'Shows from', 'Code', 'Redraw reason'].map(csvCell).join(',')];
+    var lines = [['Country', 'Day', 'Prize', 'How', 'Name', 'BMS', 'Site', 'Likes got', 'Likes given', 'Status', 'Drawn by', 'Approved by', 'Shows from', 'Code', 'Redraw reason'].map(csvCell).join(',')];
     ((D.data && D.data.winners) || []).forEach(function (w) {
       var code = w.given_at ? (w.given_how === 'whatsapp' ? 'Shown for WhatsApp ' : 'Opened on phone ') + new Date(w.given_at).toLocaleString('en-GB', { timeZone: KL })
         : w.has_code ? 'Set aside, not opened' : 'No code yet';
       lines.push([w.country, w.draw_day || 'Before the draw', w.prize, POOL[w.pool] || '', w.kind === 'liker' ? 'Liker' : (w.first_name || ''), w.bms,
-        w.site ? C.siteName(w.site) : '', w.likes_at_draw != null ? w.likes_at_draw : '', w.status === 'picked' ? 'Waiting for approval' : w.status === 'redrawn' ? 'Redrawn' : 'Approved',
+        w.site ? C.siteName(w.site) : '', w.kind === 'liker' ? '' : (w.likes_at_draw != null ? w.likes_at_draw : w.like_count), w.likes_given || 0, w.status === 'picked' ? 'Waiting for approval' : w.status === 'redrawn' ? 'Redrawn' : 'Approved',
         w.created_by || '', w.approved_by || '', w.live_at ? new Date(w.live_at).toLocaleString('en-GB', { timeZone: KL }) : '', w.status === 'redrawn' ? '' : code, w.redraw_reason || ''].map(csvCell).join(','));
     });
     saveCsv(lines, 'wish-tree-prize-winners.csv');
