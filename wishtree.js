@@ -1545,15 +1545,13 @@
     '.wt-gift-flag{top:84%;width:12%}',
     '.wt-flag-my{left:6%}',
     '.wt-flag-th{left:82%;animation-delay:-3.2s}',
-    '.wt-flag-my .wt-gift-box{background:linear-gradient(90deg,#010066 0 50%,transparent 50%) 0 0/100% 57% no-repeat,repeating-linear-gradient(180deg,#CC0001 0 7.14%,#FFFFFF 7.14% 14.28%)}',
-    '.wt-flag-my .wt-gift-box::after{content:"";position:absolute;left:12%;top:12%;width:14%;aspect-ratio:1;border-radius:50%;box-shadow:inset .5cqw 0 0 #FFCC00}',
-    '.wt-flag-th .wt-gift-box{background:linear-gradient(180deg,#A51931 0 16.66%,#F4F5F8 16.66% 33.33%,#2D2A4A 33.33% 66.66%,#F4F5F8 66.66% 83.33%,#A51931 83.33%)}',
+    '.wt-gift-flag .wt-gift-box{background:#FFFFFF;overflow:hidden;border:2px solid #C99A55}',
+    '.wt-gift-flag .wt-gift-box svg{display:block;width:100%;height:100%}',
     '.wt-gift-mid{top:89%;width:7.5%;aspect-ratio:1/0.9}',
     '.wt-mid-2{left:36%;--box:#343F37;--lid:#3D493F;--rib:#B18854;animation-delay:-1.3s}',
-    '.wt-mid-3{left:46.5%;top:90%;--box:#F4EEE3;--lid:#FBF7EF;--rib:#6C151E;animation-delay:-2.6s}',
+    '.wt-mid-3{left:46.5%;top:90%;--box:#6C151E;--lid:#7D1C26;--rib:#C99A55;animation-delay:-2.6s}',
     '.wt-mid-4{left:57%;--box:#B18854;--lid:#BE9663;--rib:#6C151E;animation-delay:-3.9s}',
-    '.wt-gift-ic{position:absolute;left:50%;top:50%;width:46%;transform:translate(-50%,-40%);color:#F4EEE3;line-height:0}',
-    '.wt-mid-3 .wt-gift-ic{color:#6C151E}',
+    '.wt-gift-ic{position:absolute;left:50%;top:50%;width:52%;padding:7%;box-sizing:border-box;transform:translate(-50%,-42%);border-radius:18%;background:#FFFDF8;border:1px solid var(--rib);color:#6C151E;line-height:0;box-shadow:0 1px 2px rgba(0,0,0,.25)}',
     '.wt-gift-ic svg{width:100%;height:auto}',
     '.wt-gift-mid .wt-gift-label{display:none}',
     '.wt-gift-flag .wt-gift-label{bottom:-14%;font-size:1.4cqw}',
@@ -1583,6 +1581,11 @@
     '@media (prefers-reduced-motion:reduce){.wt-tag,.wt-body{transition:none}.wt-tag.wt-new,.wt-light,.wt-halo,.wt-leader,.wt-swing,.wt-tag:hover .wt-swing,.wt-gift-prize{animation:none}}'
   ].join('\n');
 
+  // The flags on the Grab gifts of the flat tree
+  var FLAG_SVG = {
+    MY: '<svg viewBox="0 0 28 14" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect y="0" width="28" height="1" fill="#CC0001"/><rect y="1" width="28" height="1" fill="#FFFFFF"/><rect y="2" width="28" height="1" fill="#CC0001"/><rect y="3" width="28" height="1" fill="#FFFFFF"/><rect y="4" width="28" height="1" fill="#CC0001"/><rect y="5" width="28" height="1" fill="#FFFFFF"/><rect y="6" width="28" height="1" fill="#CC0001"/><rect y="7" width="28" height="1" fill="#FFFFFF"/><rect y="8" width="28" height="1" fill="#CC0001"/><rect y="9" width="28" height="1" fill="#FFFFFF"/><rect y="10" width="28" height="1" fill="#CC0001"/><rect y="11" width="28" height="1" fill="#FFFFFF"/><rect y="12" width="28" height="1" fill="#CC0001"/><rect y="13" width="28" height="1" fill="#FFFFFF"/><rect width="14" height="8" fill="#010066"/><circle cx="5.3" cy="4" r="3" fill="#FFCC00"/><circle cx="6.1" cy="4" r="2.5" fill="#010066"/><polygon points="10.00,1.40 10.26,2.88 11.13,1.66 10.72,3.10 12.03,2.38 11.04,3.50 12.53,3.42 11.15,4.00 12.53,4.58 11.04,4.50 12.03,5.62 10.72,4.90 11.13,6.34 10.26,5.12 10.00,6.60 9.74,5.12 8.87,6.34 9.28,4.90 7.97,5.62 8.96,4.50 7.47,4.58 8.85,4.00 7.47,3.42 8.96,3.50 7.97,2.38 9.28,3.10 8.87,1.66 9.74,2.88" fill="#FFCC00"/></svg>',
+    TH: '<svg viewBox="0 0 9 6" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="9" height="6" fill="#A51931"/><rect y="1" width="9" height="4" fill="#F4F5F8"/><rect y="2" width="9" height="2" fill="#2D2A4A"/></svg>'
+  };
   // A little gingerbread figure for the flat tree (the 3D tree builds its own)
   var GINGER_SVG = '<svg viewBox="0 0 52 64" aria-hidden="true">' +
     '<polygon points="26.0,49.5 26.7,49.6 27.4,49.7 28.0,50.0 28.6,50.4 29.2,50.9 29.7,51.5 30.1,52.2 30.5,53.0 31.3,59.7 31.3,59.7 31.8,60.8 32.6,61.7 33.6,62.4 34.7,62.8 35.9,63.0 37.1,62.9 38.2,62.5 39.2,61.8 40.0,61.0 40.6,59.9 40.9,58.8 41.0,57.6 40.7,56.4 40.2,55.3 39.5,54.4 38.5,53.7 38.0,46.0 37.4,44.5 36.9,42.9 36.4,41.2 36.0,39.5 35.7,37.7 35.4,35.9 35.2,34.0 35.0,32.0 46.0,31.9 46.5,31.9 47.4,31.8 48.2,31.6 49.0,31.1 49.7,30.6 50.2,29.9 50.7,29.1 50.9,28.3 51.0,27.4 50.9,26.5 50.7,25.7 50.2,24.9 49.7,24.2 49.0,23.7 48.2,23.2 47.4,23.0 46.5,22.9 34.0,22.8 33.4,22.7 32.9,22.6 32.5,22.5 32.1,22.3 31.9,22.2 31.7,22.0 31.5,21.7 31.5,21.5 31.7,21.8 33.1,20.7 34.3,19.4 35.3,17.9 36.0,16.2 36.4,14.5 36.5,12.7 36.3,10.9 35.8,9.2 35.0,7.6 33.9,6.1 32.6,4.9 31.2,3.9 29.5,3.1 27.8,2.7 26.0,2.5 24.2,2.7 22.5,3.1 20.8,3.9 19.4,4.9 18.1,6.1 17.0,7.6 16.2,9.2 15.7,10.9 15.5,12.7 15.6,14.5 16.0,16.2 16.7,17.9 17.7,19.4 18.9,20.7 20.3,21.8 20.3,22.0 20.2,22.1 20.1,22.3 19.8,22.4 19.5,22.5 19.1,22.6 18.6,22.7 18.0,22.8 5.5,22.9 5.5,22.9 4.6,23.0 3.8,23.2 3.0,23.7 2.3,24.2 1.8,24.9 1.3,25.7 1.1,26.5 1.0,27.4 1.1,28.3 1.3,29.1 1.8,29.9 2.3,30.6 3.0,31.1 3.8,31.6 4.6,31.8 5.5,31.9 17.0,32.0 16.8,34.0 16.6,35.9 16.3,37.7 16.0,39.5 15.6,41.2 15.1,42.9 14.6,44.5 14.0,46.0 13.5,53.7 13.5,53.7 12.6,54.4 11.8,55.3 11.3,56.4 11.0,57.5 11.1,58.7 11.4,59.9 12.0,60.9 12.8,61.8 13.8,62.5 14.9,62.9 16.1,63.0 17.3,62.8 18.4,62.4 19.4,61.7 20.1,60.8 20.7,59.7 21.5,53.0 21.9,52.2 22.3,51.5 22.8,50.9 23.4,50.4 24.0,50.0 24.6,49.7 25.3,49.6 26.0,49.5" fill="#B8733A" stroke="#86491F" stroke-width="1.6" stroke-linejoin="round"/>' +
@@ -1633,7 +1636,7 @@
         (o.prize ? prizeGifts().map(function (pg, i) {
           var cls = pg.flag ? 'wt-gift-flag wt-flag-' + esc(pg.flag.toLowerCase()) : 'wt-gift-mid wt-mid-' + i;
           return '<button type="button" class="wt-gift wt-gift-prize ' + cls + '" data-kind="prize" data-id="' + esc(pg.id) + '" aria-label="' + esc('Prize: ' + (pg.flag ? pg.label + ', ' + pg.card.line2 : pg.card.line1)) + '">' +
-            '<span class="wt-gift-bow"></span><span class="wt-gift-lid"></span><span class="wt-gift-box">' + (pg.flag ? '' : '<span class="wt-gift-ic">' + iconSvgPath(pg.icon, 24) + '</span>') + '</span>' +
+            '<span class="wt-gift-bow"></span><span class="wt-gift-lid"></span><span class="wt-gift-box">' + (pg.flag ? (FLAG_SVG[pg.flag] || '') : '<span class="wt-gift-ic">' + iconSvgPath(pg.icon, 24) + '</span>') + '</span>' +
             '<span class="wt-gift-label">' + esc(pg.label) + '</span></button>';
         }).join('') : '') +
         '<span class="wt-lgifts"></span>' +

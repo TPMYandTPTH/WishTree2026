@@ -710,7 +710,7 @@ export function createTree3D(container, opts = {}) {
   const prizeList = typeof C.prizeGifts === 'function' ? C.prizeGifts() : [];
   const FLAG_SPOTS = [{ x: -2.08, z: 1.0, rot: -0.3 }, { x: 2.08, z: 1.0, rot: 0.3 }];
   const MID_SPOTS = [{ x: -0.8, z: 2.02, rot: 0.28 }, { x: 0.05, z: 2.28, rot: -0.12 }, { x: 0.88, z: 2.02, rot: -0.3 }];
-  const MID_COLORS = [[0x343f37, 0xb18854], [0xf4eee3, 0x6c151e], [0xb18854, 0x6c151e]];
+  const MID_COLORS = [[0x343f37, 0xb18854], [0x6c151e, 0xc99a55], [0xb18854, 0x6c151e]];   // each its own colour, so the labels stand out
   const GIFT_SLOTS = {
     red: { x: -1.36, z: 2.3, rot: 0.3, W: 0.34, H: 0.62, D: 0.2, color: 0x6c151e, words: ['A wish', 'for you'], ginger: true },
     gold: { x: 1.42, z: 2.3, rot: -0.3, W: 0.34, H: 0.62, D: 0.2, color: 0xb18854, words: ['Where it', 'all began'], ginger: true },
