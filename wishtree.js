@@ -852,7 +852,26 @@
       });
       return Promise.resolve(list.sort(function (a, b) { return a.approved_at < b.approved_at ? 1 : -1; }));
     }
-    return getClient().rpc('get_approved_wishes').then(function (res) {
+    return Promise.all([
+      getClient().rpc('get_approved_wishes').then(function (res) {
+        if (res.error) throw res.error;
+        return res.data || [];
+      }),
+      fetchWinners().catch(function (err) { console.error(err); return []; })
+    ]).then(function (r) {
+      // A winning wish leaves the like race: it's marked here, then kept off the tree and out of the lists
+      var won = {};
+      r[1].forEach(function (x) { if (x.wish_id) won[String(x.wish_id)] = x; });
+      return r[0].map(function (w) {
+        var x = won[String(w.id)];
+        return x ? Object.assign({}, w, { won: true, won_prize: x.prize || '', won_reason: x.reason || '', won_at: x.won_at }) : w;
+      });
+    });
+  }
+  // The public winners: wish winners (by wish) and liker winners (by the last 4 digits of the BMS), newest first
+  function fetchWinners() {
+    if (DEMO) return Promise.resolve([]);
+    return getClient().rpc('get_winners').then(function (res) {
       if (res.error) throw res.error;
       return res.data || [];
     });
@@ -1080,12 +1099,21 @@
   }
 
   // More wishes than spots: the most-liked go on the tree (ties go to the newest). Returns oldest first, like pickForTree.
+  // Which wishes hang on the tree (returned oldest first). Winners never hang. When there are more wishes than
+  // room, the newest quarter always hang (so a new wish shows up soon after it's approved) and the rest take
+  // turns: every TREE_ROTATE_MINUTES a different random set, the same for everyone at the same time. Likes play
+  // no part, so a popular wish can't keep its place and pull in more likes just by being seen more.
+  var TREE_ROTATE_MINUTES = 15;
   function rankForTree(list, cap) {
+    list = list.filter(function (w) { return !w.won; });
     if (list.length <= cap) return list.slice().sort(newestFirst).reverse();
-    var top = list.slice().sort(function (a, b) {
-      return ((b.like_count || 0) - (a.like_count || 0)) || newestFirst(a, b);
-    }).slice(0, cap);
-    return top.sort(newestFirst).reverse();
+    var byNew = list.slice().sort(newestFirst);
+    var fresh = Math.max(1, Math.round(cap * 0.25));
+    var slot = Math.floor(Date.now() / (TREE_ROTATE_MINUTES * 60000));
+    var turns = byNew.slice(fresh).sort(function (a, b) {
+      return hash('turn:' + slot + ':' + a.id) - hash('turn:' + slot + ':' + b.id);
+    });
+    return byNew.slice(0, fresh).concat(turns.slice(0, cap - fresh)).sort(newestFirst).reverse();
   }
 
   /* ---------- The tree ---------- */
@@ -1463,6 +1491,8 @@
     saveReadLangs: saveReadLangs,
     safePhoto: safePhoto,
     rankForTree: rankForTree,
+    fetchWinners: fetchWinners,
+    TREE_ROTATE_MINUTES: TREE_ROTATE_MINUTES,
     COUNTRY_LABEL: COUNTRY_LABEL,
     SITES: SITES,
     LEADER_SLOTS: CROWN_SIZE,

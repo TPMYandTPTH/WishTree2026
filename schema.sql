@@ -118,6 +118,26 @@ create table if not exists public.prize_excluded (
   note text
 );
 
+-- Winners. One prize per BMS: a person who has won can't win again (wisher or liker). A winning wish leaves the
+-- like race: it comes off the tree and the lists, shows on the Winners tab, and its likes stop counting.
+-- status: 'picked' (drawn, not checked yet), 'approved' (public), 'sent' (voucher sent), 'redrawn' (replaced).
+create table if not exists public.prize_winners (
+  id bigint generated always as identity primary key,
+  kind text not null check (kind in ('wish', 'liker')),
+  wish_id uuid references public.wishes(id) on delete cascade,
+  bms text not null,
+  prize text,
+  reason text,
+  status text not null default 'approved' check (status in ('picked', 'approved', 'sent', 'redrawn')),
+  created_at timestamptz not null default now(),
+  created_by text,
+  sent_at timestamptz,
+  sent_by text,
+  check (kind <> 'wish' or wish_id is not null)
+);
+create unique index if not exists prize_winners_bms_key on public.prize_winners (bms) where status <> 'redrawn';
+create unique index if not exists prize_winners_wish_key on public.prize_winners (wish_id) where wish_id is not null and status <> 'redrawn';
+
 -- Automatic flags shown to approvers (phone numbers, emails in the wish text)
 create or replace function public.wish_flags(p_message text) returns text[]
 language plpgsql immutable set search_path = '' as $$
@@ -476,6 +496,7 @@ alter table public.app_settings enable row level security;
 alter table public.private_salt enable row level security;
 alter table public.rate_events enable row level security;
 alter table public.prize_excluded enable row level security;
+alter table public.prize_winners enable row level security;
 alter table public.access_passwords enable row level security;
 alter table public.access_sessions enable row level security;
 alter table public.wishes enable row level security;
@@ -483,6 +504,7 @@ alter table public.leader_messages enable row level security;
 alter table public.likes enable row level security;
 alter table public.admin_log enable row level security;
 -- No policies on purpose: the pages only reach the data through the functions below.
+revoke all on public.prize_winners from anon, authenticated;
 revoke all on public.app_settings, public.private_salt, public.rate_events, public.prize_excluded,
               public.access_passwords, public.access_sessions, public.wishes, public.leader_messages, public.likes,
               public.admin_log
@@ -696,6 +718,7 @@ begin
      or v_dev !~ '^[A-Za-z0-9-]{16,64}$'                                          -- no device code
      or not public.bms_ok(v_bms)                                                  -- short, long or made-up BMS
      or (p_kind = 'wish' and exists (select 1 from public.wishes w where w.id = p_id and w.bms = v_bms))   -- own wish
+     or (p_kind = 'wish' and exists (select 1 from public.prize_winners p where p.wish_id = p_id and p.status <> 'redrawn'))   -- already won
      or exists (select 1 from public.likes l where l.kind = p_kind and l.target_id = p_id and l.device_id = v_dev)  -- this device already liked it
   then
     return query select 'ok'::text; return;
@@ -827,8 +850,15 @@ begin
              -- other wishes sent from the same device (BMS only, no names), e.g. 'BMS 12345, BMS 67890'
              (select string_agg('BMS ' || o.bms, ', ' order by o.created_at)
                 from public.wishes o
-               where w.device_id is not null and o.device_id = w.device_id and o.id <> w.id) as same_device
+               where w.device_id is not null and o.device_id = w.device_id and o.id <> w.id) as same_device,
+             (select coalesce(p.prize, 'Prize to be decided') from public.prize_winners p
+               where p.wish_id = w.id and p.status <> 'redrawn' limit 1) as winner
       from public.wishes w order by w.created_at desc limit 5000) x), '[]'::json),
+    'winners', coalesce((select json_agg(x order by x.created_at desc) from (
+      select p.id, p.kind, p.wish_id, p.bms, p.prize, p.reason, p.status, p.created_at, p.created_by, p.sent_at, p.sent_by,
+             w.first_name, w.site
+      from public.prize_winners p left join public.wishes w on w.id = p.wish_id
+      where p.status <> 'redrawn') x), '[]'::json),
     -- photos of approved messages come from get_leader_photos; the others come here, to be checked
     'leaders', coalesce((select json_agg(x) from (
       select m.id, m.created_at, m.updated_at, m.display_name, m.title, m.message, m.lang,
@@ -1049,6 +1079,41 @@ begin
 end
 $$;
 
+-- Tree and TV pages: the public winners (wish winners by wish; liker winners by the last 4 digits of the BMS)
+create or replace function public.get_winners()
+returns table (wish_id uuid, kind text, bms_end text, prize text, reason text, won_at timestamptz)
+language sql stable security definer set search_path = '' as $$
+  select p.wish_id, p.kind, case when p.kind = 'liker' then right(p.bms, 4) end, p.prize, p.reason, p.created_at
+  from public.prize_winners p
+  where p.status in ('approved', 'sent')
+  order by p.created_at desc
+$$;
+
+-- Approvals: make an approved wish a winner (it leaves the like race), or undo that before the prize is sent
+create or replace function public.admin_set_winner(p_token text, p_wish_id uuid, p_on boolean,
+                                                   p_prize text default null, p_reason text default null)
+returns text
+language plpgsql security definer set search_path = '' as $$
+declare
+  v_bms text;
+begin
+  if public.session_role(p_token) is distinct from 'admin' then raise exception 'not_allowed'; end if;
+  select w.bms into v_bms from public.wishes w where w.id = p_wish_id;
+  if not found then return 'not_found'; end if;
+  if coalesce(p_on, false) then
+    if not exists (select 1 from public.wishes w where w.id = p_wish_id and w.status = 'approved') then return 'not_approved'; end if;
+    if exists (select 1 from public.prize_winners p where p.bms = v_bms and p.status <> 'redrawn') then return 'already_won'; end if;
+    insert into public.prize_winners (kind, wish_id, bms, prize, reason, status, created_by)
+    values ('wish', p_wish_id, v_bms, nullif(btrim(coalesce(p_prize, '')), ''), nullif(btrim(coalesce(p_reason, '')), ''),
+            'approved', public.session_who(p_token));
+    return 'ok';
+  end if;
+  if exists (select 1 from public.prize_winners p where p.wish_id = p_wish_id and p.status = 'sent') then return 'already_sent'; end if;
+  delete from public.prize_winners p where p.wish_id = p_wish_id and p.status in ('picked', 'approved');
+  return 'ok';
+end
+$$;
+
 -- The prize standings with BMS, and signs of like-farming (many likes from one connection)
 drop function if exists public.get_prize_check(int);
 drop function if exists public.get_prize_check(text, int);
@@ -1069,6 +1134,7 @@ begin
   from public.wishes w
   join public.likes l on l.kind = 'wish' and l.target_id = w.id
   where w.status = 'approved'
+    and not exists (select 1 from public.prize_winners p where p.status <> 'redrawn' and (p.wish_id = w.id or p.bms = w.bms))
   group by w.id
   order by count(l.bms) desc, max(l.created_at) asc
   limit least(greatest(coalesce(p_limit, 10), 1), 50);
@@ -1128,6 +1194,7 @@ grant execute on function public.get_approved_wishes() to anon, authenticated;
 grant execute on function public.get_leader_messages() to anon, authenticated;
 grant execute on function public.get_leader_photos(uuid[]) to anon, authenticated;
 grant execute on function public.get_settings() to anon, authenticated;
+grant execute on function public.get_winners() to anon, authenticated;
 grant execute on function public.submit_wish(text, text, text, text, text, text, text, boolean, text, text) to anon, authenticated;
 grant execute on function public.get_my_wish(text, text) to anon, authenticated;
 grant execute on function public.set_like(text, uuid, text, boolean, text) to anon, authenticated;
@@ -1139,6 +1206,7 @@ grant execute on function public.leader_save(text, text, text, text, text, boole
 grant execute on function public.leader_get_mine(text, text) to anon, authenticated;
 grant execute on function public.leader_delete_mine(text, text) to anon, authenticated;
 grant execute on function public.admin_queue(text) to anon, authenticated;
+grant execute on function public.admin_set_winner(text, uuid, boolean, text, text) to anon, authenticated;
 grant execute on function public.admin_set_name(text, text) to anon, authenticated;
 grant execute on function public.admin_set_status(text, text, uuid[], text) to anon, authenticated;
 grant execute on function public.admin_edit_message(text, text, uuid, text) to anon, authenticated;

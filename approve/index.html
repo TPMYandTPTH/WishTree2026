@@ -144,6 +144,11 @@ a{color:var(--slate)}
 .who .where{font-size:14px;color:var(--muted)}
 .chip{padding:3px 9px;border-radius:999px;background:var(--violet-soft);color:var(--slate);font-size:12px;font-weight:500}
 .chip.tag{display:inline-flex;align-items:center;gap:6px}
+.chip.won{background:#7A5418;color:#FFF6E2;font-weight:700}
+.wn-rows{margin:8px 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+.wn-rows li{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;padding:8px 10px;border-radius:8px;background:#FBF3E2;border:1px solid #E7D2A6;font-size:13px}
+.wn-rows li b{font-size:14px}
+.wn-rows li span{color:var(--slate)}
 .chip.tag i{width:9px;height:12px;border-radius:2px}
 .time{font-size:13px;color:var(--muted)}
 .flags{display:flex;flex-wrap:wrap;gap:6px}
@@ -213,9 +218,9 @@ a{color:var(--slate)}
   .likes{width:100%}
 }
 </style>
-<script src="../vendor/supabase.js?v=2026112003"></script>
-<script src="../config.js?v=2026112003"></script>
-<script src="../wishtree.js?v=2026112003"></script>
+<script src="../vendor/supabase.js?v=2026112004"></script>
+<script src="../config.js?v=2026112004"></script>
+<script src="../wishtree.js?v=2026112004"></script>
 </head>
 <body>
 <div id="demoBar" class="demo-bar" role="status" hidden><span class="pv">PREVIEW</span>Sample messages only; your decisions stay on this device. Any password opens it here. Once the Wish Tree opens, only the Approvals password does.</div>
@@ -322,6 +327,13 @@ a{color:var(--slate)}
           <div class="small">Orange flags are automatic checks: phone numbers or emails, a BMS that looks made up, and wishes sent from the same device. One device, one BMS: a wish from a device that already sent one for another BMS goes straight to Not approved. A person always decides, and "Approve all" skips flagged wishes. Use Edit to change anything (name, words, site, title, photo, place in the list) and approve in one step.</div>
         </div>
 
+        <div class="box" id="winBox">
+          <h2>Winners</h2>
+          <p class="small">No one wins twice. A winning wish leaves the like race: it comes off the tree, moves to the <b>Winners</b> tab on the tree page in gold, and its likes stop counting. Use <b>Make winner</b> on an approved wish, and <b>Undo winner</b> if it was a mistake.</p>
+          <ol id="winRows" class="wn-rows"></ol>
+          <div class="pz-tools"><button type="button" id="winCsv" class="btn btn-ghost">Download winners list</button></div>
+        </div>
+
         <div class="box" id="prizeBox">
           <h2 id="prizeTitle">Prize standings</h2>
           <p class="small">Likes stop counting at 11:59 pm on 18 December. Maszy approves the final list, and the winners are announced on 22 December. <b>Leaders and organizers can't win</b>: skip their wishes when you pick.</p>
@@ -385,7 +397,7 @@ a{color:var(--slate)}
   var S = {
     view: 'loading', token: '',
     kind: 'wish', status: 'pending', site: 'all', q: '',
-    wishes: [], leaders: [], likes: {},
+    wishes: [], leaders: [], likes: {}, winners: [],
     settings: { submissions_open: true },
     editing: null, draft: '', busy: {}, shown: PAGE, bulkArmed: false,
     me: '', renaming: false
@@ -436,6 +448,7 @@ a{color:var(--slate)}
       q = q || {};
       gotMe(q.me);
       S.wishes = q.wishes || [];
+      S.winners = q.winners || [];
       S.likes = {};
       S.wishes.forEach(function (w) { S.likes['wish:' + w.id] = w.like_count || 0; });
       if (q.settings) S.settings = q.settings;
@@ -473,6 +486,7 @@ a{color:var(--slate)}
 
   /* ---------- Render ---------- */
   function render() {
+    renderWinners();
     var waiting = countBy(S.wishes, 'pending') + countBy(S.leaders, 'pending');
     $('sWaiting').textContent = fmt(waiting);
     $('sApproved').textContent = fmt(countBy(S.wishes, 'approved') + countBy(S.leaders, 'approved'));
@@ -550,6 +564,7 @@ a{color:var(--slate)}
     h += '<span class="chip">' + esc(C.langLabel(x.lang || 'en')) + '</span>';
     if (isW) h += '<span class="chip tag"><i style="background:' + (SWATCH[x.tag_color] || SWATCH.cream) + ';box-shadow:inset 0 0 0 1px rgba(0,0,0,.15)"></i>' + esc((x.charm || 'snow').replace(/^./, function (c) { return c.toUpperCase(); })) + '</span>';
     if (!isW && x.hidden) h += '<span class="chip">Hidden</span>';
+    if (isW && x.winner) h += '<span class="chip won">Winner · ' + esc(x.winner) + '</span>';
     h += '</div><span class="time">' + esc(ago(when)) + '</span></div>';
     if (flags.length) {
       h += '<div class="flags">' + flags.map(function (f) {
@@ -582,6 +597,12 @@ a{color:var(--slate)}
     } else if (status === 'approved') {
       h += '<button type="button" class="btn btn-ghost" data-act="edit"' + dis + '>Edit</button>';
       h += '<button type="button" class="btn btn-reject" data-act="reject"' + dis + '>Take down</button>';
+      if (isW) {
+        h += x.winner
+          ? '<button type="button" class="btn btn-ghost" data-act="unwin"' + dis + '>Undo winner</button>'
+          : '<button type="button" class="btn btn-ghost" data-act="win"' + dis + ' title="Takes it out of the like race and onto the Winners tab">' +
+            (winArmed === key ? 'Click again to make winner' : 'Make winner') + '</button>';
+      }
     } else {
       h += '<button type="button" class="btn btn-approve" data-act="approve"' + dis + '>' + checkIcon() + 'Approve</button>';
       h += '<button type="button" class="btn btn-ghost" data-act="edit"' + dis + '>Edit</button>';
@@ -904,6 +925,7 @@ a{color:var(--slate)}
   });
   $('prizeRefresh').addEventListener('click', function () { loadPrize(); });
   $('prizeCsv').addEventListener('click', downloadCsv);
+  $('winCsv').addEventListener('click', downloadWinners);
   $('prizeWinners').addEventListener('click', downloadWinners);
   $('rmBms').addEventListener('input', function () {
     var v = $('rmBms').value.replace(/\D/g, '').slice(0, 7);
@@ -991,6 +1013,7 @@ a{color:var(--slate)}
     if (action === 'cancel') { S.editing = null; renderList(); return; }
     if (action === 'save') { saveEdit(key, f); return; }
     if (action === 'photo-remove') { S.draft.photo = ''; S.draft.photoChanged = true; renderList(); return; }
+    if (action === 'win' || action === 'unwin') { setWinner(key, f, action === 'win'); return; }
     var changes;
     if (action === 'approve') changes = { status: 'approved' };
     else if (action === 'reject') changes = { status: 'rejected' };
@@ -1014,6 +1037,54 @@ a{color:var(--slate)}
       if (signedOut(err)) return;
       $('mainErr').textContent = 'That didn\'t save. ' + (err && err.message ? err.message : 'Please try again.');
     });
+  }
+
+  // Make an approved wish a winner (click twice), or undo it
+  var winArmed = '';
+  function setWinner(key, f, on) {
+    if (on && winArmed !== key) {
+      winArmed = key;
+      renderList();
+      setTimeout(function () { if (winArmed === key) { winArmed = ''; renderList(); } }, 5000);
+      return;
+    }
+    winArmed = '';
+    S.busy[key] = true;
+    $('mainErr').textContent = '';
+    renderList();
+    adminRpc('admin_set_winner', { p_wish_id: f.id, p_on: on, p_prize: null, p_reason: null }).then(function (r) {
+      S.busy[key] = false;
+      if (r && r !== 'ok') {
+        $('mainErr').textContent = r === 'already_won' ? 'This BMS has already won. No one wins twice.'
+          : r === 'already_sent' ? 'The prize was already sent, so this winner stays.'
+          : r === 'not_approved' ? 'Only an approved wish can win.' : 'That didn\'t save. Please try again.';
+      }
+      C.track(on ? 'winner_set' : 'winner_undo', { kind: 'wish' });
+      load();
+    }).catch(function (err) {
+      console.error(err);
+      S.busy[key] = false;
+      renderList();
+      if (signedOut(err)) return;
+      $('mainErr').textContent = 'That didn\'t save. ' + (err && err.message ? err.message : 'Please try again.');
+    });
+  }
+  function renderWinners() {
+    var list = S.winners || [];
+    $('winRows').innerHTML = list.length ? list.map(function (w) {
+      var who = w.kind === 'liker' ? 'Liker · BMS ' + w.bms : (w.first_name || '') + ' · BMS ' + w.bms + (w.site ? ' · ' + C.siteName(w.site) : '');
+      return '<li><b>' + esc(who) + '</b><span>' + esc(w.prize || 'Prize to be decided') + '</span>' +
+        (w.reason ? '<span>' + esc(w.reason) + '</span>' : '') +
+        '<span>' + esc((w.status === 'sent' ? 'Sent' : 'Not sent yet') + (w.created_by ? ' · added by ' + w.created_by : '') + ' · ' + new Date(w.created_at).toLocaleDateString('en-GB')) + '</span></li>';
+    }).join('') : '<li><span>No winners yet.</span></li>';
+  }
+  function downloadWinners() {
+    var lines = [['Type', 'Name', 'BMS', 'Site', 'Prize', 'Why', 'Status', 'Added by', 'Added on'].map(csvCell).join(',')];
+    (S.winners || []).forEach(function (w) {
+      lines.push([w.kind === 'liker' ? 'Liker' : 'Wish', w.first_name || '', w.bms, w.site ? C.siteName(w.site) : '', w.prize || 'Prize to be decided',
+        w.reason || '', w.status === 'sent' ? 'Sent' : 'Not sent yet', w.created_by || '', new Date(w.created_at).toLocaleString('en-GB')].map(csvCell).join(','));
+    });
+    saveCsv(lines, 'wish-tree-winners.csv');
   }
 
   function bulkApprove() {

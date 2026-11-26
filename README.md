@@ -43,7 +43,8 @@ The **Accept new wishes** switch on the Approvals page closes or reopens the cam
 ## How many cards fit, languages and the list
 
 - **The 3D tree holds 60 wishes** (`MAX_TAGS_3D`), plus up to 8 leaders at the top. That's the most it can hang without tags overlapping. The flat tree holds 40.
-- When a site (or "All sites") has more approved wishes than that, **the most-liked go on the tree** (ties go to the newest). Every wish, on the tree or not, is in the **Every wish** list under the tree, with search, Most liked / Newest, and a like button. The TVs still show every wish in turn.
+- When a site (or "All sites") has more approved wishes than that, **the newest quarter always hang and the rest take turns**: every 15 minutes a different random set (the same for everyone at the same time). Likes play no part, so a popular wish can't keep its place and pull in more likes. Every wish, on the tree or not, is in the **Every wish** list under the tree, with search, Random / Newest / Most liked / Winners, and a like button. The TVs still show every wish in turn.
+- **Winners** (table `prize_winners`, one per BMS: no one wins twice). A winning wish leaves the like race: it comes off the tree and the TVs, moves to the gold **Winners** tab, and its likes stop counting. On the Approvals page use **Make winner** on an approved wish (click twice) or **Undo winner**; the Winners box lists them all with a CSV download.
 - **Languages:** people pick the language they wrote in (Thai, Chinese, Japanese, Korean, Tamil and Vietnamese are picked automatically as they type). Readers choose one or more languages with the **Languages** button on the tree; the choice is remembered on their device. The button only offers languages that have at least one approved wish on that site (no Thai wishes = no Thai), and hides itself when there's only one. Leaders' messages always show. Edit `LANGUAGES` in `config.js` to add or remove languages; the database accepts any 2-3 letter code.
 - **Likes:** the first like asks for the BMS; the device remembers it ("Liking as BMS … · Change" under the tree). Leaders' messages get a brass **Thank you** button instead (it turns to "Thanked"), with no count, so it's never mixed up with the prize likes.
 - **Likes that don't count, silently:** every like shows straight away (heart filled, count +1), but the database only stores it when the BMS looks real (4 to 7 digits, not one digit repeated like 55555, not a straight run like 1234567 or 7654321), it's not the person's own wish, this device hasn't already liked that message (one like per device, whatever BMS is typed), and it's before the deadline. A like that wasn't stored is gone when the page is reloaded. Nobody is told, so there's nothing to work around.
@@ -117,7 +118,7 @@ No Google sign-in or email setup is needed. If an older version created a `leade
 
 ## Notes
 
-- **Version tags:** every page loads `config.js`, `wishtree.js` and the files in `vendor/` with `?v=2026112003`. When you change `config.js` or `wishtree.js`, raise that number on all five pages (tree, wish page, leaders, Approvals, TV) so no browser mixes a new page with an old cached file.
+- **Version tags:** every page loads `config.js`, `wishtree.js` and the files in `vendor/` with `?v=2026112004`. When you change `config.js` or `wishtree.js`, raise that number on all five pages (tree, wish page, leaders, Approvals, TV) so no browser mixes a new page with an old cached file.
 
 - Character limits live in two places: `MAX_LENGTH` / `LEADER_MAX_LENGTH` in `config.js` and the two `char_length` checks in `schema.sql`. Keep them the same.
 - Likes need no sign-in, only a BMS once per device. Counts show on the tree, the TVs and the Approvals page.
