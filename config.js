@@ -149,10 +149,23 @@ window.WISH_CFG = {
     tag: 'Grab vouchers',     // the label on the big gift
     short: 'Daily Grab voucher draws from 1 December',
     title: 'Daily Grab voucher draws',
-    text: 'Every day from 1 December, wishes and likers win Grab vouchers. Malaysia, 1 to 18 December: the 3 most-liked wishes win RM\u00a050 each, 3 random wishes win RM\u00a020 and 1 random liker wins RM\u00a020. Thailand, 1 to 16 December: the most-liked Thai wish, 1 random Thai wish and 1 random liker each win THB\u00a0250.',
-    // Shorter words for the prize slide on the TVs
-    tvText: 'Every day from 1 December. Malaysia: the 3 most-liked wishes win RM\u00a050, and 3 random wishes and 1 random liker win RM\u00a020. Thailand: the most-liked wish, 1 random wish and 1 random liker win THB\u00a0250.',
-    tvDeadline: 'New winners show on the tree at 9 am every day.',
+    // The Grab vouchers, shown big on the prize card (tree page) and the prize slide (TVs). Keep them in line with
+    // the prize_plan table.
+    vouchers: [
+      { country: 'Malaysia', when: '1 to 18 December, every day', items: [
+        { amount: 'RM 50', who: '3 most-liked wishes' },
+        { amount: 'RM 20', who: '3 random wishes' },
+        { amount: 'RM 20', who: '1 random liker' }
+      ] },
+      { country: 'Thailand', when: '1 to 16 December, every day', items: [
+        { amount: 'THB 250', who: 'The most-liked Thai wish' },
+        { amount: 'THB 250', who: '1 random Thai wish' },
+        { amount: 'THB 250', who: '1 random liker' }
+      ] }
+    ],
+    // Used only if vouchers is empty
+    text: 'Every day from 1 December, wishes and likers win Grab vouchers.',
+    tvDeadline: 'Winners show at 9 am every day. One prize per person.',
     deadline: 'New winners show here at 9 am every day. If you win, open the Wish Tree on the phone you used for your wish or your likes to get your Grab code.',
     rules: 'One prize per person. Leaders and organizers can\'t win. A winning wish leaves the like race. The Wish Tree team checks every winner before they show here. Likes count until 11:59 pm on 18 December (Malaysia time).'
     // The database stops counting likes at app_settings.likes_close_at (18 Dec 2026, 23:59 Malaysia time).

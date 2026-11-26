@@ -116,6 +116,21 @@ html.portrait .tree-box{height:49rem}
 .pz-deadline{display:flex;align-items:flex-start;gap:1rem;padding:1rem 1.4rem;border-radius:1.1rem;background:rgba(244,238,227,.12);font-size:1.9rem;font-weight:700;line-height:1.35}
 .pz-deadline svg{flex:none;width:2.2rem;height:2.2rem;margin-top:.2rem;color:#E2BF85}
 .pz-how{font-size:1.5rem;line-height:1.4;color:var(--card-sub)}
+/* the Grab vouchers, big: Malaysia and Thailand side by side, one voucher a line */
+.pz-vouchers{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem 2rem}
+.pz-v-group{display:flex;flex-direction:column;gap:.4rem;min-width:0}
+.pz-v-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:.2rem .9rem}
+.pz-v-head b{font-size:1.3rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#E2BF85}
+.pz-v-head span{font-size:1.25rem;color:var(--card-sub)}
+.pz-v-row{display:flex;flex-direction:column;gap:.35rem}
+.pz-v{display:flex;align-items:center;gap:1rem;min-width:0;padding:.3rem 1rem;border-radius:.8rem;background:rgba(244,238,227,.1);border:1px solid rgba(226,191,133,.45)}
+.pz-v-amt{flex:none;min-width:7.8rem;font-size:2.2rem;font-weight:700;line-height:1.1;letter-spacing:-.01em;color:#F4EEE3;white-space:nowrap}
+.prize-tv.has-vouchers .pz-title{font-size:2.5rem}
+.prize-tv.has-vouchers{gap:.8rem;padding-top:.8rem}
+.prize-tv.has-vouchers .pz-how{display:none}
+.pz-v-grab{display:none}
+.pz-v-who{min-width:0;font-size:1.35rem;line-height:1.25;color:var(--card-ink)}
+html.portrait .pz-vouchers{grid-template-columns:1fr}
 html.portrait .pz-title{font-size:2.6rem}
 html.portrait .pz-text,html.portrait .pz-deadline{font-size:1.8rem}
 html.portrait .pz-how{display:none}
@@ -186,10 +201,10 @@ body.pointer .fs{opacity:1;pointer-events:auto}
   .live .dot{animation:none}
 }
 </style>
-<script src="../vendor/supabase.js?v=2026112601"></script>
-<script src="../vendor/qrcode.min.js?v=2026112601"></script>
-<script src="../config.js?v=2026112601"></script>
-<script src="../wishtree.js?v=2026112601"></script>
+<script src="../vendor/supabase.js?v=2026112602"></script>
+<script src="../vendor/qrcode.min.js?v=2026112602"></script>
+<script src="../config.js?v=2026112602"></script>
+<script src="../wishtree.js?v=2026112602"></script>
 </head>
 <body>
 <div class="backdrop" aria-hidden="true"></div>
@@ -563,7 +578,10 @@ body.pointer .fs{opacity:1;pointer-events:auto}
     $('foot').hidden = true;
     $('prizeTv').hidden = false;
     $('pzTitle').textContent = PRIZE.title || '';
-    $('pzText').textContent = PRIZE.tvText || PRIZE.text || '';
+    var vouchers = C.voucherHtml();
+    if (vouchers) $('pzText').innerHTML = '<div class="pz-vouchers">' + vouchers + '</div>';
+    else $('pzText').textContent = PRIZE.tvText || PRIZE.text || '';
+    $('prizeTv').classList.toggle('has-vouchers', !!vouchers);
     $('pzDeadline').textContent = PRIZE.tvDeadline || PRIZE.deadline || '';
     $('pzHow').textContent = 'Like the wishes you love on the tree. One prize per person. Leaders and organizers can\'t win.';
     return true;

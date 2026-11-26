@@ -206,6 +206,18 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
 .prize-deadline{display:flex;align-items:flex-start;gap:8px;margin:0;padding:12px 14px;border-radius:10px;background:rgba(244,238,227,.12);color:#F4EEE3;font-size:15px;font-weight:700;line-height:1.45}
 .prize-deadline svg{flex:none;margin-top:2px;color:#E2BF85}
 .prize-rules{margin:0;font-size:13px;line-height:1.55;color:var(--card-sub)}
+/* the Grab vouchers, big */
+.pz-vouchers{display:flex;flex-direction:column;gap:14px}
+.pz-v-group{display:flex;flex-direction:column;gap:8px}
+.pz-v-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px}
+.pz-v-head b{font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#E2BF85}
+.pz-v-head span{font-size:13px;color:var(--card-sub)}
+.pz-v-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.pz-v{display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-width:0;padding:12px 12px 11px;border-radius:12px;background:rgba(244,238,227,.1);border:1px solid rgba(226,191,133,.45)}
+.pz-v-amt{font-size:28px;font-weight:700;line-height:1.05;letter-spacing:-.01em;color:#F4EEE3;white-space:nowrap}
+.pz-v-grab{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#E2BF85}
+.pz-v-who{margin-top:4px;font-size:13px;line-height:1.3;color:var(--card-ink)}
+@media (max-width:560px){.pz-v{padding:10px 9px}.pz-v-amt{font-size:21px}.pz-v-who{font-size:12px}}
 @keyframes giftIn{from{transform:translateY(14px) scale(.97);opacity:0}to{transform:none;opacity:1}}
 @media (prefers-reduced-motion: reduce){.wish-card[data-kind="secret"]{animation:none}}
 .hole{position:absolute;top:14px;left:50%;width:10px;height:10px;margin-left:-5px;border-radius:50%;background:#343F37;opacity:.55}
@@ -277,6 +289,7 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
 .sort{display:flex;gap:4px;padding:4px;border-radius:999px;background:rgba(108,21,30,.08)}
 .sort button{min-height:36px;padding:0 14px;border:0;border-radius:999px;background:transparent;color:var(--cream);font-size:14px;font-weight:500;cursor:pointer}
 .sort button[aria-pressed="true"]{background:var(--cran);color:var(--paper)}
+.sort .soon{display:inline-block;margin-left:6px;padding:1px 6px;border-radius:999px;background:#B18854;color:#241C14;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;vertical-align:1px}
 .leader-list{display:flex;flex-direction:column;gap:14px;margin-bottom:14px}
 .lead-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px;padding-top:20px}
 @media (max-width:1240px){.lead-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
@@ -445,15 +458,16 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
   .qr-card{display:none}
   .card-text{font-size:18px}
 }
-@media (max-width:380px){
+@media (max-width:430px){
   .brand-name,.brand-divider{display:none}
+  #ctaTop{min-height:44px;padding:0 16px;gap:6px;font-size:15px}
 }
 @media (prefers-reduced-motion:reduce){.dot{animation:none}.wish-card{transition:none}.spin-out #treeMount,.spin-in #treeMount{animation:none}}
 </style>
-<script src="vendor/supabase.js?v=2026112601"></script>
-<script src="vendor/qrcode.min.js?v=2026112601"></script>
-<script src="config.js?v=2026112601"></script>
-<script src="wishtree.js?v=2026112601"></script>
+<script src="vendor/supabase.js?v=2026112602"></script>
+<script src="vendor/qrcode.min.js?v=2026112602"></script>
+<script src="config.js?v=2026112602"></script>
+<script src="wishtree.js?v=2026112602"></script>
 </head>
 <body>
 <a class="skip" href="#tree">Skip to the tree</a>
@@ -561,6 +575,7 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
           </div>
           <p id="cardText" class="card-text">Lighting up the tree…</p>
           <div id="prizeBox" class="prize-box" hidden>
+            <div id="prizeVouchers" class="pz-vouchers"></div>
             <p id="prizeText" class="prize-text"></p>
             <p class="prize-deadline"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg><span id="prizeDeadline"></span></p>
             <p id="prizeRules" class="prize-rules"></p>
@@ -630,7 +645,7 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
           <button type="button" data-sort="random" aria-pressed="true" title="A fresh order for every visit. Tap again to shuffle.">Random</button>
           <button type="button" data-sort="new" aria-pressed="false">Newest</button>
           <button type="button" data-sort="likes" aria-pressed="false">Most liked</button>
-          <button type="button" data-sort="winners" aria-pressed="false" id="winnersBtn" hidden>Winners</button>
+          <button type="button" data-sort="winners" aria-pressed="false" id="winnersBtn">Winners<span class="soon" id="winnersSoon">Soon</span></button>
         </div>
       </div>
     </div>
@@ -960,11 +975,12 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
     var total = all.length + winners.length;
     var nWon = winners.length + (state.site === 'all' ? C.likerWinners().length : 0);
     el('allSub').textContent = state.sort === 'winners'
-      ? fmt(nWon) + (nWon === 1 ? ' winner' : ' winners') + ' · ' + where + ' · ' + langSummary()
+      ? (nWon ? fmt(nWon) + (nWon === 1 ? ' winner' : ' winners') + ' · ' + where + ' · ' + langSummary() : 'Coming soon: from 9 am on 1 December')
       : fmt(total) + (total === 1 ? ' wish' : ' wishes') + ' · ' + where + ' · ' + langSummary() +
         (all.length > cap() ? ' · ' + cap() + ' hang on the tree at a time, taking turns' : '');
-    el('winnersBtn').hidden = !state.wishes.some(function (w) { return w.won; }) && !C.likerWinners().length;
-    if (state.sort === 'winners' && el('winnersBtn').hidden) state.sort = 'random';
+    // The Winners tab is always there; "Soon" until the first winners are announced (9 am, 1 December)
+    var anyWon = state.wishes.some(function (w) { return w.won; }) || C.likerWinners().length > 0;
+    el('winnersSoon').hidden = anyWon;
     Array.prototype.forEach.call(document.querySelectorAll('.sort button'), function (b) {
       b.setAttribute('aria-pressed', b.getAttribute('data-sort') === state.sort ? 'true' : 'false');
     });
@@ -1056,7 +1072,7 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
         '<div class="li-foot"><span class="li-mark" style="--bg-mark:' + pal.bg + '" aria-hidden="true">' + C.tpMarkHtml(w.tag_color !== 'red') + '</span>' +
         '<div class="li-who" lang="en"><b>' + C.esc(C.displayName(w)) + '</b><span>' + C.esc(C.displayWhere(w)) + '</span></div>' +
         likeBtnHtml('wish', w) + '</div></article>';
-    }).join('') + likerHtml : '<div class="all-empty">' + (state.q ? 'No wishes match your search.' : state.sort === 'winners' ? 'No winners here yet.' : 'No wishes here yet in the languages you picked.') + '</div>';
+    }).join('') + likerHtml : '<div class="all-empty">' + (state.q ? 'No wishes match your search.' : state.sort === 'winners' ? (state.wishes.some(function (w) { return w.won; }) || C.likerWinners().length ? 'No winners from here yet.' : 'Winners show here from 9 am on 1 December, once the Wish Tree team approves them.') : 'No wishes here yet in the languages you picked.') + '</div>';
     el('moreBtn').hidden = list.length <= state.shown;
     el('moreBtn').textContent = 'Show more (' + fmt(list.length - Math.min(list.length, state.shown)) + ' left)';
   }
@@ -1090,7 +1106,11 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
   }
 
   function renderPrize() {
-    el('prizeText').textContent = PRIZE.text || '';
+    var v = C.voucherHtml();
+    el('prizeVouchers').innerHTML = v;
+    el('prizeVouchers').hidden = !v;
+    el('prizeText').textContent = v ? '' : (PRIZE.text || '');
+    el('prizeText').hidden = !!v;
     el('prizeDeadline').textContent = PRIZE.deadline || '';
     el('prizeRules').textContent = PRIZE.rules || '';
   }

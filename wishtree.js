@@ -1002,6 +1002,17 @@
 
   /* ---------- Prize: the most-liked wishes ---------- */
   var PRIZE = Object.assign({ enabled: true, winners: 5, amount: 'RM 100' }, CFG.PRIZE || {});
+  // The Grab vouchers in big type, per country (PRIZE.vouchers in config.js). Styles come from the page (.pz-v-*).
+  function voucherHtml() {
+    var groups = Array.isArray(PRIZE.vouchers) ? PRIZE.vouchers : [];
+    return groups.map(function (g) {
+      return '<div class="pz-v-group"><div class="pz-v-head"><b>' + esc(g.country || '') + '</b><span>' + esc(g.when || '') + '</span></div>' +
+        '<div class="pz-v-row">' + (g.items || []).map(function (it) {
+          return '<div class="pz-v"><span class="pz-v-amt">' + esc(it.amount || '').replace(/ /g, '&nbsp;') + '</span>' +
+            '<span class="pz-v-grab">Grab voucher</span><span class="pz-v-who">' + esc(it.who || '') + '</span></div>';
+        }).join('') + '</div></div>';
+    }).join('');
+  }
   // Preview mode only (the Approvals page reads the real standings from the database)
   // Preview mode only (the Approvals page uses get_prize_check when live; the public pages show no standings)
   function fetchPrizeTop(n) {
@@ -1667,6 +1678,7 @@
     rankForTree: rankForTree,
     fetchWinners: fetchWinners,
     likerWinners: likerWinners,
+    voucherHtml: voucherHtml,
     fetchMyPrizes: fetchMyPrizes,
     revealPrize: revealPrize,
     showMyPrizes: showMyPrizes,
