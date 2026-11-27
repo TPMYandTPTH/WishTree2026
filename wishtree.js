@@ -1124,7 +1124,8 @@
       likerWinnerList = r[1].filter(function (x) { return x.kind === 'liker'; });
       return r[0].map(function (w) {
         var x = won[String(w.id)];
-        if (x) return Object.assign({}, w, { won: true, won_prize: x.prize || '', won_reason: x.reason || '', won_at: x.won_at });
+        if (x) return Object.assign({}, w, { won: true, won_prize: x.prize || '', won_reason: x.reason || '', won_at: x.won_at,
+          won_country: x.country || null, won_pool: x.pool || null, won_day: x.draw_day || null });
         return paused[String(w.id)] ? Object.assign({}, w, { paused: true }) : w;
       });
     });
@@ -1132,12 +1133,16 @@
   // Liker winners from the last load (BMS shown as its last 4 digits only), newest first
   var likerWinnerList = [];
   function likerWinners() { return likerWinnerList.slice(); }
-  // The public winners: wish winners (by wish) and liker winners (by the last 4 digits of the BMS), newest first
+  // The public winners: wish winners (by wish) and liker winners (by the last 4 digits of the BMS), newest first,
+  // with their country, pool and day (get_winners, without those, if the database is older)
   function fetchWinners() {
     if (DEMO) return Promise.resolve([]);
-    return getClient().rpc('get_winners').then(function (res) {
-      if (res.error) throw res.error;
-      return res.data || [];
+    return getClient().rpc('get_prize_winners').then(function (res) {
+      if (!res.error) return res.data || [];
+      return getClient().rpc('get_winners').then(function (r2) {
+        if (r2.error) throw r2.error;
+        return r2.data || [];
+      });
     });
   }
 
@@ -1838,6 +1843,8 @@
     siteName: siteName,
     esc: esc,
     iconSvg: iconSvg,
+    prizeIconSvg: iconSvgPath,
+    flagSvg: function (code) { return FLAG_SVG[code] || ''; },
     ICON_D: ICON_D,
     STAR_D: 'M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z',
     hash: hash,

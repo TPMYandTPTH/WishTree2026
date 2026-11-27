@@ -390,9 +390,57 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
 .won-badge{display:inline-flex;align-items:center;gap:6px;min-height:28px;padding:0 12px;border-radius:999px;background:#7A5418;color:#FFF6E2;font-size:13px;font-weight:700;letter-spacing:.02em}
 .won-note{margin-left:auto;font-size:13px;color:#7A5418;text-align:right}
 .li.won-liker{justify-content:space-between}
-.li.won.sample{border-style:dashed;background:linear-gradient(180deg,rgba(247,235,207,.7),rgba(241,224,186,.7));box-shadow:none}
-.li.won.sample .li-text{font-style:italic;color:#7A5418}
-.li.won.sample .li-who b{color:#7A5418}
+ /* Winners tab */
+#allList.win-mode{display:block}
+.wv-grand{background:#343F37;color:#F4EEE3;border:1.5px solid #B18854;border-radius:18px;padding:22px 24px 24px;margin-bottom:16px;box-shadow:0 0 0 6px rgba(177,136,84,.14)}
+.wv-ghead{display:flex;justify-content:space-between;align-items:flex-end;gap:16px 24px;flex-wrap:wrap;margin-bottom:18px}
+.wv-kicker{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#D9B77E}
+.wv-grand h3{margin:6px 0 4px;font-size:26px;line-height:1.2;font-weight:500;color:#FFF7E8}
+.wv-grand p{margin:0;color:#CFC3B0;font-size:15px;max-width:680px}
+.wv-big{display:flex;gap:8px}
+.wv-big .u{min-width:66px;padding:8px 6px 7px;border-radius:12px;background:rgba(177,136,84,.16);border:1px solid rgba(217,183,126,.45);text-align:center}
+.wv-big .u b{display:block;font-size:30px;line-height:1.1;font-weight:700;color:#F3D9A4;font-variant-numeric:tabular-nums}
+.wv-big .u span{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#CFC3B0}
+.wv-soon,.wv-done{display:inline-flex;align-items:center;gap:6px;padding:10px 16px;border-radius:999px;background:#B18854;color:#241C14;font-weight:700;font-size:15px}
+.wv-gifts{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}
+@media (max-width:1100px){.wv-gifts{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:560px){.wv-gifts{grid-template-columns:repeat(2,minmax(0,1fr))}.wv-grand{padding:18px 16px 18px}.wv-grand h3{font-size:22px}.wv-big .u{min-width:0;flex:1}.wv-big{width:100%}}
+.wv-gift{display:flex;flex-direction:column;align-items:center;text-align:center;gap:3px;padding:16px 10px 14px;border-radius:14px;background:rgba(255,255,255,.04);border:1px dashed rgba(217,183,126,.55);min-width:0}
+.wv-gift.won{background:linear-gradient(180deg,#F7EBCF,#F1E0BA);border:1.5px solid #C99A45}
+.wv-gic{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#B18854;color:#241C14;margin-bottom:6px}
+.wv-gift>b{font-size:15px;line-height:1.25;color:#FFF7E8}
+.wv-gift.won>b{color:#6C151E}
+.wv-gsub{font-size:12px;color:#CFC3B0}
+.wv-gift.won .wv-gsub{color:#7A5418}
+.wv-gwho{margin-top:10px;padding-top:9px;border-top:1px dashed rgba(217,183,126,.45);width:100%;min-width:0}
+.wv-gwho b{display:block;font-size:14px;color:#F3D9A4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wv-gwho span{display:block;font-size:12px;color:#CFC3B0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wv-gift.won .wv-gwho{border-top-color:rgba(122,84,24,.35)}
+.wv-gift.won .wv-gwho b{color:#3B2F22}
+.wv-gift.won .wv-gwho span{color:#7A5418}
+.wv-cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start}
+@media (max-width:820px){.wv-cols{grid-template-columns:minmax(0,1fr)}}
+.wv-country{background:#FFFDF8;border:1px solid #E3D8C6;border-radius:16px;padding:18px 18px 10px;min-width:0}
+.wv-chead{display:flex;align-items:center;gap:12px;padding-bottom:12px}
+.wv-flag{width:42px;height:28px;border-radius:5px;overflow:hidden;flex:none;box-shadow:0 0 0 1px rgba(0,0,0,.1)}
+.wv-flag svg{width:100%;height:100%;display:block}
+.wv-chead h3{margin:0;font-size:20px;line-height:1.2;font-weight:500;color:#6C151E}
+.wv-chead span{font-size:13px;color:#6B6259}
+.wv-chead .wv-total{margin-left:auto;flex:none;padding:4px 10px;border-radius:999px;background:#F1E0BA;color:#7A5418;font-weight:700;font-size:13px}
+.wv-day{border-top:1px solid #EDE3D3;padding:12px 0 6px}
+.wv-dh{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:6px}
+.wv-dh b{font-size:15px;color:#343F37}
+.wv-dh span{font-size:13px;color:#6B6259}
+.wv-day.next .wv-dh span{color:#B4541C;font-weight:700}
+.wv-row{display:flex;align-items:center;gap:12px;padding:6px 0;min-width:0}
+.wv-amt{flex:none;min-width:78px;text-align:center;padding:4px 8px;border-radius:999px;background:#F1E0BA;color:#6C151E;font-weight:800;font-size:13px;white-space:nowrap}
+.wv-row .wv-who{min-width:0}
+.wv-row .wv-who b{display:block;font-size:15px;color:#2A2622;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wv-row .wv-who span{display:block;font-size:13px;color:#6B6259;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wv-row.ph .wv-amt{background:transparent;border:1px dashed #C99A45}
+.wv-row.ph .wv-who b{color:#7A5418;font-weight:500}
+.wv-more{display:flex;justify-content:center;padding:6px 0 8px}
+.wv-none{margin:8px 0 10px;color:#6B6259;font-size:14px}
 .li.won-liker .li-who b{font-size:20px;font-weight:500;color:#7A5418}
 .li-who{min-width:0;flex:1}
 .li-who b{display:block;font-size:14px}
@@ -483,10 +531,10 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
 }
 @media (prefers-reduced-motion:reduce){.dot{animation:none}.wish-card{transition:none}.spin-out #treeMount,.spin-in #treeMount{animation:none}}
 </style>
-<script src="vendor/supabase.js?v=2026112713"></script>
-<script src="vendor/qrcode.min.js?v=2026112713"></script>
-<script src="config.js?v=2026112713"></script>
-<script src="wishtree.js?v=2026112713"></script>
+<script src="vendor/supabase.js?v=2026112714"></script>
+<script src="vendor/qrcode.min.js?v=2026112714"></script>
+<script src="config.js?v=2026112714"></script>
+<script src="wishtree.js?v=2026112714"></script>
 </head>
 <body>
 <a class="skip" href="#tree">Skip to the tree</a>
@@ -1003,42 +1051,142 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
     h ^= h >>> 15; h = Math.imul(h, 2246822519) >>> 0; h ^= h >>> 13;   // mix the end so similar ids spread out
     return h >>> 0;
   }
-  // Sample winner cards for the Winners tab until the first winners show (1 December): one per kind of prize,
-  // in whole rows
-  function sampleWinners() {
-    var V = PRIZE.vouchers || [], G = PRIZE.grand || [];
-    function item(c, i) { var v = V.filter(function (x) { return x.code === c; })[0]; return v && v.items && v.items[i] ? v.items[i].amount : ''; }
-    var list = [
-      { prize: item('MY', 0), how: 'Most liked wish', where: 'Malaysia' },
-      { prize: item('TH', 0), how: 'Most liked wish', where: 'Thailand' },
-      { prize: item('MY', 1), how: 'Lucky draw', where: 'Malaysia' },
-      { prize: G[0] && G[0].name, how: 'Grand prize draw', where: 'Grand prize · at the end' },
-      { prize: item('MY', 2), how: 'Lucky liker', where: 'Malaysia', liker: true },
-      { prize: item('TH', 1), how: 'Lucky draw', where: 'Thailand' },
-      { prize: G[1] && G[1].name, how: 'Grand prize draw', where: 'Grand prize · at the end' },
-      { prize: item('TH', 2), how: 'Lucky liker', where: 'Thailand', liker: true },
-      { prize: G[2] && G[2].name, how: 'Grand prize draw', where: 'Grand prize · at the end' },
-      { prize: item('MY', 0), how: 'Most liked wish', where: 'Malaysia' }
-    ].filter(function (x) { return x.prize; });
-    var cols = listCols();
-    var n = cols >= 3 ? Math.floor(list.length / cols) * cols : 4;
-    return list.slice(0, Math.max(cols, n)).map(function (x) {
-      return '<article class="li won sample" aria-label="Sample winner card">' +
-        '<div class="li-top"><span class="won-badge">' + C.iconSvg('star', 14) + ' Soon · ' + C.esc(x.prize) + '</span><span class="li-lang">Sample</span></div>' +
-        '<p class="li-text">' + (x.liker ? 'Give likes for a chance to win.' : 'This could be your wish.') + '</p>' +
-        '<div class="li-foot"><span class="li-mark" style="--bg-mark:#B18854" aria-hidden="true">' + C.tpMarkHtml(true) + '</span>' +
-        '<div class="li-who" lang="en"><b>TP colleague</b><span>' + C.esc(x.where) + '</span></div>' +
-        '<span class="won-note">' + C.esc(x.how) + '</span></div></article>';
+  // ---------- The Winners tab: the grand prizes (full width, with a countdown to the announcement), then Malaysia
+  // and Thailand day by day (the next day's prizes waiting, then each day's winners, newest first)
+  var HOW = { top: 'Most liked wish', early: 'Most liked wish', random: 'Lucky draw', liker: 'Lucky liker', grand: 'Grand prize draw' };
+  var POOL_RANK = { top: 1, early: 2, random: 3, manual: 4, liker: 5 };
+  var KL_TZ = 'Asia/Kuala_Lumpur';
+  function klDay(iso) { try { return new Date(iso).toLocaleDateString('en-CA', { timeZone: KL_TZ }); } catch (e) { return ''; } }
+  function dayName(ymd) { return new Date(ymd + 'T12:00:00+08:00').toLocaleDateString('en-GB', { timeZone: KL_TZ, weekday: 'short', day: 'numeric', month: 'short' }); }
+  function nextDay(ymd) { var d = new Date(ymd + 'T12:00:00Z'); d.setUTCDate(d.getUTCDate() + 1); return d.toISOString().slice(0, 10); }
+  // same rule as the database: Singha, and Thai wishes from home, are Thailand
+  function wishCountry(w) { return w.site === 'singha' || (w.site === 'wfh' && w.lang === 'th') ? 'TH' : 'MY'; }
+  function allWinners() {
+    var list = state.wishes.filter(function (w) { return w.won; }).map(function (w) {
+      return { name: C.displayName(w), where: C.displayWhere(w), site: C.siteName(w.site) || C.displayWhere(w), prize: w.won_prize, reason: w.won_reason,
+        pool: w.won_pool || (w.won_reason === 'Grand prize draw' ? 'grand' : ''), country: w.won_country || wishCountry(w),
+        day: w.won_day || klDay(w.won_at), at: w.won_at };
+    });
+    C.likerWinners().forEach(function (x) {
+      list.push({ liker: true, name: 'BMS ending ' + (x.bms_end || ''), where: '', prize: x.prize, pool: 'liker',
+        country: x.country || 'MY', day: x.draw_day || klDay(x.won_at), at: x.won_at });
+    });
+    return list;
+  }
+  function howText(x) { return HOW[x.pool] || x.reason || 'Winner'; }
+
+  function grandHtml(list) {
+    var G = Array.isArray(PRIZE.grand) ? PRIZE.grand : [];
+    var won = list.filter(function (x) { return x.pool === 'grand'; });
+    var slots = [];
+    G.forEach(function (g) {
+      var mine = won.filter(function (x) { return x.prize === g.name; });
+      for (var i = 0; i < Math.max(g.count || 1, mine.length); i++) slots.push({ g: g, w: mine[i] || null });
+    });
+    won.forEach(function (x) {
+      if (!G.some(function (g) { return g.name === x.prize; })) slots.push({ g: { name: x.prize, line1: x.prize, line2: 'Grand prize', icon: 'voucher' }, w: x });
+    });
+    if (!slots.length) return '';
+    var at = PRIZE.grandAt && !isNaN(Date.parse(PRIZE.grandAt)) ? PRIZE.grandAt : '';
+    var when = at ? new Date(at).toLocaleDateString('en-GB', { timeZone: KL_TZ, day: 'numeric', month: 'long' }) : 'the end';
+    var allIn = slots.every(function (x) { return x.w; });
+    return '<section class="wv-grand" aria-label="Grand prizes">' +
+      '<div class="wv-ghead"><div><span class="wv-kicker">' + C.iconSvg('gift', 14) + ' Grand prizes</span>' +
+      '<h3>' + slots.length + ' big gifts, one lucky draw</h3>' +
+      '<p>' + (allIn ? 'Congratulations to our grand prize winners!' : 'Every wish that hasn\'t won yet is in the draw. Winners are announced on ' + C.esc(when) + '.') + '</p></div>' +
+      (allIn ? '<span class="wv-done">' + C.iconSvg('star', 16) + ' Announced</span>' : at ? '<div class="wv-big" data-cd="' + C.esc(at) + '" role="timer" aria-label="Time until the grand prize winners are announced"></div>' : '') +
+      '</div><div class="wv-gifts">' + slots.map(function (x) {
+        return '<article class="wv-gift' + (x.w ? ' won' : '') + '"><span class="wv-gic">' + C.prizeIconSvg(x.g.icon, 28) + '</span>' +
+          '<b>' + C.esc(x.g.line1 || x.g.name) + '</b><span class="wv-gsub">' + C.esc(x.g.line2 || '') + '</span>' +
+          '<div class="wv-gwho">' + (x.w ? '<b>' + C.esc(x.w.name) + '</b><span>' + C.esc(x.w.where || '') + '</span>'
+            : '<b>TP colleague</b><span>Soon</span>') + '</div></article>';
+      }).join('') + '</div></section>';
+  }
+
+  function rowHtml(amount, name, sub, ph) {
+    return '<div class="wv-row' + (ph ? ' ph' : '') + '"><span class="wv-amt">' + C.esc(amount || '') + '</span>' +
+      '<div class="wv-who"><b>' + C.esc(name) + '</b><span>' + C.esc(sub) + '</span></div></div>';
+  }
+  function countryHtml(V, list) {
+    var mine = list.filter(function (x) { return x.pool !== 'grand' && x.country === V.code; });
+    var byDay = {};
+    mine.forEach(function (x) { (byDay[x.day] = byDay[x.day] || []).push(x); });
+    var days = Object.keys(byDay).sort().reverse();
+    var items = Array.isArray(V.items) ? V.items : [];
+    var first = V.days && V.days[0], last = V.days && V.days[1];
+    // the next day to announce: today until its winners are out, then tomorrow (within the days of the draw)
+    var next = null;
+    if (first && last) {
+      var d = klDay(new Date().toISOString());
+      if (d < first) d = first;
+      if (byDay[d]) d = nextDay(d);
+      if (d <= last) next = d;
+    }
+    var amounts = [];
+    items.forEach(function (it) { if (amounts.indexOf(it.amount) === -1) amounts.push(it.amount); });
+    var h = '<section class="wv-country" aria-label="' + C.esc(V.country) + ' winners">' +
+      '<div class="wv-chead"><span class="wv-flag">' + C.flagSvg(V.code) + '</span><div><h3>' + C.esc(V.country) + '</h3>' +
+      '<span>' + C.esc(amounts.join(' and ')) + ' Grab vouchers · ' + C.esc(V.when || '') + '</span></div>' +
+      (mine.length ? '<span class="wv-total">' + fmt(mine.length) + (mine.length === 1 ? ' winner' : ' winners') + '</span>' : '') + '</div>';
+    if (next) {
+      h += '<div class="wv-day next"><div class="wv-dh"><b>' + C.esc(dayName(next)) + '</b>' +
+        '<span class="wv-cd" data-cd="' + next + 'T09:00:00+08:00"></span></div>' +
+        items.map(function (it) {
+          var n = it.n || 1;
+          return rowHtml(it.amount, (n > 1 ? n + ' × ' : '') + 'TP colleague', it.how || it.who || '', true);
+        }).join('') + '</div>';
+    }
+    var open = !!(state.winOpen && state.winOpen[V.code]);
+    var keep = next ? 2 : 3;
+    days.forEach(function (d, i) {
+      if (i >= keep && !open) return;
+      var ws = byDay[d].slice().sort(function (a, b) { return (POOL_RANK[a.pool] || 9) - (POOL_RANK[b.pool] || 9) || (String(a.at) < String(b.at) ? -1 : 1); });
+      h += '<div class="wv-day"><div class="wv-dh"><b>' + C.esc(dayName(d)) + '</b><span>' + fmt(ws.length) + (ws.length === 1 ? ' winner' : ' winners') + '</span></div>' +
+        ws.map(function (x) { return rowHtml(x.prize, x.name, x.liker ? howText(x) : howText(x) + (x.site ? ' · ' + x.site : '')); }).join('') + '</div>';
+    });
+    if (days.length > keep) {
+      h += '<div class="wv-more"><button type="button" class="btn-ghost" data-wv-more="' + C.esc(V.code) + '" aria-expanded="' + (open ? 'true' : 'false') + '">' +
+        (open ? 'Show fewer days' : 'Earlier days (' + (days.length - keep) + ')') + '</button></div>';
+    }
+    if (!next && !days.length) h += '<p class="wv-none">No winners yet.</p>';
+    return h + '</section>';
+  }
+  function winnersHtml() {
+    var list = allWinners();
+    var V = Array.isArray(PRIZE.vouchers) ? PRIZE.vouchers : [];
+    return grandHtml(list) + '<div class="wv-cols">' + V.map(function (v) { return countryHtml(v, list); }).join('') + '</div>';
+  }
+  // Countdowns on the Winners tab, ticking every second while it's open
+  var cdTimer = null;
+  function cdParts(ms) { var t = Math.max(0, Math.floor(ms / 1000)); return { d: Math.floor(t / 86400), h: Math.floor(t % 86400 / 3600), m: Math.floor(t % 3600 / 60), s: t % 60 }; }
+  function pad2(n) { return (n < 10 ? '0' : '') + n; }
+  function tickCountdowns() {
+    var els = document.querySelectorAll('[data-cd]');
+    if (!els.length) { if (cdTimer) { clearInterval(cdTimer); cdTimer = null; } return; }
+    var now = Date.now();
+    Array.prototype.forEach.call(els, function (e) {
+      var left = Date.parse(e.getAttribute('data-cd')) - now;
+      var p = cdParts(left);
+      if (e.classList.contains('wv-big')) {
+        e.innerHTML = left <= 0 ? '<span class="wv-soon">Announcing soon</span>'
+          : [[p.d, p.d === 1 ? 'day' : 'days'], [pad2(p.h), 'hrs'], [pad2(p.m), 'min'], [pad2(p.s), 'sec']].map(function (u) {
+            return '<span class="u"><b>' + u[0] + '</b><span>' + u[1] + '</span></span>';
+          }).join('');
+      } else {
+        e.textContent = left <= 0 ? 'Announcing soon' : 'Announced in ' + (p.d ? p.d + 'd ' + p.h + 'h' : p.h ? p.h + 'h ' + pad2(p.m) + 'm' : p.m + 'm ' + pad2(p.s) + 's');
+      }
     });
   }
+  function startCountdowns() { tickCountdowns(); if (!cdTimer && document.querySelector('[data-cd]')) cdTimer = setInterval(tickCountdowns, 1000); }
   function renderList() {
     var all = siteWishes();
     var winners = siteWinners();
     var where = state.site === 'all' ? 'All sites' : C.siteName(state.site);
     var total = all.length + winners.length;
     var nWon = winners.length + (state.site === 'all' ? C.likerWinners().length : 0);
+    var nAll = state.wishes.filter(function (w) { return w.won; }).length + C.likerWinners().length;
     el('allSub').textContent = state.sort === 'winners'
-      ? (nWon ? fmt(nWon) + (nWon === 1 ? ' winner' : ' winners') + ' · ' + where + ' · ' + langSummary() : 'Coming soon: from 1 December · samples of what winners will look like')
+      ? (nAll ? fmt(nAll) + (nAll === 1 ? ' winner' : ' winners') + ' so far · all sites' : 'The first winners are announced on 1 December')
       : fmt(total) + (total === 1 ? ' wish' : ' wishes') + ' · ' + where + ' · ' + langSummary() +
         (all.length > cap() ? ' · ' + cap() + ' hang on the tree at a time, taking turns' : '');
     // The Winners tab is always there; "Soon" until the first winners are announced (1 December)
@@ -1114,9 +1262,10 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
       return '<article class="li won won-liker"><div class="li-top"><span class="won-badge">' + C.iconSvg('star', 14) + ' Winner' + (x.prize ? ' · ' + C.esc(x.prize) : '') + '</span></div>' +
         '<div class="li-foot"><div class="li-who" lang="en"><b>BMS ending ' + C.esc(x.bms_end || '') + '</b><span>A lucky liker · ' + C.esc(day) + '</span></div></div></article>';
     }).join('');
-    // Before the first winners: sample cards, so everyone sees what winning looks like
-    var noWinnersYet = state.sort === 'winners' && !state.q.trim() && !state.wishes.some(function (w) { return w.won; }) && !C.likerWinners().length;
-    var sampleHtml = noWinnersYet ? sampleWinners().join('') : '';
+    // The Winners tab has its own layout: the grand prizes, then Malaysia and Thailand day by day (every site)
+    var winView = state.sort === 'winners';
+    el('allList').classList.toggle('win-mode', winView);
+    var sampleHtml = winView ? winnersHtml() : '';
     el('allList').innerHTML = sampleHtml || ((shown.length || likerHtml) ? shown.map(function (w) {
       var pal = C.PALETTE[w.tag_color] || C.PALETTE.cream;
       if (w.won) {
@@ -1142,9 +1291,10 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
     el('moreBtn').hidden = !!sampleHtml || list.length <= shown.length;
     // Winners tab: where to go if the prize isn't on your phone (once the team's link is in config.js)
     var cUrl = C.prizeContactUrl ? C.prizeContactUrl() : '';
-    el('winHelp').hidden = !(state.sort === 'winners' && cUrl && (shown.length || likerHtml));
+    el('winHelp').hidden = !(winView && cUrl && nAll);
     if (!el('winHelp').hidden) el('winHelp').innerHTML = 'Is one of these yours, but the prize isn\'t on your phone? <a href="' + C.esc(cUrl) + '" target="_blank" rel="noopener noreferrer">' + C.esc((PRIZE.contact && PRIZE.contact.label) || 'Contact the Wish Tree team') + '</a> with your BMS.';
     el('moreBtn').textContent = 'Show more (' + fmt(list.length - shown.length) + ' left)';
+    if (winView) startCountdowns();
     state.listCols = listCols();
   }
 
@@ -1610,6 +1760,14 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
     try { target.scrollIntoView({ behavior: REDUCE ? 'auto' : 'smooth', block: 'center' }); } catch (err) { target.scrollIntoView(); }
   });
   el('leaderList').addEventListener('click', onListClick);
+  el('allList').addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('[data-wv-more]');
+    if (!b) return;
+    var c = b.getAttribute('data-wv-more');
+    state.winOpen = state.winOpen || {};
+    state.winOpen[c] = !state.winOpen[c];
+    renderList();
+  });
   el('allSearch').addEventListener('input', function (e) { state.q = e.target.value; state.shown = LIST_PAGE; renderList(); });
   Array.prototype.forEach.call(document.querySelectorAll('.sort button'), function (b) {
     b.addEventListener('click', function () {

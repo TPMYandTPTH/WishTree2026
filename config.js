@@ -155,15 +155,16 @@ window.WISH_CFG = {
     // The Grab vouchers, shown big on the prize card (tree page) and the prize slide (TVs). Keep them in line with
     // the prize_plan table.
     vouchers: [
-      { country: 'Malaysia', code: 'MY', when: '1 to 18 December, every day', items: [
-        { amount: 'RM 50', who: '3 most-liked wishes' },
-        { amount: 'RM 20', who: '3 random wishes' },
-        { amount: 'RM 20', who: '1 random liker' }
+      // days: first and last day of the daily draws; n and how: winners a day and how they win (Winners tab)
+      { country: 'Malaysia', code: 'MY', when: '1 to 18 December, every day', days: ['2026-12-01', '2026-12-18'], items: [
+        { amount: 'RM 50', who: '3 most-liked wishes', n: 3, how: 'Most liked wish' },
+        { amount: 'RM 20', who: '3 random wishes', n: 3, how: 'Lucky draw' },
+        { amount: 'RM 20', who: '1 random liker', n: 1, how: 'Lucky liker' }
       ] },
-      { country: 'Thailand', code: 'TH', when: '1 to 16 December, every day', items: [
-        { amount: 'THB 250', who: 'The most-liked Thai wish' },
-        { amount: 'THB 250', who: '1 random Thai wish' },
-        { amount: 'THB 250', who: '1 random liker' }
+      { country: 'Thailand', code: 'TH', when: '1 to 16 December, every day', days: ['2026-12-01', '2026-12-16'], items: [
+        { amount: 'THB 250', who: 'The most-liked Thai wish', n: 1, how: 'Most liked wish' },
+        { amount: 'THB 250', who: '1 random Thai wish', n: 1, how: 'Lucky draw' },
+        { amount: 'THB 250', who: '1 random liker', n: 1, how: 'Lucky liker' }
       ] }
     ],
     // Used only if vouchers is empty
@@ -177,6 +178,8 @@ window.WISH_CFG = {
       { name: 'CK backpack', short: 'CK backpack', line1: 'CK backpack', line2: 'Grand prize', count: 2, icon: 'bag' }
     ],
     grandWhen: 'Lucky draw at the end',
+    // Winners tab: the countdown to the grand prize announcement (Malaysia time)
+    grandAt: '2026-12-19T09:00:00+08:00',
     // Where a winner can get help (the Wish Tree team's WhatsApp link, for example). Shown on the "You won" card and
     // under the Winners tab once it's set; leave url empty to hide it. Must start with https://
     contact: { url: '', label: 'Contact the Wish Tree team' },

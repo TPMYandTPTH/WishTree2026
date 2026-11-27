@@ -1945,6 +1945,20 @@ language sql stable security definer set search_path = '' as $$
   order by coalesce(p.live_at, p.created_at) desc
 $$;
 
+-- The same public winners with their country, how they won (pool) and the day they're for: the Winners tab shows the
+-- grand prizes, then Malaysia and Thailand day by day. Nothing here that isn't already public except the pool.
+create or replace function public.get_prize_winners()
+returns table (wish_id uuid, kind text, bms_end text, prize text, reason text, won_at timestamptz,
+               country text, pool text, draw_day date)
+language sql stable security definer set search_path = '' as $$
+  select p.wish_id, p.kind, case when p.kind = 'liker' then right(p.bms, 4) end, p.prize, p.reason,
+         coalesce(p.live_at, p.created_at), p.country, p.pool,
+         coalesce(p.draw_day, (coalesce(p.live_at, p.created_at) at time zone 'Asia/Kuala_Lumpur')::date)
+  from public.prize_winners p
+  where p.status in ('approved', 'sent') and coalesce(p.live_at, p.created_at) <= now()
+  order by coalesce(p.live_at, p.created_at) desc
+$$;
+
 -- Approvals: winners now come from the daily draw only (a winner picked by hand could be anyone's friend).
 -- Undo still works for the early winners until their code is shown.
 create or replace function public.admin_set_winner(p_token text, p_wish_id uuid, p_on boolean,
@@ -2017,6 +2031,7 @@ grant execute on function public.reveal_prize(text, json, bigint) to anon, authe
 grant execute on function public.get_approved_wishes() to anon, authenticated;
 grant execute on function public.get_paused_wishes() to anon, authenticated;
 grant execute on function public.get_winners() to anon, authenticated;
+grant execute on function public.get_prize_winners() to anon, authenticated;
 grant execute on function public.admin_set_winner(text, uuid, boolean, text, text) to anon, authenticated;
 grant execute on function public.admin_delete(text, text, uuid) to anon, authenticated;
 
