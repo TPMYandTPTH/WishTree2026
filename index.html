@@ -390,6 +390,9 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
 .won-badge{display:inline-flex;align-items:center;gap:6px;min-height:28px;padding:0 12px;border-radius:999px;background:#7A5418;color:#FFF6E2;font-size:13px;font-weight:700;letter-spacing:.02em}
 .won-note{margin-left:auto;font-size:13px;color:#7A5418;text-align:right}
 .li.won-liker{justify-content:space-between}
+.li.won.sample{border-style:dashed;background:linear-gradient(180deg,rgba(247,235,207,.7),rgba(241,224,186,.7));box-shadow:none}
+.li.won.sample .li-text{font-style:italic;color:#7A5418}
+.li.won.sample .li-who b{color:#7A5418}
 .li.won-liker .li-who b{font-size:20px;font-weight:500;color:#7A5418}
 .li-who{min-width:0;flex:1}
 .li-who b{display:block;font-size:14px}
@@ -480,10 +483,10 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
 }
 @media (prefers-reduced-motion:reduce){.dot{animation:none}.wish-card{transition:none}.spin-out #treeMount,.spin-in #treeMount{animation:none}}
 </style>
-<script src="vendor/supabase.js?v=2026112611"></script>
-<script src="vendor/qrcode.min.js?v=2026112611"></script>
-<script src="config.js?v=2026112611"></script>
-<script src="wishtree.js?v=2026112611"></script>
+<script src="vendor/supabase.js?v=2026112712"></script>
+<script src="vendor/qrcode.min.js?v=2026112712"></script>
+<script src="config.js?v=2026112712"></script>
+<script src="wishtree.js?v=2026112712"></script>
 </head>
 <body>
 <a class="skip" href="#tree">Skip to the tree</a>
@@ -1000,6 +1003,34 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
     h ^= h >>> 15; h = Math.imul(h, 2246822519) >>> 0; h ^= h >>> 13;   // mix the end so similar ids spread out
     return h >>> 0;
   }
+  // Sample winner cards for the Winners tab until the first winners show (1 December): one per kind of prize,
+  // in whole rows
+  function sampleWinners() {
+    var V = PRIZE.vouchers || [], G = PRIZE.grand || [];
+    function item(c, i) { var v = V.filter(function (x) { return x.code === c; })[0]; return v && v.items && v.items[i] ? v.items[i].amount : ''; }
+    var list = [
+      { prize: item('MY', 0), how: 'Most liked wish', where: 'Malaysia' },
+      { prize: item('TH', 0), how: 'Most liked wish', where: 'Thailand' },
+      { prize: item('MY', 1), how: 'Lucky draw', where: 'Malaysia' },
+      { prize: G[0] && G[0].name, how: 'Grand prize draw', where: 'Grand prize · at the end' },
+      { prize: item('MY', 2), how: 'Lucky liker', where: 'Malaysia', liker: true },
+      { prize: item('TH', 1), how: 'Lucky draw', where: 'Thailand' },
+      { prize: G[1] && G[1].name, how: 'Grand prize draw', where: 'Grand prize · at the end' },
+      { prize: item('TH', 2), how: 'Lucky liker', where: 'Thailand', liker: true },
+      { prize: G[2] && G[2].name, how: 'Grand prize draw', where: 'Grand prize · at the end' },
+      { prize: item('MY', 0), how: 'Most liked wish', where: 'Malaysia' }
+    ].filter(function (x) { return x.prize; });
+    var cols = listCols();
+    var n = cols >= 3 ? Math.floor(list.length / cols) * cols : 4;
+    return list.slice(0, Math.max(cols, n)).map(function (x) {
+      return '<article class="li won sample" aria-label="Sample winner card">' +
+        '<div class="li-top"><span class="won-badge">' + C.iconSvg('star', 14) + ' Soon · ' + C.esc(x.prize) + '</span><span class="li-lang">Sample</span></div>' +
+        '<p class="li-text">' + (x.liker ? 'Give likes for a chance to win.' : 'This could be your wish.') + '</p>' +
+        '<div class="li-foot"><span class="li-mark" style="--bg-mark:#B18854" aria-hidden="true">' + C.tpMarkHtml(true) + '</span>' +
+        '<div class="li-who" lang="en"><b>TP colleague</b><span>' + C.esc(x.where) + '</span></div>' +
+        '<span class="won-note">' + C.esc(x.how) + '</span></div></article>';
+    });
+  }
   function renderList() {
     var all = siteWishes();
     var winners = siteWinners();
@@ -1007,7 +1038,7 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
     var total = all.length + winners.length;
     var nWon = winners.length + (state.site === 'all' ? C.likerWinners().length : 0);
     el('allSub').textContent = state.sort === 'winners'
-      ? (nWon ? fmt(nWon) + (nWon === 1 ? ' winner' : ' winners') + ' · ' + where + ' · ' + langSummary() : 'Coming soon: from 1 December')
+      ? (nWon ? fmt(nWon) + (nWon === 1 ? ' winner' : ' winners') + ' · ' + where + ' · ' + langSummary() : 'Coming soon: from 1 December · samples of what winners will look like')
       : fmt(total) + (total === 1 ? ' wish' : ' wishes') + ' · ' + where + ' · ' + langSummary() +
         (all.length > cap() ? ' · ' + cap() + ' hang on the tree at a time, taking turns' : '');
     // The Winners tab is always there; "Soon" until the first winners are announced (1 December)
@@ -1047,9 +1078,10 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
     var byOrder = function (a, b) { return (a.sort_order || 999) - (b.sort_order || 999); };
     var senior = rest.filter(isSenior).sort(byOrder);
     var others = rest.filter(function (L) { return !isSenior(L); }).sort(byOrder);
-    // behind "Show more": Directors (medium cards, 5 per row), then managers and below (small cards, 6 per row)
+    // behind "Show more": Directors, then managers and below, all the same card, 5 per row (no new line between them)
     var directors = others.filter(function (L) { return L.level === 'director'; });
     var managers = others.filter(function (L) { return L.level !== 'director'; });
+    var dirMgr = directors.concat(managers);
     // at the very end: Amr's and Maszy's cards (the wishes in the two small gifts, HIDDEN_WISHES in config.js)
     var team = SECRET_IDS.map(function (id) {
       var h = SECRETS[id];
@@ -1067,8 +1099,7 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
       (senior.length ? '<div class="lead-grid">' + senior.map(archHtml).join('') + '</div>' : '') +
       (nMore
         ? (state.leadersOpen ? '<div class="lead-more" id="leadMore">' +
-            (directors.length ? '<div class="lead-dir">' + directors.map(cardHtml).join('') + '</div>' : '') +
-            (managers.length ? '<div class="lead-mgr">' + managers.map(cardHtml).join('') + '</div>' : '') +
+            (dirMgr.length ? '<div class="lead-dir">' + dirMgr.map(cardHtml).join('') + '</div>' : '') +
             (team.length ? '<div class="team-row">' + team.join('') + '</div>' : '') + '</div>' : '') +
           '<div class="lead-toggle"><button type="button" class="btn-ghost" data-lead-toggle aria-expanded="' + (state.leadersOpen ? 'true' : 'false') + '"' + (state.leadersOpen ? ' aria-controls="leadMore"' : '') + '>' +
           (state.leadersOpen ? 'See less' : 'See more (' + nMore + ')') + '</button></div>'
@@ -1083,7 +1114,10 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
       return '<article class="li won won-liker"><div class="li-top"><span class="won-badge">' + C.iconSvg('star', 14) + ' Winner' + (x.prize ? ' · ' + C.esc(x.prize) : '') + '</span></div>' +
         '<div class="li-foot"><div class="li-who" lang="en"><b>BMS ending ' + C.esc(x.bms_end || '') + '</b><span>A lucky liker · ' + C.esc(day) + '</span></div></div></article>';
     }).join('');
-    el('allList').innerHTML = (shown.length || likerHtml) ? shown.map(function (w) {
+    // Before the first winners: sample cards, so everyone sees what winning looks like
+    var noWinnersYet = state.sort === 'winners' && !state.q.trim() && !state.wishes.some(function (w) { return w.won; }) && !C.likerWinners().length;
+    var sampleHtml = noWinnersYet ? sampleWinners().join('') : '';
+    el('allList').innerHTML = sampleHtml || ((shown.length || likerHtml) ? shown.map(function (w) {
       var pal = C.PALETTE[w.tag_color] || C.PALETTE.cream;
       if (w.won) {
         // a winner: gold, its prize, no like button (its likes stopped counting when it won)
@@ -1104,8 +1138,8 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
         '<div class="li-foot"><span class="li-mark" style="--bg-mark:' + pal.bg + '" aria-hidden="true">' + C.tpMarkHtml(w.tag_color !== 'red') + '</span>' +
         '<div class="li-who" lang="en"><b>' + C.esc(C.displayName(w)) + '</b><span>' + C.esc(C.displayWhere(w)) + '</span></div>' +
         likeBtnHtml('wish', w) + '</div></article>';
-    }).join('') + likerHtml : '<div class="all-empty">' + (state.q ? 'No wishes match your search.' : state.sort === 'winners' ? (state.wishes.some(function (w) { return w.won; }) || C.likerWinners().length ? 'No winners from here yet.' : 'Winners show here from 1 December, once the Wish Tree team approves them.') : 'No wishes here yet in the languages you picked.') + '</div>';
-    el('moreBtn').hidden = list.length <= shown.length;
+    }).join('') + likerHtml : '<div class="all-empty">' + (state.q ? 'No wishes match your search.' : state.sort === 'winners' ? (state.wishes.some(function (w) { return w.won; }) || C.likerWinners().length ? 'No winners from here yet.' : 'Winners show here from 1 December, once the Wish Tree team approves them.') : 'No wishes here yet in the languages you picked.') + '</div>');
+    el('moreBtn').hidden = !!sampleHtml || list.length <= shown.length;
     // Winners tab: where to go if the prize isn't on your phone (once the team's link is in config.js)
     var cUrl = C.prizeContactUrl ? C.prizeContactUrl() : '';
     el('winHelp').hidden = !(state.sort === 'winners' && cUrl && (shown.length || likerHtml));

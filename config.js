@@ -58,10 +58,13 @@ window.WISH_CFG = {
   // Leaders type their name on the leaders' page with these as suggestions; the name can't change after the first send.
   // spot:  'ceo' = the big ornament under the star, 'crown' = around the top of the tree, 'list' = the list only.
   // level: 'exec' = C-level and VP: ornament-shaped cards, 5 per row, always shown in the list under the tree.
-  //        'director' = Directors: medium cards, 5 per row, behind "Show more", once they post.
-  //        'manager' = Managers and below: small cards, 6 per row, behind "Show more", once they post.
+  //        'director' and 'manager' = Directors, then managers and below: the same cards, 5 per row, behind
+  //        "Show more", once they post.
+  // On the tree: 'ceo' and 'crown' always hang at the top; the places they leave free are shared by the other
+  // leaders who posted, taking turns.
   // Photo: assets/leaders/<name in lower case with dashes>.jpg, e.g. alex-ma.jpg (initials show until it's there).
   // Add photo: 'assets/leaders/other-file.jpg' to a line to use a different file.
+  // tv: ['singha'] shows that leader only on those sites' TVs (and the TV for all sites); leave it out for every TV.
   // draft: a suggested message, filled in on the leaders' page when that leader picks their name.
   // Nothing is sent until they press Send; they can change every word first.
   LEADERS: [
@@ -70,7 +73,7 @@ window.WISH_CFG = {
       draft: 'To every one of you across Malaysia, Thailand, Vietnam and beyond: THANK YOU. Every customer, client, or colleague you helped made a difference and each of those are appreciated. Enjoy the holidays with the people you love and let\'s make 2027 our best year yet. Merry Christmas & Happy New Year!' },
     { name: 'Divya Dutta',              title: 'Chief Operating Officer',      spot: 'crown', level: 'exec',
       draft: 'Thank you for the care and energy you bring to our customers and to each other every day. I\'m proud of what we achieved together this year. Wishing you and your families a joyful Christmas and a bright New Year!' },
-    { name: 'Himanshu',                 title: 'Chief Operating Officer',      spot: 'crown', level: 'exec',
+    { name: 'Himanshu',                 title: 'Chief Operating Officer',      spot: 'crown', level: 'exec', tv: ['singha'],
       draft: 'To our teams on every site and at home: thank you for showing up for our customers, day and night. Rest well, celebrate the wins, and come back ready for an amazing 2027. Happy holidays!' },
     { name: 'Alex Ma',                  title: 'Chief Financial Officer',      spot: 'crown', level: 'exec',
       draft: 'Behind every result this year is a team that cared about getting it right. Thank you for your hard work and commitment. Wishing you a peaceful Christmas and a healthy, happy New Year with your loved ones.' },

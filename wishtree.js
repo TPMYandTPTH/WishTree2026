@@ -1240,6 +1240,8 @@
         draft: String(l.draft || '').trim(),
         spot: ['ceo', 'crown', 'gift', 'list'].indexOf(l.spot) !== -1 ? l.spot : 'list',
         level: level,
+        // tv: site ids whose TVs show this leader (the TV for all sites always does); leave it out for every TV
+        tv: Array.isArray(l.tv) ? l.tv.map(function (x) { return String(x).toLowerCase(); }) : null,
         senior: level === 'exec',
         order: i + 1,
         photo: String(l.photo || ('assets/leaders/' + leaderSlug(name) + '.jpg'))
@@ -1262,7 +1264,7 @@
     // a place set on the Approvals page (1-99) wins over the order of the list; 100 means none was set
     var pos = Number(l.sort_order);
     var order = pos >= 1 && pos <= 99 ? pos : c.order;
-    return Object.assign({}, l, { spot: c.spot, senior: c.senior, level: c.level, sort_order: order, photo_url: l.photo_url || leaderPhoto(l.display_name) || null });
+    return Object.assign({}, l, { spot: c.spot, senior: c.senior, level: c.level, tv: c.tv, sort_order: order, photo_url: l.photo_url || leaderPhoto(l.display_name) || null });
   }
 
   /* ---------- Small helpers ---------- */
@@ -1347,18 +1349,31 @@
     return String(a.updated_at || '') < String(b.updated_at || '') ? -1 : 1;
   }
   // { crown: [...] (CEO first), gifts: [...], extra: [...] (only in the list) }
+  // The CEO and C-level (spot 'ceo' or 'crown' in config.js LEADERS) always hang at the top of the tree. The places
+  // they leave free are shared by the other leaders who posted: every TREE_ROTATE_MINUTES a different random set,
+  // the same for everyone at the same time. As more C-level post, fewer places are left to share.
   function leaderPlaces(list) {
     var all = (list || []).slice().sort(leaderOrder);
-    var crown = [], gifts = [], extra = [];
+    var crown = [], gifts = [], extra = [], turns = [];
     var ceoTaken = false;
     all.forEach(function (L) {
-      if (L.spot === 'list') { extra.push(L); return; }
+      if (L.spot === 'list') { turns.push(L); return; }
       if (L.spot === 'gift') { (gifts.length < LEADER_GIFTS ? gifts : extra).push(L); return; }
       if (L.spot === 'ceo' && !ceoTaken) { ceoTaken = true; crown.unshift(L); return; }
       if (crown.length < CROWN_MAX) crown.push(L);
       else if (gifts.length < LEADER_GIFTS) gifts.push(L);   // no room at the top: into a gift
       else extra.push(L);
     });
+    var free = Math.max(0, CROWN_MAX - crown.length);
+    if (free && turns.length) {
+      var slot = Math.floor(Date.now() / (TREE_ROTATE_MINUTES * 60000));
+      var picked = turns.slice().sort(function (a, b) {
+        return hash('lead-turn:' + slot + ':' + a.id) - hash('lead-turn:' + slot + ':' + b.id);
+      }).slice(0, free);
+      var on = {};
+      picked.forEach(function (L) { on[String(L.id)] = true; crown.push(L); });
+      turns.forEach(function (L) { if (!on[String(L.id)]) extra.push(L); });
+    } else extra = extra.concat(turns);
     return { crown: crown, gifts: gifts, extra: extra, all: crown.concat(gifts, extra) };
   }
 

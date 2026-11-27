@@ -210,10 +210,10 @@ body.pointer .fs{opacity:1;pointer-events:auto}
   .live .dot{animation:none}
 }
 </style>
-<script src="../vendor/supabase.js?v=2026112611"></script>
-<script src="../vendor/qrcode.min.js?v=2026112611"></script>
-<script src="../config.js?v=2026112611"></script>
-<script src="../wishtree.js?v=2026112611"></script>
+<script src="../vendor/supabase.js?v=2026112712"></script>
+<script src="../vendor/qrcode.min.js?v=2026112712"></script>
+<script src="../config.js?v=2026112712"></script>
+<script src="../wishtree.js?v=2026112712"></script>
 </head>
 <body>
 <div class="backdrop" aria-hidden="true"></div>
@@ -418,7 +418,8 @@ body.pointer .fs{opacity:1;pointer-events:auto}
   function load() {
     return Promise.all([C.fetchApproved(), C.fetchLeaders()]).then(function (r) {
       S.wishes = r[0] || [];
-      S.leaders = r[1] || [];
+      // a leader with tv: [...] in config.js LEADERS shows only on those sites' TVs (and the TV for all sites)
+      S.leaders = (r[1] || []).filter(function (L) { return SITE === 'all' || !L.tv || L.tv.indexOf(SITE) !== -1; });
       setLive(true);
       var ids = {};
       siteWishes().forEach(function (w) { ids[String(w.id)] = 1; });
