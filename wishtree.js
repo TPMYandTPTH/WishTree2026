@@ -864,7 +864,12 @@
       close: 'Close', help: 'Trouble with your code? Contact the Wish Tree team with your BMS.',
       top: 'Most liked wish', random: 'Lucky draw wish', liker: 'Lucky liker', early: 'Most liked wish', manual: 'Winner',
       grand: 'Grand prize draw', wonGrand: 'You won the {prize}!', details: 'See details',
-      grandNext: 'The Wish Tree team will contact you about your prize. Keep your BMS handy.', contact: 'Contact the Wish Tree team'
+      grandNext: 'The Wish Tree team will contact you about your prize. Keep your BMS handy.', contact: 'Contact the Wish Tree team',
+      isYou: 'Is this you, {name}?', isYourBms: 'Is this your BMS?', checking: 'Checking this phone…',
+      onThisPhone: 'Your prize is on this phone!', openMine: 'Open my prize',
+      sameWish: 'Your prize opens only on the same phone and browser you used to write your wish, with the same BMS ID. Open the Wish Tree there and it will be waiting for you.',
+      sameLike: 'Your prize opens only on the same phone and browser you used to give your likes, with the same BMS ID. Open the Wish Tree there and it will be waiting for you.',
+      otherPhone: 'Changed phone or cleared your browser? Contact the Wish Tree team with your BMS ID.'
     },
     ms: {
       won: 'Anda memenangi baucar Grab {prize}!', sub: 'Tahniah daripada pasukan Wish Tree.', open: 'Dapatkan kod saya', mine: 'Baucar Grab saya',
@@ -875,7 +880,12 @@
       close: 'Tutup', help: 'Masalah dengan kod anda? Hubungi pasukan Wish Tree dengan BMS anda.',
       top: 'Hajat paling disukai', random: 'Hajat cabutan bertuah', liker: 'Penyuka bertuah', early: 'Hajat paling disukai', manual: 'Pemenang',
       grand: 'Cabutan hadiah utama', wonGrand: 'Anda memenangi {prize}!', details: 'Lihat butiran',
-      grandNext: 'Pasukan Wish Tree akan menghubungi anda tentang hadiah anda. Sediakan BMS anda.', contact: 'Hubungi pasukan Wish Tree'
+      grandNext: 'Pasukan Wish Tree akan menghubungi anda tentang hadiah anda. Sediakan BMS anda.', contact: 'Hubungi pasukan Wish Tree',
+      isYou: 'Adakah ini anda, {name}?', isYourBms: 'Adakah ini BMS anda?', checking: 'Menyemak telefon ini…',
+      onThisPhone: 'Hadiah anda ada di telefon ini!', openMine: 'Buka hadiah saya',
+      sameWish: 'Hadiah anda hanya boleh dibuka pada telefon dan pelayar yang sama yang anda gunakan untuk menulis hajat, dengan ID BMS yang sama. Buka Wish Tree di sana dan hadiah anda sedang menanti.',
+      sameLike: 'Hadiah anda hanya boleh dibuka pada telefon dan pelayar yang sama yang anda gunakan untuk menekan suka, dengan ID BMS yang sama. Buka Wish Tree di sana dan hadiah anda sedang menanti.',
+      otherPhone: 'Tukar telefon atau kosongkan pelayar? Hubungi pasukan Wish Tree dengan ID BMS anda.'
     },
     th: {
       won: 'คุณได้รับบัตรกำนัล Grab มูลค่า {prize}!', sub: 'ขอแสดงความยินดีจากทีม Wish Tree', open: 'รับรหัสของฉัน', mine: 'บัตรกำนัล Grab ของฉัน',
@@ -886,7 +896,12 @@
       close: 'ปิด', help: 'มีปัญหากับรหัส? โปรดติดต่อทีม Wish Tree พร้อมหมายเลข BMS ของคุณ',
       top: 'คำอวยพรที่ได้รับถูกใจมากที่สุด', random: 'คำอวยพรผู้โชคดี', liker: 'ผู้กดถูกใจผู้โชคดี', early: 'คำอวยพรที่ได้รับถูกใจมากที่สุด', manual: 'ผู้ได้รับรางวัล',
       grand: 'จับรางวัลใหญ่', wonGrand: 'คุณได้รับ {prize}!', details: 'ดูรายละเอียด',
-      grandNext: 'ทีม Wish Tree จะติดต่อคุณเกี่ยวกับรางวัล โปรดเตรียมหมายเลข BMS ของคุณไว้', contact: 'ติดต่อทีม Wish Tree'
+      grandNext: 'ทีม Wish Tree จะติดต่อคุณเกี่ยวกับรางวัล โปรดเตรียมหมายเลข BMS ของคุณไว้', contact: 'ติดต่อทีม Wish Tree',
+      isYou: 'นี่คือคุณใช่ไหม {name}?', isYourBms: 'นี่คือ BMS ของคุณใช่ไหม?', checking: 'กำลังตรวจสอบโทรศัพท์เครื่องนี้…',
+      onThisPhone: 'รางวัลของคุณอยู่ในโทรศัพท์เครื่องนี้!', openMine: 'เปิดรางวัลของฉัน',
+      sameWish: 'รางวัลจะเปิดได้เฉพาะในโทรศัพท์และเบราว์เซอร์เดียวกับที่คุณใช้เขียนคำอวยพร พร้อมหมายเลข BMS เดียวกัน เปิด Wish Tree บนเครื่องนั้น แล้วรางวัลจะรอคุณอยู่',
+      sameLike: 'รางวัลจะเปิดได้เฉพาะในโทรศัพท์และเบราว์เซอร์เดียวกับที่คุณใช้กดถูกใจ พร้อมหมายเลข BMS เดียวกัน เปิด Wish Tree บนเครื่องนั้น แล้วรางวัลจะรอคุณอยู่',
+      otherPhone: 'เปลี่ยนโทรศัพท์หรือล้างข้อมูลเบราว์เซอร์? โปรดติดต่อทีม Wish Tree พร้อมหมายเลข BMS ของคุณ'
     }
   };
   var WON_CSS = '.wtp-bar{position:fixed;left:50%;bottom:16px;z-index:9000;transform:translateX(-50%);width:min(560px,calc(100% - 24px));display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;padding:14px 16px;border-radius:16px;background:#343F37;color:#F4EEE3;border:2px solid #B18854;box-shadow:0 14px 40px rgba(0,0,0,.35);font-family:inherit}' +
@@ -1012,6 +1027,73 @@
       });
       return list;
     }).catch(function (err) { console.error(err); return []; });
+  }
+
+  // A winner tapped their name on the Winners tab: if this phone holds their prize, open it; if not, tell them to use
+  // the same phone and browser they used for the wish (or the likes), with the same BMS ID.
+  // info = { name, prize, liker: true|false }
+  function showClaimHelp(info) {
+    info = info || {};
+    var lang = WON_T[storageGet('wt-lang')] ? storageGet('wt-lang') : 'en';
+    var T = WON_T[lang];
+    var tt = function (k, v) { return String(T[k] || WON_T.en[k] || '').replace(/\{(\w+)\}/g, function (m, n) { return v && v[n] != null ? v[n] : m; }); };
+    if (!document.getElementById('wtpCss')) {
+      var st = document.createElement('style');
+      st.id = 'wtpCss';
+      st.textContent = WON_CSS;
+      document.head.appendChild(st);
+    }
+    var old = document.getElementById('wtpDlg');
+    if (old) old.remove();
+    var lastFocus = document.activeElement;
+    var d = document.createElement('div');
+    d.id = 'wtpDlg';
+    d.className = 'wtp-dlg';
+    d.innerHTML = '<div class="wtp-card" role="dialog" aria-modal="true" aria-labelledby="wtpTitle" tabindex="-1"></div>';
+    document.body.appendChild(d);
+    var card = d.firstChild;
+    var title = info.liker ? tt('isYourBms') : tt('isYou', { name: info.name || '' });
+    var cUrl = prizeContactUrl();
+    var contactLink = cUrl ? '<a class="wtp-btn ghost" href="' + esc(cUrl) + '" target="_blank" rel="noopener noreferrer">' + esc(tt('contact')) + '</a>' : '';
+    var closeBtn = '<button type="button" class="wtp-btn ghost" data-wtp="close">' + esc(tt('close')) + '</button>';
+    function paint(body) {
+      card.innerHTML = '<div class="wtp-why">' + esc(info.prize || info.name || '') + '</div><h2 id="wtpTitle">' + esc(title) + '</h2>' + body;
+    }
+    function close() {
+      d.remove();
+      document.removeEventListener('keydown', onKey);
+      if (lastFocus && lastFocus.focus) lastFocus.focus();
+    }
+    function onKey(e) { if (e.key === 'Escape') close(); }
+    paint('<p>' + esc(tt('checking')) + '</p>');
+    d.addEventListener('click', function (e) {
+      if (e.target === d) { close(); return; }
+      var b = e.target.closest ? e.target.closest('[data-wtp]') : null;
+      if (!b) return;
+      if (b.getAttribute('data-wtp') === 'close') close();
+      if (b.getAttribute('data-wtp') === 'mine') {
+        close();
+        showMyPrizes().then(function () {
+          var open = document.querySelector('#wtpBar [data-wtp="open"]');
+          if (open) open.click();
+        });
+      }
+    });
+    document.addEventListener('keydown', onKey);
+    card.focus();
+    track('prize_claim_help', { liker: info.liker ? 1 : 0 });
+    fetchMyPrizes().then(function (list) {
+      if (!document.body.contains(d)) return;
+      if (list.length) {
+        paint('<p><b>' + esc(tt('onThisPhone')) + '</b></p><div class="wtp-row"><button type="button" class="wtp-btn" data-wtp="mine">' + esc(tt('openMine')) + '</button>' + closeBtn + '</div>');
+        return;
+      }
+      paint('<p>' + esc(tt(info.liker ? 'sameLike' : 'sameWish')) + '</p><p class="wtp-note">' + esc(tt('otherPhone')) + '</p>' +
+        '<div class="wtp-row">' + contactLink + closeBtn + '</div>');
+    }).catch(function () {
+      if (!document.body.contains(d)) return;
+      paint('<p>' + esc(tt(info.liker ? 'sameLike' : 'sameWish')) + '</p><p class="wtp-note">' + esc(tt('otherPhone')) + '</p><div class="wtp-row">' + contactLink + closeBtn + '</div>');
+    });
   }
 
   /* ---------- Prize: the most-liked wishes ---------- */
@@ -1830,6 +1912,7 @@
     fetchMyPrizes: fetchMyPrizes,
     revealPrize: revealPrize,
     showMyPrizes: showMyPrizes,
+    showClaimHelp: showClaimHelp,
     prizeContactUrl: prizeContactUrl,
     TREE_ROTATE_MINUTES: TREE_ROTATE_MINUTES,
     COUNTRY_LABEL: COUNTRY_LABEL,

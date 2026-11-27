@@ -438,6 +438,12 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
 .wv-row .wv-who b{display:block;font-size:15px;color:#2A2622;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .wv-row .wv-who span{display:block;font-size:13px;color:#6B6259;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .wv-row.ph .wv-amt{background:transparent;border:1px dashed #C99A45}
+button.wv-claim{font:inherit;color:inherit;text-align:inherit;cursor:pointer;-webkit-appearance:none;appearance:none}
+button.wv-row{width:100%;background:none;border:0;border-radius:10px;padding:6px 8px;margin:0 -8px;width:calc(100% + 16px)}
+button.wv-row:hover,button.wv-row:focus-visible{background:#F7EEDC}
+button.wv-row:hover .wv-who b{text-decoration:underline;text-decoration-color:#C99A45;text-underline-offset:3px}
+button.wv-gwho{display:block;background:none;border-left:0;border-right:0;border-bottom:0;border-radius:0 0 10px 10px}
+button.wv-gwho:hover b{text-decoration:underline;text-underline-offset:3px}
 .wv-row.ph .wv-who b{color:#7A5418;font-weight:500}
 .wv-more{display:flex;justify-content:center;padding:6px 0 8px}
 .wv-none{margin:8px 0 10px;color:#6B6259;font-size:14px}
@@ -531,10 +537,10 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
 }
 @media (prefers-reduced-motion:reduce){.dot{animation:none}.wish-card{transition:none}.spin-out #treeMount,.spin-in #treeMount{animation:none}}
 </style>
-<script src="vendor/supabase.js?v=2026112714"></script>
-<script src="vendor/qrcode.min.js?v=2026112714"></script>
-<script src="config.js?v=2026112714"></script>
-<script src="wishtree.js?v=2026112714"></script>
+<script src="vendor/supabase.js?v=2026112815"></script>
+<script src="vendor/qrcode.min.js?v=2026112815"></script>
+<script src="config.js?v=2026112815"></script>
+<script src="wishtree.js?v=2026112815"></script>
 </head>
 <body>
 <a class="skip" href="#tree">Skip to the tree</a>
@@ -1098,14 +1104,21 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
       '</div><div class="wv-gifts">' + slots.map(function (x) {
         return '<article class="wv-gift' + (x.w ? ' won' : '') + '"><span class="wv-gic">' + C.prizeIconSvg(x.g.icon, 28) + '</span>' +
           '<b>' + C.esc(x.g.line1 || x.g.name) + '</b><span class="wv-gsub">' + C.esc(x.g.line2 || '') + '</span>' +
-          '<div class="wv-gwho">' + (x.w ? '<b>' + C.esc(x.w.name) + '</b><span>' + C.esc(x.w.where || '') + '</span>'
-            : '<b>TP colleague</b><span>Soon</span>') + '</div></article>';
+          (x.w ? '<button type="button" class="wv-gwho wv-claim"' + claimAttrs(x.w) + '><b>' + C.esc(x.w.name) + '</b><span>' + C.esc(x.w.where || '') + '</span></button>'
+            : '<div class="wv-gwho"><b>TP colleague</b><span>Soon</span></div>') + '</article>';
       }).join('') + '</div></section>';
   }
 
-  function rowHtml(amount, name, sub, ph) {
-    return '<div class="wv-row' + (ph ? ' ph' : '') + '"><span class="wv-amt">' + C.esc(amount || '') + '</span>' +
-      '<div class="wv-who"><b>' + C.esc(name) + '</b><span>' + C.esc(sub) + '</span></div></div>';
+  // A winner's row is a button: tapping your name opens your prize if it's on this phone, or says to use the same
+  // phone and browser, with the same BMS ID
+  function claimAttrs(x) {
+    return ' data-claim-name="' + C.esc(x.name) + '" data-claim-prize="' + C.esc(x.prize || '') + '"' + (x.liker ? ' data-claim-liker="1"' : '') +
+      ' aria-label="' + C.esc(x.name + ', ' + (x.prize || '') + ': is this you?') + '"';
+  }
+  function rowHtml(amount, name, sub, ph, x) {
+    var tag = x ? 'button' : 'div';
+    return '<' + tag + (x ? ' type="button"' + claimAttrs(x) : '') + ' class="wv-row' + (ph ? ' ph' : '') + (x ? ' wv-claim' : '') + '"><span class="wv-amt">' + C.esc(amount || '') + '</span>' +
+      '<span class="wv-who"><b>' + C.esc(name) + '</b><span>' + C.esc(sub) + '</span></span></' + tag + '>';
   }
   function countryHtml(V, list) {
     var mine = list.filter(function (x) { return x.pool !== 'grand' && x.country === V.code; });
@@ -1142,7 +1155,7 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
       if (i >= keep && !open) return;
       var ws = byDay[d].slice().sort(function (a, b) { return (POOL_RANK[a.pool] || 9) - (POOL_RANK[b.pool] || 9) || (String(a.at) < String(b.at) ? -1 : 1); });
       h += '<div class="wv-day"><div class="wv-dh"><b>' + C.esc(dayName(d)) + '</b><span>' + fmt(ws.length) + (ws.length === 1 ? ' winner' : ' winners') + '</span></div>' +
-        ws.map(function (x) { return rowHtml(x.prize, x.name, x.liker ? howText(x) : howText(x) + (x.site ? ' · ' + x.site : '')); }).join('') + '</div>';
+        ws.map(function (x) { return rowHtml(x.prize, x.name, x.liker ? howText(x) : howText(x) + (x.site ? ' · ' + x.site : ''), false, x); }).join('') + '</div>';
     });
     if (days.length > keep) {
       h += '<div class="wv-more"><button type="button" class="btn-ghost" data-wv-more="' + C.esc(V.code) + '" aria-expanded="' + (open ? 'true' : 'false') + '">' +
@@ -1186,7 +1199,7 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
     var nWon = winners.length + (state.site === 'all' ? C.likerWinners().length : 0);
     var nAll = state.wishes.filter(function (w) { return w.won; }).length + C.likerWinners().length;
     el('allSub').textContent = state.sort === 'winners'
-      ? (nAll ? fmt(nAll) + (nAll === 1 ? ' winner' : ' winners') + ' so far · all sites' : 'The first winners are announced on 1 December')
+      ? (nAll ? fmt(nAll) + (nAll === 1 ? ' winner' : ' winners') + ' so far · all sites · tap your name to get your prize' : 'The first winners are announced on 1 December')
       : fmt(total) + (total === 1 ? ' wish' : ' wishes') + ' · ' + where + ' · ' + langSummary() +
         (all.length > cap() ? ' · ' + cap() + ' hang on the tree at a time, taking turns' : '');
     // The Winners tab is always there; "Soon" until the first winners are announced (1 December)
@@ -1761,6 +1774,8 @@ h1{margin:12px 0 0;font-size:54px;line-height:1.02;font-weight:300;letter-spacin
   });
   el('leaderList').addEventListener('click', onListClick);
   el('allList').addEventListener('click', function (e) {
+    var w = e.target.closest && e.target.closest('[data-claim-name]');
+    if (w) { C.showClaimHelp({ name: w.getAttribute('data-claim-name'), prize: w.getAttribute('data-claim-prize'), liker: w.hasAttribute('data-claim-liker') }); return; }
     var b = e.target.closest && e.target.closest('[data-wv-more]');
     if (!b) return;
     var c = b.getAttribute('data-wv-more');
