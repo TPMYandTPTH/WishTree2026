@@ -107,7 +107,7 @@ window.WISH_CFG = {
     { name: 'Amit Mittal',              title: 'Director of WFM',              spot: 'list',  level: 'director' },
     { name: 'Sol Catherine Marticio',   title: 'Executive Asst. to the CEO, MY & TH', spot: 'list', level: 'director' },
     // Managers and below
-    { name: 'Partiban Periannan',       title: 'Manager of Transformations',   spot: 'list',  level: 'manager' },
+    { name: 'Partiban Periannan',       title: 'Head of DST',                  spot: 'crown', level: 'manager' },   // on the tree for now
     { name: 'Parvathy Ramar',           title: 'Sr. Manager of GTM',           spot: 'list',  level: 'manager' },
     { name: 'Choon Haw',                title: 'Sr. Manager of IT',            spot: 'list',  level: 'manager' },
     { name: 'Chris Hsu',                title: 'Sr. Manager of Operations',    spot: 'list',  level: 'manager' },
